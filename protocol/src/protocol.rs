@@ -6,6 +6,6 @@ mod test {
 
     #[test]
     fn test_description() {
-        assert_eq!(DESCRIPTION, "AMQP - 0.9.1");
+        assert_eq!(format!("{} - {}.{}.{}", NAME, MAJOR_VERSION, MINOR_VERSION, REVISION), "AMQP - 0.9.1");
     }
 }
