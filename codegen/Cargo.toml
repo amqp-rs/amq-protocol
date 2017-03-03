@@ -14,6 +14,7 @@ name = "amq_protocol_codegen"
 
 [dependencies]
 handlebars   = "^0.25.1"
+itertools    = "^0.5.9"
 serde        = "^0.9.10"
 serde_derive = "^0.9.10"
 serde_json   = "^0.9.8"

@@ -18,7 +18,15 @@ fn main() {
     std::fs::File::open("specs/amqp-rabbitmq-0.9.1.json").expect("Failed to open AMQP sepcs file").read_to_string(&mut s).expect("Failed to read AMQP specs file");
     std::fs::File::open("templates/main.tpl").expect("Failed to open main template").read_to_string(&mut main_tpl).expect("Failed to read main template");
 
-    let specs = serde_json::from_str::<AMQProtocolDefinition>(&s).expect("Failed to parse AMQP specs file");
+    let specs     = serde_json::from_str::<AMQProtocolDefinition>(&s).expect("Failed to parse AMQP specs file");
+    let templates = AMQPTemplates {
+        main:     main_tpl,
+        constant: String::new(),
+        klass:    String::new(),
+        method:   String::new(),
+        argument: String::new(),
+        property: String::new(),
+    };
 
-    writeln!(f, "{}", specs.codegen(&main_tpl)).expect("Failed to generate protocol.rs");
+    writeln!(f, "{}", specs.codegen(&templates)).expect("Failed to generate protocol.rs");
 }
