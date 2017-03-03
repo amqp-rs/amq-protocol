@@ -247,16 +247,55 @@ mod test {
             minor_version: 9,
             revision:      1,
             port:          5672,
-            copyright:     Vec::new(),
-            domains:       Vec::new(),
-            constants:     Vec::new(),
-            classes:       Vec::new(),
+            copyright:     vec!["Copyright 1".to_string(), "Copyright 2".to_string()],
+            domains:       vec![AMQPDomain("domain1".to_string(), AMQPType::Octet)],
+            constants:     vec![
+                AMQPConstant {
+                    name:  "constant1".to_string(),
+                    value: 128,
+                    klass: Some("class1".to_string()),
+                }
+            ],
+            classes:       vec![
+                AMQPClass {
+                    id:         42,
+                    methods:    vec![
+                        AMQPMethod {
+                            id:          64,
+                            arguments:   vec![
+                                AMQPArgument {
+                                    amqp_type:     Some(AMQPType::Bit),
+                                    name:          "argument1".to_string(),
+                                    default_value: Some(Value::String("value1".to_string())),
+                                    domain:        Some("domain1".to_string()),
+                                }
+                            ],
+                            name:        "method1".to_string(),
+                            synchronous: Some(true),
+                        }
+                    ],
+                    name:       "class1".to_string(),
+                    properties: Some(vec![
+                        AMQPProperty {
+                            amqp_type: AMQPType::LongStr,
+                            name:      "property1".to_string(),
+                        }
+                    ]),
+                }
+            ],
         }
     }
 
     fn templates() -> AMQPTemplates {
         AMQPTemplates {
-            main:     "{{name}} - {{major_version}}.{{minor_version}}.{{revision}}".to_string(),
+            main:     r#"
+{{name}} - {{major_version}}.{{minor_version}}.{{revision}}
+{{copyright}}
+port {{port}}
+{{domains}}
+{{constants}}
+{{classes}}
+"#.to_string(),
             domain:   String::new(),
             constant: String::new(),
             klass:    String::new(),
@@ -268,6 +307,14 @@ mod test {
 
     #[test]
     fn main_template() {
-        assert_eq!(specs().codegen(&templates()), "AMQP - 0.9.1");
+        assert_eq!(specs().codegen(&templates()), r#"
+AMQP - 0.9.1
+Copyright 1
+Copyright 2
+port 5672
+
+
+
+"#);
     }
 }
