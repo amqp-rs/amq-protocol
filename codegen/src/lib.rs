@@ -51,7 +51,7 @@ fn register_templates(templates: &AMQPTemplates) -> Handlebars {
     let mut handlebars = Handlebars::new();
 
     handlebars.register_template_string("main",     &templates.main).expect("Failed to register main template");
-    handlebars.register_template_string("domain",   &templates.main).expect("Failed to register domain template");
+    handlebars.register_template_string("domain",   &templates.domain).expect("Failed to register domain template");
     handlebars.register_template_string("constant", &templates.constant).expect("Failed to register constant template");
     handlebars.register_template_string("class",    &templates.klass).expect("Failed to register class template");
     handlebars.register_template_string("method",   &templates.method).expect("Failed to register method template");
@@ -214,7 +214,7 @@ impl Codegen for AMQPArgument {
             data.insert("domain".to_string(), domain.clone());
         }
 
-        handlebars.render("domain", &data).expect("Failed to render domain template")
+        handlebars.render("argument", &data).expect("Failed to render domain template")
     }
 }
 
@@ -232,7 +232,7 @@ impl Codegen for AMQPProperty {
         data.insert("type".to_string(), self.amqp_type.to_string());
         data.insert("name".to_string(), self.name.clone());
 
-        handlebars.render("domain", &data).expect("Failed to render domain template")
+        handlebars.render("property", &data).expect("Failed to render domain template")
     }
 }
 
