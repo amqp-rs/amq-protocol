@@ -132,6 +132,20 @@ impl AMQPType {
     }
 }
 
+pub fn camel_name(name: &str) -> String {
+    let mut new_word: bool = true;
+    name.chars().fold("".to_string(), |mut result, ch| {
+        if ch == '-' || ch == '_' || ch == ' ' {
+            new_word = true;
+            result
+        } else {
+            result.push(if new_word { ch.to_ascii_uppercase() } else { ch.to_ascii_lowercase() });
+            new_word = false;
+            result
+        }
+    })
+}
+
 #[derive(Debug, Deserialize)]
 pub struct AMQPDomain(String, AMQPType);
 
@@ -207,6 +221,7 @@ impl Codegen for AMQPMethod {
         data.insert("arguments".to_string(),   self.arguments.iter().map(|arg| arg.codegen(&handlebars)).join("\n"));
         data.insert("name".to_string(),        self.name.clone());
         data.insert("synchronous".to_string(), format!("{}", self.synchronous.unwrap_or(false)));
+        data.insert("camel_name".to_string(),  camel_name(&self.name));
 
         handlebars.render("method", &data).expect("Failed to render method template")
     }
@@ -248,30 +263,14 @@ pub struct AMQPProperty {
     pub name:      String,
 }
 
-impl AMQPProperty {
-    pub fn struct_name(&self) -> String {
-        let mut new_word: bool = true;
-        self.name.chars().fold("".to_string(), |mut result, ch| {
-            if ch == '-' || ch == '_' || ch == ' ' {
-                new_word = true;
-                result
-            } else {
-                result.push(if new_word { ch.to_ascii_uppercase() } else { ch.to_ascii_lowercase() });
-                new_word = false;
-                result
-            }
-        })
-    }
-}
-
 impl Codegen for AMQPProperty {
     fn codegen(&self, handlebars: &Handlebars) -> String {
         let mut data = BTreeMap::new();
 
-        data.insert("type".to_string(),        self.amqp_type.to_string());
-        data.insert("rust_type".to_string(),   self.amqp_type.to_rust_type());
-        data.insert("name".to_string(),        self.name.clone());
-        data.insert("struct_name".to_string(), self.struct_name());
+        data.insert("type".to_string(),       self.amqp_type.to_string());
+        data.insert("rust_type".to_string(),  self.amqp_type.to_rust_type());
+        data.insert("name".to_string(),       self.name.clone());
+        data.insert("camel_name".to_string(), camel_name(&self.name));
 
         handlebars.render("property", &data).expect("Failed to render domain template")
     }
