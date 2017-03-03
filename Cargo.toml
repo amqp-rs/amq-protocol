@@ -1,0 +1,2 @@
+[workspace]
+members = [ "amq-protocol-codegen", "amq-protocol" ]

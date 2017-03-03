@@ -1,0 +1,18 @@
+[package]
+name          = "amq-protocol-codegen"
+version       = "0.0.0"
+authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
+description   = "AMQP specifications - codegen"
+repository    = "https://github.com/Keruspe/amq-protocol"
+documentation = "https://docs.rs/amq_protocol"
+keywords      = ["amqp","rabbitmq","protocol"]
+categories    = ["api-bindings","network-programming"]
+license       = "BSD-2-Clause"
+
+[lib]
+name = "amq_protocol_codegen"
+
+[dependencies]
+
+[badges]
+travis-ci = { repository = "Keruspe/amq-protocol" }
