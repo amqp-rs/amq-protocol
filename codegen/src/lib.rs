@@ -4,6 +4,10 @@ extern crate serde_json;
 
 use serde_json::Value;
 
+pub trait Codegen {
+    fn codegen(&self) -> String;
+}
+
 #[derive(Debug, Deserialize)]
 pub struct AMQProtocolDefinition {
     pub name:          String,
@@ -17,6 +21,12 @@ pub struct AMQProtocolDefinition {
     pub domains:       Vec<(String, AMQPType)>,
     pub constants:     Vec<AMQPConstant>,
     pub classes:       Vec<AMQPClass>,
+}
+
+impl Codegen for AMQProtocolDefinition {
+    fn codegen(&self) -> String {
+        String::new()
+    }
 }
 
 #[derive(Debug, Deserialize)]
