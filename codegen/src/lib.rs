@@ -207,7 +207,7 @@ impl Codegen for AMQPArgument {
             data.insert("type".to_string(), amqp_type.to_string());
         }
         if let Some(ref default_value) = self.default_value {
-            data.insert("default_value".to_string(), default_value.to_string());
+            data.insert("default_value".to_string(), default_value.to_string()); /* FIXME: handlebars fials with string here transforming " into &amp;amp;amp;quot; */
         }
         data.insert("name".to_string(),   self.name.clone());
         if let Some(ref domain) = self.domain {
@@ -264,9 +264,9 @@ mod test {
                             id:          64,
                             arguments:   vec![
                                 AMQPArgument {
-                                    amqp_type:     Some(AMQPType::Bit),
+                                    amqp_type:     Some(AMQPType::Long),
                                     name:          "argument1".to_string(),
-                                    default_value: Some(Value::String("value1".to_string())),
+                                    default_value: Some(From::from(666)),
                                     domain:        Some("domain1".to_string()),
                                 }
                             ],
@@ -296,12 +296,20 @@ port {{port}}
 {{constants}}
 {{classes}}
 "#.to_string(),
-            domain:   String::new(),
-            constant: String::new(),
-            klass:    String::new(),
-            method:   String::new(),
-            argument: String::new(),
-            property: String::new(),
+            domain:   "{{name}}: {{type}}".to_string(),
+            constant: "{{name}}({{class}}) = {{value}}".to_string(),
+            klass:    r#"
+{{id}} - {{name}}
+{{properties}}
+{{methods}}
+"#.to_string(),
+            method:   r#"
+{{id}} - {{name}}
+synchronous: {{synchronous}}
+{{arguments}}
+"#.to_string(),
+            argument: "{{name}}({{domain}}): {{type}} = {{default_value}}".to_string(),
+            property: "{{name}}: {{type}}".to_string(),
         }
     }
 
@@ -312,7 +320,15 @@ AMQP - 0.9.1
 Copyright 1
 Copyright 2
 port 5672
+domain1: octet
+constant1(class1) = 128
 
+42 - class1
+property1: longstr
+
+64 - method1
+synchronous: true
+argument1(domain1): long = 666
 
 
 "#);
