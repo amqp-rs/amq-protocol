@@ -8,6 +8,7 @@ use handlebars::Handlebars;
 use itertools::Itertools;
 use serde_json::Value;
 use std::collections::BTreeMap;
+use std::ascii::AsciiExt;
 
 trait Codegen {
     fn codegen(&self, handlebars: &Handlebars) -> String;
@@ -113,6 +114,20 @@ impl AMQPType {
             AMQPType::LongStr   => "longstr",
             AMQPType::Table     => "table",
             AMQPType::Timestamp => "timestamp",
+        }.to_string()
+    }
+
+    fn to_rust_type(&self) -> String {
+        match *self {
+            AMQPType::Bit       => "bool",
+            AMQPType::Octet     => "u8",
+            AMQPType::Short     => "u16",
+            AMQPType::Long      => "u32",
+            AMQPType::LongLong  => "u64",
+            AMQPType::ShortStr  => "String",
+            AMQPType::LongStr   => "String",
+            AMQPType::Table     => "String", /* FIXME: add a custom type */
+            AMQPType::Timestamp => "u64",
         }.to_string()
     }
 }
@@ -233,12 +248,30 @@ pub struct AMQPProperty {
     pub name:      String,
 }
 
+impl AMQPProperty {
+    pub fn struct_name(&self) -> String {
+        let mut new_word: bool = true;
+        self.name.chars().fold("".to_string(), |mut result, ch| {
+            if ch == '-' || ch == '_' || ch == ' ' {
+                new_word = true;
+                result
+            } else {
+                result.push(if new_word { ch.to_ascii_uppercase() } else { ch.to_ascii_lowercase() });
+                new_word = false;
+                result
+            }
+        })
+    }
+}
+
 impl Codegen for AMQPProperty {
     fn codegen(&self, handlebars: &Handlebars) -> String {
         let mut data = BTreeMap::new();
 
-        data.insert("type".to_string(), self.amqp_type.to_string());
-        data.insert("name".to_string(), self.name.clone());
+        data.insert("type".to_string(),        self.amqp_type.to_string());
+        data.insert("rust_type".to_string(),   self.amqp_type.to_rust_type());
+        data.insert("name".to_string(),        self.name.clone());
+        data.insert("struct_name".to_string(), self.struct_name());
 
         handlebars.render("property", &data).expect("Failed to render domain template")
     }
