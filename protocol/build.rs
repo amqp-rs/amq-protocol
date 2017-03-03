@@ -7,23 +7,25 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::path::Path;
 
+fn load_template(name: &str) -> String {
+    let mut tpl = String::new();
+    std::fs::File::open(format!("templates/{}.tpl", name)).expect(&format!("Failed to open {} template", name)).read_to_string(&mut tpl).expect(&format!("Failed to read {} template", name));
+    tpl
+}
+
 fn main() {
-    let out_dir      = env::var("OUT_DIR").expect("OUT_DIR is not defined");
-    let dest_path    = Path::new(&out_dir).join("protocol.rs");
-    let mut f        = File::create(&dest_path).expect("Failed to create protocol.rs");
-    let mut main_tpl = String::new();
-
-    std::fs::File::open("templates/main.tpl").expect("Failed to open main template").read_to_string(&mut main_tpl).expect("Failed to read main template");
-
+    let out_dir   = env::var("OUT_DIR").expect("OUT_DIR is not defined");
+    let dest_path = Path::new(&out_dir).join("protocol.rs");
+    let mut f     = File::create(&dest_path).expect("Failed to create protocol.rs");
     let specs     = AMQProtocolDefinition::load();
     let templates = AMQPTemplates {
-        main:     main_tpl,
-        domain:   String::new(),
-        constant: String::new(),
-        klass:    String::new(),
-        method:   String::new(),
-        argument: String::new(),
-        property: String::new(),
+        main:     load_template("main"),
+        domain:   load_template("domain"),
+        constant: load_template("constant"),
+        klass:    load_template("class"),
+        method:   load_template("method"),
+        argument: load_template("argument"),
+        property: load_template("property"),
     };
 
     writeln!(f, "{}", specs.codegen(&templates)).expect("Failed to generate protocol.rs");
