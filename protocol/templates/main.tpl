@@ -5,14 +5,12 @@ pub const REVISION:      u8           = {{revision}};
 pub const PORT:          u32          = {{port}};
 pub const COPYRIGHT:     &'static str = r#"{{copyright}}"#;
 
-mod domain {
+pub mod domain {
 {{domains}}
 }
 
-mod constant {
+pub mod constant {
 {{constants}}
 }
 
-mod klass {
 {{classes}}
-}
