@@ -155,10 +155,10 @@ impl Codegen for AMQPClass {
     fn codegen(&self, handlebars: &Handlebars) -> String {
         let mut data = BTreeMap::new();
 
-        data.insert("id".to_string(),   format!("{}", self.id));
-        /* TODO: methods */
-        data.insert("name".to_string(), self.name.clone());
-        /* TODO: properties */
+        data.insert("id".to_string(),        format!("{}", self.id));
+        data.insert("methods".to_sting(),    self.methods.iter().map(|method| method.codegen(&handlebars)).join("\n"))
+        data.insert("name".to_string(),      self.name.clone());
+        data.insert("properties".to_sting(), self.properties.iter().map(|prop| prop.codegen(&handlebars)).join("\n"))
 
         handlebars.render("class", &data).expect("Failed to render class template")
     }
@@ -170,6 +170,19 @@ pub struct AMQPMethod {
     pub arguments:   Vec<AMQPArgument>,
     pub name:        String,
     pub synchronous: Option<bool>,
+}
+
+impl Codegen for AMQPMethod {
+    fn codegen(&self, handlebars: &Handlebars) -> String {
+        let mut data = BTreeMap::new();
+
+        data.insert("id".to_string(),          format!("{}", self.id));
+        /* TODO: arguments */
+        data.insert("name".to_string(),        self.name.clone());
+        data.insert("synchronous".to_string(), format!("{}", self.synchronous.unwrap_or(false)));
+
+        handlebars.render("method", &data).expect("Failed to render method template");
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -187,6 +200,17 @@ pub struct AMQPProperty {
     #[serde(rename="type")]
     pub amqp_type: AMQPType,
     pub name:      String,
+}
+
+impl Codegen for AMQPProperty {
+    fn codegen(&self, handlebars: &Handlebars) -> String {
+        let mut data = BTreeMap::new();
+
+        data.insert("type".to_string(), self.amqp_type.to_string());
+        data.insert("name".to_string(), self.name.clone());
+
+        handlebars.render("domain", &data).expect("Failed to render domain template")
+    }
 }
 
 #[cfg(test)]
