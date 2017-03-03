@@ -253,6 +253,7 @@ impl AMQPArgument {
         if let Some(ref default_value) = self.default_value {
             let s = default_value.to_string();
             match default_value {
+                /* TODO: simplify that, handle Table */
                 &Value::String(_) => format!("Some({}.to_string())", s),
                 &Value::Number(_) => format!("Some({})", s),
                 &Value::Bool(_)   => format!("Some({})", s),
