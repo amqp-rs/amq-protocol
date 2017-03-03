@@ -137,7 +137,9 @@ impl Codegen for AMQPConstant {
 
         data.insert("name".to_string(),  self.name.clone());
         data.insert("value".to_string(), format!("{}", self.value));
-        data.insert("class".to_string(), self.klass.clone().unwrap_or("".to_string())); /* FIXME: we might want to handle None another way */
+        if let Some(ref klass) = self.klass {
+            data.insert("class".to_string(), klass);
+        }
 
         handlebars.render("constant", &data).expect("Failed to render constant template")
     }
@@ -155,10 +157,12 @@ impl Codegen for AMQPClass {
     fn codegen(&self, handlebars: &Handlebars) -> String {
         let mut data = BTreeMap::new();
 
-        data.insert("id".to_string(),        format!("{}", self.id));
-        data.insert("methods".to_sting(),    self.methods.iter().map(|method| method.codegen(&handlebars)).join("\n"))
-        data.insert("name".to_string(),      self.name.clone());
-        data.insert("properties".to_sting(), self.properties.iter().map(|prop| prop.codegen(&handlebars)).join("\n"))
+        data.insert("id".to_string(),      format!("{}", self.id));
+        data.insert("methods".to_string(), self.methods.iter().map(|method| method.codegen(&handlebars)).join("\n"));
+        data.insert("name".to_string(),    self.name.clone());
+        if let Some(ref properties) = self.properties {
+            data.insert("properties".to_string(), properties.iter().map(|prop| prop.codegen(&handlebars)).join("\n"));
+        }
 
         handlebars.render("class", &data).expect("Failed to render class template")
     }
@@ -177,11 +181,11 @@ impl Codegen for AMQPMethod {
         let mut data = BTreeMap::new();
 
         data.insert("id".to_string(),          format!("{}", self.id));
-        /* TODO: arguments */
+        data.insert("arguments".to_string(),   self.arguments.iter().map(|arg| arg.codegen(&handlebars)).join("\n"));
         data.insert("name".to_string(),        self.name.clone());
         data.insert("synchronous".to_string(), format!("{}", self.synchronous.unwrap_or(false)));
 
-        handlebars.render("method", &data).expect("Failed to render method template");
+        handlebars.render("method", &data).expect("Failed to render method template")
     }
 }
 
@@ -193,6 +197,25 @@ pub struct AMQPArgument {
     #[serde(rename="default-value")]
     pub default_value: Option<Value>,
     pub domain:        Option<String>,
+}
+
+impl Codegen for AMQPArgument {
+    fn codegen(&self, handlebars: &Handlebars) -> String {
+        let mut data = BTreeMap::new();
+
+        if let Some(ref amqp_type) = self.amqp_type {
+            data.insert("type".to_string(), amqp_type.to_string());
+        }
+        if let Some(ref default_value) = self.default_value {
+            data.insert("default_value".to_string(), default_value.to_string());
+        }
+        data.insert("name".to_string(),   self.name.clone());
+        if let Some(ref domain) = self.domain {
+            data.insert("domain".to_string(), domain.clone());
+        }
+
+        handlebars.render("domain", &data).expect("Failed to render domain template")
+    }
 }
 
 #[derive(Debug, Deserialize)]
