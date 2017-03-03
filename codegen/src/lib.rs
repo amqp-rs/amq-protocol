@@ -51,6 +51,7 @@ fn register_templates(templates: &AMQPTemplates) -> Handlebars {
     let mut handlebars = Handlebars::new();
 
     handlebars.register_template_string("main",     &templates.main).expect("Failed to register main template");
+    handlebars.register_template_string("domain",   &templates.main).expect("Failed to register domain template");
     handlebars.register_template_string("constant", &templates.constant).expect("Failed to register constant template");
     handlebars.register_template_string("class",    &templates.klass).expect("Failed to register class template");
     handlebars.register_template_string("method",   &templates.method).expect("Failed to register method template");
@@ -62,6 +63,7 @@ fn register_templates(templates: &AMQPTemplates) -> Handlebars {
 
 pub struct AMQPTemplates {
     pub main:     String,
+    pub domain:   String,
     pub constant: String,
     pub klass:    String,
     pub method:   String,
@@ -91,12 +93,33 @@ pub enum AMQPType {
     Timestamp,
 }
 
+impl AMQPType {
+    fn to_string(&self) -> String {
+        match *self {
+            AMQPType::Bit       => "bit",
+            AMQPType::Octet     => "octet",
+            AMQPType::Short     => "short",
+            AMQPType::Long      => "long",
+            AMQPType::LongLong  => "longlong",
+            AMQPType::ShortStr  => "shortstr",
+            AMQPType::LongStr   => "longstr",
+            AMQPType::Table     => "table",
+            AMQPType::Timestamp => "timestamp",
+        }.to_string()
+    }
+}
+
 #[derive(Debug, Deserialize)]
 pub struct AMQPDomain(String, AMQPType);
 
 impl Codegen for AMQPDomain {
     fn codegen(&self, handlebars: &Handlebars) -> String {
-        String::new()
+        let mut data = BTreeMap::new();
+
+        data.insert("name".to_string(), self.0.clone());
+        data.insert("type".to_string(), self.1.to_string());
+
+        handlebars.render("domain", &data).expect("Failed to render domain template")
     }
 }
 
@@ -110,7 +133,13 @@ pub struct AMQPConstant {
 
 impl Codegen for AMQPConstant {
     fn codegen(&self, handlebars: &Handlebars) -> String {
-        String::new()
+        let mut data = BTreeMap::new();
+
+        data.insert("name".to_string(),  self.name.clone());
+        data.insert("value".to_string(), format!("{}", self.value));
+        data.insert("class".to_string(), self.klass.clone().unwrap_or("".to_string())); /* FIXME: we might want to handle None another way */
+
+        handlebars.render("constant", &data).expect("Failed to render constant template")
     }
 }
 
@@ -124,7 +153,14 @@ pub struct AMQPClass {
 
 impl Codegen for AMQPClass {
     fn codegen(&self, handlebars: &Handlebars) -> String {
-        String::new()
+        let mut data = BTreeMap::new();
+
+        data.insert("id".to_string(),   format!("{}", self.id));
+        /* TODO: methods */
+        data.insert("name".to_string(), self.name.clone());
+        /* TODO: properties */
+
+        handlebars.render("class", &data).expect("Failed to render class template")
     }
 }
 
@@ -173,7 +209,8 @@ mod test {
 
     fn templates() -> AMQPTemplates {
         AMQPTemplates {
-            main: "{{name}} - {{major_version}}.{{minor_version}}.{{revision}}".to_string(),
+            main:     "{{name}} - {{major_version}}.{{minor_version}}.{{revision}}".to_string(),
+            domain:   String::new(),
             constant: String::new(),
             klass:    String::new(),
             method:   String::new(),

@@ -21,6 +21,7 @@ fn main() {
     let specs     = serde_json::from_str::<AMQProtocolDefinition>(&s).expect("Failed to parse AMQP specs file");
     let templates = AMQPTemplates {
         main:     main_tpl,
+        domain:   String::new(),
         constant: String::new(),
         klass:    String::new(),
         method:   String::new(),
