@@ -138,7 +138,7 @@ impl Codegen for AMQPConstant {
         data.insert("name".to_string(),  self.name.clone());
         data.insert("value".to_string(), format!("{}", self.value));
         if let Some(ref klass) = self.klass {
-            data.insert("class".to_string(), klass);
+            data.insert("class".to_string(), klass.clone());
         }
 
         handlebars.render("constant", &data).expect("Failed to render constant template")
