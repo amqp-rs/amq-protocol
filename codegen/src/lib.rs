@@ -29,6 +29,12 @@ pub struct AMQProtocolDefinition {
 }
 
 impl AMQProtocolDefinition {
+    pub fn load() -> AMQProtocolDefinition {
+        let specs = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/specs/amqp-rabbitmq-0.9.1.json"));
+
+        serde_json::from_str::<AMQProtocolDefinition>(specs).expect("Failed to parse AMQP specs file")
+    }
+
     pub fn codegen(&self, templates: &AMQPTemplates) -> String {
         let handlebars = register_templates(templates);
         let mut data   = BTreeMap::new();
