@@ -50,6 +50,8 @@ impl AMQProtocolDefinition {
 fn register_templates(templates: &AMQPTemplates) -> Handlebars {
     let mut handlebars = Handlebars::new();
 
+    handlebars.register_escape_fn(handlebars::no_escape);
+
     handlebars.register_template_string("main",     &templates.main).expect("Failed to register main template");
     handlebars.register_template_string("domain",   &templates.domain).expect("Failed to register domain template");
     handlebars.register_template_string("constant", &templates.constant).expect("Failed to register constant template");
@@ -207,7 +209,7 @@ impl Codegen for AMQPArgument {
             data.insert("type".to_string(), amqp_type.to_string());
         }
         if let Some(ref default_value) = self.default_value {
-            data.insert("default_value".to_string(), default_value.to_string()); /* FIXME: handlebars fials with string here transforming " into &amp;amp;amp;quot; */
+            data.insert("default_value".to_string(), default_value.to_string());
         }
         data.insert("name".to_string(),   self.name.clone());
         if let Some(ref domain) = self.domain {
@@ -264,9 +266,9 @@ mod test {
                             id:          64,
                             arguments:   vec![
                                 AMQPArgument {
-                                    amqp_type:     Some(AMQPType::Long),
+                                    amqp_type:     Some(AMQPType::LongStr),
                                     name:          "argument1".to_string(),
-                                    default_value: Some(From::from(666)),
+                                    default_value: Some(From::from("value1")),
                                     domain:        Some("domain1".to_string()),
                                 }
                             ],
@@ -328,7 +330,7 @@ property1: longstr
 
 64 - method1
 synchronous: true
-argument1(domain1): long = 666
+argument1(domain1): longstr = "value1"
 
 
 "#);
