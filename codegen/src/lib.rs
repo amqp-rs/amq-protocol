@@ -132,7 +132,7 @@ impl AMQPType {
     }
 }
 
-pub fn camel_name(name: &str) -> String {
+fn camel_name(name: &str) -> String {
     let mut new_word: bool = true;
     name.chars().fold("".to_string(), |mut result, ch| {
         if ch == '-' || ch == '_' || ch == ' ' {
@@ -144,6 +144,14 @@ pub fn camel_name(name: &str) -> String {
             result
         }
     })
+}
+
+fn snake_name(name: &str) -> String {
+    match name {
+        "type"   => "amqp_type".to_string(),
+        "return" => "amqp_return".to_string(),
+        name     => name.replace("-", "_"),
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -194,9 +202,10 @@ impl Codegen for AMQPClass {
     fn codegen(&self, handlebars: &Handlebars) -> String {
         let mut data = BTreeMap::new();
 
-        data.insert("id".to_string(),      format!("{}", self.id));
-        data.insert("methods".to_string(), self.methods.iter().map(|method| method.codegen(&handlebars)).join("\n"));
-        data.insert("name".to_string(),    self.name.clone());
+        data.insert("id".to_string(),         format!("{}", self.id));
+        data.insert("methods".to_string(),    self.methods.iter().map(|method| method.codegen(&handlebars)).join("\n"));
+        data.insert("name".to_string(),       self.name.clone());
+        data.insert("snake_name".to_string(), snake_name(&self.name));
         if let Some(ref properties) = self.properties {
             data.insert("properties".to_string(), properties.iter().map(|prop| prop.codegen(&handlebars)).join("\n"));
         }
@@ -217,11 +226,13 @@ impl Codegen for AMQPMethod {
     fn codegen(&self, handlebars: &Handlebars) -> String {
         let mut data = BTreeMap::new();
 
-        data.insert("id".to_string(),          format!("{}", self.id));
-        data.insert("arguments".to_string(),   self.arguments.iter().map(|arg| arg.codegen(&handlebars)).join("\n"));
-        data.insert("name".to_string(),        self.name.clone());
-        data.insert("synchronous".to_string(), format!("{}", self.synchronous.unwrap_or(false)));
-        data.insert("camel_name".to_string(),  camel_name(&self.name));
+        data.insert("id".to_string(),              format!("{}", self.id));
+        data.insert("arguments".to_string(),       self.arguments.iter().map(|arg| arg.codegen(&handlebars)).join("\n"));
+        data.insert("argument_fields".to_string(), self.arguments.iter().map(|arg| arg.codegen_field()).join("\n"));
+        data.insert("name".to_string(),            self.name.clone());
+        data.insert("synchronous".to_string(),     format!("{}", self.synchronous.unwrap_or(false)));
+        data.insert("camel_name".to_string(),      camel_name(&self.name));
+        data.insert("snake_name".to_string(),      snake_name(&self.name));
 
         handlebars.render("method", &data).expect("Failed to render method template")
     }
@@ -237,22 +248,49 @@ pub struct AMQPArgument {
     pub domain:        Option<String>,
 }
 
+impl AMQPArgument {
+    fn serialize_default_value(&self) -> String {
+        if let Some(ref default_value) = self.default_value {
+            let s = default_value.to_string();
+            match default_value {
+                &Value::String(_) => format!("Some({}.to_string())", s),
+                &Value::Number(_) => format!("Some({})", s),
+                &Value::Bool(_)   => format!("Some({})", s),
+                _                 => "None".to_string(),
+            }
+        } else {
+            "None".to_string()
+        }
+    }
+
+    fn serialize_domain(&self) -> String {
+        if let Some(ref domain) = self.domain {
+            format!("Some(\"{}\".to_string())", domain)
+        } else {
+            "None".to_string()
+        }
+    }
+
+    fn codegen_field(&self) -> String {
+        format!("pub {}: {},", snake_name(&self.name), camel_name(&self.name))
+    }
+}
+
 impl Codegen for AMQPArgument {
     fn codegen(&self, handlebars: &Handlebars) -> String {
         let mut data = BTreeMap::new();
 
         if let Some(ref amqp_type) = self.amqp_type {
             data.insert("type".to_string(), amqp_type.to_string());
+            data.insert("value_field".to_string(), format!("pub value: {},", amqp_type.to_rust_type()));
+            data.insert("default_value_method".to_string(), format!("pub fn default_value() -> Option<{}> {{ {} }}", amqp_type.to_rust_type(), &self.serialize_default_value()));
         }
-        if let Some(ref default_value) = self.default_value {
-            data.insert("default_value".to_string(), default_value.to_string());
-        }
-        data.insert("name".to_string(),   self.name.clone());
-        if let Some(ref domain) = self.domain {
-            data.insert("domain".to_string(), domain.clone());
-        }
+        data.insert("name".to_string(),          self.name.clone());
+        data.insert("camel_name".to_string(),    camel_name(&self.name));
+        data.insert("snake_name".to_string(),    snake_name(&self.name));
+        data.insert("domain".to_string(),        self.serialize_domain());
 
-        handlebars.render("argument", &data).expect("Failed to render domain template")
+        handlebars.render("argument", &data).expect("Failed to render argument template")
     }
 }
 
@@ -272,7 +310,7 @@ impl Codegen for AMQPProperty {
         data.insert("name".to_string(),       self.name.clone());
         data.insert("camel_name".to_string(), camel_name(&self.name));
 
-        handlebars.render("property", &data).expect("Failed to render domain template")
+        handlebars.render("property", &data).expect("Failed to render property template")
     }
 }
 
@@ -287,7 +325,7 @@ mod test {
             minor_version: 9,
             revision:      1,
             port:          5672,
-            copyright:     vec!["Copyright 1".to_string(), "Copyright 2".to_string()],
+            copyright:     vec!["Copyright 1\n".to_string(), "Copyright 2".to_string()],
             domains:       vec![AMQPDomain("domain1".to_string(), AMQPType::Octet)],
             constants:     vec![
                 AMQPConstant {
@@ -306,7 +344,7 @@ mod test {
                                 AMQPArgument {
                                     amqp_type:     Some(AMQPType::LongStr),
                                     name:          "argument1".to_string(),
-                                    default_value: Some(From::from("value1")),
+                                    default_value: Some(Value::String("value1".to_string())),
                                     domain:        Some("domain1".to_string()),
                                 }
                             ],
@@ -348,7 +386,7 @@ port {{port}}
 synchronous: {{synchronous}}
 {{arguments}}
 "#.to_string(),
-            argument: "{{name}}({{domain}}): {{type}} = {{default_value}}".to_string(),
+            argument: "{{name}}({{domain}}): {{type}} = {{default_value_method}}".to_string(),
             property: "{{name}}: {{type}}".to_string(),
         }
     }
@@ -368,7 +406,7 @@ property1: longstr
 
 64 - method1
 synchronous: true
-argument1(domain1): longstr = "value1"
+argument1(Some("domain1".to_string())): longstr = pub fn default_value() -> Option<String> { Some("value1".to_string()) }
 
 
 "#);
