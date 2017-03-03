@@ -14,7 +14,7 @@ script:
     - cargo test  --verbose --all
 
 after_success:
-    - cargo coveralls --lib
+    - cargo coveralls --verbose --all
 
 addons:
     apt:
