@@ -1,11 +1,14 @@
+extern crate handlebars;
 extern crate serde;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
 
+use handlebars::Handlebars;
 use serde_json::Value;
+use std::collections::BTreeMap;
 
 pub trait Codegen {
-    fn codegen(&self) -> String;
+    fn codegen(&self, template: &str) -> String;
 }
 
 #[derive(Debug, Deserialize)]
@@ -24,8 +27,16 @@ pub struct AMQProtocolDefinition {
 }
 
 impl Codegen for AMQProtocolDefinition {
-    fn codegen(&self) -> String {
-        String::new()
+    fn codegen(&self, template: &str) -> String {
+        let mut handlebars = Handlebars::new();
+        let mut data       = BTreeMap::new();
+
+        handlebars.register_template_string("main", template).expect("Failed to register main template");
+        data.insert("name".to_string(),          self.name.clone());
+        data.insert("major_version".to_string(), format!("{}", self.major_version));
+        data.insert("minor_version".to_string(), format!("{}", self.minor_version));
+        data.insert("revision".to_string(),      format!("{}", self.revision));
+        handlebars.render("main", &data).expect("Failed to render main template")
     }
 }
 
@@ -90,4 +101,28 @@ pub struct AMQPProperty {
     #[serde(rename="type")]
     pub amqp_type: AMQPType,
     pub name:      String,
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    fn specs() -> AMQProtocolDefinition {
+        AMQProtocolDefinition {
+            name:          "AMQP".to_string(),
+            major_version: 0,
+            minor_version: 9,
+            revision:      1,
+            port:          5672,
+            copyright:     Vec::new(),
+            domains:       Vec::new(),
+            constants:     Vec::new(),
+            classes:       Vec::new(),
+        }
+    }
+
+    #[test]
+    fn main_template() {
+        assert_eq!(specs().codegen("{{name}} - {{major_version}}.{{minor_version}}.{{revision}}"), "AMQP - 0.9.1");
+    }
 }
