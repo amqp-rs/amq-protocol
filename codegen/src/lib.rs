@@ -44,7 +44,7 @@ impl AMQProtocolDefinition {
         data.insert("minor_version".to_string(), format!("{}", self.minor_version));
         data.insert("revision".to_string(),      format!("{}", self.revision));
         data.insert("port".to_string(),          format!("{}", self.port));
-        data.insert("copyright".to_string(),     self.copyright.iter().join("\n"));
+        data.insert("copyright".to_string(),     self.copyright.iter().join(""));
         data.insert("domains".to_string(),       self.domains.iter().map(|domain| domain.codegen(&handlebars)).join("\n"));
         data.insert("constants".to_string(),     self.constants.iter().map(|constant| constant.codegen(&handlebars)).join("\n"));
         data.insert("classes".to_string(),       self.classes.iter().map(|klass| klass.codegen(&handlebars)).join("\n"));
