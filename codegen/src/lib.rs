@@ -14,7 +14,7 @@ trait Codegen {
     fn codegen(&self, handlebars: &Handlebars) -> String;
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AMQProtocolDefinition {
     pub name:          String,
     #[serde(rename="major-version")]
@@ -52,6 +52,18 @@ impl AMQProtocolDefinition {
 
         handlebars.render("main", &data).expect("Failed to render main template")
     }
+
+    pub fn codegen_full(self, full_template: &str) -> String {
+        let mut handlebars = Handlebars::new();
+        let mut data = BTreeMap::new();
+
+        handlebars.register_escape_fn(handlebars::no_escape);
+        handlebars.register_template_string("full", full_template).expect("Failed to register full template");
+
+        data.insert("specs".to_string(), self);
+
+        handlebars.render("full", &data).expect("Failed to render full template")
+    }
 }
 
 fn register_templates(templates: &AMQPTemplates) -> Handlebars {
@@ -80,7 +92,7 @@ pub struct AMQPTemplates {
     pub property: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub enum AMQPType {
     #[serde(rename="bit")]
     Bit,
@@ -154,7 +166,7 @@ fn snake_name(name: &str) -> String {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AMQPDomain(String, AMQPType);
 
 impl Codegen for AMQPDomain {
@@ -168,7 +180,7 @@ impl Codegen for AMQPDomain {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AMQPConstant {
     pub name:  String,
     pub value: u16,
@@ -190,7 +202,7 @@ impl Codegen for AMQPConstant {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AMQPClass {
     pub id:         u8,
     pub methods:    Vec<AMQPMethod>,
@@ -214,7 +226,7 @@ impl Codegen for AMQPClass {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AMQPMethod {
     pub id:          u8,
     pub arguments:   Vec<AMQPArgument>,
@@ -238,7 +250,7 @@ impl Codegen for AMQPMethod {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AMQPArgument {
     #[serde(rename="type")]
     pub amqp_type:     Option<AMQPType>,
@@ -295,7 +307,7 @@ impl Codegen for AMQPArgument {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AMQPProperty {
     #[serde(rename="type")]
     pub amqp_type: AMQPType,
