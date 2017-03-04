@@ -162,7 +162,7 @@ fn snake_name(name: &str) -> String {
     match name {
         "type"   => "amqp_type".to_string(),
         "return" => "amqp_return".to_string(),
-        name     => name.replace("-", "_"),
+        name     => name.replace("-", "_").to_lowercase(),
     }
 }
 
@@ -188,15 +188,23 @@ pub struct AMQPConstant {
     pub klass: Option<String>,
 }
 
+impl AMQPConstant {
+    pub fn serialize_class(&self) -> String {
+        match self.klass {
+            Some(ref klass) => format!("Some(\"{}\".to_string())", klass),
+            None            => "None".to_string(),
+        }
+    }
+}
+
 impl Codegen for AMQPConstant {
     fn codegen(&self, handlebars: &Handlebars) -> String {
         let mut data = BTreeMap::new();
 
-        data.insert("name".to_string(),  self.name.clone());
-        data.insert("value".to_string(), format!("{}", self.value));
-        if let Some(ref klass) = self.klass {
-            data.insert("class".to_string(), klass.clone());
-        }
+        data.insert("name".to_string(),       self.name.clone());
+        data.insert("snake_name".to_string(), snake_name(&self.name));
+        data.insert("value".to_string(),      format!("{}", self.value));
+        data.insert("class".to_string(),      self.serialize_class());
 
         handlebars.render("constant", &data).expect("Failed to render constant template")
     }
