@@ -167,7 +167,7 @@ fn snake_name(name: &str) -> String {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct AMQPDomain(String, AMQPType);
+pub struct AMQPDomain(pub String, pub AMQPType);
 
 impl Codegen for AMQPDomain {
     fn codegen(&self, handlebars: &Handlebars) -> String {
