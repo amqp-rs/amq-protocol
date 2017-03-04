@@ -173,8 +173,9 @@ impl Codegen for AMQPDomain {
     fn codegen(&self, handlebars: &Handlebars) -> String {
         let mut data = BTreeMap::new();
 
-        data.insert("name".to_string(), self.0.clone());
-        data.insert("type".to_string(), self.1.to_string());
+        data.insert("name".to_string(),       self.0.clone());
+        data.insert("snake_name".to_string(), snake_name(&self.0));
+        data.insert("type".to_string(),       self.1.to_string());
 
         handlebars.render("domain", &data).expect("Failed to render domain template")
     }
