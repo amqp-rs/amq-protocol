@@ -421,7 +421,7 @@ Copyright 1
 Copyright 2
 port 5672
 domain1: octet
-constant1(class1) = 128
+constant1(Some("class1".to_string())) = 128
 
 42 - class1
 property1: longstr
