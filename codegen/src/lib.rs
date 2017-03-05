@@ -1,9 +1,11 @@
+extern crate amq_protocol_types;
 extern crate handlebars;
 extern crate itertools;
 extern crate serde;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
 
+use amq_protocol_types::*;
 use handlebars::Handlebars;
 use itertools::Itertools;
 use serde_json::Value;
@@ -90,58 +92,6 @@ pub struct AMQPTemplates {
     pub method:   String,
     pub argument: String,
     pub property: String,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub enum AMQPType {
-    #[serde(rename="bit")]
-    Bit,
-    #[serde(rename="octet")]
-    Octet,
-    #[serde(rename="short")]
-    Short,
-    #[serde(rename="long")]
-    Long,
-    #[serde(rename="longlong")]
-    LongLong,
-    #[serde(rename="shortstr")]
-    ShortStr,
-    #[serde(rename="longstr")]
-    LongStr,
-    #[serde(rename="table")]
-    Table,
-    #[serde(rename="timestamp")]
-    Timestamp,
-}
-
-impl AMQPType {
-    fn to_string(&self) -> String {
-        match *self {
-            AMQPType::Bit       => "bit",
-            AMQPType::Octet     => "octet",
-            AMQPType::Short     => "short",
-            AMQPType::Long      => "long",
-            AMQPType::LongLong  => "longlong",
-            AMQPType::ShortStr  => "shortstr",
-            AMQPType::LongStr   => "longstr",
-            AMQPType::Table     => "table",
-            AMQPType::Timestamp => "timestamp",
-        }.to_string()
-    }
-
-    fn to_rust_type(&self) -> String {
-        match *self {
-            AMQPType::Bit       => "bool",
-            AMQPType::Octet     => "u8",
-            AMQPType::Short     => "u16",
-            AMQPType::Long      => "u32",
-            AMQPType::LongLong  => "u64",
-            AMQPType::ShortStr  => "String",
-            AMQPType::LongStr   => "String",
-            AMQPType::Table     => "String", /* FIXME: add a custom type */
-            AMQPType::Timestamp => "u64",
-        }.to_string()
-    }
 }
 
 fn camel_name(name: &str) -> String {
@@ -303,9 +253,9 @@ impl Codegen for AMQPArgument {
         let mut data = BTreeMap::new();
 
         if let Some(ref amqp_type) = self.amqp_type {
-            data.insert("type".to_string(), amqp_type.to_string());
-            data.insert("value_field".to_string(), format!("pub value: {},", amqp_type.to_rust_type()));
-            data.insert("default_value_method".to_string(), format!("pub fn default_value() -> Option<{}> {{ {} }}", amqp_type.to_rust_type(), &self.serialize_default_value()));
+            data.insert("type".to_string(),                 amqp_type.to_string());
+            data.insert("value_field".to_string(),          format!("pub value: {},", amqp_type.to_string()));
+            data.insert("default_value_method".to_string(), format!("pub fn default_value() -> Option<{}> {{ {} }}", amqp_type.to_string(), &self.serialize_default_value()));
         }
         data.insert("name".to_string(),          self.name.clone());
         data.insert("camel_name".to_string(),    camel_name(&self.name));
@@ -328,7 +278,6 @@ impl Codegen for AMQPProperty {
         let mut data = BTreeMap::new();
 
         data.insert("type".to_string(),       self.amqp_type.to_string());
-        data.insert("rust_type".to_string(),  self.amqp_type.to_rust_type());
         data.insert("name".to_string(),       self.name.clone());
         data.insert("camel_name".to_string(), camel_name(&self.name));
 
@@ -348,7 +297,7 @@ mod test {
             revision:      1,
             port:          5672,
             copyright:     vec!["Copyright 1\n".to_string(), "Copyright 2".to_string()],
-            domains:       vec![AMQPDomain("domain1".to_string(), AMQPType::Octet)],
+            domains:       vec![AMQPDomain("domain1".to_string(), AMQPType::ShortInt)],
             constants:     vec![
                 AMQPConstant {
                     name:  "constant1".to_string(),
@@ -364,7 +313,7 @@ mod test {
                             id:          64,
                             arguments:   vec![
                                 AMQPArgument {
-                                    amqp_type:     Some(AMQPType::LongStr),
+                                    amqp_type:     Some(AMQPType::LongString),
                                     name:          "argument1".to_string(),
                                     default_value: Some(Value::String("value1".to_string())),
                                     domain:        Some("domain1".to_string()),
@@ -377,7 +326,7 @@ mod test {
                     name:       "class1".to_string(),
                     properties: Some(vec![
                         AMQPProperty {
-                            amqp_type: AMQPType::LongStr,
+                            amqp_type: AMQPType::LongString,
                             name:      "property1".to_string(),
                         }
                     ]),
@@ -420,15 +369,15 @@ AMQP - 0.9.1
 Copyright 1
 Copyright 2
 port 5672
-domain1: octet
+domain1: ShortInt
 constant1(Some("class1".to_string())) = 128
 
 42 - class1
-property1: longstr
+property1: LongString
 
 64 - method1
 synchronous: true
-argument1(Some("domain1".to_string())): longstr = pub fn default_value() -> Option<String> { Some("value1".to_string()) }
+argument1(Some("domain1".to_string())): LongString = pub fn default_value() -> Option<LongString> { Some("value1".to_string()) }
 
 
 "#);

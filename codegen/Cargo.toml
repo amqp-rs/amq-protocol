@@ -13,10 +13,11 @@ license       = "BSD-2-Clause"
 name = "amq_protocol_codegen"
 
 [dependencies]
-itertools    = "^0.5.9"
-serde        = "^0.9.10"
-serde_derive = "^0.9.10"
-serde_json   = "^0.9.8"
+amq-protocol-types = "0.1.1"
+itertools          = "^0.5.9"
+serde              = "^0.9.10"
+serde_derive       = "^0.9.10"
+serde_json         = "^0.9.8"
 
 [dependencies.handlebars]
 version  = "^0.25.1"
