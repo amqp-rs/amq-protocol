@@ -38,6 +38,55 @@ pub enum AMQPType {
     Void,
 }
 
+impl AMQPType {
+    pub fn from_id(id: char) -> AMQPType {
+        match id {
+            't' => AMQPType::Boolean,
+            'b' => AMQPType::ShortShortInt,
+            'B' => AMQPType::ShortShortUInt,
+            'U' => AMQPType::ShortInt,
+            'u' => AMQPType::ShortUInt,
+            'I' => AMQPType::LongInt,
+            'i' => AMQPType::LongUInt,
+            'L' => AMQPType::LongLongInt,
+            'l' => AMQPType::LongLongUInt,
+            'f' => AMQPType::Float,
+            'd' => AMQPType::Double,
+            'D' => AMQPType::DecimalValue,
+            's' => AMQPType::ShortString,
+            'S' => AMQPType::LongString,
+            'A' => AMQPType::FieldArray,
+            'T' => AMQPType::TimeStamp,
+            'F' => AMQPType::FieldTable,
+            'V' => AMQPType::Void,
+            _ => panic!("Unknown type id {}", id), /*FIXME: don't panic*/
+        }
+    }
+
+    pub fn get_id(&self) -> char {
+        match *self {
+            AMQPType::Boolean => 't',
+            AMQPType::ShortShortInt => 'b',
+            AMQPType::ShortShortUInt => 'B',
+            AMQPType::ShortInt => 'U',
+            AMQPType::ShortUInt => 'u',
+            AMQPType::LongInt => 'I',
+            AMQPType::LongUInt => 'i',
+            AMQPType::LongLongInt => 'L',
+            AMQPType::LongLongUInt => 'l',
+            AMQPType::Float => 'f',
+            AMQPType::Double => 'd',
+            AMQPType::DecimalValue => 'D',
+            AMQPType::ShortString => 's',
+            AMQPType::LongString => 'S',
+            AMQPType::FieldArray => 'A',
+            AMQPType::TimeStamp => 'T',
+            AMQPType::FieldTable => 'F',
+            AMQPType::Void => 'V',
+        }
+    }
+}
+
 pub type Boolean        = bool;
 pub type ShortShortInt  = i8;
 pub type ShortShortUInt = u8;
