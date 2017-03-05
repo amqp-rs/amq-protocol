@@ -85,6 +85,10 @@ impl AMQPType {
             AMQPType::Void => 'V',
         }
     }
+
+    pub fn to_string(&self) -> String {
+        format!("{:?}", self)
+    }
 }
 
 pub type Boolean        = bool;
