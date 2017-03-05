@@ -1,13 +1,9 @@
 extern crate serde;
 #[macro_use] extern crate serde_derive;
-extern crate serde_json;
 
 use std::collections::HashMap;
 
-/* Fields with a custom rename are for deserializing
- * the secifications json file in amq-protocol-codegen
- */
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Serialize)]
 pub enum AMQPType {
     Boolean,
     ShortShortInt,
@@ -101,6 +97,7 @@ pub type TimeStamp      = u64;
 pub type FieldTable     = HashMap<String, AMQPValue>;
 pub type Void           = ();
 
+#[derive(Debug, Serialize)]
 pub enum AMQPValue {
     Boolean(Boolean),
     ShortShortInt(ShortShortInt),
