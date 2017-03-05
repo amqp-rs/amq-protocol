@@ -15,7 +15,6 @@ name = "amq_protocol_types"
 [dependencies]
 serde        = "^0.9.10"
 serde_derive = "^0.9.10"
-serde_json   = "^0.9.8"
 
 [badges]
 travis-ci = { repository = "Keruspe/amq-protocol" }

@@ -9,31 +9,22 @@ use std::collections::HashMap;
  */
 #[derive(Debug, Deserialize, Serialize)]
 pub enum AMQPType {
-    #[serde(rename="bit")]
     Boolean,
-    #[serde(rename="octet")]
     ShortShortInt,
     ShortShortUInt,
-    #[serde(rename="short")]
     ShortInt,
     ShortUInt,
-    #[serde(rename="long")]
     LongInt,
     LongUInt,
-    #[serde(rename="longlong")]
     LongLongInt,
     LongLongUInt,
     Float,
     Double,
     DecimalValue,
-    #[serde(rename="shortstr")]
     ShortString,
-    #[serde(rename="longstr")]
     LongString,
     FieldArray,
-    #[serde(rename="timestamp")]
     TimeStamp,
-    #[serde(rename="table")]
     FieldTable,
     Void,
 }
