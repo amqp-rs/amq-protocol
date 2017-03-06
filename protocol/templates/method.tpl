@@ -1,4 +1,6 @@
 pub mod {{snake_name}} {
+    use super::*;
+
     {{arguments}}
 
     #[derive(Debug, PartialEq, Clone)]

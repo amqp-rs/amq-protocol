@@ -1,4 +1,6 @@
 pub mod {{snake_name}} {
+    use super::*;
+
     pub fn name() -> String {
         "{{name}}".to_string()
     }

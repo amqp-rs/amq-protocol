@@ -14,9 +14,10 @@ build         = "build.rs"
 name = "amq_protocol"
 
 [build-dependencies]
-amq-protocol-codegen = "0.3.0"
+amq-protocol-codegen = "0.3.2"
 
 [dependencies]
+amq-protocol-types = "0.2.2"
 
 [badges]
 travis-ci = { repository = "Keruspe/amq-protocol" }
