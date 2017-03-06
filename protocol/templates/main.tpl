@@ -8,11 +8,13 @@ pub const PORT:          u32          = {{port}};
 pub const COPYRIGHT:     &'static str = r#"{{copyright}}"#;
 
 pub mod domain {
+    #[allow(unused_imports)]
     use super::*;
 {{domains}}
 }
 
 pub mod constant {
+    #[allow(unused_imports)]
     use super::*;
 {{constants}}
 }
