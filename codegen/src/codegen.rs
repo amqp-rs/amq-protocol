@@ -4,17 +4,6 @@ use handlebars::Handlebars;
 use itertools::Itertools;
 use std::collections::BTreeMap;
 
-#[derive(Debug)]
-pub struct AMQPTemplates {
-    pub main:     String,
-    pub domain:   String,
-    pub constant: String,
-    pub klass:    String,
-    pub method:   String,
-    pub argument: String,
-    pub property: String,
-}
-
 pub trait Codegen {
     fn codegen(&self, handlebars: &Handlebars) -> String;
 }
@@ -108,6 +97,7 @@ mod test {
 
     use amq_protocol_types::*;
     use serde_json::Value;
+    use templating::AMQPTemplates;
 
     fn specs() -> AMQProtocolDefinition {
         AMQProtocolDefinition {

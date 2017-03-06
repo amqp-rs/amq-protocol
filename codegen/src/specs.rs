@@ -1,5 +1,6 @@
 use codegen::*;
 use internal::*;
+use templating::*;
 use util::*;
 
 use amq_protocol_types::*;
