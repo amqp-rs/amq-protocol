@@ -1,7 +1,7 @@
 use specs::*;
 use templating::*;
 
-use handlebars::{self, Handlebars};
+use handlebars::{self, Handlebars, HelperDef};
 use itertools::Itertools;
 use std::collections::BTreeMap;
 
@@ -31,6 +31,11 @@ impl CodeGenerator {
             specs:      specs,
             handlebars: handlebars,
         }
+    }
+
+    pub fn with_helper(mut self, name: &str, helper: Box<HelperDef + 'static>) -> CodeGenerator {
+        self.handlebars.register_helper(name, helper);
+        self
     }
 
     pub fn generate(&self) -> String {
