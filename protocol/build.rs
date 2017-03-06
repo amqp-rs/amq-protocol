@@ -28,5 +28,5 @@ fn main() {
         property: load_template("property"),
     };
 
-    writeln!(f, "{}", specs.codegen(&templates)).expect("Failed to generate protocol.rs");
+    writeln!(f, "{}", specs.code_generator(templates).generate()).expect("Failed to generate protocol.rs");
 }
