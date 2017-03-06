@@ -13,8 +13,8 @@ license       = "BSD-2-Clause"
 name = "amq_protocol_types"
 
 [dependencies]
-serde        = "^0.9.10"
-serde_derive = "^0.9.10"
+serde        = "^0.9.11"
+serde_derive = "^0.9.11"
 
 [badges]
 travis-ci = { repository = "Keruspe/amq-protocol" }
