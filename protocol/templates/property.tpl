@@ -1,10 +1,10 @@
 #[derive(Debug, PartialEq, Clone)]
-pub struct {{camel_name}} {
-    pub value: {{type}}
+pub struct {{property.camel_name()}} {
+    pub value: {{property.type}}
 }
 
-impl {{camel_name}} {
+impl {{property.camel_name()}} {
     pub fn amqp_name() -> String {
-        "{{name}}".to_string()
+        "{{property.name}}".to_string()
     }
 }

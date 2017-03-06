@@ -1,20 +1,10 @@
 #[derive(Debug, PartialEq, Clone)]
-pub struct {{camel_name}} {
-    {{value_field}}
+pub struct {{argument.camel_name()}} {
+    pub {{argument.snake_name(}}): {{argument.type}}
 }
 
-impl {{camel_name}} {
-    pub fn amqp_name() -> String {
-        "{{name}}".to_string()
-    }
-
-    pub fn amqp_type() -> String {
-        "{{type}}".to_string()
-    }
-
+impl {{argument.camel_name()}} {
     pub fn domain() -> Option<String> {
-        {{domain}}
+        {{argument.domain}}
     }
-
-    {{default_value_method}}
 }

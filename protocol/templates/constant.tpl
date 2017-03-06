@@ -1,16 +1,16 @@
-pub mod {{snake_name}} {
+pub mod {{constant.snake_name()}} {
     #[allow(unused_imports)]
     use super::*;
 
     pub fn name() -> String {
-        "{{name}}".to_string()
+        "{{constant.name}}".to_string()
     }
 
     pub fn value() -> u16 {
-        {{value}}
+        {{constant.value}}
     }
 
     pub fn klass() -> Option<String> {
-        {{class}}
+        {{constant.class}}
     }
 }

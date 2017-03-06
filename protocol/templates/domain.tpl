@@ -1,12 +1,8 @@
-pub mod {{snake_name}} {
+pub mod {{domain.snake_name()}} {
     #[allow(unused_imports)]
     use super::*;
 
     pub fn name() -> String {
-        "{{name}}".to_string()
-    }
-
-    pub fn amqp_type() -> String {
-        "{{type}}".to_string()
+        "{{domain.name}}".to_string()
     }
 }
