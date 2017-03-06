@@ -163,9 +163,9 @@ mod test {
     fn templates() -> AMQPTemplates {
         AMQPTemplates {
             main:     r#"
-{{name}} - {{major_version}}.{{minor_version}}.{{revision}}
+{{protocol.name}} - {{protocol.major_version}}.{{protocol.minor_version}}.{{protocol.revision}}
 {{copyright}}
-port {{port}}
+port {{protocol.port}}
 {{domains}}
 {{constants}}
 {{classes}}

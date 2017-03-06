@@ -6,14 +6,11 @@ use amq_protocol_types::*;
 use handlebars::{self, Handlebars};
 use itertools::Itertools;
 use serde_json::{self, Value};
-use std::collections::BTreeMap;
 
 #[derive(Debug, Serialize)]
 pub struct AMQProtocolDefinition {
     pub name:          String,
-    #[serde(rename="major-version")]
     pub major_version: u8,
-    #[serde(rename="minor-version")]
     pub minor_version: u8,
     pub revision:      u8,
     pub port:          u32,
@@ -21,6 +18,15 @@ pub struct AMQProtocolDefinition {
     pub domains:       Vec<AMQPDomain>,
     pub constants:     Vec<AMQPConstant>,
     pub classes:       Vec<AMQPClass>,
+}
+
+#[derive(Debug, Serialize)]
+struct AMQProtocolDefinitionWrapper<'a> {
+    protocol : &'a AMQProtocolDefinition,
+    copyright: String,
+    domains:   String,
+    constants: String,
+    classes:   String,
 }
 
 impl AMQProtocolDefinition {
@@ -32,7 +38,6 @@ impl AMQProtocolDefinition {
 
     pub fn codegen(&self, templates: &AMQPTemplates) -> String {
         let mut handlebars = Handlebars::new();
-        let mut data   = BTreeMap::new();
 
         handlebars.register_escape_fn(handlebars::no_escape);
 
@@ -44,17 +49,13 @@ impl AMQProtocolDefinition {
         handlebars.register_template_string("argument", &templates.argument).expect("Failed to register argument template");
         handlebars.register_template_string("property", &templates.property).expect("Failed to register property template");
 
-        data.insert("name".to_string(),          self.name.clone());
-        data.insert("major_version".to_string(), format!("{}", self.major_version));
-        data.insert("minor_version".to_string(), format!("{}", self.minor_version));
-        data.insert("revision".to_string(),      format!("{}", self.revision));
-        data.insert("port".to_string(),          format!("{}", self.port));
-        data.insert("copyright".to_string(),     self.copyright.iter().join(""));
-        data.insert("domains".to_string(),       self.domains.iter().map(|domain| domain.codegen(&handlebars)).join("\n"));
-        data.insert("constants".to_string(),     self.constants.iter().map(|constant| constant.codegen(&handlebars)).join("\n"));
-        data.insert("classes".to_string(),       self.classes.iter().map(|klass| klass.codegen(&handlebars)).join("\n"));
-
-        handlebars.render("main", &data).expect("Failed to render main template")
+        handlebars.render("main", &AMQProtocolDefinitionWrapper {
+            protocol:  self,
+            copyright: self.copyright.iter().join(""),
+            domains:   self.domains.iter().map(|domain| domain.codegen(&handlebars)).join("\n"),
+            constants: self.constants.iter().map(|constant| constant.codegen(&handlebars)).join("\n"),
+            classes:   self.classes.iter().map(|klass| klass.codegen(&handlebars)).join("\n"),
+        }).expect("Failed to render main template")
     }
 }
 
@@ -94,7 +95,6 @@ pub struct AMQPArgument {
     #[serde(rename="type")]
     pub amqp_type:     Option<AMQPType>,
     pub name:          String,
-    #[serde(rename="default-value")]
     pub default_value: Option<Value>,
     pub domain:        Option<String>,
 }
