@@ -1,5 +1,4 @@
 use specs::*;
-use util::*;
 
 use handlebars::Handlebars;
 use itertools::Itertools;
@@ -20,92 +19,88 @@ pub trait Codegen {
     fn codegen(&self, handlebars: &Handlebars) -> String;
 }
 
-impl Codegen for AMQPDomain {
-    fn codegen(&self, handlebars: &Handlebars) -> String {
-        let mut data = BTreeMap::new();
-
-        data.insert("name".to_string(),       self.name.clone());
-        data.insert("snake_name".to_string(), snake_name(&self.name));
-        data.insert("type".to_string(),       self.amqp_type.to_string());
-
-        handlebars.render("domain", &data).expect("Failed to render domain template")
-    }
+trait BasicGetData {
+    fn get_data(&self, handlebars: &Handlebars) -> BTreeMap<String, &Self>;
 }
 
-impl Codegen for AMQPConstant {
-    fn codegen(&self, handlebars: &Handlebars) -> String {
-        let mut data = BTreeMap::new();
-
-        data.insert("name".to_string(),       self.name.clone());
-        data.insert("snake_name".to_string(), snake_name(&self.name));
-        data.insert("value".to_string(),      format!("{}", self.value));
-        data.insert("class".to_string(),      self.serialize_class());
-
-        handlebars.render("constant", &data).expect("Failed to render constant template")
-    }
+trait ClassGetData {
+    fn get_data(&self, handlebars: &Handlebars) -> AMQPClassWrapper;
 }
 
-impl Codegen for AMQPClass {
-    fn codegen(&self, handlebars: &Handlebars) -> String {
-        let mut data = BTreeMap::new();
+trait MethodGetData {
+    fn get_data(&self, handlebars: &Handlebars) -> AMQPMethodWrapper;
+}
 
-        data.insert("id".to_string(),         format!("{}", self.id));
-        data.insert("methods".to_string(),    self.methods.iter().map(|method| method.codegen(&handlebars)).join("\n"));
-        data.insert("name".to_string(),       self.name.clone());
-        data.insert("snake_name".to_string(), snake_name(&self.name));
-        if let Some(ref properties) = self.properties {
-            data.insert("properties".to_string(), properties.iter().map(|prop| prop.codegen(&handlebars)).join("\n"));
+macro_rules! get_data {
+    ($t:ty, $key:expr) => {
+        impl BasicGetData for $t {
+            #[allow(unused_variables)]
+            fn get_data(&self, handlebars: &Handlebars) -> BTreeMap<String, &Self> {
+                let mut data = BTreeMap::new();
+                data.insert($key.to_string(), self);
+                data
+            }
         }
-
-        handlebars.render("class", &data).expect("Failed to render class template")
     }
 }
 
-impl Codegen for AMQPMethod {
-    fn codegen(&self, handlebars: &Handlebars) -> String {
-        let mut data = BTreeMap::new();
-
-        data.insert("id".to_string(),              format!("{}", self.id));
-        data.insert("arguments".to_string(),       self.arguments.iter().map(|arg| arg.codegen(&handlebars)).join("\n"));
-        data.insert("argument_fields".to_string(), self.arguments.iter().map(|arg| arg.codegen_field()).join("\n"));
-        data.insert("name".to_string(),            self.name.clone());
-        data.insert("synchronous".to_string(),     format!("{}", self.synchronous.unwrap_or(false)));
-        data.insert("camel_name".to_string(),      camel_name(&self.name));
-        data.insert("snake_name".to_string(),      snake_name(&self.name));
-
-        handlebars.render("method", &data).expect("Failed to render method template")
-    }
+#[derive(Debug, Serialize)]
+struct AMQPClassWrapper<'a> {
+    #[serde(rename="class")]
+    klass:      &'a AMQPClass,
+    methods:    String,
+    properties: Option<String>,
 }
 
-impl Codegen for AMQPArgument {
-    fn codegen(&self, handlebars: &Handlebars) -> String {
-        let mut data = BTreeMap::new();
-
-        if let Some(ref amqp_type) = self.amqp_type {
-            data.insert("type".to_string(),                 amqp_type.to_string());
-            data.insert("value_field".to_string(),          format!("pub value: {},", amqp_type.to_string()));
-            data.insert("default_value_method".to_string(), format!("pub fn default_value() -> Option<{}> {{ {} }}", amqp_type.to_string(), &self.serialize_default_value()));
+impl ClassGetData for AMQPClass {
+    fn get_data(&self, handlebars: &Handlebars) -> AMQPClassWrapper {
+        AMQPClassWrapper {
+            klass:      self,
+            methods:    self.methods.iter().map(|method| method.codegen(&handlebars)).join("\n"),
+            properties: match self.properties {
+                Some(ref properties) => Some(properties.iter().map(|method| method.codegen(&handlebars)).join("\n")),
+                None                 => None,
+            },
         }
-        data.insert("name".to_string(),          self.name.clone());
-        data.insert("camel_name".to_string(),    camel_name(&self.name));
-        data.insert("snake_name".to_string(),    snake_name(&self.name));
-        data.insert("domain".to_string(),        self.serialize_domain());
-
-        handlebars.render("argument", &data).expect("Failed to render argument template")
     }
 }
 
-impl Codegen for AMQPProperty {
-    fn codegen(&self, handlebars: &Handlebars) -> String {
-        let mut data = BTreeMap::new();
+#[derive(Debug, Serialize)]
+struct AMQPMethodWrapper<'a> {
+    method:    &'a AMQPMethod,
+    arguments: String,
+}
 
-        data.insert("type".to_string(),       self.amqp_type.to_string());
-        data.insert("name".to_string(),       self.name.clone());
-        data.insert("camel_name".to_string(), camel_name(&self.name));
-
-        handlebars.render("property", &data).expect("Failed to render property template")
+impl MethodGetData for AMQPMethod {
+    fn get_data(&self, handlebars: &Handlebars) -> AMQPMethodWrapper {
+        AMQPMethodWrapper {
+            method:    self,
+            arguments: self.arguments.iter().map(|arg| arg.codegen(&handlebars)).join("\n"),
+        }
     }
 }
+
+get_data!(AMQPDomain,   "domain");
+get_data!(AMQPConstant, "constant");
+get_data!(AMQPArgument, "argument");
+get_data!(AMQPProperty, "property");
+
+macro_rules! codegen {
+    ($t:ty, $name:expr) => {
+        impl Codegen for $t {
+            fn codegen (&self, handlebars: &Handlebars) -> String {
+                handlebars.render($name, &self.get_data(handlebars)).expect(&format!("Failed to render {} template", $name))
+            }
+        }
+    };
+}
+
+codegen!(AMQPDomain,   "domain");
+codegen!(AMQPConstant, "constant");
+codegen!(AMQPClass,    "class");
+codegen!(AMQPMethod,   "method");
+codegen!(AMQPArgument, "argument");
+codegen!(AMQPProperty, "property");
 
 #[cfg(test)]
 mod test {
@@ -175,20 +170,20 @@ port {{port}}
 {{constants}}
 {{classes}}
 "#.to_string(),
-            domain:   "{{name}}: {{type}}".to_string(),
-            constant: "{{name}}({{class}}) = {{value}}".to_string(),
+            domain:   "{{domain.name}}: {{domain.type}}".to_string(),
+            constant: "{{constant.name}}({{constant.class}}) = {{constant.value}}".to_string(),
             klass:    r#"
-{{id}} - {{name}}
+{{class.id}} - {{class.name}}
 {{properties}}
 {{methods}}
 "#.to_string(),
             method:   r#"
-{{id}} - {{name}}
-synchronous: {{synchronous}}
+{{method.id}} - {{method.name}}
+synchronous: {{method.synchronous}}
 {{arguments}}
 "#.to_string(),
-            argument: "{{name}}({{domain}}): {{type}} = {{default_value_method}}".to_string(),
-            property: "{{name}}: {{type}}".to_string(),
+            argument: "{{argument.name}}({{argument.domain}}): {{argument.type}}".to_string(),
+            property: "{{property.name}}: {{property.type}}".to_string(),
         }
     }
 
@@ -200,14 +195,14 @@ Copyright 1
 Copyright 2
 port 5672
 domain1: ShortInt
-constant1(Some("class1".to_string())) = 128
+constant1(class1) = 128
 
 42 - class1
 property1: LongString
 
 64 - method1
 synchronous: true
-argument1(Some("domain1".to_string())): LongString = pub fn default_value() -> Option<LongString> { Some("value1".to_string()) }
+argument1(domain1): LongString
 
 
 "#);
