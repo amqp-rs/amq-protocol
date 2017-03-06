@@ -1,8 +1,57 @@
 use specs::*;
+use templating::*;
 
-use handlebars::Handlebars;
+use handlebars::{self, Handlebars};
 use itertools::Itertools;
 use std::collections::BTreeMap;
+
+pub struct CodeGenerator {
+    specs:      AMQProtocolDefinition,
+    handlebars: Handlebars,
+}
+
+impl CodeGenerator {
+    pub fn new(specs: AMQProtocolDefinition, templates: AMQPTemplates) -> CodeGenerator {
+        let mut handlebars = Handlebars::new();
+
+        handlebars.register_escape_fn(handlebars::no_escape);
+
+        handlebars.register_helper("camel", Box::new(camel_helper));
+        handlebars.register_helper("snake", Box::new(snake_helper));
+
+        handlebars.register_template_string("main",     &templates.main).expect("Failed to register main template");
+        handlebars.register_template_string("domain",   &templates.domain).expect("Failed to register domain template");
+        handlebars.register_template_string("constant", &templates.constant).expect("Failed to register constant template");
+        handlebars.register_template_string("class",    &templates.klass).expect("Failed to register class template");
+        handlebars.register_template_string("method",   &templates.method).expect("Failed to register method template");
+        handlebars.register_template_string("argument", &templates.argument).expect("Failed to register argument template");
+        handlebars.register_template_string("property", &templates.property).expect("Failed to register property template");
+
+        CodeGenerator {
+            specs:      specs,
+            handlebars: handlebars,
+        }
+    }
+
+    pub fn generate(&self) -> String {
+        self.handlebars.render("main", &AMQProtocolDefinitionWrapper {
+            protocol:  &self.specs,
+            copyright: self.specs.copyright.iter().join(""),
+            domains:   self.specs.domains.iter().map(|domain| domain.codegen(&self.handlebars)).join("\n"),
+            constants: self.specs.constants.iter().map(|constant| constant.codegen(&self.handlebars)).join("\n"),
+            classes:   self.specs.classes.iter().map(|klass| klass.codegen(&self.handlebars)).join("\n"),
+        }).expect("Failed to render main template")
+    }
+}
+
+#[derive(Debug, Serialize)]
+struct AMQProtocolDefinitionWrapper<'a> {
+    protocol : &'a AMQProtocolDefinition,
+    copyright: String,
+    domains:   String,
+    constants: String,
+    classes:   String,
+}
 
 pub trait Codegen {
     fn codegen(&self, handlebars: &Handlebars) -> String;
@@ -179,7 +228,7 @@ synchronous: {{method.synchronous}}
 
     #[test]
     fn main_template() {
-        assert_eq!(specs().codegen(&templates()), r#"
+        assert_eq!(specs().code_generator(templates()).generate(), r#"
 AMQP - 0.9.1
 Copyright 1
 Copyright 2
