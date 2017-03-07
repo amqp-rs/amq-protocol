@@ -3,7 +3,6 @@ language: rust
 
 rust:
     - nightly
-    - beta
 
 before_script:
     - cargo install cargo-travis
