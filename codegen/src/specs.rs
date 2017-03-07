@@ -29,6 +29,13 @@ impl AMQProtocolDefinition {
     pub fn code_generator(self, templates: AMQPTemplates) -> CodeGenerator {
         CodeGenerator::new(self, templates)
     }
+
+    pub fn simple_code_generator(self, template: String) -> CodeGenerator {
+        self.code_generator(AMQPTemplates {
+            main: template,
+            ..Default::default()
+        })
+    }
 }
 
 #[derive(Debug, Serialize)]
