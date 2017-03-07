@@ -5,7 +5,7 @@ use templating::*;
 use amq_protocol_types::*;
 use serde_json::{self, Value};
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AMQProtocolDefinition {
     pub name:          String,
     pub major_version: u8,
@@ -37,7 +37,7 @@ impl AMQProtocolDefinition {
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AMQPDomain {
     pub name:      String,
     #[serde(rename="type")]
@@ -52,7 +52,7 @@ pub struct AMQPConstant {
     pub klass: Option<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AMQPClass {
     pub id:         u8,
     pub methods:    Vec<AMQPMethod>,
@@ -60,7 +60,7 @@ pub struct AMQPClass {
     pub properties: Option<Vec<AMQPProperty>>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AMQPMethod {
     pub id:          u8,
     pub arguments:   Vec<AMQPArgument>,
@@ -68,7 +68,7 @@ pub struct AMQPMethod {
     pub synchronous: Option<bool>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AMQPArgument {
     #[serde(rename="type")]
     pub amqp_type:     Option<AMQPType>,
@@ -77,7 +77,7 @@ pub struct AMQPArgument {
     pub domain:        Option<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AMQPProperty {
     #[serde(rename="type")]
     pub amqp_type: AMQPType,
