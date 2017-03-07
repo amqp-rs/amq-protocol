@@ -1,7 +1,6 @@
 use codegen::*;
 use internal::*;
 use templating::*;
-use util::*;
 
 use amq_protocol_types::*;
 use serde_json::{self, Value};
@@ -83,43 +82,4 @@ pub struct AMQPProperty {
     #[serde(rename="type")]
     pub amqp_type: AMQPType,
     pub name:      String,
-}
-
-// FIXME: Drop everything below this
-impl AMQPConstant {
-    pub fn serialize_class(&self) -> String {
-        match self.klass {
-            Some(ref klass) => format!("Some(\"{}\".to_string())", klass),
-            None            => "None".to_string(),
-        }
-    }
-}
-
-impl AMQPArgument {
-    pub fn serialize_default_value(&self) -> String {
-        if let Some(ref default_value) = self.default_value {
-            let s = default_value.to_string();
-            match default_value {
-                /* TODO: simplify that, handle Table */
-                &Value::String(_) => format!("Some({}.to_string())", s),
-                &Value::Number(_) => format!("Some({})", s),
-                &Value::Bool(_)   => format!("Some({})", s),
-                _                 => "None".to_string(),
-            }
-        } else {
-            "None".to_string()
-        }
-    }
-
-    pub fn serialize_domain(&self) -> String {
-        if let Some(ref domain) = self.domain {
-            format!("Some(\"{}\".to_string())", domain)
-        } else {
-            "None".to_string()
-        }
-    }
-
-    pub fn codegen_field(&self) -> String {
-        format!("pub {}: {},", snake_case(&self.name), camel_case(&self.name))
-    }
 }
