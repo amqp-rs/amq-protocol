@@ -4,7 +4,7 @@ extern crate serde;
 use std::collections::HashMap;
 use std::fmt;
 
-#[derive(Clone, Debug, PartialEq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub enum AMQPType {
     Boolean,
     ShortShortInt,
@@ -103,13 +103,13 @@ pub type TimeStamp      = u64;
 pub type FieldTable     = HashMap<String, AMQPValue>;
 pub type Void           = ();
 
-#[derive(Clone, Debug, PartialEq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct DecimalValue {
     pub scale: u8,
     pub value: LongUInt,
 }
 
-#[derive(Clone, Debug, PartialEq, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub enum AMQPValue {
     Boolean(Boolean),
     ShortShortInt(ShortShortInt),
