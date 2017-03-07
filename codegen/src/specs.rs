@@ -7,12 +7,12 @@ use serde_json::{self, Value};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AMQProtocolDefinition {
-    pub name:          String,
-    pub major_version: u8,
-    pub minor_version: u8,
-    pub revision:      u8,
-    pub port:          u32,
-    pub copyright:     Vec<String>,
+    pub name:          ShortString,
+    pub major_version: ShortShortUInt,
+    pub minor_version: ShortShortUInt,
+    pub revision:      ShortShortUInt,
+    pub port:          LongUInt,
+    pub copyright:     Vec<LongString>,
     pub domains:       Vec<AMQPDomain>,
     pub constants:     Vec<AMQPConstant>,
     pub classes:       Vec<AMQPClass>,
@@ -39,47 +39,47 @@ impl AMQProtocolDefinition {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AMQPDomain {
-    pub name:      String,
+    pub name:      ShortString,
     #[serde(rename="type")]
     pub amqp_type: AMQPType,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AMQPConstant {
-    pub name:  String,
+    pub name:  ShortString,
     pub value: u16,
     #[serde(rename="class")]
-    pub klass: Option<String>,
+    pub klass: Option<ShortString>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AMQPClass {
-    pub id:         u8,
+    pub id:         ShortUInt,
     pub methods:    Vec<AMQPMethod>,
-    pub name:       String,
+    pub name:       ShortString,
     pub properties: Option<Vec<AMQPProperty>>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AMQPMethod {
-    pub id:          u8,
+    pub id:          ShortUInt,
     pub arguments:   Vec<AMQPArgument>,
-    pub name:        String,
-    pub synchronous: Option<bool>,
+    pub name:        ShortString,
+    pub synchronous: Option<Boolean>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AMQPArgument {
     #[serde(rename="type")]
     pub amqp_type:     Option<AMQPType>,
-    pub name:          String,
-    pub default_value: Option<Value>,
-    pub domain:        Option<String>,
+    pub name:          ShortString,
+    pub default_value: Option<Value>, /* TODO: convert that to an AMQPValue */
+    pub domain:        Option<ShortString>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AMQPProperty {
     #[serde(rename="type")]
     pub amqp_type: AMQPType,
-    pub name:      String,
+    pub name:      ShortString,
 }

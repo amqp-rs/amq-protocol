@@ -6,14 +6,14 @@ use serde_json::Value;
 /* Modified version of AMQProtocolDefinition to handle deserialization */
 #[derive(Debug, Deserialize)]
 pub struct _AMQProtocolDefinition {
-    name:          String,
+    name:          ShortString,
     #[serde(rename="major-version")]
-    major_version: u8,
+    major_version: ShortShortUInt,
     #[serde(rename="minor-version")]
-    minor_version: u8,
-    revision:      u8,
-    port:          u32,
-    copyright:     Vec<String>,
+    minor_version: ShortShortUInt,
+    revision:      ShortShortUInt,
+    port:          LongUInt,
+    copyright:     Vec<LongString>,
     domains:       Vec<_AMQPDomain>,
     constants:     Vec<AMQPConstant>,
     classes:       Vec<_AMQPClass>,
@@ -37,7 +37,7 @@ impl _AMQProtocolDefinition {
 
 /* Defined as a two-elems array in the spec */
 #[derive(Debug, Deserialize)]
-struct _AMQPDomain(String, _AMQPType);
+struct _AMQPDomain(ShortString, _AMQPType);
 
 impl _AMQPDomain {
     fn to_specs(&self) -> AMQPDomain {
@@ -89,9 +89,9 @@ impl _AMQPType {
 
 #[derive(Debug, Deserialize)]
 struct _AMQPClass {
-    id:         u8,
+    id:         ShortUInt,
     methods:    Vec<_AMQPMethod>,
-    name:       String,
+    name:       ShortString,
     properties: Option<Vec<_AMQPProperty>>,
 }
 
@@ -111,10 +111,10 @@ impl _AMQPClass {
 
 #[derive(Debug, Deserialize)]
 struct _AMQPMethod {
-    id:          u8,
+    id:          ShortUInt,
     arguments:   Vec<_AMQPArgument>,
-    name:        String,
-    synchronous: Option<bool>,
+    name:        ShortString,
+    synchronous: Option<Boolean>,
 }
 
 impl _AMQPMethod {
@@ -132,10 +132,10 @@ impl _AMQPMethod {
 struct _AMQPArgument {
     #[serde(rename="type")]
     amqp_type:     Option<_AMQPType>,
-    name:          String,
+    name:          ShortString,
     #[serde(rename="default-value")]
     default_value: Option<Value>,
-    domain:        Option<String>,
+    domain:        Option<ShortString>,
 }
 
 impl _AMQPArgument {
@@ -156,7 +156,7 @@ impl _AMQPArgument {
 struct _AMQPProperty {
     #[serde(rename="type")]
     amqp_type: _AMQPType,
-    name:      String,
+    name:      ShortString,
 }
 
 impl _AMQPProperty {
