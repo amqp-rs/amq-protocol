@@ -75,11 +75,10 @@ impl _AMQPType {
     fn to_specs(&self) -> AMQPType {
         match *self {
             _AMQPType::Bit       => AMQPType::Boolean,
-            /* FIXME: Should those be Int or UInt ? */
-            _AMQPType::Octet     => AMQPType::ShortShortInt,
-            _AMQPType::Short     => AMQPType::ShortInt,
-            _AMQPType::Long      => AMQPType::LongInt,
-            _AMQPType::LongLong  => AMQPType::LongLongInt,
+            _AMQPType::Octet     => AMQPType::ShortShortUInt,
+            _AMQPType::Short     => AMQPType::ShortUInt,
+            _AMQPType::Long      => AMQPType::LongUInt,
+            _AMQPType::LongLong  => AMQPType::LongLongUInt,
             _AMQPType::ShortStr  => AMQPType::ShortString,
             _AMQPType::LongStr   => AMQPType::LongString,
             _AMQPType::Table     => AMQPType::FieldTable,
