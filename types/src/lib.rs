@@ -21,7 +21,7 @@ pub enum AMQPType {
     ShortString,
     LongString,
     FieldArray,
-    TimeStamp,
+    Timestamp,
     FieldTable,
     Void,
 }
@@ -44,7 +44,7 @@ impl AMQPType {
             's' => Some(AMQPType::ShortString),
             'S' => Some(AMQPType::LongString),
             'A' => Some(AMQPType::FieldArray),
-            'T' => Some(AMQPType::TimeStamp),
+            'T' => Some(AMQPType::Timestamp),
             'F' => Some(AMQPType::FieldTable),
             'V' => Some(AMQPType::Void),
             _   => None,
@@ -68,7 +68,7 @@ impl AMQPType {
             AMQPType::ShortString => 's',
             AMQPType::LongString => 'S',
             AMQPType::FieldArray => 'A',
-            AMQPType::TimeStamp => 'T',
+            AMQPType::Timestamp => 'T',
             AMQPType::FieldTable => 'F',
             AMQPType::Void => 'V',
         }
@@ -99,7 +99,7 @@ pub type Double         = f64;
 pub type ShortString    = String; /* TODO: don't allow size >= 255 */
 pub type LongString     = String;
 pub type FieldArray     = Vec<AMQPValue>;
-pub type TimeStamp      = u64;
+pub type Timestamp      = u64;
 pub type FieldTable     = HashMap<String, AMQPValue>;
 pub type Void           = ();
 
@@ -126,7 +126,7 @@ pub enum AMQPValue {
     ShortString(ShortString),
     LongString(LongString),
     FieldArray(FieldArray),
-    TimeStamp(TimeStamp),
+    Timestamp(Timestamp),
     FieldTable(FieldTable),
     Void(Void),
 }
