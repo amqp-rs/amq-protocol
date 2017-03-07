@@ -96,13 +96,18 @@ pub type LongLongInt    = i64;
 pub type LongLongUInt   = u64;
 pub type Float          = f32;
 pub type Double         = f64;
-pub type DecimalValue   = i64;    /* FIXME: find out what this is exactly */
 pub type ShortString    = String; /* TODO: don't allow size >= 255 */
 pub type LongString     = String;
 pub type FieldArray     = Vec<AMQPValue>;
 pub type TimeStamp      = u64;
 pub type FieldTable     = HashMap<String, AMQPValue>;
 pub type Void           = ();
+
+#[derive(Clone, Debug, PartialEq, Serialize)]
+pub struct DecimalValue {
+    pub scale: u8,
+    pub value: LongUInt,
+}
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub enum AMQPValue {
