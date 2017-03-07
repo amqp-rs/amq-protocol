@@ -75,6 +75,7 @@ impl _AMQPType {
     fn to_specs(&self) -> AMQPType {
         match *self {
             _AMQPType::Bit       => AMQPType::Boolean,
+            /* FIXME: Should those be Int or UInt ? */
             _AMQPType::Octet     => AMQPType::ShortShortInt,
             _AMQPType::Short     => AMQPType::ShortInt,
             _AMQPType::Long      => AMQPType::LongInt,
