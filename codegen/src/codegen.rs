@@ -1,7 +1,7 @@
 use specs::*;
 use templating::*;
 
-use handlebars::{self, Handlebars, HelperDef};
+use handlebars::{self, Handlebars};
 use itertools::Itertools;
 use std::collections::BTreeMap;
 
@@ -33,13 +33,9 @@ impl CodeGenerator {
         }
     }
 
-    pub fn with_helper(mut self, name: &str, helper: Box<HelperDef + 'static>) -> CodeGenerator {
-        self.handlebars.register_helper(name, helper);
-        self
-    }
-
-    pub fn with_template(mut self, name: &str, template: &str) -> CodeGenerator {
-        self.handlebars.register_template_string(name, template).expect(&format!("Failed to register {} template", name));
+    pub fn customize<F>(mut self, mut customize_fn: F) -> CodeGenerator
+            where F: FnMut(&mut Handlebars) {
+        customize_fn(&mut self.handlebars);
         self
     }
 
@@ -55,10 +51,6 @@ impl CodeGenerator {
             constants: self.specs.constants.iter().map(|constant| constant.codegen(&self.handlebars)).join("\n"),
             classes:   self.specs.classes.iter().map(|klass| klass.codegen(&self.handlebars)).join("\n"),
         }).expect(&format!("Failed to render {} template", name))
-    }
-
-    pub fn get_handlebars(&mut self) -> &mut Handlebars {
-        &mut self.handlebars
     }
 }
 
