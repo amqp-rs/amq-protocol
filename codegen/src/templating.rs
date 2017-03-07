@@ -13,6 +13,20 @@ pub struct AMQPTemplates {
     pub property: String,
 }
 
+impl Default for AMQPTemplates {
+    fn default() -> AMQPTemplates {
+        AMQPTemplates {
+            main:     String::new(),
+            domain:   String::new(),
+            constant: String::new(),
+            klass:    String::new(),
+            method:   String::new(),
+            argument: String::new(),
+            property: String::new(),
+        }
+    }
+}
+
 pub fn camel_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
     let param = h.param(0).expect("no param given to camel").value().as_str().expect("non-string param given to camel");
     rc.writer.write(camel_name(param).as_bytes())?;
