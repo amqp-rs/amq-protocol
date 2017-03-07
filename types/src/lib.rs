@@ -128,5 +128,5 @@ pub enum AMQPValue {
     FieldArray(FieldArray),
     Timestamp(Timestamp),
     FieldTable(FieldTable),
-    Void(Void),
+    Void,
 }
