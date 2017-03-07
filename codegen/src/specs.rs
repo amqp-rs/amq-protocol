@@ -120,6 +120,6 @@ impl AMQPArgument {
     }
 
     pub fn codegen_field(&self) -> String {
-        format!("pub {}: {},", snake_name(&self.name), camel_name(&self.name))
+        format!("pub {}: {},", snake_case(&self.name), camel_case(&self.name))
     }
 }

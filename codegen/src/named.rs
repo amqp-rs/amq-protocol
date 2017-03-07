@@ -15,11 +15,11 @@ macro_rules! named {
             }
 
             fn camel_name(&self) -> String {
-                camel_name(&self.name)
+                camel_case(&self.name)
             }
 
             fn snake_name(&self) -> String {
-                snake_name(&self.name)
+                snake_case(&self.name)
             }
         }
     }

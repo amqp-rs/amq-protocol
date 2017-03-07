@@ -1,6 +1,6 @@
 use std::ascii::AsciiExt;
 
-pub fn camel_name(name: &str) -> String {
+pub fn camel_case(name: &str) -> String {
     let mut new_word: bool = true;
     name.chars().fold("".to_string(), |mut result, ch| {
         if ch == '-' || ch == '_' || ch == ' ' {
@@ -14,7 +14,7 @@ pub fn camel_name(name: &str) -> String {
     })
 }
 
-pub fn snake_name(name: &str) -> String {
+pub fn snake_case(name: &str) -> String {
     match name {
         "type"   => "amqp_type".to_string(),
         "return" => "amqp_return".to_string(),

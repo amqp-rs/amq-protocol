@@ -29,12 +29,12 @@ impl Default for AMQPTemplates {
 
 pub fn camel_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
     let param = h.param(0).expect("no param given to camel").value().as_str().expect("non-string param given to camel");
-    rc.writer.write(camel_name(param).as_bytes())?;
+    rc.writer.write(camel_case(param).as_bytes())?;
     Ok(())
 }
 
 pub fn snake_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
     let param = h.param(0).expect("no param given to snake").value().as_str().expect("non-string param given to snake");
-    rc.writer.write(snake_name(param).as_bytes())?;
+    rc.writer.write(snake_case(param).as_bytes())?;
     Ok(())
 }
