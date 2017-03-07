@@ -2,6 +2,7 @@ extern crate serde;
 #[macro_use] extern crate serde_derive;
 
 use std::collections::HashMap;
+use std::fmt;
 
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub enum AMQPType {
@@ -74,7 +75,13 @@ impl AMQPType {
     }
 
     pub fn to_string(&self) -> String {
-        format!("{:?}", self)
+        format!("{}", self)
+    }
+}
+
+impl fmt::Display for AMQPType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 
