@@ -56,6 +56,10 @@ impl CodeGenerator {
             classes:   self.specs.classes.iter().map(|klass| klass.codegen(&self.handlebars)).join("\n"),
         }).expect(&format!("Failed to render {} template", name))
     }
+
+    pub fn get_handlebars(&mut self) -> &mut Handlebars {
+        &mut self.handlebars
+    }
 }
 
 #[derive(Debug, Serialize)]
