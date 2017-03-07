@@ -82,7 +82,7 @@ impl _AMQPType {
             _AMQPType::ShortStr  => AMQPType::ShortString,
             _AMQPType::LongStr   => AMQPType::LongString,
             _AMQPType::Table     => AMQPType::FieldTable,
-            _AMQPType::Timestamp => AMQPType::TimeStamp,
+            _AMQPType::Timestamp => AMQPType::Timestamp,
         }
     }
 }
