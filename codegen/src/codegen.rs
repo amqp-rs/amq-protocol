@@ -38,14 +38,23 @@ impl CodeGenerator {
         self
     }
 
+    pub fn with_template(mut self, name: &str, template: &str) -> CodeGenerator {
+        self.handlebars.register_template_string(name, template).expect(&format!("Failed to register {} template", name));
+        self
+    }
+
     pub fn generate(&self) -> String {
-        self.handlebars.render("main", &AMQProtocolDefinitionWrapper {
+        self.generate_from_template_name("main")
+    }
+
+    pub fn generate_from_template_name(&self, name: &str) -> String {
+        self.handlebars.render(name, &AMQProtocolDefinitionWrapper {
             protocol:  &self.specs,
             copyright: self.specs.copyright.iter().join(""),
             domains:   self.specs.domains.iter().map(|domain| domain.codegen(&self.handlebars)).join("\n"),
             constants: self.specs.constants.iter().map(|constant| constant.codegen(&self.handlebars)).join("\n"),
             classes:   self.specs.classes.iter().map(|klass| klass.codegen(&self.handlebars)).join("\n"),
-        }).expect("Failed to render main template")
+        }).expect(&format!("Failed to render {} template", name))
     }
 }
 
