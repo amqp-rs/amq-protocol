@@ -85,8 +85,8 @@ synchronous: {{method.synchronous}}
             ],
             classes:       vec![
                 AMQPClass {
-                    id:         42,
-                    methods:    vec![
+                    id:            42,
+                    methods:       vec![
                         AMQPMethod {
                             id:          64,
                             arguments:   vec![
@@ -101,13 +101,14 @@ synchronous: {{method.synchronous}}
                             synchronous: true,
                         }
                     ],
-                    name:       "class1".to_string(),
-                    properties: vec![
+                    name:          "class1".to_string(),
+                    properties:    vec![
                         AMQPProperty {
                             amqp_type: AMQPType::LongString,
                             name:      "property1".to_string(),
                         }
                     ],
+                    is_connection: false,
                 }
             ],
         }
