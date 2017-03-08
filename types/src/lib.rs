@@ -1,5 +1,8 @@
 extern crate serde;
 #[macro_use] extern crate serde_derive;
+extern crate serde_json;
+
+use serde_json::Value;
 
 use std::collections::HashMap;
 use std::fmt;
@@ -129,4 +132,34 @@ pub enum AMQPValue {
     Timestamp(Timestamp),
     FieldTable(FieldTable),
     Void,
+}
+
+impl From<Value> for AMQPValue {
+    fn from(v: Value) -> AMQPValue {
+        From::from(&v)
+    }
+}
+
+impl<'a> From<&'a Value> for AMQPValue {
+    fn from(v: &Value) -> AMQPValue {
+        match *v {
+            Value::Bool(ref b)   => AMQPValue::Boolean(*b),
+            Value::Number(ref n) => {
+                if n.is_u64() {
+                    AMQPValue::LongLongUInt(n.as_u64().unwrap())
+                } else if n.is_i64() {
+                    AMQPValue::LongLongInt(n.as_i64().unwrap())
+                } else {
+                    AMQPValue::Double(n.as_f64().unwrap())
+                }
+            },
+            Value::String(ref s) => AMQPValue::LongString(s.clone()),
+            Value::Array(ref v)  => AMQPValue::FieldArray(v.iter().map(From::from).collect()),
+            Value::Object(ref o) => AMQPValue::FieldTable(o.iter().fold(FieldTable::new(), |mut table, (k, v)| {
+                table.insert(k.clone(), From::from(v));
+                table
+            })),
+            Value::Null          => AMQPValue::Void,
+        }
+    }
 }
