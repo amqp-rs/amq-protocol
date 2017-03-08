@@ -3,6 +3,8 @@ use internal::*;
 use amq_protocol_types::*;
 use serde_json::{self, Value};
 
+use std::collections::BTreeMap;
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AMQProtocolDefinition {
     pub name:          ShortString,
@@ -11,7 +13,7 @@ pub struct AMQProtocolDefinition {
     pub revision:      ShortShortUInt,
     pub port:          LongUInt,
     pub copyright:     LongString,
-    pub domains:       Vec<AMQPDomain>,
+    pub domains:       BTreeMap<ShortString, AMQPType>,
     pub constants:     Vec<AMQPConstant>,
     pub classes:       Vec<AMQPClass>,
 }
@@ -25,16 +27,9 @@ impl AMQProtocolDefinition {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct AMQPDomain {
-    pub name:      ShortString,
-    #[serde(rename="type")]
-    pub amqp_type: AMQPType,
-}
-
-#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AMQPConstant {
     pub name:  ShortString,
-    pub value: u16,
+    pub value: ShortUInt,
     #[serde(rename="class")]
     pub klass: Option<ShortString>,
 }
@@ -44,7 +39,7 @@ pub struct AMQPClass {
     pub id:         ShortUInt,
     pub methods:    Vec<AMQPMethod>,
     pub name:       ShortString,
-    pub properties: Option<Vec<AMQPProperty>>,
+    pub properties: Vec<AMQPProperty>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -52,13 +47,13 @@ pub struct AMQPMethod {
     pub id:          ShortUInt,
     pub arguments:   Vec<AMQPArgument>,
     pub name:        ShortString,
-    pub synchronous: Option<Boolean>,
+    pub synchronous: Boolean,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AMQPArgument {
     #[serde(rename="type")]
-    pub amqp_type:     Option<AMQPType>,
+    pub amqp_type:     AMQPType,
     pub name:          ShortString,
     pub default_value: Option<Value>, /* TODO: convert that to an AMQPValue */
     pub domain:        Option<ShortString>,

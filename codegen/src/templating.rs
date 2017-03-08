@@ -44,8 +44,8 @@ mod test {
 {{protocol.name}} - {{protocol.major_version}}.{{protocol.minor_version}}.{{protocol.revision}}
 {{protocol.copyright}}
 port {{protocol.port}}
-{{#each protocol.domains as |domain| ~}}
-{{domain.name}}: {{domain.type}}
+{{#each protocol.domains ~}}
+{{@key}}: {{this}}
 {{/each ~}}
 {{#each protocol.constants as |constant| ~}}
 {{constant.name}}({{constant.class}}) = {{constant.value}}
@@ -66,6 +66,8 @@ synchronous: {{method.synchronous}}
 "#;
 
     fn specs() -> AMQProtocolDefinition {
+        let mut domains = BTreeMap::new();
+        domains.insert("domain1".to_string(), AMQPType::LongString);
         AMQProtocolDefinition {
             name:          "AMQP".to_string(),
             major_version: 0,
@@ -73,12 +75,7 @@ synchronous: {{method.synchronous}}
             revision:      1,
             port:          5672,
             copyright:     "Copyright 1\nCopyright 2".to_string(),
-            domains:       vec![
-                AMQPDomain{
-                    name:      "domain1".to_string(),
-                    amqp_type: AMQPType::ShortInt
-                }
-            ],
+            domains:       domains,
             constants:     vec![
                 AMQPConstant {
                     name:  "constant1".to_string(),
@@ -94,23 +91,23 @@ synchronous: {{method.synchronous}}
                             id:          64,
                             arguments:   vec![
                                 AMQPArgument {
-                                    amqp_type:     Some(AMQPType::LongString),
+                                    amqp_type:     AMQPType::LongString,
                                     name:          "argument1".to_string(),
                                     default_value: Some(Value::String("value1".to_string())),
                                     domain:        Some("domain1".to_string()),
                                 }
                             ],
                             name:        "method1".to_string(),
-                            synchronous: Some(true),
+                            synchronous: true,
                         }
                     ],
                     name:       "class1".to_string(),
-                    properties: Some(vec![
+                    properties: vec![
                         AMQPProperty {
                             amqp_type: AMQPType::LongString,
                             name:      "property1".to_string(),
                         }
-                    ]),
+                    ],
                 }
             ],
         }
@@ -127,7 +124,7 @@ AMQP - 0.9.1
 Copyright 1
 Copyright 2
 port 5672
-domain1: ShortInt
+domain1: LongString
 constant1(class1) = 128
 42 - class1
 property1: LongString

@@ -4,6 +4,8 @@ use amq_protocol_types::*;
 use itertools::Itertools;
 use serde_json::Value;
 
+use std::collections::BTreeMap;
+
 /* Modified version of AMQProtocolDefinition to handle deserialization */
 #[derive(Debug, Deserialize)]
 pub struct _AMQProtocolDefinition {
@@ -22,6 +24,11 @@ pub struct _AMQProtocolDefinition {
 
 impl _AMQProtocolDefinition {
     pub fn to_specs(self) -> AMQProtocolDefinition {
+        let domains = self.domains.iter().fold(BTreeMap::new(), |mut domains, domain| {
+            domains.insert(domain.0.clone(), domain.1.to_specs());
+            domains
+        });
+        let classes = self.classes.iter().map(|klass| klass.to_specs(&domains)).collect();
         AMQProtocolDefinition {
             name:          self.name,
             major_version: self.major_version,
@@ -29,9 +36,9 @@ impl _AMQProtocolDefinition {
             revision:      self.revision,
             port:          self.port,
             copyright:     self.copyright.iter().join(""),
-            domains:       self.domains.iter().map(|domain| domain.to_specs()).collect(),
+            domains:       domains,
             constants:     self.constants,
-            classes:       self.classes.iter().map(|klass| klass.to_specs()).collect(),
+            classes:       classes,
         }
     }
 }
@@ -39,15 +46,6 @@ impl _AMQProtocolDefinition {
 /* Defined as a two-elems array in the spec */
 #[derive(Debug, Deserialize)]
 struct _AMQPDomain(ShortString, _AMQPType);
-
-impl _AMQPDomain {
-    fn to_specs(&self) -> AMQPDomain {
-        AMQPDomain {
-            name:      self.0.clone(),
-            amqp_type: self.1.to_specs(),
-        }
-    }
-}
 
 /* Subset of AMQPType used in specs for deserialization */
 #[derive(Debug, Deserialize)]
@@ -97,14 +95,14 @@ struct _AMQPClass {
 }
 
 impl _AMQPClass {
-    fn to_specs(&self) -> AMQPClass {
+    fn to_specs(&self, domains: &BTreeMap<String, AMQPType>) -> AMQPClass {
         AMQPClass {
             id:         self.id,
-            methods:    self.methods.iter().map(|method| method.to_specs()).collect(),
+            methods:    self.methods.iter().map(|method| method.to_specs(domains)).collect(),
             name:       self.name.clone(),
             properties: match self.properties {
-                Some(ref properties) => Some(properties.iter().map(|prop| prop.to_specs()).collect()),
-                None                 => None,
+                Some(ref properties) => properties.iter().map(|prop| prop.to_specs()).collect(),
+                None                 => Vec::new(),
             },
         }
     }
@@ -119,12 +117,12 @@ struct _AMQPMethod {
 }
 
 impl _AMQPMethod {
-    fn to_specs(&self) -> AMQPMethod {
+    fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>) -> AMQPMethod {
         AMQPMethod {
             id:          self.id,
-            arguments:   self.arguments.iter().map(|arg| arg.to_specs()).collect(),
+            arguments:   self.arguments.iter().map(|arg| arg.to_specs(domains)).collect(),
             name:        self.name.clone(),
-            synchronous: self.synchronous,
+            synchronous: self.synchronous.unwrap_or(false),
         }
     }
 }
@@ -140,11 +138,17 @@ struct _AMQPArgument {
 }
 
 impl _AMQPArgument {
-    fn to_specs(&self) -> AMQPArgument {
+    fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>) -> AMQPArgument {
         AMQPArgument {
             amqp_type:     match self.amqp_type {
-                Some(ref amqp_type) => Some(amqp_type.to_specs()),
-                None                => None,
+                Some(ref amqp_type) => amqp_type.to_specs(),
+                None                => {
+                    let domain = match self.domain {
+                        Some(ref domain) => domain,
+                        None             => panic!(format!("{} has no type nor domain", self.name)),
+                    };
+                    domains.get(domain).expect(&format!("No {} domain exists", domain)).clone()
+                },
             },
             name:          self.name.clone(),
             default_value: self.default_value.clone(),

@@ -26,7 +26,6 @@ macro_rules! named {
 }
 
 named!(AMQProtocolDefinition);
-named!(AMQPDomain);
 named!(AMQPConstant);
 named!(AMQPClass);
 named!(AMQPMethod);
