@@ -14,7 +14,7 @@ build         = "build.rs"
 name = "amq_protocol"
 
 [build-dependencies]
-amq-protocol-codegen = "0.8.0"
+amq-protocol-codegen = "0.9.0"
 
 [dependencies]
 amq-protocol-types = "^0.4.0"
