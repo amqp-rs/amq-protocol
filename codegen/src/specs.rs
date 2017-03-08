@@ -1,6 +1,4 @@
-use codegen::*;
 use internal::*;
-use templating::*;
 
 use amq_protocol_types::*;
 use serde_json::{self, Value};
@@ -12,7 +10,7 @@ pub struct AMQProtocolDefinition {
     pub minor_version: ShortShortUInt,
     pub revision:      ShortShortUInt,
     pub port:          LongUInt,
-    pub copyright:     Vec<LongString>,
+    pub copyright:     LongString,
     pub domains:       Vec<AMQPDomain>,
     pub constants:     Vec<AMQPConstant>,
     pub classes:       Vec<AMQPClass>,
@@ -23,17 +21,6 @@ impl AMQProtocolDefinition {
         let specs = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/specs/amqp-rabbitmq-0.9.1.json"));
 
         serde_json::from_str::<_AMQProtocolDefinition>(specs).expect("Failed to parse AMQP specs file").to_specs()
-    }
-
-    pub fn code_generator(self, templates: AMQPTemplates) -> CodeGenerator {
-        CodeGenerator::new(self, templates)
-    }
-
-    pub fn simple_code_generator(self, template: String) -> CodeGenerator {
-        self.code_generator(AMQPTemplates {
-            main: template,
-            ..Default::default()
-        })
     }
 }
 

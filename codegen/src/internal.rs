@@ -1,6 +1,7 @@
 use specs::*;
 
 use amq_protocol_types::*;
+use itertools::Itertools;
 use serde_json::Value;
 
 /* Modified version of AMQProtocolDefinition to handle deserialization */
@@ -27,7 +28,7 @@ impl _AMQProtocolDefinition {
             minor_version: self.minor_version,
             revision:      self.revision,
             port:          self.port,
-            copyright:     self.copyright,
+            copyright:     self.copyright.iter().join(""),
             domains:       self.domains.iter().map(|domain| domain.to_specs()).collect(),
             constants:     self.constants,
             classes:       self.classes.iter().map(|klass| klass.to_specs()).collect(),
