@@ -36,7 +36,6 @@ mod test {
     use specs::*;
 
     use amq_protocol_types::*;
-    use serde_json::Value;
 
     use std::collections::BTreeMap;
 
@@ -93,7 +92,7 @@ synchronous: {{method.synchronous}}
                                 AMQPArgument {
                                     amqp_type:     AMQPType::LongString,
                                     name:          "argument1".to_string(),
-                                    default_value: Some(Value::String("value1".to_string())),
+                                    default_value: Some(AMQPValue::LongString("value1".to_string())),
                                     domain:        Some("domain1".to_string()),
                                 }
                             ],

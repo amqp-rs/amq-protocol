@@ -1,7 +1,7 @@
 use internal::*;
 
 use amq_protocol_types::*;
-use serde_json::{self, Value};
+use serde_json::from_str;
 
 use std::collections::BTreeMap;
 
@@ -22,7 +22,7 @@ impl AMQProtocolDefinition {
     pub fn load() -> AMQProtocolDefinition {
         let specs = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/specs/amqp-rabbitmq-0.9.1.json"));
 
-        serde_json::from_str::<_AMQProtocolDefinition>(specs).expect("Failed to parse AMQP specs file").to_specs()
+        from_str::<_AMQProtocolDefinition>(specs).expect("Failed to parse AMQP specs file").to_specs()
     }
 }
 
@@ -56,7 +56,7 @@ pub struct AMQPArgument {
     #[serde(rename="type")]
     pub amqp_type:     AMQPType,
     pub name:          ShortString,
-    pub default_value: Option<Value>, /* TODO: convert that to an AMQPValue */
+    pub default_value: Option<AMQPValue>,
     pub domain:        Option<ShortString>,
 }
 

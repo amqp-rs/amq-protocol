@@ -152,7 +152,7 @@ impl _AMQPArgument {
                 },
             },
             name:          self.name.clone(),
-            default_value: self.default_value.clone(),
+            default_value: self.default_value.as_ref().map(From::from),
             domain:        self.domain.clone(),
         }
     }
