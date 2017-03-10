@@ -130,6 +130,31 @@ pub enum AMQPValue {
     Void,
 }
 
+impl AMQPValue {
+    pub fn get_type(&self) -> AMQPType {
+        match *self {
+            AMQPValue::Boolean(_)        => AMQPType::Boolean,
+            AMQPValue::ShortShortInt(_)  => AMQPType::ShortShortInt,
+            AMQPValue::ShortShortUInt(_) => AMQPType::ShortShortUInt,
+            AMQPValue::ShortInt(_)       => AMQPType::ShortInt,
+            AMQPValue::ShortUInt(_)      => AMQPType::ShortUInt,
+            AMQPValue::LongInt(_)        => AMQPType::LongInt,
+            AMQPValue::LongUInt(_)       => AMQPType::LongUInt,
+            AMQPValue::LongLongInt(_)    => AMQPType::LongLongInt,
+            AMQPValue::LongLongUInt(_)   => AMQPType::LongLongUInt,
+            AMQPValue::Float(_)          => AMQPType::Float,
+            AMQPValue::Double(_)         => AMQPType::Double,
+            AMQPValue::DecimalValue(_)   => AMQPType::DecimalValue,
+            AMQPValue::ShortString(_)    => AMQPType::ShortString,
+            AMQPValue::LongString(_)     => AMQPType::LongString,
+            AMQPValue::FieldArray(_)     => AMQPType::FieldArray,
+            AMQPValue::Timestamp(_)      => AMQPType::Timestamp,
+            AMQPValue::FieldTable(_)     => AMQPType::FieldTable,
+            AMQPValue::Void              => AMQPType::Void,
+        }
+    }
+}
+
 impl From<Value> for AMQPValue {
     fn from(v: Value) -> AMQPValue {
         From::from(&v)
