@@ -2,28 +2,26 @@ use types::*;
 
 use cookie_factory::*;
 
-/* TODO: use AMQP types and call gen_type when something like call!() is available */
-
 pub fn gen_value<'a>(x: (&'a mut [u8], usize), v: &AMQPValue) -> Result<(&'a mut [u8], usize), GenError> {
     match *v {
-        AMQPValue::Boolean(ref b)        => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_boolean(b)),
-        AMQPValue::ShortShortInt(ref i)  => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_short_short_int(i)),
-        AMQPValue::ShortShortUInt(ref u) => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_short_short_uint(u)),
-        AMQPValue::ShortInt(ref i)       => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_short_int(i)),
-        AMQPValue::ShortUInt(ref u)      => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_short_uint(u)),
-        AMQPValue::LongInt(ref i)        => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_long_int(i)),
-        AMQPValue::LongUInt(ref u)       => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_long_uint(u)),
-        AMQPValue::LongLongInt(ref i)    => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_long_long_int(i)),
-        AMQPValue::LongLongUInt(ref u)   => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_long_long_uint(u)),
-        AMQPValue::Float(ref f)          => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_float(f)),
-        AMQPValue::Double(ref d)         => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_double(d)),
-        AMQPValue::DecimalValue(ref d)   => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_decimal_value(d)),
-        AMQPValue::ShortString(ref s)    => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_short_string(s)),
-        AMQPValue::LongString(ref s)     => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_long_string(s)),
-        AMQPValue::FieldArray(ref a)     => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_field_array(a)),
-        AMQPValue::Timestamp(ref t)      => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_timestamp(t)),
-        AMQPValue::FieldTable(ref t)     => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_field_table(t)),
-        AMQPValue::Void                  => gen_be_u8!(x, v.get_type().get_id() as u8),
+        AMQPValue::Boolean(ref b)        => do_gen!(x, gen_type(&v.get_type()) >> gen_boolean(b)),
+        AMQPValue::ShortShortInt(ref i)  => do_gen!(x, gen_type(&v.get_type()) >> gen_short_short_int(i)),
+        AMQPValue::ShortShortUInt(ref u) => do_gen!(x, gen_type(&v.get_type()) >> gen_short_short_uint(u)),
+        AMQPValue::ShortInt(ref i)       => do_gen!(x, gen_type(&v.get_type()) >> gen_short_int(i)),
+        AMQPValue::ShortUInt(ref u)      => do_gen!(x, gen_type(&v.get_type()) >> gen_short_uint(u)),
+        AMQPValue::LongInt(ref i)        => do_gen!(x, gen_type(&v.get_type()) >> gen_long_int(i)),
+        AMQPValue::LongUInt(ref u)       => do_gen!(x, gen_type(&v.get_type()) >> gen_long_uint(u)),
+        AMQPValue::LongLongInt(ref i)    => do_gen!(x, gen_type(&v.get_type()) >> gen_long_long_int(i)),
+        AMQPValue::LongLongUInt(ref u)   => do_gen!(x, gen_type(&v.get_type()) >> gen_long_long_uint(u)),
+        AMQPValue::Float(ref f)          => do_gen!(x, gen_type(&v.get_type()) >> gen_float(f)),
+        AMQPValue::Double(ref d)         => do_gen!(x, gen_type(&v.get_type()) >> gen_double(d)),
+        AMQPValue::DecimalValue(ref d)   => do_gen!(x, gen_type(&v.get_type()) >> gen_decimal_value(d)),
+        AMQPValue::ShortString(ref s)    => do_gen!(x, gen_type(&v.get_type()) >> gen_short_string(s)),
+        AMQPValue::LongString(ref s)     => do_gen!(x, gen_type(&v.get_type()) >> gen_long_string(s)),
+        AMQPValue::FieldArray(ref a)     => do_gen!(x, gen_type(&v.get_type()) >> gen_field_array(a)),
+        AMQPValue::Timestamp(ref t)      => do_gen!(x, gen_type(&v.get_type()) >> gen_timestamp(t)),
+        AMQPValue::FieldTable(ref t)     => do_gen!(x, gen_type(&v.get_type()) >> gen_field_table(t)),
+        AMQPValue::Void                  => gen_type(x, &v.get_type()),
     }
 }
 
