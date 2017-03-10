@@ -98,13 +98,13 @@ pub type Double         = f64;
 pub type ShortString    = String; /* TODO: don't allow size >= 255 */
 pub type LongString     = String;
 pub type FieldArray     = Vec<AMQPValue>;
-pub type Timestamp      = u64;
-pub type FieldTable     = HashMap<String, AMQPValue>;
+pub type Timestamp      = LongLongUInt;
+pub type FieldTable     = HashMap<ShortString, AMQPValue>;
 pub type Void           = ();
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct DecimalValue {
-    pub scale: u8,
+    pub scale: ShortShortUInt,
     pub value: LongUInt,
 }
 
