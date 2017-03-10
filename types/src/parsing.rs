@@ -19,7 +19,7 @@ named!(pub parse_value<AMQPValue>,                 switch!(parse_type,
     AMQPType::LongString     => map!(call!(parse_long_string),      |s| AMQPValue::LongString(s))     |
     AMQPType::FieldArray     => map!(call!(parse_field_array),      |a| AMQPValue::FieldArray(a))     |
     AMQPType::Timestamp      => map!(call!(parse_timestamp),        |t| AMQPValue::Timestamp(t))      |
-//    AMQPType::FieldTable     => map!(call!(parse_field_table),      |t| AMQPValue::FieldTable(t))     |
+    AMQPType::FieldTable     => map!(call!(parse_field_table),      |t| AMQPValue::FieldTable(t))     |
     AMQPType::Void           => value!(AMQPValue::Void)
 ));
 
@@ -41,3 +41,7 @@ named!(pub parse_short_string<ShortString>,        do_parse!(length: parse_short
 named!(pub parse_long_string<LongString>,          do_parse!(length: parse_long_uint >> s: take_str!(length) >> (s.to_string())));
 named!(pub parse_field_array<FieldArray>,          do_parse!(length: parse_long_int >> array: count!(parse_value, length as usize) >> (array)));
 named!(pub parse_timestamp<Timestamp>,             call!(parse_long_long_uint));
+named!(pub parse_field_table<FieldTable>,          do_parse!(length: parse_long_uint >> table: flat_map!(take!(length as usize), fold_many0!(complete!(pair!(parse_short_string, parse_value)), FieldTable::new(), |mut acc: FieldTable, (key, value)| {
+    acc.insert(key, value);
+    acc
+})) >> (table)));
