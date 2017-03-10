@@ -17,7 +17,7 @@ named!(pub parse_value<AMQPValue>,                 switch!(parse_type,
     AMQPType::DecimalValue   => map!(call!(parse_decimal_value),    |d| AMQPValue::DecimalValue(d))   |
     AMQPType::ShortString    => map!(call!(parse_short_string),     |s| AMQPValue::ShortString(s))    |
     AMQPType::LongString     => map!(call!(parse_long_string),      |s| AMQPValue::LongString(s))     |
-//    AMQPType::FieldArray     => map!(call!(parse_field_array),      |a| AMQPValue::FieldArray(a))     |
+    AMQPType::FieldArray     => map!(call!(parse_field_array),      |a| AMQPValue::FieldArray(a))     |
     AMQPType::Timestamp      => map!(call!(parse_timestamp),        |t| AMQPValue::Timestamp(t))      |
 //    AMQPType::FieldTable     => map!(call!(parse_field_table),      |t| AMQPValue::FieldTable(t))     |
     AMQPType::Void           => value!(AMQPValue::Void)
@@ -39,4 +39,5 @@ named!(pub parse_double<Double>,                   call!(double));
 named!(pub parse_decimal_value<DecimalValue>,      do_parse!(scale: parse_short_short_uint >> value: parse_long_uint >> (DecimalValue { scale: scale, value: value, })));
 named!(pub parse_short_string<ShortString>,        do_parse!(length: parse_short_short_uint >> s: take_str!(length) >> (s.to_string())));
 named!(pub parse_long_string<LongString>,          do_parse!(length: parse_long_uint >> s: take_str!(length) >> (s.to_string())));
+named!(pub parse_field_array<FieldArray>,          do_parse!(length: parse_long_int >> array: count!(parse_value, length as usize) >> (array)));
 named!(pub parse_timestamp<Timestamp>,             call!(parse_long_long_uint));
