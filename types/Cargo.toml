@@ -19,7 +19,7 @@ serde_derive = "^0.9.11"
 serde_json   = "^0.9.9"
 
 [dependencies.cookie-factory]
-git = "https://github.com/geal/cookie-factory"
+git = "https://github.com/Keruspe/cookie-factory"
 
 [badges]
 travis-ci = { repository = "Keruspe/amq-protocol" }

@@ -7,16 +7,16 @@ use cookie_factory::*;
 pub fn gen_value<'a>(x: (&'a mut [u8], usize), v: &AMQPValue) -> Result<(&'a mut [u8], usize), GenError> {
     match *v {
         AMQPValue::Boolean(ref b)        => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_boolean(b)),
-//        AMQPValue::ShortShortInt(ref i)  => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_short_short_int(i)),
+        AMQPValue::ShortShortInt(ref i)  => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_short_short_int(i)),
         AMQPValue::ShortShortUInt(ref u) => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_short_short_uint(u)),
-//        AMQPValue::ShortInt(ref i)       => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_short_int(i)),
+        AMQPValue::ShortInt(ref i)       => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_short_int(i)),
         AMQPValue::ShortUInt(ref u)      => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_short_uint(u)),
-//        AMQPValue::LongInt(ref i)        => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_long_int(i)),
+        AMQPValue::LongInt(ref i)        => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_long_int(i)),
         AMQPValue::LongUInt(ref u)       => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_long_uint(u)),
-//        AMQPValue::LongLongInt(ref i)    => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_long_long_int(i)),
+        AMQPValue::LongLongInt(ref i)    => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_long_long_int(i)),
         AMQPValue::LongLongUInt(ref u)   => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_long_long_uint(u)),
-//        AMQPValue::Float(ref f)          => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_float(f)),
-//        AMQPValue::Double(ref d)         => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_double(d)),
+        AMQPValue::Float(ref f)          => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_float(f)),
+        AMQPValue::Double(ref d)         => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_double(d)),
         AMQPValue::DecimalValue(ref d)   => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_decimal_value(d)),
         AMQPValue::ShortString(ref s)    => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_short_string(s)),
         AMQPValue::LongString(ref s)     => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_long_string(s)),
@@ -24,7 +24,6 @@ pub fn gen_value<'a>(x: (&'a mut [u8], usize), v: &AMQPValue) -> Result<(&'a mut
         AMQPValue::Timestamp(ref t)      => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_timestamp(t)),
         AMQPValue::FieldTable(ref t)     => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_field_table(t)),
         AMQPValue::Void                  => gen_be_u8!(x, v.get_type().get_id() as u8),
-        _                                => Err(GenError::CustomError(42))
     }
 }
 
@@ -36,47 +35,45 @@ pub fn gen_boolean<'a>(x: (&'a mut [u8], usize), b: &Boolean) -> Result<(&'a mut
     gen_be_u8!(x, if *b { 1 } else { 0 })
 }
 
-/*
 pub fn gen_short_short_int<'a>(x: (&'a mut [u8], usize), i: &ShortShortInt) -> Result<(&'a mut [u8], usize), GenError> {
     gen_be_i8!(x, *i)
 }
-*/
 
 pub fn gen_short_short_uint<'a>(x: (&'a mut [u8], usize), u: &ShortShortUInt) -> Result<(&'a mut [u8], usize), GenError> {
     gen_be_u8!(x, *u)
 }
 
-/*
 pub fn gen_short_int<'a>(x: (&'a mut [u8], usize), i: &ShortInt) -> Result<(&'a mut [u8], usize), GenError> {
     gen_be_i16!(x, *i)
 }
-*/
 
 pub fn gen_short_uint<'a>(x: (&'a mut [u8], usize), u: &ShortUInt) -> Result<(&'a mut [u8], usize), GenError> {
     gen_be_u16!(x, *u)
 }
 
-/*
 pub fn gen_long_int<'a>(x: (&'a mut [u8], usize), i: &LongInt) -> Result<(&'a mut [u8], usize), GenError> {
     gen_be_i32!(x, *i)
 }
-*/
 
 pub fn gen_long_uint<'a>(x: (&'a mut [u8], usize), u: &LongUInt) -> Result<(&'a mut [u8], usize), GenError> {
     gen_be_u32!(x, *u)
 }
 
-/*
 pub fn gen_long_long_int<'a>(x: (&'a mut [u8], usize), i: &LongLongInt) -> Result<(&'a mut [u8], usize), GenError> {
     gen_be_i64!(x, *i)
 }
-*/
 
 pub fn gen_long_long_uint<'a>(x: (&'a mut [u8], usize), u: &LongLongUInt) -> Result<(&'a mut [u8], usize), GenError> {
     gen_be_u64!(x, *u)
 }
 
-/* TODO: Float, Double */
+pub fn gen_float<'a>(x: (&'a mut [u8], usize), f: &Float) -> Result<(&'a mut [u8], usize), GenError> {
+    gen_be_f32!(x, *f)
+}
+
+pub fn gen_double<'a>(x: (&'a mut [u8], usize), d: &Double) -> Result<(&'a mut [u8], usize), GenError> {
+    gen_be_f64!(x, *d)
+}
 
 pub fn gen_decimal_value<'a>(x: (&'a mut [u8], usize), d: &DecimalValue) -> Result<(&'a mut [u8], usize), GenError> {
     do_gen!(x, gen_be_u8!(d.scale) >> gen_be_u32!(d.value))
