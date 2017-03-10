@@ -22,7 +22,7 @@ pub fn gen_value<'a>(x: (&'a mut [u8], usize), v: &AMQPValue) -> Result<(&'a mut
         AMQPValue::LongString(ref s)     => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_long_string(s)),
         AMQPValue::FieldArray(ref a)     => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_field_array(a)),
         AMQPValue::Timestamp(ref t)      => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_timestamp(t)),
-//        AMQPValue::FieldTable(ref t)     => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_field_table(t)),
+        AMQPValue::FieldTable(ref t)     => do_gen!(x, gen_be_u8!(v.get_type().get_id() as u8) >> gen_field_table(t)),
         AMQPValue::Void                  => gen_be_u8!(x, v.get_type().get_id() as u8),
         _                                => Err(GenError::CustomError(42))
     }
@@ -101,4 +101,13 @@ pub fn gen_timestamp<'a>(x: (&'a mut [u8], usize), t: &Timestamp) -> Result<(&'a
     gen_long_long_uint(x, t)
 }
 
-/* TODO: FieldTable */
+pub fn gen_field_table<'a>(x: (&'a mut [u8], usize), t: &FieldTable) -> Result<(&'a mut [u8], usize), GenError> {
+    let (x1, index1) = x;
+    gen_many_ref!((x1, index1 + 4), t, gen_field_entry).and_then(|(x2, index2)| {
+        gen_be_u32!((x2, index1), index2 - index1 - 4).and_then(|(x3, _)| Ok((x3, index2)))
+    })
+}
+
+pub fn gen_field_entry<'a>(x: (&'a mut [u8], usize), e: &(&ShortString, &AMQPValue)) -> Result<(&'a mut [u8], usize), GenError> {
+    do_gen!(x, gen_short_string(e.0) >> gen_value(e.1))
+}
