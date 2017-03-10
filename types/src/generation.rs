@@ -74,21 +74,21 @@ pub fn gen_double<'a>(x: (&'a mut [u8], usize), d: &Double) -> Result<(&'a mut [
 }
 
 pub fn gen_decimal_value<'a>(x: (&'a mut [u8], usize), d: &DecimalValue) -> Result<(&'a mut [u8], usize), GenError> {
-    do_gen!(x, gen_be_u8!(d.scale) >> gen_be_u32!(d.value))
+    do_gen!(x, gen_short_short_uint(&d.scale) >> gen_long_uint(&d.value))
 }
 
 pub fn gen_short_string<'a>(x: (&'a mut [u8], usize), s: &ShortString) -> Result<(&'a mut [u8], usize), GenError> {
-    do_gen!(x, gen_be_u8!(s.len() as u8) >> gen_slice!(s.as_bytes()))
+    do_gen!(x, gen_short_short_uint(&(s.len() as ShortShortUInt)) >> gen_slice!(s.as_bytes()))
 }
 
 pub fn gen_long_string<'a>(x: (&'a mut [u8], usize), s: &LongString) -> Result<(&'a mut [u8], usize), GenError> {
-    do_gen!(x, gen_be_u32!(s.len() as u32) >> gen_slice!(s.as_bytes()))
+    do_gen!(x, gen_long_uint(&(s.len() as LongUInt)) >> gen_slice!(s.as_bytes()))
 }
 
 pub fn gen_field_array<'a>(x: (&'a mut [u8], usize), a: &FieldArray) -> Result<(&'a mut [u8], usize), GenError> {
     let (x1, index1) = x;
     gen_many_ref!((x1, index1 + 4), a, gen_value).and_then(|(x2, index2)| {
-        gen_be_u32!((x2, index1), index2 - index1 - 4).and_then(|(x3, _)| Ok((x3, index2)))
+        gen_long_uint((x2, index1), &((index2 - index1 - 4) as LongUInt)).and_then(|(x3, _)| Ok((x3, index2)))
     })
 }
 
@@ -99,7 +99,7 @@ pub fn gen_timestamp<'a>(x: (&'a mut [u8], usize), t: &Timestamp) -> Result<(&'a
 pub fn gen_field_table<'a>(x: (&'a mut [u8], usize), t: &FieldTable) -> Result<(&'a mut [u8], usize), GenError> {
     let (x1, index1) = x;
     gen_many_ref!((x1, index1 + 4), t, gen_field_entry).and_then(|(x2, index2)| {
-        gen_be_u32!((x2, index1), index2 - index1 - 4).and_then(|(x3, _)| Ok((x3, index2)))
+        gen_long_uint((x2, index1), &((index2 - index1 - 4) as LongUInt)).and_then(|(x3, _)| Ok((x3, index2)))
     })
 }
 
