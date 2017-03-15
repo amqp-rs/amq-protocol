@@ -46,3 +46,102 @@ named!(pub parse_field_table<FieldTable>,          do_parse!(length: parse_long_
     acc.insert(key, value);
     acc
 })) >> (table)));
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    use nom::IResult;
+
+    const EMPTY: &'static [u8] = b"";
+
+    #[test]
+    fn test_parse_boolean() {
+        assert_eq!(parse_boolean(&[0]), IResult::Done(EMPTY, false));
+        assert_eq!(parse_boolean(&[1]), IResult::Done(EMPTY, true));
+    }
+
+    #[test]
+    fn test_parse_short_short_uint() {
+        assert_eq!(parse_short_short_uint(&[0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_short_short_uint(&[255]), IResult::Done(EMPTY, 255));
+    }
+
+    #[test]
+    fn test_parse_short_short_int() {
+        assert_eq!(parse_short_short_int(&[0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_short_short_int(&[255]), IResult::Done(EMPTY, -1));
+    }
+
+    #[test]
+    fn test_parse_short_uint() {
+        assert_eq!(parse_short_uint(&[0,   0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_short_uint(&[255, 255]), IResult::Done(EMPTY, 65535));
+    }
+
+    #[test]
+    fn test_parse_short_int() {
+        assert_eq!(parse_short_int(&[0,   0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_short_int(&[255, 255]), IResult::Done(EMPTY, -1));
+    }
+
+    #[test]
+    fn test_parse_long_uint() {
+        assert_eq!(parse_long_uint(&[0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_long_uint(&[255, 255, 255, 255]), IResult::Done(EMPTY, 4294967295));
+    }
+
+    #[test]
+    fn test_parse_long_int() {
+        assert_eq!(parse_long_int(&[0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_long_int(&[255, 255, 255, 255]), IResult::Done(EMPTY, -1));
+    }
+
+    #[test]
+    fn test_parse_long_long_uint() {
+        assert_eq!(parse_long_long_uint(&[0,   0,   0,   0,   0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_long_long_uint(&[255, 255, 255, 255, 255, 255, 255, 255]), IResult::Done(EMPTY, 18446744073709551615));
+    }
+
+    #[test]
+    fn test_parse_long_long_int() {
+        assert_eq!(parse_long_long_int(&[0,   0,   0,   0,   0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_long_long_int(&[255, 255, 255, 255, 255, 255, 255, 255]), IResult::Done(EMPTY, -1));
+    }
+
+    #[test]
+    fn test_parse_float() {
+        assert_eq!(parse_float(&[0,  0,  0,  0]),  IResult::Done(EMPTY, 0.));
+        assert_eq!(parse_float(&[42, 42, 42, 42]), IResult::Done(EMPTY, 0.00000000000015113662));
+    }
+
+    #[test]
+    fn test_parse_double() {
+        assert_eq!(parse_double(&[0,  0,  0,  0,  0,  0,  0,  0]),  IResult::Done(EMPTY, 0.));
+        assert_eq!(parse_double(&[42, 42, 42, 42, 42, 42, 42, 42]), IResult::Done(EMPTY, 0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000014260258159703532));
+    }
+
+    #[test]
+    fn test_parse_decimal_value() {
+        assert_eq!(parse_decimal_value(&[0,   0,   0,   0,   0]),   IResult::Done(EMPTY, DecimalValue { scale: 0,   value: 0          }));
+        assert_eq!(parse_decimal_value(&[255, 255, 255, 255, 255]), IResult::Done(EMPTY, DecimalValue { scale: 255, value: 4294967295 }));
+    }
+
+    #[test]
+    fn test_parse_short_string() {
+        assert_eq!(parse_short_string(&[0]),                                             IResult::Done(EMPTY, ShortString::new()));
+        assert_eq!(parse_short_string(&[4, 't' as u8, 'e' as u8, 's' as u8, 't' as u8]), IResult::Done(EMPTY, "test".to_string()));
+    }
+
+    #[test]
+    fn test_parse_long_string() {
+        assert_eq!(parse_long_string(&[0, 0, 0, 0]),                                             IResult::Done(EMPTY, LongString::new()));
+        assert_eq!(parse_long_string(&[0, 0, 0, 4, 't' as u8, 'e' as u8, 's' as u8, 't' as u8]), IResult::Done(EMPTY, "test".to_string()));
+    }
+
+    #[test]
+    fn test_parse_timestamp() {
+        assert_eq!(parse_timestamp(&[0,   0,   0,   0,   0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_timestamp(&[255, 255, 255, 255, 255, 255, 255, 255]), IResult::Done(EMPTY, 18446744073709551615));
+    }
+}
