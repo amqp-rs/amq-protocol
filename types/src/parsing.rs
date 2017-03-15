@@ -1,6 +1,6 @@
 use types::*;
 
-use nom::{be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, float, double};
+use nom::{be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be_f32, be_f64};
 
 /* FIXME: we convert to a Some so that nom can happily handle some _ case which would otherwise fail as we're exhaustive */
 named!(pub parse_value<AMQPValue>,                 switch!(map!(parse_type, |t| Some(t)),
@@ -35,8 +35,8 @@ named!(pub parse_long_int<LongInt>,                call!(be_i32));
 named!(pub parse_long_uint<LongUInt>,              call!(be_u32));
 named!(pub parse_long_long_int<LongLongInt>,       call!(be_i64));
 named!(pub parse_long_long_uint<LongLongUInt>,     call!(be_u64));
-named!(pub parse_float<Float>,                     call!(float));
-named!(pub parse_double<Double>,                   call!(double));
+named!(pub parse_float<Float>,                     call!(be_f32));
+named!(pub parse_double<Double>,                   call!(be_f64));
 named!(pub parse_decimal_value<DecimalValue>,      do_parse!(scale: parse_short_short_uint >> value: parse_long_uint >> (DecimalValue { scale: scale, value: value, })));
 named!(pub parse_short_string<ShortString>,        do_parse!(length: parse_short_short_uint >> s: take_str!(length) >> (s.to_string())));
 named!(pub parse_long_string<LongString>,          do_parse!(length: parse_long_uint >> s: take_str!(length) >> (s.to_string())));
