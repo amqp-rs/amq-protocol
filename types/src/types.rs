@@ -1,6 +1,6 @@
 use serde_json::Value;
 
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt;
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
@@ -99,7 +99,7 @@ pub type ShortString    = String; /* TODO: don't allow size >= 255 */
 pub type LongString     = String;
 pub type FieldArray     = Vec<AMQPValue>;
 pub type Timestamp      = LongLongUInt;
-pub type FieldTable     = HashMap<ShortString, AMQPValue>;
+pub type FieldTable     = BTreeMap<ShortString, AMQPValue>;
 pub type Void           = ();
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
