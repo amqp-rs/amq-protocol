@@ -106,3 +106,68 @@ pub fn gen_field_table<'a>(x: (&'a mut [u8], usize), t: &FieldTable) -> Result<(
 pub fn gen_field_entry<'a>(x: (&'a mut [u8], usize), e: &(&ShortString, &AMQPValue)) -> Result<(&'a mut [u8], usize), GenError> {
     do_gen!(x, gen_short_string(e.0) >> gen_value(e.1))
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_gen_type() {
+        assert_eq!(gen_type((&mut [0], 0), &AMQPType::ShortShortInt).unwrap(), (&mut [98][..], 1));
+        assert_eq!(gen_type((&mut [0], 0), &AMQPType::ShortInt).unwrap(),      (&mut [85][..], 1));
+    }
+
+    #[test]
+    fn test_gen_boolean() {
+        assert_eq!(gen_boolean((&mut [0], 0), &false).unwrap(), (&mut [0][..], 1));
+        assert_eq!(gen_boolean((&mut [0], 0), &true).unwrap(),  (&mut [1][..], 1));
+    }
+
+    #[test]
+    fn test_gen_short_short_int() {
+        assert_eq!(gen_short_short_int((&mut [0], 0), &0).unwrap(),  (&mut [0][..],   1));
+        assert_eq!(gen_short_short_int((&mut [0], 0), &-1).unwrap(), (&mut [255][..], 1));
+    }
+
+    #[test]
+    fn test_gen_short_short_uint() {
+        assert_eq!(gen_short_short_uint((&mut [0], 0), &0).unwrap(),   (&mut [0][..],   1));
+        assert_eq!(gen_short_short_uint((&mut [0], 0), &255).unwrap(), (&mut [255][..], 1));
+    }
+
+    #[test]
+    fn test_gen_short_int() {
+        assert_eq!(gen_short_int((&mut [0, 0], 0), &0).unwrap(),  (&mut [0,   0][..],   2));
+        assert_eq!(gen_short_int((&mut [0, 0], 0), &-1).unwrap(), (&mut [255, 255][..], 2));
+    }
+
+    #[test]
+    fn test_gen_short_uint() {
+        assert_eq!(gen_short_uint((&mut [0, 0], 0), &0).unwrap(),     (&mut [0,   0][..],   2));
+        assert_eq!(gen_short_uint((&mut [0, 0], 0), &65535).unwrap(), (&mut [255, 255][..], 2));
+    }
+
+    #[test]
+    fn test_gen_long_int() {
+        assert_eq!(gen_long_int((&mut [0, 0, 0, 0], 0), &0).unwrap(),  (&mut [0,   0,   0,   0][..],   4));
+        assert_eq!(gen_long_int((&mut [0, 0, 0, 0], 0), &-1).unwrap(), (&mut [255, 255, 255, 255][..], 4));
+    }
+
+    #[test]
+    fn test_gen_long_uint() {
+        assert_eq!(gen_long_uint((&mut [0, 0, 0, 0], 0), &0).unwrap(),          (&mut [0,   0,   0,   0][..],   4));
+        assert_eq!(gen_long_uint((&mut [0, 0, 0, 0], 0), &4294967295).unwrap(), (&mut [255, 255, 255, 255][..], 4));
+    }
+
+    #[test]
+    fn test_gen_long_long_int() {
+        assert_eq!(gen_long_long_int((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0).unwrap(),  (&mut [0,   0,   0,   0,   0,   0,   0,   0][..],   8));
+        assert_eq!(gen_long_long_int((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &-1).unwrap(), (&mut [255, 255, 255, 255, 255, 255, 255, 255][..], 8));
+    }
+
+    #[test]
+    fn test_gen_long_long_uint() {
+        assert_eq!(gen_long_long_uint((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0).unwrap(),                    (&mut [0,   0,   0,   0,   0,   0,   0,   0][..],   8));
+        assert_eq!(gen_long_long_uint((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &18446744073709551615).unwrap(), (&mut [255, 255, 255, 255, 255, 255, 255, 255][..], 8));
+    }
+}
