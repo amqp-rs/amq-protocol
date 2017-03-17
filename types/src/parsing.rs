@@ -74,21 +74,15 @@ mod test {
     }
 
     #[test]
-    fn test_parse_short_short_uint() {
-        assert_eq!(parse_short_short_uint(&[0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_short_short_uint(&[255]), IResult::Done(EMPTY, 255));
-    }
-
-    #[test]
     fn test_parse_short_short_int() {
         assert_eq!(parse_short_short_int(&[0]),   IResult::Done(EMPTY, 0));
         assert_eq!(parse_short_short_int(&[255]), IResult::Done(EMPTY, -1));
     }
 
     #[test]
-    fn test_parse_short_uint() {
-        assert_eq!(parse_short_uint(&[0,   0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_short_uint(&[255, 255]), IResult::Done(EMPTY, 65535));
+    fn test_parse_short_short_uint() {
+        assert_eq!(parse_short_short_uint(&[0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_short_short_uint(&[255]), IResult::Done(EMPTY, 255));
     }
 
     #[test]
@@ -98,9 +92,9 @@ mod test {
     }
 
     #[test]
-    fn test_parse_long_uint() {
-        assert_eq!(parse_long_uint(&[0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_long_uint(&[255, 255, 255, 255]), IResult::Done(EMPTY, 4294967295));
+    fn test_parse_short_uint() {
+        assert_eq!(parse_short_uint(&[0,   0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_short_uint(&[255, 255]), IResult::Done(EMPTY, 65535));
     }
 
     #[test]
@@ -110,15 +104,21 @@ mod test {
     }
 
     #[test]
-    fn test_parse_long_long_uint() {
-        assert_eq!(parse_long_long_uint(&[0,   0,   0,   0,   0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_long_long_uint(&[255, 255, 255, 255, 255, 255, 255, 255]), IResult::Done(EMPTY, 18446744073709551615));
+    fn test_parse_long_uint() {
+        assert_eq!(parse_long_uint(&[0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_long_uint(&[255, 255, 255, 255]), IResult::Done(EMPTY, 4294967295));
     }
 
     #[test]
     fn test_parse_long_long_int() {
         assert_eq!(parse_long_long_int(&[0,   0,   0,   0,   0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
         assert_eq!(parse_long_long_int(&[255, 255, 255, 255, 255, 255, 255, 255]), IResult::Done(EMPTY, -1));
+    }
+
+    #[test]
+    fn test_parse_long_long_uint() {
+        assert_eq!(parse_long_long_uint(&[0,   0,   0,   0,   0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_long_long_uint(&[255, 255, 255, 255, 255, 255, 255, 255]), IResult::Done(EMPTY, 18446744073709551615));
     }
 
     #[test]
