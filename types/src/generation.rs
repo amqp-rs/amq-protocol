@@ -86,10 +86,7 @@ pub fn gen_long_string<'a>(x: (&'a mut [u8], usize), s: &LongString) -> Result<(
 }
 
 pub fn gen_field_array<'a>(x: (&'a mut [u8], usize), a: &FieldArray) -> Result<(&'a mut [u8], usize), GenError> {
-    let (x1, index1) = x;
-    gen_many_ref!((x1, index1 + 4), a, gen_value).and_then(|(x2, index2)| {
-        gen_long_uint((x2, index1), &((index2 - index1 - 4) as LongUInt)).and_then(|(x3, _)| Ok((x3, index2)))
-    })
+    do_gen!(x, gen_long_uint(&(a.len() as LongUInt)) >> gen_many_ref!(a, gen_value))
 }
 
 pub fn gen_timestamp<'a>(x: (&'a mut [u8], usize), t: &Timestamp) -> Result<(&'a mut [u8], usize), GenError> {
@@ -202,6 +199,12 @@ mod test {
         assert_eq!(gen_long_string((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &"test".to_string()).unwrap(), (&mut [0, 0, 0, 4, 116, 101, 115, 116][..], 8));
     }
     */
+
+    #[test]
+    fn test_gen_field_array() {
+        assert_eq!(gen_field_array((&mut [0, 0, 0, 0], 0), &FieldArray::new()).unwrap(),                    (&mut [0, 0, 0, 0][..], 4));
+        assert_eq!(gen_field_array((&mut [0, 0, 0, 0, 0, 0], 0), &vec![AMQPValue::Boolean(true)]).unwrap(), (&mut [0, 0, 0, 1, 116, 1][..], 6));
+    }
 
     #[test]
     fn test_gen_timestamp() {
