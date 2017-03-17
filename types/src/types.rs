@@ -184,3 +184,14 @@ impl<'a> From<&'a Value> for AMQPValue {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_type_to_string() {
+        assert_eq!(AMQPType::Boolean.to_string(), "Boolean");
+        assert_eq!(AMQPType::Void.to_string(),    "Void");
+    }
+}
