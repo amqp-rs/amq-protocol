@@ -129,19 +129,29 @@ mod test {
 
     #[test]
     fn test_parse_short_string() {
-        assert_eq!(parse_short_string(&[0]),                                             IResult::Done(EMPTY, ShortString::new()));
-        assert_eq!(parse_short_string(&[4, 't' as u8, 'e' as u8, 's' as u8, 't' as u8]), IResult::Done(EMPTY, "test".to_string()));
+        assert_eq!(parse_short_string(&[0]),                     IResult::Done(EMPTY, ShortString::new()));
+        assert_eq!(parse_short_string(&[4, 116, 101, 115, 116]), IResult::Done(EMPTY, "test".to_string()));
     }
 
     #[test]
     fn test_parse_long_string() {
-        assert_eq!(parse_long_string(&[0, 0, 0, 0]),                                             IResult::Done(EMPTY, LongString::new()));
-        assert_eq!(parse_long_string(&[0, 0, 0, 4, 't' as u8, 'e' as u8, 's' as u8, 't' as u8]), IResult::Done(EMPTY, "test".to_string()));
+        assert_eq!(parse_long_string(&[0, 0, 0, 0]),                     IResult::Done(EMPTY, LongString::new()));
+        assert_eq!(parse_long_string(&[0, 0, 0, 4, 116, 101, 115, 116]), IResult::Done(EMPTY, "test".to_string()));
+    }
+
+    #[test]
+    fn test_parse_field_array() {
+        assert_eq!(parse_field_array(&[0, 0, 0, 0]), IResult::Done(EMPTY, FieldArray::new()));
     }
 
     #[test]
     fn test_parse_timestamp() {
         assert_eq!(parse_timestamp(&[0,   0,   0,   0,   0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
         assert_eq!(parse_timestamp(&[255, 255, 255, 255, 255, 255, 255, 255]), IResult::Done(EMPTY, 18446744073709551615));
+    }
+
+    #[test]
+    fn test_parse_field_table() {
+        assert_eq!(parse_field_table(&[0, 0, 0, 0]), IResult::Done(EMPTY, FieldTable::new()));
     }
 }
