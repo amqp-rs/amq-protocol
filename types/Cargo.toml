@@ -13,13 +13,11 @@ license       = "BSD-2-Clause"
 name = "amq_protocol_types"
 
 [dependencies]
-nom          = "^2.1.0"
-serde        = "^0.9.11"
-serde_derive = "^0.9.11"
-serde_json   = "^0.9.9"
-
-[dependencies.cookie-factory]
-git = "https://github.com/Geal/cookie-factory"
+cookie-factory = "^0.1.0"
+nom            = "^2.1.0"
+serde          = "^0.9.11"
+serde_derive   = "^0.9.11"
+serde_json     = "^0.9.9"
 
 [badges]
 travis-ci = { repository = "Keruspe/amq-protocol" }
