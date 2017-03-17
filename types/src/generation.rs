@@ -170,4 +170,42 @@ mod test {
         assert_eq!(gen_long_long_uint((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0).unwrap(),                    (&mut [0,   0,   0,   0,   0,   0,   0,   0][..],   8));
         assert_eq!(gen_long_long_uint((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &18446744073709551615).unwrap(), (&mut [255, 255, 255, 255, 255, 255, 255, 255][..], 8));
     }
+
+    #[test]
+    fn test_gen_float() {
+        assert_eq!(gen_float((&mut [0, 0, 0, 0], 0), &0.).unwrap(),    (&mut [0,  0,  0,   0][..],  4));
+        assert_eq!(gen_float((&mut [0, 0, 0, 0], 0), &42.42).unwrap(), (&mut [66, 41, 174, 20][..], 4));
+    }
+
+    #[test]
+    fn test_gen_double() {
+        assert_eq!(gen_double((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0.).unwrap(),    (&mut [0,  0,  0,  0,   0,   0,  0,  0][..],   8));
+        assert_eq!(gen_double((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &42.42).unwrap(), (&mut [64, 69, 53, 194, 143, 92, 40, 246][..], 8));
+    }
+
+    #[test]
+    fn test_gen_decimal_value() {
+        assert_eq!(gen_decimal_value((&mut [0, 0, 0, 0, 0], 0), &DecimalValue { scale: 0, value: 0 }).unwrap(),  (&mut [0, 0, 0, 0, 0][..], 5));
+        assert_eq!(gen_decimal_value((&mut [0, 0, 0, 0, 0], 0), &DecimalValue { scale: 2, value: 42 }).unwrap(), (&mut [2, 0, 0, 0, 42][..], 5));
+    }
+
+    /* The string tests don't pass because of a bug in cookie factory
+    #[test]
+    fn test_gen_short_string() {
+        assert_eq!(gen_short_string((&mut [0], 0), &"".to_string()).unwrap(),                 (&mut [0][..], 1));
+        assert_eq!(gen_short_string((&mut [0, 0, 0, 0, 0], 0), &"test".to_string()).unwrap(), (&mut [4, 116, 101, 115, 116][..], 5));
+    }
+
+    #[test]
+    fn test_gen_long_string() {
+        assert_eq!(gen_long_string((&mut [0, 0, 0, 0], 0), &"".to_string()).unwrap(),                 (&mut [0, 0, 0, 0][..], 4));
+        assert_eq!(gen_long_string((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &"test".to_string()).unwrap(), (&mut [0, 0, 0, 4, 116, 101, 115, 116][..], 8));
+    }
+    */
+
+    #[test]
+    fn test_gen_timestamp() {
+        assert_eq!(gen_timestamp((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0).unwrap(),                    (&mut [0,   0,   0,   0,   0,   0,   0,   0][..],   8));
+        assert_eq!(gen_timestamp((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &18446744073709551615).unwrap(), (&mut [255, 255, 255, 255, 255, 255, 255, 255][..], 8));
+    }
 }
