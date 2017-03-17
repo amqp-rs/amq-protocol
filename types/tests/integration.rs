@@ -11,7 +11,7 @@ fn test_full_integration() {
     table2.insert("bar".to_string(), AMQPValue::ShortString("blah".to_string()));
     table2.insert("baz".to_string(), AMQPValue::LongString("blah42".to_string()));
 
-    table.insert("foo".to_string(),  AMQPValue::FieldArray(vec![AMQPValue::Void]));
+    table.insert("foo".to_string(),  AMQPValue::FieldArray(vec![AMQPValue::Boolean(true), AMQPValue::Void]));
     table.insert("oof".to_string(),  AMQPValue::FieldArray(FieldArray::new()));
     table.insert("bar".to_string(),  AMQPValue::FieldTable(FieldTable::new()));
     table.insert("blah".to_string(), AMQPValue::Boolean(false));

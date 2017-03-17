@@ -41,7 +41,10 @@ named!(pub parse_double<Double>,                   call!(be_f64));
 named!(pub parse_decimal_value<DecimalValue>,      do_parse!(scale: parse_short_short_uint >> value: parse_long_uint >> (DecimalValue { scale: scale, value: value, })));
 named!(pub parse_short_string<ShortString>,        do_parse!(length: parse_short_short_uint >> s: take_str!(length) >> (s.to_string())));
 named!(pub parse_long_string<LongString>,          do_parse!(length: parse_long_uint >> s: take_str!(length) >> (s.to_string())));
-named!(pub parse_field_array<FieldArray>,          do_parse!(length: parse_long_int >> array: count!(parse_value, length as usize) >> (array)));
+named!(pub parse_field_array<FieldArray>,          do_parse!(length: parse_long_int >> array: flat_map!(take!(length as usize), fold_many0!(parse_value, FieldArray::new(), |mut acc: FieldArray, elem| {
+    acc.push(elem);
+    acc
+})) >> (array)));
 named!(pub parse_timestamp<Timestamp>,             call!(parse_long_long_uint));
 named!(pub parse_field_table<FieldTable>,          do_parse!(length: parse_long_uint >> table: flat_map!(take!(length as usize), fold_many0!(complete!(pair!(parse_short_string, parse_value)), FieldTable::new(), |mut acc: FieldTable, (key, value)| {
     acc.insert(key, value);
@@ -155,7 +158,7 @@ mod test {
     #[test]
     fn test_parse_field_array() {
         assert_eq!(parse_field_array(&[0, 0, 0, 0]),                                 IResult::Done(EMPTY, FieldArray::new()));
-        assert_eq!(parse_field_array(&[0, 0, 0, 2, 115, 4, 116, 101, 115, 116, 86]), IResult::Done(EMPTY, vec![AMQPValue::ShortString("test".to_string()), AMQPValue::Void]));
+        assert_eq!(parse_field_array(&[0, 0, 0, 7, 115, 4, 116, 101, 115, 116, 86]), IResult::Done(EMPTY, vec![AMQPValue::ShortString("test".to_string()), AMQPValue::Void]));
     }
 
     #[test]
