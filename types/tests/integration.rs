@@ -24,6 +24,7 @@ fn test_full_integration() {
     table.insert("gggg".to_string(), AMQPValue::LongLongInt(-9999));
     table.insert("hhhh".to_string(), AMQPValue::LongLongUInt(0));
     table.insert("iiii".to_string(), AMQPValue::Float(42.3));
+    table.insert("tabl".to_string(), AMQPValue::FieldTable(table2));
     table.insert("jjjj".to_string(), AMQPValue::Double(0.00987654321));
     table.insert("kkkk".to_string(), AMQPValue::Timestamp(1234567890));
     table.insert("llll".to_string(), AMQPValue::Void);
