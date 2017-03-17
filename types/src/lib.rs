@@ -7,7 +7,9 @@ extern crate serde_json;
 mod generation;
 mod parsing;
 mod types;
+mod value;
 
 pub use generation::*;
 pub use parsing::*;
 pub use types::*;
+pub use value::*;

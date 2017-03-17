@@ -1,4 +1,5 @@
 use types::*;
+use value::*;
 
 use nom::{be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be_f32, be_f64};
 
