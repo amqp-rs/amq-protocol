@@ -211,4 +211,13 @@ mod test {
         assert_eq!(gen_timestamp((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0).unwrap(),                    (&mut [0,   0,   0,   0,   0,   0,   0,   0][..],   8));
         assert_eq!(gen_timestamp((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &18446744073709551615).unwrap(), (&mut [255, 255, 255, 255, 255, 255, 255, 255][..], 8));
     }
+
+    #[test]
+    fn test_gen_field_table() {
+        let mut table = FieldTable::new();
+        table.insert("test".to_string(), AMQPValue::Float(42.42));
+        table.insert("tt".to_string(),   AMQPValue::LongLongInt(42));
+        assert_eq!(gen_field_table((&mut [0, 0, 0, 0],                                                                   0), &FieldTable::new()).unwrap(), (&mut [0, 0, 0, 0][..],                                                                                         4));
+        assert_eq!(gen_field_table((&mut [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0), &table).unwrap(),             (&mut [0, 0, 0, 22, 2, 116, 116, 76, 0, 0, 0, 0, 0, 0, 0, 42, 4, 116, 101, 115, 116, 102, 66, 41, 174, 20][..], 26));
+    }
 }
