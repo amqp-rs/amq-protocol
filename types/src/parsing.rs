@@ -141,7 +141,8 @@ mod test {
 
     #[test]
     fn test_parse_field_array() {
-        assert_eq!(parse_field_array(&[0, 0, 0, 0]), IResult::Done(EMPTY, FieldArray::new()));
+        assert_eq!(parse_field_array(&[0, 0, 0, 0]),                                 IResult::Done(EMPTY, FieldArray::new()));
+        assert_eq!(parse_field_array(&[0, 0, 0, 2, 115, 4, 116, 101, 115, 116, 86]), IResult::Done(EMPTY, vec![AMQPValue::ShortString("test".to_string()), AMQPValue::Void]));
     }
 
     #[test]
@@ -152,6 +153,10 @@ mod test {
 
     #[test]
     fn test_parse_field_table() {
-        assert_eq!(parse_field_table(&[0, 0, 0, 0]), IResult::Done(EMPTY, FieldTable::new()));
+        let mut table = FieldTable::new();
+        table.insert("test".to_string(), AMQPValue::ShortString("test".to_string()));
+        table.insert("tt".to_string(),   AMQPValue::Void);
+        assert_eq!(parse_field_table(&[0, 0, 0, 0]),                                                                      IResult::Done(EMPTY, FieldTable::new()));
+        assert_eq!(parse_field_table(&[0, 0, 0, 15, 4, 116, 101, 115, 116, 115, 4, 116, 101, 115, 116, 2, 116, 116, 86]), IResult::Done(EMPTY, table));
     }
 }
