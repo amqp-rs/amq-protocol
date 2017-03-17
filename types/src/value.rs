@@ -78,3 +78,52 @@ impl<'a> From<&'a Value> for AMQPValue {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    use serde_json::{map, Number};
+
+    #[test]
+    fn test_from_bool_value() {
+        assert_eq!(AMQPValue::from(Value::Bool(false)), AMQPValue::Boolean(false));
+        assert_eq!(AMQPValue::from(Value::Bool(true)),  AMQPValue::Boolean(true));
+    }
+
+    #[test]
+    fn test_from_number_value() {
+        assert_eq!(AMQPValue::from(Value::Number(Number::from(42))),                 AMQPValue::LongLongUInt(42));
+        assert_eq!(AMQPValue::from(Value::Number(Number::from(-42))),                AMQPValue::LongLongInt(-42));
+        assert_eq!(AMQPValue::from(Value::Number(Number::from_f64(42.42).unwrap())), AMQPValue::Double(42.42));
+    }
+
+    #[test]
+    fn test_from_string_value() {
+        assert_eq!(AMQPValue::from(Value::String(String::new())),      AMQPValue::LongString(String::new()));
+        assert_eq!(AMQPValue::from(Value::String("test".to_string())), AMQPValue::LongString("test".to_string()));
+    }
+
+    #[test]
+    fn test_from_array_value() {
+        assert_eq!(AMQPValue::from(Value::Array(Vec::new())),        AMQPValue::FieldArray(FieldArray::new()));
+        assert_eq!(AMQPValue::from(Value::Array(vec![Value::Null])), AMQPValue::FieldArray(vec![AMQPValue::Void]));
+    }
+
+    #[test]
+    fn test_from_object_value() {
+        let mut value_map = map::Map::new();
+        let mut table     = FieldTable::new();
+
+        value_map.insert("test".to_string(), Value::Null);
+        table.insert("test".to_string(), AMQPValue::Void);
+
+        assert_eq!(AMQPValue::from(Value::Object(map::Map::new())), AMQPValue::FieldTable(FieldTable::new()));
+        assert_eq!(AMQPValue::from(Value::Object(value_map)),       AMQPValue::FieldTable(table));
+    }
+
+    #[test]
+    fn test_from_null_value() {
+        assert_eq!(AMQPValue::from(Value::Null), AMQPValue::Void);
+    }
+}
