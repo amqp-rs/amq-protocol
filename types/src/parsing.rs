@@ -123,14 +123,14 @@ mod test {
 
     #[test]
     fn test_parse_float() {
-        assert_eq!(parse_float(&[0,  0,  0,  0]),  IResult::Done(EMPTY, 0.));
-        assert_eq!(parse_float(&[42, 42, 42, 42]), IResult::Done(EMPTY, 0.00000000000015113662));
+        assert_eq!(parse_float(&[0,  0,  0,   0]),  IResult::Done(EMPTY, 0.));
+        assert_eq!(parse_float(&[66, 41, 174, 20]), IResult::Done(EMPTY, 42.42));
     }
 
     #[test]
     fn test_parse_double() {
-        assert_eq!(parse_double(&[0,  0,  0,  0,  0,  0,  0,  0]),  IResult::Done(EMPTY, 0.));
-        assert_eq!(parse_double(&[42, 42, 42, 42, 42, 42, 42, 42]), IResult::Done(EMPTY, 0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000014260258159703532));
+        assert_eq!(parse_double(&[0,  0,  0,  0,   0,   0,  0,  0]),   IResult::Done(EMPTY, 0.));
+        assert_eq!(parse_double(&[64, 69, 53, 194, 143, 92, 40, 246]), IResult::Done(EMPTY, 42.42));
     }
 
     #[test]
