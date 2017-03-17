@@ -56,6 +56,18 @@ mod test {
     const EMPTY: &'static [u8] = b"";
 
     #[test]
+    fn test_parse_value() {
+        assert_eq!(parse_value(&[84, 42, 42, 42, 42, 42,  42,  42,  42]),  IResult::Done(EMPTY, AMQPValue::Timestamp(3038287259199220266)));
+        assert_eq!(parse_value(&[83, 0,  0,  0,  4,  116, 101, 115, 116]), IResult::Done(EMPTY, AMQPValue::LongString("test".to_string())));
+    }
+
+    #[test]
+    fn test_parse_type() {
+        assert_eq!(parse_type(&[116]), IResult::Done(EMPTY, AMQPType::Boolean));
+        assert_eq!(parse_type(&[102]), IResult::Done(EMPTY, AMQPType::Float));
+    }
+
+    #[test]
     fn test_parse_boolean() {
         assert_eq!(parse_boolean(&[0]), IResult::Done(EMPTY, false));
         assert_eq!(parse_boolean(&[1]), IResult::Done(EMPTY, true));
