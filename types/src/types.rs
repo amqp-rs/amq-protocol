@@ -113,6 +113,12 @@ mod test {
     use super::*;
 
     #[test]
+    fn test_type_from_id() {
+        assert_eq!(AMQPType::from_id('T'), Some(AMQPType::Timestamp));
+        assert_eq!(AMQPType::from_id('z'), None);
+    }
+
+    #[test]
     fn test_type_to_string() {
         assert_eq!(AMQPType::Boolean.to_string(), "Boolean");
         assert_eq!(AMQPType::Void.to_string(),    "Void");
