@@ -1,6 +1,9 @@
 extern crate amq_protocol_types;
 
-use amq_protocol_types::*;
+use amq_protocol_types::generation::gen_value;
+use amq_protocol_types::parsing::parse_value;
+use amq_protocol_types::types::*;
+use amq_protocol_types::value::AMQPValue;
 
 #[test]
 fn test_full_integration() {
