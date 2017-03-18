@@ -13,29 +13,11 @@ impl AMQPFlags {
     }
 
     pub fn get_bytes(&self) -> Vec<u8> {
-        let mut bytes = Vec::new();
-        let mut cur   = 0;
-        let mut added = true;
-
-        for (index, b) in self.0.iter().enumerate() {
-            if index % 8 == 0 {
-                if !added {
-                    bytes.push(cur);
-                }
-                cur = 0;
-                added = false;
-            }
-
-            if *b {
-                cur += 1 << (index % 8);
-            }
-        }
-
-        if !added {
-            bytes.push(cur);
-        }
-
-        bytes
+        self.0.chunks(8).map(|v| {
+            v.iter().enumerate().map(|(idx, b)| {
+                if *b { 1 << idx } else { 0 }
+            }).sum()
+        }).collect()
     }
 }
 
