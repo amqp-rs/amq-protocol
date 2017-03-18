@@ -1,4 +1,3 @@
-extern crate bit_vec;
 #[macro_use] extern crate cookie_factory;
 #[macro_use] extern crate nom;
 extern crate serde;
