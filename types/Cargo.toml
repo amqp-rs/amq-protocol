@@ -13,6 +13,7 @@ license       = "BSD-2-Clause"
 name = "amq_protocol_types"
 
 [dependencies]
+bit-vec        = "^0.4.3"
 cookie-factory = "^0.1.0"
 nom            = "^2.1.0"
 serde          = "^0.9.11"
