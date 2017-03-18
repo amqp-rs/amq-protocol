@@ -1,3 +1,4 @@
+use flags::*;
 use types::*;
 use value::*;
 
@@ -106,6 +107,12 @@ pub fn gen_field_table<'a>(x: (&'a mut [u8], usize), t: &FieldTable) -> Result<(
 
 fn gen_field_entry<'a>(x: (&'a mut [u8], usize), e: &(&ShortString, &AMQPValue)) -> Result<(&'a mut [u8], usize), GenError> {
     do_gen!(x, gen_short_string(e.0) >> gen_value(e.1))
+}
+
+pub fn gen_flags<'a>(x: (&'a mut [u8], usize), f: &AMQPFlags) -> Result<(&'a mut [u8], usize), GenError> {
+    f.get_bytes().iter().fold(Ok(x), |acc: Result<(&'a mut [u8], usize), GenError>, b| {
+        acc.and_then(|x| gen_be_u8!(x, *b))
+    })
 }
 
 #[cfg(test)]
@@ -223,5 +230,22 @@ mod test {
         table.insert("tt".to_string(),   AMQPValue::LongLongInt(42));
         assert_eq!(gen_field_table((&mut [0, 0, 0, 0],                                                                   0), &FieldTable::new()).unwrap(), (&mut [0, 0, 0, 0][..],                                                                                         4));
         assert_eq!(gen_field_table((&mut [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0), &table).unwrap(),             (&mut [0, 0, 0, 22, 4, 116, 101, 115, 116, 102, 66, 41, 174, 20, 2, 116, 116, 76, 0, 0, 0, 0, 0, 0, 0, 42][..], 26));
+    }
+
+    #[test]
+    fn test_gen_flags() {
+        let mut flags = AMQPFlags::new();
+        flags.add_flag(true);
+        flags.add_flag(false);
+        flags.add_flag(true);
+        flags.add_flag(true);
+        assert_eq!(gen_flags((&mut [0], 0), &flags).unwrap(), (&mut [0b00001101][..], 1));
+        flags.add_flag(true);
+        flags.add_flag(false);
+        flags.add_flag(true);
+        flags.add_flag(true);
+        flags.add_flag(false);
+        flags.add_flag(true);
+        assert_eq!(gen_flags((&mut [0, 0], 0), &flags).unwrap(), (&mut [0b11011101, 0b00000010][..], 2));
     }
 }
