@@ -19,6 +19,16 @@ impl AMQPFlags {
             }).sum()
         }).collect()
     }
+
+    pub fn from_bytes(bytes: Vec<u8>, nb: usize) -> AMQPFlags {
+        AMQPFlags(bytes.iter().flat_map(|b| {
+            let mut v = Vec::new();
+            for s in 0..8 {
+                v.push(((b & (1 << s)) >> s) == 1)
+            }
+            v
+        }).take(nb).collect())
+    }
 }
 
 #[cfg(test)]

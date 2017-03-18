@@ -1,7 +1,8 @@
+use flags::*;
 use types::*;
 use value::*;
 
-use nom::{be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be_f32, be_f64};
+use nom::{be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be_f32, be_f64, IResult};
 
 /* FIXME: we convert to a Some so that nom can happily handle some _ case which would otherwise fail as we're exhaustive */
 named!(pub parse_value<AMQPValue>,                 switch!(map!(parse_type, |t| Some(t)),
@@ -50,6 +51,10 @@ named!(pub parse_field_table<FieldTable>,          do_parse!(length: parse_long_
     acc.insert(key, value);
     acc
 })) >> (table)));
+
+pub fn parse_flags(i: &[u8], nb: usize) -> IResult<&[u8], AMQPFlags> {
+    map!(i, take!((nb + 7)/8), |b: &[u8]| AMQPFlags::from_bytes(b.to_vec(), nb))
+}
 
 #[cfg(test)]
 mod test {
@@ -174,5 +179,22 @@ mod test {
         table.insert("tt".to_string(),   AMQPValue::Void);
         assert_eq!(parse_field_table(&[0, 0, 0, 0]),                                                                      IResult::Done(EMPTY, FieldTable::new()));
         assert_eq!(parse_field_table(&[0, 0, 0, 15, 4, 116, 101, 115, 116, 115, 4, 116, 101, 115, 116, 2, 116, 116, 86]), IResult::Done(EMPTY, table));
+    }
+
+    #[test]
+    fn test_parse_flags() {
+        let mut flags = AMQPFlags::new();
+        flags.add_flag(true);
+        flags.add_flag(false);
+        flags.add_flag(true);
+        flags.add_flag(true);
+        assert_eq!(parse_flags(&[0b00001101], 4), IResult::Done(EMPTY, flags.clone()));
+        flags.add_flag(true);
+        flags.add_flag(false);
+        flags.add_flag(true);
+        flags.add_flag(true);
+        flags.add_flag(false);
+        flags.add_flag(true);
+        assert_eq!(parse_flags(&[0b11011101, 0b00000010], 10), IResult::Done(EMPTY, flags));
     }
 }
