@@ -121,10 +121,32 @@ impl _AMQPMethod {
     fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>) -> AMQPMethod {
         AMQPMethod {
             id:          self.id,
-            arguments:   self.arguments.iter().map(|arg| arg.to_specs(domains)).collect(),
+            arguments:   self.arguments_to_specs(domains),
             name:        self.name.clone(),
             synchronous: self.synchronous.unwrap_or(false),
         }
+    }
+
+    fn arguments_to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>) -> Vec<AMQPArgument> {
+        let mut arguments                            = Vec::new();
+        let mut flags : Option<Vec<AMQPFlagArgument>> = None;
+        for argument in &self.arguments {
+            let amqp_type = argument.get_type(domains);
+            if amqp_type == AMQPType::Boolean {
+                let mut flgs = flags.take().unwrap_or_else(|| Vec::new());
+                flgs.push(argument.to_flag_specs());
+                flags = Some(flgs);
+            } else {
+                if let Some(flags) = flags.take() {
+                    arguments.push(AMQPArgument::Flags(flags));
+                }
+                arguments.push(AMQPArgument::Value(argument.to_value_specs(amqp_type)));
+            }
+        }
+        if let Some(flags) = flags.take() {
+            arguments.push(AMQPArgument::Flags(flags));
+        }
+        arguments
     }
 }
 
@@ -139,22 +161,33 @@ struct _AMQPArgument {
 }
 
 impl _AMQPArgument {
-    fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>) -> AMQPArgument {
-        AMQPArgument::Value(AMQPValueArgument {
-            amqp_type:     match self.amqp_type {
-                Some(ref amqp_type) => amqp_type.to_specs(),
-                None                => {
-                    let domain = match self.domain {
-                        Some(ref domain) => domain,
-                        None             => panic!(format!("{} has no type nor domain", self.name)),
-                    };
-                    domains.get(domain).expect(&format!("No {} domain exists", domain)).clone()
-                },
-            },
+    fn to_flag_specs(&self) -> AMQPFlagArgument {
+        AMQPFlagArgument {
+            name:          self.name.clone(),
+            default_value: self.default_value.as_ref().and_then(|v| v.as_u64()).map(|u| u != 0).unwrap_or(false),
+        }
+    }
+
+    fn to_value_specs(&self, amqp_type: AMQPType) -> AMQPValueArgument {
+        AMQPValueArgument {
+            amqp_type:     amqp_type,
             name:          self.name.clone(),
             default_value: self.default_value.as_ref().map(From::from),
             domain:        self.domain.clone(),
-        })
+        }
+    }
+
+    fn get_type(&self, domains: &BTreeMap<ShortString, AMQPType>) -> AMQPType {
+        match self.amqp_type {
+            Some(ref amqp_type) => amqp_type.to_specs(),
+            None                => {
+                let domain = match self.domain {
+                    Some(ref domain) => domain,
+                    None             => panic!(format!("{} has no type nor domain", self.name)),
+                };
+                domains.get(domain).expect(&format!("No {} domain exists", domain)).clone()
+            },
+        }
     }
 }
 
