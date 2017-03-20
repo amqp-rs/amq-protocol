@@ -1,6 +1,6 @@
 use specs::*;
 
-use amq_protocol_types::types::*;
+use amq_protocol_types::*;
 use itertools::Itertools;
 use serde_json::Value;
 

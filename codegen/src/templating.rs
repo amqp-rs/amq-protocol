@@ -120,8 +120,7 @@ mod test {
 
     use specs::*;
 
-    use amq_protocol_types::types::*;
-    use amq_protocol_types::value::*;
+    use amq_protocol_types::*;
 
     use std::collections::BTreeMap;
 
