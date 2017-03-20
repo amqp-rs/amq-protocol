@@ -4,8 +4,11 @@ extern crate serde;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
 
+mod types;
+
+pub use types::*;
+
 pub mod flags;
 pub mod generation;
 pub mod parsing;
-pub mod types;
 pub mod value;
