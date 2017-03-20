@@ -5,10 +5,11 @@ extern crate serde;
 extern crate serde_json;
 
 mod types;
+mod value;
 
 pub use types::*;
+pub use value::*;
 
 pub mod flags;
 pub mod generation;
 pub mod parsing;
-pub mod value;
