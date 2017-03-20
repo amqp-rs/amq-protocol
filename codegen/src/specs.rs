@@ -1,6 +1,7 @@
 use internal::*;
 
-use amq_protocol_types::*;
+use amq_protocol_types::types::*;
+use amq_protocol_types::value::*;
 use serde_json::from_str;
 
 use std::collections::BTreeMap;

@@ -35,7 +35,8 @@ mod test {
 
     use specs::*;
 
-    use amq_protocol_types::*;
+    use amq_protocol_types::types::*;
+    use amq_protocol_types::value::*;
 
     use std::collections::BTreeMap;
 
