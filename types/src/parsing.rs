@@ -52,8 +52,8 @@ named!(pub parse_field_table<FieldTable>,          do_parse!(length: parse_long_
     acc
 })) >> (table)));
 
-pub fn parse_flags(i: &[u8], nb: usize) -> IResult<&[u8], AMQPFlags> {
-    map!(i, take!((nb + 7)/8), |b: &[u8]| AMQPFlags::from_bytes(b.to_vec(), nb))
+pub fn parse_flags<'a, 'b>(i: &'a [u8], names: &'b Vec<&'b str>) -> IResult<&'a [u8], AMQPFlags> {
+    map!(i, take!((names.len() + 7)/8), |b: &[u8]| AMQPFlags::from_bytes(names, b.to_vec()))
 }
 
 #[cfg(test)]
@@ -184,17 +184,18 @@ mod test {
     #[test]
     fn test_parse_flags() {
         let mut flags = AMQPFlags::new();
-        flags.add_flag(true);
-        flags.add_flag(false);
-        flags.add_flag(true);
-        flags.add_flag(true);
-        assert_eq!(parse_flags(&[0b00001101], 4), IResult::Done(EMPTY, flags.clone()));
-        flags.add_flag(true);
-        flags.add_flag(false);
-        flags.add_flag(true);
-        flags.add_flag(true);
-        flags.add_flag(false);
-        flags.add_flag(true);
-        assert_eq!(parse_flags(&[0b11011101, 0b00000010], 10), IResult::Done(EMPTY, flags));
+        let mut names = Vec::new();
+        names.push("a"); flags.add_flag("a".to_string(), true);
+        names.push("b"); flags.add_flag("b".to_string(), false);
+        names.push("c"); flags.add_flag("c".to_string(), true);
+        names.push("d"); flags.add_flag("d".to_string(), true);
+        assert_eq!(parse_flags(&[0b00001101], &names), IResult::Done(EMPTY, flags.clone()));
+        names.push("e"); flags.add_flag("e".to_string(), true);
+        names.push("f"); flags.add_flag("f".to_string(), false);
+        names.push("g"); flags.add_flag("g".to_string(), true);
+        names.push("h"); flags.add_flag("h".to_string(), true);
+        names.push("i"); flags.add_flag("i".to_string(), false);
+        names.push("j"); flags.add_flag("j".to_string(), true);
+        assert_eq!(parse_flags(&[0b11011101, 0b00000010], &names), IResult::Done(EMPTY, flags));
     }
 }

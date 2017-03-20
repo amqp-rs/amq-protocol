@@ -235,17 +235,17 @@ mod test {
     #[test]
     fn test_gen_flags() {
         let mut flags = AMQPFlags::new();
-        flags.add_flag(true);
-        flags.add_flag(false);
-        flags.add_flag(true);
-        flags.add_flag(true);
+        flags.add_flag("a".to_string(), true);
+        flags.add_flag("b".to_string(), false);
+        flags.add_flag("c".to_string(), true);
+        flags.add_flag("d".to_string(), true);
         assert_eq!(gen_flags((&mut [0], 0), &flags).unwrap(), (&mut [0b00001101][..], 1));
-        flags.add_flag(true);
-        flags.add_flag(false);
-        flags.add_flag(true);
-        flags.add_flag(true);
-        flags.add_flag(false);
-        flags.add_flag(true);
+        flags.add_flag("e".to_string(), true);
+        flags.add_flag("f".to_string(), false);
+        flags.add_flag("g".to_string(), true);
+        flags.add_flag("h".to_string(), true);
+        flags.add_flag("i".to_string(), false);
+        flags.add_flag("j".to_string(), true);
         assert_eq!(gen_flags((&mut [0, 0], 0), &flags).unwrap(), (&mut [0b11011101, 0b00000010][..], 2));
     }
 }
