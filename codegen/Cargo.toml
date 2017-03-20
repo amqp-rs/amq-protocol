@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-codegen"
-version       = "0.11.0"
+version       = "0.12.0"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications - codegen"
 repository    = "https://github.com/Keruspe/amq-protocol"
