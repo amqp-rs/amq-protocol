@@ -1,4 +1,4 @@
-use types::Boolean;
+use types::{Boolean, ShortString};
 
 use std::collections::HashMap;
 
