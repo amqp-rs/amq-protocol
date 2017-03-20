@@ -1,4 +1,4 @@
-use specs::AMQPArgument;
+use specs::{AMQPArgument, AMQPFlagArgument};
 use util::*;
 
 use handlebars::{self, Handlebars, Helper, Renderable, RenderContext, RenderError, to_json};
@@ -18,6 +18,7 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self.register_helper("camel",         Box::new(camel_helper));
         self.register_helper("snake",         Box::new(snake_helper));
         self.register_helper("each_argument", Box::new(each_argument_helper));
+        self.register_helper("each_flag",     Box::new(each_flag_helper));
         self
     }
 }
@@ -54,9 +55,50 @@ pub fn each_argument_helper (h: &Helper, r: &Handlebars, rc: &mut RenderContext)
             if let Some(block_param) = h.block_param() {
                 let mut map = BTreeMap::new();
                 match *argument {
-                    AMQPArgument::Value(ref v) => map.insert(block_param.to_string(), to_json(v)),
-                    AMQPArgument::Flags(ref f) => map.insert(block_param.to_string(), to_json(f)),
+                    AMQPArgument::Value(ref v) => {
+                        map.insert(block_param.to_string(), to_json(v));
+                        map.insert("argument_is_value".to_string(), to_json(&true));
+                    },
+                    AMQPArgument::Flags(ref f) => {
+                        map.insert(block_param.to_string(), to_json(f));
+                        map.insert("argument_is_value".to_string(), to_json(&false));
+                    },
                 };
+                local_rc.push_block_context(&map);
+            }
+            t.render(r, &mut local_rc)?;
+            if h.block_param().is_some() {
+                local_rc.pop_block_context();
+            }
+            if local_path_root.is_some() {
+                local_rc.pop_local_path_root();
+            }
+        }
+        rc.demote_local_vars();
+    }
+    Ok(())
+}
+
+pub fn each_flag_helper (h: &Helper, r: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
+    let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_flag\""))?;
+
+    if let Some(t) = h.template() {
+        rc.promote_local_vars();
+        let local_path_root = value.path_root().map(|p| format!("{}/{}", rc.get_path(), p));
+        let flags : Vec<AMQPFlagArgument> = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not a Vec<AMQPFlagArgument> for helper \"each_flag\""))?;
+        for (index, flag) in flags.iter().enumerate() {
+            let mut local_rc = rc.derive();
+            if let Some(ref p) = local_path_root {
+                local_rc.push_local_path_root(p.clone());
+            }
+            local_rc.set_local_var("@index".to_string(), to_json(&index));
+            if let Some(inner_path) = value.path() {
+                let new_path = format!("{}/{}.[{}]", local_rc.get_path(), inner_path, index);
+                local_rc.set_path(new_path.clone());
+            }
+            if let Some(block_param) = h.block_param() {
+                let mut map = BTreeMap::new();
+                map.insert(block_param.to_string(), to_json(flag));
                 local_rc.push_block_context(&map);
             }
             t.render(r, &mut local_rc)?;
@@ -102,7 +144,13 @@ port {{protocol.port}}
 {{method.id}} - {{method.name}}
 synchronous: {{method.synchronous}}
 {{#each_argument method.arguments as |argument| ~}}
+{{#if argument_is_value ~}}
 {{argument.name}}({{argument.domain}}): {{argument.type}}
+{{else}}
+{{#each_flag argument as |flag| ~}}
+{{flag.name}}: {{flag.default_value}}
+{{/each_flag ~}}
+{{/if ~}}
 {{/each_argument ~}}
 {{/each ~}}
 {{/each ~}}
@@ -139,7 +187,16 @@ synchronous: {{method.synchronous}}
                                     default_value: Some(AMQPValue::LongString("value1".to_string())),
                                     domain:        Some("domain1".to_string()),
                                 }),
-                                // TODO: add a Flags argument
+                                AMQPArgument::Flags(vec![
+                                    AMQPFlagArgument {
+                                        name:         "flag1".to_string(),
+                                        default_value: true,
+                                    },
+                                    AMQPFlagArgument {
+                                        name:         "flag2".to_string(),
+                                        default_value: false,
+                                    },
+                                ]),
                             ],
                             name:        "method1".to_string(),
                             synchronous: true,
@@ -176,6 +233,9 @@ property1: LongString
 64 - method1
 synchronous: true
 argument1(domain1): LongString
+
+flag1: true
+flag2: false
 
 "#);
     }
