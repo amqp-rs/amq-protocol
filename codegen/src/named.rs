@@ -29,5 +29,6 @@ named!(AMQProtocolDefinition);
 named!(AMQPConstant);
 named!(AMQPClass);
 named!(AMQPMethod);
-named!(AMQPArgument);
+named!(AMQPValueArgument);
+named!(AMQPFlagArgument);
 named!(AMQPProperty);

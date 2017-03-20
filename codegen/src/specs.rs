@@ -53,12 +53,24 @@ pub struct AMQPMethod {
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct AMQPArgument {
+pub enum AMQPArgument {
+    Value(AMQPValueArgument),
+    Flags(Vec<AMQPFlagArgument>),
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct AMQPValueArgument {
     #[serde(rename="type")]
     pub amqp_type:     AMQPType,
     pub name:          ShortString,
     pub default_value: Option<AMQPValue>,
     pub domain:        Option<ShortString>,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct AMQPFlagArgument {
+    pub name:          ShortString,
+    pub default_value: Boolean,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

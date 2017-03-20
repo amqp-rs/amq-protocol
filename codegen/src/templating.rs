@@ -1,6 +1,10 @@
+use specs::AMQPArgument;
 use util::*;
 
-use handlebars::{self, Handlebars, Helper, RenderContext, RenderError};
+use handlebars::{self, Handlebars, Helper, Renderable, RenderContext, RenderError, to_json};
+use serde_json::{self};
+
+use std::collections::BTreeMap;
 
 pub type CodeGenerator = Handlebars;
 
@@ -11,8 +15,9 @@ pub trait HandlebarsAMQPExtension {
 impl HandlebarsAMQPExtension for CodeGenerator {
     fn register_amqp_helpers(mut self) -> CodeGenerator {
         self.register_escape_fn(handlebars::no_escape);
-        self.register_helper("camel", Box::new(camel_helper));
-        self.register_helper("snake", Box::new(snake_helper));
+        self.register_helper("camel",         Box::new(camel_helper));
+        self.register_helper("snake",         Box::new(snake_helper));
+        self.register_helper("each_argument", Box::new(each_argument_helper));
         self
     }
 }
@@ -26,6 +31,44 @@ pub fn camel_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Resu
 pub fn snake_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
     let param = h.param(0).expect("no param given to snake").value().as_str().expect("non-string param given to snake");
     rc.writer.write(snake_case(param).as_bytes())?;
+    Ok(())
+}
+
+pub fn each_argument_helper (h: &Helper, r: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
+    let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_argument\""))?;
+
+    if let Some(t) = h.template() {
+        rc.promote_local_vars();
+        let local_path_root = value.path_root().map(|p| format!("{}/{}", rc.get_path(), p));
+        let arguments : Vec<AMQPArgument> = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not a Vec<AMQPArgument> for helper \"each_argument\""))?;
+        for (index, argument) in arguments.iter().enumerate() {
+            let mut local_rc = rc.derive();
+            if let Some(ref p) = local_path_root {
+                local_rc.push_local_path_root(p.clone());
+            }
+            local_rc.set_local_var("@index".to_string(), to_json(&index));
+            if let Some(inner_path) = value.path() {
+                let new_path = format!("{}/{}.[{}]", local_rc.get_path(), inner_path, index);
+                local_rc.set_path(new_path.clone());
+            }
+            if let Some(block_param) = h.block_param() {
+                let mut map = BTreeMap::new();
+                match *argument {
+                    AMQPArgument::Value(ref v) => map.insert(block_param.to_string(), to_json(v)),
+                    AMQPArgument::Flags(ref f) => map.insert(block_param.to_string(), to_json(f)),
+                };
+                local_rc.push_block_context(&map);
+            }
+            t.render(r, &mut local_rc)?;
+            if h.block_param().is_some() {
+                local_rc.pop_block_context();
+            }
+            if local_path_root.is_some() {
+                local_rc.pop_local_path_root();
+            }
+        }
+        rc.demote_local_vars();
+    }
     Ok(())
 }
 
@@ -58,9 +101,9 @@ port {{protocol.port}}
 {{#each class.methods as |method| ~}}
 {{method.id}} - {{method.name}}
 synchronous: {{method.synchronous}}
-{{#each method.arguments as |argument| ~}}
+{{#each_argument method.arguments as |argument| ~}}
 {{argument.name}}({{argument.domain}}): {{argument.type}}
-{{/each ~}}
+{{/each_argument ~}}
 {{/each ~}}
 {{/each ~}}
 "#;
@@ -90,12 +133,13 @@ synchronous: {{method.synchronous}}
                         AMQPMethod {
                             id:          64,
                             arguments:   vec![
-                                AMQPArgument {
+                                AMQPArgument::Value(AMQPValueArgument {
                                     amqp_type:     AMQPType::LongString,
                                     name:          "argument1".to_string(),
                                     default_value: Some(AMQPValue::LongString("value1".to_string())),
                                     domain:        Some("domain1".to_string()),
-                                }
+                                }),
+                                // TODO: add a Flags argument
                             ],
                             name:        "method1".to_string(),
                             synchronous: true,

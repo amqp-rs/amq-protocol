@@ -140,7 +140,7 @@ struct _AMQPArgument {
 
 impl _AMQPArgument {
     fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>) -> AMQPArgument {
-        AMQPArgument {
+        AMQPArgument::Value(AMQPValueArgument {
             amqp_type:     match self.amqp_type {
                 Some(ref amqp_type) => amqp_type.to_specs(),
                 None                => {
@@ -154,7 +154,7 @@ impl _AMQPArgument {
             name:          self.name.clone(),
             default_value: self.default_value.as_ref().map(From::from),
             domain:        self.domain.clone(),
-        }
+        })
     }
 }
 
