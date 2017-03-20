@@ -1,5 +1,3 @@
-use amq_protocol_types::*;
-
 pub const NAME:          &'static str = "{{protocol.name}}";
 pub const MAJOR_VERSION: u8           = {{protocol.major_version}};
 pub const MINOR_VERSION: u8           = {{protocol.minor_version}};
