@@ -24,13 +24,15 @@ impl HandlebarsAMQPExtension for CodeGenerator {
 }
 
 pub fn camel_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
-    let param = h.param(0).expect("no param given to camel").value().as_str().expect("non-string param given to camel");
+    let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"camel\""))?;
+    let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"camel\""))?;
     rc.writer.write(camel_case(param).as_bytes())?;
     Ok(())
 }
 
 pub fn snake_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
-    let param = h.param(0).expect("no param given to snake").value().as_str().expect("non-string param given to snake");
+    let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
+    let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"snake\""))?;
     rc.writer.write(snake_case(param).as_bytes())?;
     Ok(())
 }
