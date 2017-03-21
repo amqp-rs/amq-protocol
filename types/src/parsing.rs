@@ -4,28 +4,30 @@ use value::*;
 
 use nom::{be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be_f32, be_f64, IResult};
 
-/* FIXME: we convert to a Some so that nom can happily handle some _ case which would otherwise fail as we're exhaustive */
-named!(pub parse_value<AMQPValue>,                 switch!(parse_type,
-    AMQPType::Boolean        => map!(call!(parse_boolean),          |b| AMQPValue::Boolean(b))        |
-    AMQPType::ShortShortInt  => map!(call!(parse_short_short_int),  |i| AMQPValue::ShortShortInt(i))  |
-    AMQPType::ShortShortUInt => map!(call!(parse_short_short_uint), |u| AMQPValue::ShortShortUInt(u)) |
-    AMQPType::ShortInt       => map!(call!(parse_short_int),        |i| AMQPValue::ShortInt(i))       |
-    AMQPType::ShortUInt      => map!(call!(parse_short_uint),       |u| AMQPValue::ShortUInt(u))      |
-    AMQPType::LongInt        => map!(call!(parse_long_int),         |i| AMQPValue::LongInt(i))        |
-    AMQPType::LongUInt       => map!(call!(parse_long_uint),        |u| AMQPValue::LongUInt(u))       |
-    AMQPType::LongLongInt    => map!(call!(parse_long_long_int),    |i| AMQPValue::LongLongInt(i))    |
-    AMQPType::LongLongUInt   => map!(call!(parse_long_long_uint),   |u| AMQPValue::LongLongUInt(u))   |
-    AMQPType::Float          => map!(call!(parse_float),            |f| AMQPValue::Float(f))          |
-    AMQPType::Double         => map!(call!(parse_double),           |d| AMQPValue::Double(d))         |
-    AMQPType::DecimalValue   => map!(call!(parse_decimal_value),    |d| AMQPValue::DecimalValue(d))   |
-    AMQPType::ShortString    => map!(call!(parse_short_string),     |s| AMQPValue::ShortString(s))    |
-    AMQPType::LongString     => map!(call!(parse_long_string),      |s| AMQPValue::LongString(s))     |
-    AMQPType::FieldArray     => map!(call!(parse_field_array),      |a| AMQPValue::FieldArray(a))     |
-    AMQPType::Timestamp      => map!(call!(parse_timestamp),        |t| AMQPValue::Timestamp(t))      |
-    AMQPType::FieldTable     => map!(call!(parse_field_table),      |t| AMQPValue::FieldTable(t))     |
-    AMQPType::Void           => value!(AMQPValue::Void)
-));
+pub fn parse_raw_value(i: &[u8], amqp_type: AMQPType) -> IResult<&[u8], AMQPValue> {
+    match amqp_type {
+        AMQPType::Boolean        => map!(i, call!(parse_boolean),          |b| AMQPValue::Boolean(b)),
+        AMQPType::ShortShortInt  => map!(i, call!(parse_short_short_int),  |i| AMQPValue::ShortShortInt(i)),
+        AMQPType::ShortShortUInt => map!(i, call!(parse_short_short_uint), |u| AMQPValue::ShortShortUInt(u)),
+        AMQPType::ShortInt       => map!(i, call!(parse_short_int),        |i| AMQPValue::ShortInt(i)),
+        AMQPType::ShortUInt      => map!(i, call!(parse_short_uint),       |u| AMQPValue::ShortUInt(u)),
+        AMQPType::LongInt        => map!(i, call!(parse_long_int),         |i| AMQPValue::LongInt(i)),
+        AMQPType::LongUInt       => map!(i, call!(parse_long_uint),        |u| AMQPValue::LongUInt(u)),
+        AMQPType::LongLongInt    => map!(i, call!(parse_long_long_int),    |i| AMQPValue::LongLongInt(i)),
+        AMQPType::LongLongUInt   => map!(i, call!(parse_long_long_uint),   |u| AMQPValue::LongLongUInt(u)),
+        AMQPType::Float          => map!(i, call!(parse_float),            |f| AMQPValue::Float(f)),
+        AMQPType::Double         => map!(i, call!(parse_double),           |d| AMQPValue::Double(d)),
+        AMQPType::DecimalValue   => map!(i, call!(parse_decimal_value),    |d| AMQPValue::DecimalValue(d)),
+        AMQPType::ShortString    => map!(i, call!(parse_short_string),     |s| AMQPValue::ShortString(s)),
+        AMQPType::LongString     => map!(i, call!(parse_long_string),      |s| AMQPValue::LongString(s)),
+        AMQPType::FieldArray     => map!(i, call!(parse_field_array),      |a| AMQPValue::FieldArray(a)),
+        AMQPType::Timestamp      => map!(i, call!(parse_timestamp),        |t| AMQPValue::Timestamp(t)),
+        AMQPType::FieldTable     => map!(i, call!(parse_field_table),      |t| AMQPValue::FieldTable(t)),
+        AMQPType::Void           => value!(i, AMQPValue::Void),
+    }
+}
 
+named!(pub parse_value<AMQPValue>,                 do_parse!(amqp_type: call!(parse_type) >> value: apply!(parse_raw_value, amqp_type) >> (value)));
 named!(pub parse_type<AMQPType>,                   map_opt!(be_u8, |t| AMQPType::from_id(t as char)));
 
 named!(pub parse_boolean<Boolean>,                 map!(be_u8, |b| b != 0));
@@ -68,6 +70,12 @@ mod test {
     fn test_parse_value() {
         assert_eq!(parse_value(&[84, 42, 42, 42, 42, 42,  42,  42,  42]),  IResult::Done(EMPTY, AMQPValue::Timestamp(3038287259199220266)));
         assert_eq!(parse_value(&[83, 0,  0,  0,  4,  116, 101, 115, 116]), IResult::Done(EMPTY, AMQPValue::LongString("test".to_string())));
+    }
+
+    #[test]
+    fn test_parse_raw_value() {
+        assert_eq!(parse_raw_value(&[42, 42, 42, 42, 42,  42,  42,  42],  AMQPType::Timestamp),  IResult::Done(EMPTY, AMQPValue::Timestamp(3038287259199220266)));
+        assert_eq!(parse_raw_value(&[0,  0,  0,  4,  116, 101, 115, 116], AMQPType::LongString), IResult::Done(EMPTY, AMQPValue::LongString("test".to_string())));
     }
 
     #[test]
