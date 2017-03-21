@@ -4,27 +4,31 @@ use value::*;
 
 use cookie_factory::*;
 
-pub fn gen_value<'a>(x: (&'a mut [u8], usize), v: &AMQPValue) -> Result<(&'a mut [u8], usize), GenError> {
+pub fn gen_raw_value<'a>(x: (&'a mut [u8], usize), v: &AMQPValue) -> Result<(&'a mut [u8], usize), GenError> {
     match *v {
-        AMQPValue::Boolean(ref b)        => do_gen!(x, gen_type(&v.get_type()) >> gen_boolean(b)),
-        AMQPValue::ShortShortInt(ref i)  => do_gen!(x, gen_type(&v.get_type()) >> gen_short_short_int(i)),
-        AMQPValue::ShortShortUInt(ref u) => do_gen!(x, gen_type(&v.get_type()) >> gen_short_short_uint(u)),
-        AMQPValue::ShortInt(ref i)       => do_gen!(x, gen_type(&v.get_type()) >> gen_short_int(i)),
-        AMQPValue::ShortUInt(ref u)      => do_gen!(x, gen_type(&v.get_type()) >> gen_short_uint(u)),
-        AMQPValue::LongInt(ref i)        => do_gen!(x, gen_type(&v.get_type()) >> gen_long_int(i)),
-        AMQPValue::LongUInt(ref u)       => do_gen!(x, gen_type(&v.get_type()) >> gen_long_uint(u)),
-        AMQPValue::LongLongInt(ref i)    => do_gen!(x, gen_type(&v.get_type()) >> gen_long_long_int(i)),
-        AMQPValue::LongLongUInt(ref u)   => do_gen!(x, gen_type(&v.get_type()) >> gen_long_long_uint(u)),
-        AMQPValue::Float(ref f)          => do_gen!(x, gen_type(&v.get_type()) >> gen_float(f)),
-        AMQPValue::Double(ref d)         => do_gen!(x, gen_type(&v.get_type()) >> gen_double(d)),
-        AMQPValue::DecimalValue(ref d)   => do_gen!(x, gen_type(&v.get_type()) >> gen_decimal_value(d)),
-        AMQPValue::ShortString(ref s)    => do_gen!(x, gen_type(&v.get_type()) >> gen_short_string(s)),
-        AMQPValue::LongString(ref s)     => do_gen!(x, gen_type(&v.get_type()) >> gen_long_string(s)),
-        AMQPValue::FieldArray(ref a)     => do_gen!(x, gen_type(&v.get_type()) >> gen_field_array(a)),
-        AMQPValue::Timestamp(ref t)      => do_gen!(x, gen_type(&v.get_type()) >> gen_timestamp(t)),
-        AMQPValue::FieldTable(ref t)     => do_gen!(x, gen_type(&v.get_type()) >> gen_field_table(t)),
-        AMQPValue::Void                  => gen_type(x, &v.get_type()),
+        AMQPValue::Boolean(ref b)        => gen_boolean(x, b),
+        AMQPValue::ShortShortInt(ref i)  => gen_short_short_int(x, i),
+        AMQPValue::ShortShortUInt(ref u) => gen_short_short_uint(x, u),
+        AMQPValue::ShortInt(ref i)       => gen_short_int(x, i),
+        AMQPValue::ShortUInt(ref u)      => gen_short_uint(x, u),
+        AMQPValue::LongInt(ref i)        => gen_long_int(x, i),
+        AMQPValue::LongUInt(ref u)       => gen_long_uint(x, u),
+        AMQPValue::LongLongInt(ref i)    => gen_long_long_int(x, i),
+        AMQPValue::LongLongUInt(ref u)   => gen_long_long_uint(x, u),
+        AMQPValue::Float(ref f)          => gen_float(x, f),
+        AMQPValue::Double(ref d)         => gen_double(x, d),
+        AMQPValue::DecimalValue(ref d)   => gen_decimal_value(x, d),
+        AMQPValue::ShortString(ref s)    => gen_short_string(x, s),
+        AMQPValue::LongString(ref s)     => gen_long_string(x, s),
+        AMQPValue::FieldArray(ref a)     => gen_field_array(x, a),
+        AMQPValue::Timestamp(ref t)      => gen_timestamp(x, t),
+        AMQPValue::FieldTable(ref t)     => gen_field_table(x, t),
+        AMQPValue::Void                  => Ok(x),
     }
+}
+
+pub fn gen_value<'a>(x: (&'a mut [u8], usize), v: &AMQPValue) -> Result<(&'a mut [u8], usize), GenError> {
+    do_gen!(x, gen_type(&v.get_type()) >> gen_raw_value(v))
 }
 
 pub fn gen_type<'a>(x: (&'a mut [u8], usize), t: &AMQPType) -> Result<(&'a mut [u8], usize), GenError> {
