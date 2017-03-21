@@ -124,6 +124,18 @@ mod test {
     use super::*;
 
     #[test]
+    fn test_gen_raw_value() {
+        assert_eq!(gen_raw_value((&mut [0, 0, 0, 0], 0), &AMQPValue::LongInt(42)).unwrap(),   (&mut [0, 0, 0, 42][..], 4));
+        assert_eq!(gen_raw_value((&mut [0],          0), &AMQPValue::Boolean(true)).unwrap(), (&mut [1][..],           1));
+    }
+
+    #[test]
+    fn test_gen_value() {
+        assert_eq!(gen_value((&mut [0, 0, 0, 0, 0], 0), &AMQPValue::LongInt(42)).unwrap(),   (&mut [73,  0, 0, 0, 42][..], 5));
+        assert_eq!(gen_value((&mut [0, 0],          0), &AMQPValue::Boolean(true)).unwrap(), (&mut [116, 1][..],           2));
+    }
+
+    #[test]
     fn test_gen_type() {
         assert_eq!(gen_type((&mut [0], 0), &AMQPType::ShortShortInt).unwrap(), (&mut [98][..], 1));
         assert_eq!(gen_type((&mut [0], 0), &AMQPType::ShortInt).unwrap(),      (&mut [85][..], 1));
