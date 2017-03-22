@@ -19,6 +19,8 @@ amq-protocol-codegen = "^0.16.0"
 [dependencies]
 amq-protocol-codegen = "^0.16.0"
 amq-protocol-types   = "^0.9.0"
+cookie-factory       = "^0.2.0"
+nom                  = "^2.2.0"
 
 [badges]
 travis-ci = { repository = "Keruspe/amq-protocol" }
