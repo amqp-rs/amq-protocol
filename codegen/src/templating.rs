@@ -1,6 +1,7 @@
 use specs::{AMQPArgument, AMQPFlagArgument};
 use util::*;
 
+use amq_protocol_types::AMQPType;
 use handlebars::{self, Handlebars, Helper, Renderable, RenderContext, RenderError, to_json};
 use serde_json::{self};
 
@@ -17,6 +18,7 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self.register_escape_fn(handlebars::no_escape);
         self.register_helper("camel",         Box::new(camel_helper));
         self.register_helper("snake",         Box::new(snake_helper));
+        self.register_helper("snake_type",    Box::new(snake_type_helper));
         self.register_helper("each_argument", Box::new(each_argument_helper));
         self.register_helper("each_flag",     Box::new(each_flag_helper));
         self
@@ -34,6 +36,13 @@ pub fn snake_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Resu
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"snake\""))?;
     rc.writer.write(snake_case(param).as_bytes())?;
+    Ok(())
+}
+
+pub fn snake_type_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
+    let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
+    let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"snake_type\""))?;
+    rc.writer.write(snake_case(&param.to_string()).as_bytes())?;
     Ok(())
 }
 
