@@ -36,3 +36,24 @@ pub fn snake_case(name: &str) -> String {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_camel_case() {
+        assert_eq!(camel_case(""), "");
+        assert_eq!(camel_case("foobar"), "Foobar");
+        assert_eq!(camel_case("foo_bar"), "FooBar");
+        assert_eq!(camel_case("_foo__bar baz-zzz"), "FooBarBazZzz");
+    }
+
+    #[test]
+    fn test_snake_case() {
+        assert_eq!(snake_case(""), "");
+        assert_eq!(snake_case("Foobar"), "foobar");
+        assert_eq!(snake_case("FooBar"), "foo_bar");
+        assert_eq!(snake_case("Foo-BarBaz_zzz"), "foo_bar_baz_zzz");
+    }
+}
