@@ -37,7 +37,9 @@ impl _AMQProtocolDefinition {
             port:          self.port,
             copyright:     self.copyright.iter().join(""),
             domains:       domains,
-            constants:     self.constants.iter().map(|constant| constant.to_specs()).collect(),
+            constants:     self.constants.iter().filter_map(|constant| if constant.klass.is_none() { Some(constant.to_specs()) } else { None }).collect(),
+            soft_errors:   self.constants.iter().filter_map(|constant| if let Some(_AMQPErrorKind::Soft) = constant.klass { Some(constant.to_specs()) } else { None }).collect(),
+            hard_errors:   self.constants.iter().filter_map(|constant| if let Some(_AMQPErrorKind::Hard) = constant.klass { Some(constant.to_specs()) } else { None }).collect(),
             classes:       classes,
         }
     }
@@ -87,11 +89,19 @@ impl _AMQPType {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct _AMQPConstant {
+enum  _AMQPErrorKind {
+    #[serde(rename="soft-error")]
+    Soft,
+    #[serde(rename="hard-error")]
+    Hard,
+}
+
+#[derive(Debug, Deserialize)]
+struct _AMQPConstant {
     pub name:   ShortString,
     pub value:  ShortUInt,
     #[serde(rename="class")]
-    pub klass: Option<ShortString>,
+    pub klass: Option<_AMQPErrorKind>,
 }
 
 impl _AMQPConstant {
@@ -100,7 +110,6 @@ impl _AMQPConstant {
             name:      self.name.clone(),
             value:     self.value,
             amqp_type: if self.value > 255 { AMQPType::ShortUInt } else { AMQPType::ShortShortUInt },
-            klass:     self.klass.clone(),
         }
     }
 }

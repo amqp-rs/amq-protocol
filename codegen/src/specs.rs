@@ -15,6 +15,8 @@ pub struct AMQProtocolDefinition {
     pub copyright:     LongString,
     pub domains:       BTreeMap<ShortString, AMQPType>,
     pub constants:     Vec<AMQPConstant>,
+    pub soft_errors:   Vec<AMQPConstant>,
+    pub hard_errors:   Vec<AMQPConstant>,
     pub classes:       Vec<AMQPClass>,
 }
 
@@ -32,8 +34,6 @@ pub struct AMQPConstant {
     pub value:     ShortUInt,
     #[serde(rename="type")]
     pub amqp_type: AMQPType,
-    #[serde(rename="class")]
-    pub klass:     Option<ShortString>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
