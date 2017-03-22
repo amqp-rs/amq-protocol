@@ -10,3 +10,15 @@ pub const COPYRIGHT:     &'static str   = r#"{{copyright}}"#;
 {{#each protocol.constants as |constant| ~}}
 pub const {{sanitize_name constant.name}}: {{constant.type}} = {{constant.value}};
 {{/each ~}}
+pub mod soft_errors {
+    use types::*;
+    {{#each protocol.soft_errors as |constant| ~}}
+    pub const {{sanitize_name constant.name}}: {{constant.type}} = {{constant.value}};
+    {{/each ~}}
+}
+pub mod hard_errors {
+    use types::*;
+    {{#each protocol.hard_errors as |constant| ~}}
+    pub const {{sanitize_name constant.name}}: {{constant.type}} = {{constant.value}};
+    {{/each ~}}
+}
