@@ -119,9 +119,15 @@ struct _AMQPMethod {
 
 impl _AMQPMethod {
     fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>) -> AMQPMethod {
+        let arguments = self.arguments_to_specs(domains);
+        let has_flags = arguments.iter().any(|arg| match *arg {
+            AMQPArgument::Value(_) => false,
+            AMQPArgument::Flags(_) => true,
+        });
         AMQPMethod {
             id:          self.id,
-            arguments:   self.arguments_to_specs(domains),
+            arguments:   arguments,
+            has_flags:   has_flags,
             name:        self.name.clone(),
             synchronous: self.synchronous.unwrap_or(false),
         }

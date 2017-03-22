@@ -47,6 +47,7 @@ pub struct AMQPClass {
 pub struct AMQPMethod {
     pub id:          ShortUInt,
     pub arguments:   Vec<AMQPArgument>,
+    pub has_flags:   Boolean,
     pub name:        ShortString,
     pub synchronous: Boolean,
 }

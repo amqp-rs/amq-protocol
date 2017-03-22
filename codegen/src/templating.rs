@@ -199,6 +199,7 @@ synchronous: {{method.synchronous}}
                                     },
                                 ]),
                             ],
+                            has_flags:   true,
                             name:        "method1".to_string(),
                             synchronous: true,
                         }
