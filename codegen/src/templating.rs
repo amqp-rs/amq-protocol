@@ -151,7 +151,7 @@ port {{protocol.port}}
 {{@key}}: {{this}}
 {{/each ~}}
 {{#each protocol.constants as |constant| ~}}
-{{constant.name}}({{constant.class}}) = {{constant.value}}
+{{constant.name}} = {{constant.value}}
 {{/each ~}}
 {{#each protocol.classes as |class| ~}}
 {{class.id}} - {{class.name}}
@@ -187,11 +187,13 @@ synchronous: {{method.synchronous}}
             domains:       domains,
             constants:     vec![
                 AMQPConstant {
-                    name:  "constant1".to_string(),
-                    value: 128,
-                    klass: Some("class1".to_string()),
+                    name:      "constant1".to_string(),
+                    amqp_type: AMQPType::ShortUInt,
+                    value:     128,
                 }
             ],
+            soft_errors:   Vec::new(),
+            hard_errors:   Vec::new(),
             classes:       vec![
                 AMQPClass {
                     id:            42,
@@ -246,7 +248,7 @@ Copyright 1
 Copyright 2
 port 5672
 domain1: LongString
-constant1(class1) = 128
+constant1 = 128
 42 - class1
 property1: LongString
 64 - method1
