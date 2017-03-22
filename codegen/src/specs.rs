@@ -28,10 +28,12 @@ impl AMQProtocolDefinition {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AMQPConstant {
-    pub name:  ShortString,
-    pub value: ShortUInt,
+    pub name:      ShortString,
+    pub value:     ShortUInt,
+    #[serde(rename="type")]
+    pub amqp_type: AMQPType,
     #[serde(rename="class")]
-    pub klass: Option<ShortString>,
+    pub klass:     Option<ShortString>,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

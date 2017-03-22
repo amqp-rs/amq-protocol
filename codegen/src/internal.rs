@@ -18,7 +18,7 @@ pub struct _AMQProtocolDefinition {
     port:          LongUInt,
     copyright:     Vec<LongString>,
     domains:       Vec<_AMQPDomain>,
-    constants:     Vec<AMQPConstant>,
+    constants:     Vec<_AMQPConstant>,
     classes:       Vec<_AMQPClass>,
 }
 
@@ -37,7 +37,7 @@ impl _AMQProtocolDefinition {
             port:          self.port,
             copyright:     self.copyright.iter().join(""),
             domains:       domains,
-            constants:     self.constants,
+            constants:     self.constants.iter().map(|constant| constant.to_specs()).collect(),
             classes:       classes,
         }
     }
@@ -82,6 +82,25 @@ impl _AMQPType {
             _AMQPType::LongStr   => AMQPType::LongString,
             _AMQPType::Table     => AMQPType::FieldTable,
             _AMQPType::Timestamp => AMQPType::Timestamp,
+        }
+    }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct _AMQPConstant {
+    pub name:   ShortString,
+    pub value:  ShortUInt,
+    #[serde(rename="class")]
+    pub klass: Option<ShortString>,
+}
+
+impl _AMQPConstant {
+    fn to_specs(&self) -> AMQPConstant {
+        AMQPConstant {
+            name:      self.name.clone(),
+            value:     self.value,
+            amqp_type: if self.value > 255 { AMQPType::ShortUInt } else { AMQPType::ShortShortUInt },
+            klass:     self.klass.clone(),
         }
     }
 }
