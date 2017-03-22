@@ -1,7 +1,7 @@
 use std::ascii::AsciiExt;
 
 pub fn camel_case(name: &str) -> String {
-    let mut new_word: bool = true;
+    let mut new_word = true;
     name.chars().fold("".to_string(), |mut result, ch| {
         if ch == '-' || ch == '_' || ch == ' ' {
             new_word = true;
@@ -19,17 +19,20 @@ pub fn snake_case(name: &str) -> String {
         "type"   => "amqp_type".to_string(),
         "return" => "amqp_return".to_string(),
         name     => {
-            let mut new_word: bool = false;
+            let mut new_word       = false;
+            let mut last_was_upper = false;
             name.chars().fold("".to_string(), |mut result, ch| {
                 if ch == '-' || ch == '_' || ch == ' ' {
                     new_word = true;
                     result
                 } else {
-                    if new_word || (result.len() > 0 && ch.is_uppercase()) {
+                    let uppercase = ch.is_uppercase();
+                    if new_word || (!last_was_upper && result.len() > 0 && uppercase) {
                         result.push('_');
                         new_word = false;
                     }
-                    result.push(ch.to_ascii_lowercase());
+                    last_was_upper = uppercase;
+                    result.push(if uppercase { ch.to_ascii_lowercase() } else { ch });
                     result
                 }
             })
@@ -43,17 +46,24 @@ mod test {
 
     #[test]
     fn test_camel_case() {
-        assert_eq!(camel_case(""), "");
-        assert_eq!(camel_case("foobar"), "Foobar");
-        assert_eq!(camel_case("foo_bar"), "FooBar");
+        assert_eq!(camel_case(""),                  "");
+        assert_eq!(camel_case("foobar"),            "Foobar");
+        assert_eq!(camel_case("foo_bar"),           "FooBar");
         assert_eq!(camel_case("_foo__bar baz-zzz"), "FooBarBazZzz");
     }
 
     #[test]
     fn test_snake_case() {
-        assert_eq!(snake_case(""), "");
-        assert_eq!(snake_case("Foobar"), "foobar");
-        assert_eq!(snake_case("FooBar"), "foo_bar");
+        assert_eq!(snake_case(""),               "");
+        assert_eq!(snake_case("Foobar"),         "foobar");
+        assert_eq!(snake_case("FooBar"),         "foo_bar");
         assert_eq!(snake_case("Foo-BarBaz_zzz"), "foo_bar_baz_zzz");
+    }
+
+    #[test]
+    fn test_snake_case_uint() {
+        /* special case: we want UInt to be converted as uint */
+        assert_eq!(snake_case("UInt"),     "uint");
+        assert_eq!(snake_case("LongUInt"), "long_uint");
     }
 }
