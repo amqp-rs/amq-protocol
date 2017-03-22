@@ -14,10 +14,10 @@ build         = "build.rs"
 name = "amq_protocol"
 
 [build-dependencies]
-amq-protocol-codegen = "0.14.0"
+amq-protocol-codegen = {path="../codegen"}
 
 [dependencies]
-amq-protocol-codegen = "0.14.0"
+amq-protocol-codegen = {path="../codegen"}
 amq-protocol-types   = "^0.9.0"
 
 [badges]
