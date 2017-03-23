@@ -1,4 +1,9 @@
 use types::*;
+use types::flags::*;
+use types::generation::*;
+use types::parsing::*;
+
+use cookie_factory::GenError;
 
 pub const NAME:          &'static str   = "{{protocol.name}}";
 pub const MAJOR_VERSION: ShortShortUInt = {{protocol.major_version}};
@@ -109,6 +114,56 @@ pub mod {{snake class.name}} {
         {{/each_flag ~}}
         {{/if ~}}
         {{/each_argument ~}}
+    }
+
+    named!(pub parse_{{snake method.name}}<{{camel method.name}}>, do_parse!(
+        {{#each_argument method.arguments as |argument| ~}}
+        {{#if argument_is_value ~}}
+        {{snake argument.name}}: parse_{{snake_type argument.type}} >>
+        {{else}}
+        /* FIXME: support multiple flags structs? */
+        flags: apply!(parse_flags, &vec![
+            {{#each_flag argument as |flag| ~}}
+            "{{flag.name}}",
+            {{/each_flag ~}}
+        ]) >>
+        {{/if ~}}
+        {{/each_argument ~}}
+        ({{camel method.name}} {
+            {{#each_argument method.arguments as |argument| ~}}
+            {{#if argument_is_value ~}}
+            {{snake argument.name}}: {{snake argument.name}},
+            {{else}}
+            {{#each_flag argument as |flag| ~}}
+            {{snake flag.name}}: flags.get_flag("{{snake flag.name}}").unwrap_or({{flag.default_value}}),
+            {{/each_flag ~}}
+            {{/if ~}}
+            {{/each_argument ~}}
+        }))
+    );
+
+    pub fn gen_{{snake method.name}}<'a>(input:(&'a mut [u8], usize), {{#if method.has_arguments ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> Result<(&'a mut [u8],usize), GenError> {
+        {{#if method.has_flags ~}}
+        /* FIXME: support multiple flags structs? */
+        let mut flags = AMQPFlags::new();
+        {{#each_argument method.arguments as |argument| ~}}
+        {{#unless argument_is_value ~}}
+        {{#each_flag argument as |flag| ~}}
+        flags.add_flag("{{snake flag.name}}".to_string(), method.{{snake flag.name}});
+        {{/each_flag ~}}
+        {{/unless ~}}
+        {{/each_argument ~}}
+        {{/if ~}}
+        do_gen!(input,
+            gen_short_uint(&{{method.id}})
+            {{#each_argument method.arguments as |argument| ~}}
+            {{#if argument_is_value ~}}
+            >> gen_{{snake_type argument.type}}(&method.{{snake argument.name}})
+            {{else}}
+            >> gen_flags(&flags)
+            {{/if ~}}
+            {{/each_argument ~}}
+        )
     }
     {{/each ~}}
 }
