@@ -78,3 +78,38 @@ impl AMQPHardError {
         }
     }
 }
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum AMQPClass {
+    {{#each protocol.classes as |class| ~}}
+    {{camel class.name}}({{snake class.name}}::Methods),
+    {{/each ~}}
+}
+
+{{#each protocol.classes as |class|}}
+pub mod {{snake class.name}} {
+    use super::*;
+
+    #[derive(Clone, Debug, PartialEq)]
+    pub enum Methods {
+        {{#each class.methods as |method| ~}}
+        {{camel method.name}}({{camel method.name}}),
+        {{/each ~}}
+    }
+
+    {{#each class.methods as |method|}}
+    #[derive(Clone, Debug, PartialEq)]
+    pub struct {{camel method.name}} {
+        {{#each_argument method.arguments as |argument| ~}}
+        {{#if argument_is_value ~}}
+        pub {{snake argument.name}}: {{argument.type}},
+        {{else}}
+        {{#each_flag argument as |flag| ~}}
+        pub {{snake flag.name}}: Boolean,
+        {{/each_flag ~}}
+        {{/if ~}}
+        {{/each_argument ~}}
+    }
+    {{/each ~}}
+}
+{{/each ~}}
