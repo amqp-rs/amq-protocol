@@ -5,7 +5,7 @@ use serde_json::from_str;
 
 use std::collections::BTreeMap;
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQProtocolDefinition {
     pub name:          ShortString,
     pub major_version: ShortShortUInt,
@@ -28,7 +28,7 @@ impl AMQProtocolDefinition {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPConstant {
     pub name:      ShortString,
     pub value:     ShortUInt,
@@ -36,7 +36,7 @@ pub struct AMQPConstant {
     pub amqp_type: AMQPType,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPClass {
     pub id:            ShortUInt,
     pub methods:       Vec<AMQPMethod>,
@@ -45,7 +45,7 @@ pub struct AMQPClass {
     pub is_connection: Boolean,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPMethod {
     pub id:          ShortUInt,
     pub arguments:   Vec<AMQPArgument>,
@@ -54,13 +54,13 @@ pub struct AMQPMethod {
     pub synchronous: Boolean,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub enum AMQPArgument {
     Value(AMQPValueArgument),
     Flags(Vec<AMQPFlagArgument>),
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPValueArgument {
     #[serde(rename="type")]
     pub amqp_type:     AMQPType,
@@ -69,13 +69,13 @@ pub struct AMQPValueArgument {
     pub domain:        Option<ShortString>,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPFlagArgument {
     pub name:          ShortString,
     pub default_value: Boolean,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPProperty {
     #[serde(rename="type")]
     pub amqp_type: AMQPType,
