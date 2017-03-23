@@ -84,6 +84,14 @@ impl AMQPHardError {
     }
 }
 
+pub fn gen_class<'a>(input: (&'a mut [u8], usize), class: &AMQPClass) -> Result<(&'a mut [u8], usize), GenError> {
+    match *class {
+        {{#each protocol.classes as |class| ~}}
+        AMQPClass::{{camel class.name}}(ref {{snake class.name}}) => {{snake class.name}}::gen_{{snake class.name}}(input, {{snake class.name}}),
+        {{/each ~}}
+    }
+}
+
 #[derive(Clone, Debug, PartialEq)]
 pub enum AMQPClass {
     {{#each protocol.classes as |class| ~}}
@@ -103,7 +111,7 @@ pub mod {{snake class.name}} {
         None                => value!(None)
     ), |c: Option<{{snake class.name}}::Method>| c.expect("We can't get there as we mapped to Some, only there to get a parser after the trailing |")));
 
-    pub fn gen_{{snake class.name}}<'a>(input:(&'a mut [u8], usize), method: &Method) -> Result<(&'a mut [u8], usize), GenError> {
+    pub fn gen_{{snake class.name}}<'a>(input: (&'a mut [u8], usize), method: &Method) -> Result<(&'a mut [u8], usize), GenError> {
         match *method {
             {{#each class.methods as |method| ~}}
             Method::{{camel method.name}}(ref {{snake method.name}}) => {
@@ -163,7 +171,7 @@ pub mod {{snake class.name}} {
         })
     ));
 
-    pub fn gen_{{snake method.name}}<'a>(input:(&'a mut [u8], usize), {{#if method.has_arguments ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> Result<(&'a mut [u8],usize), GenError> {
+    pub fn gen_{{snake method.name}}<'a>(input: (&'a mut [u8], usize), {{#if method.has_arguments ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> Result<(&'a mut [u8],usize), GenError> {
         {{#if method.has_flags ~}}
         /* FIXME: support multiple flags structs? */
         let mut flags = AMQPFlags::new();
