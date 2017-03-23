@@ -84,6 +84,18 @@ impl AMQPHardError {
     }
 }
 
+{{#each protocol.classes as |class| ~}}
+use self::{{snake class.name}}::parse_{{snake class.name}};
+{{/each ~}}
+
+/* FIXME: simplify and get rid of the Option/Some when nom supports trailing | */
+named!(pub parse_class<AMQPClass>, map!(switch!(map!(parse_short_uint, Some),
+    {{#each protocol.classes as |class| ~}}
+    Some({{class.id}}) => map!(call!(parse_{{snake class.name}}), |c| Some(AMQPClass::{{camel class.name}}(c))) |
+    {{/each ~}}
+    None               => value!(None)
+), |c: Option<AMQPClass>| c.expect("We can't get there as we mapped to Some, only there to get a parser after the trailing |")));
+
 pub fn gen_class<'a>(input: (&'a mut [u8], usize), class: &AMQPClass) -> Result<(&'a mut [u8], usize), GenError> {
     match *class {
         {{#each protocol.classes as |class| ~}}
