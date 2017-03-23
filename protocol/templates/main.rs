@@ -87,7 +87,7 @@ impl AMQPHardError {
 #[derive(Clone, Debug, PartialEq)]
 pub enum AMQPClass {
     {{#each protocol.classes as |class| ~}}
-    {{camel class.name}}({{snake class.name}}::Methods),
+    {{camel class.name}}({{snake class.name}}::Method),
     {{/each ~}}
 }
 
@@ -95,8 +95,29 @@ pub enum AMQPClass {
 pub mod {{snake class.name}} {
     use super::*;
 
+    /* FIXME: simplify and get rid of the Option/Some when nom supports trailing | */
+    named!(pub parse_{{snake class.name}}<{{snake class.name}}::Method>, map!(switch!(map!(parse_short_uint, Some),
+        {{#each class.methods as |method| ~}}
+        Some({{method.id}}) => map!(call!(parse_{{snake method.name}}), |m| Some(Method::{{camel method.name}}(m))) |
+        {{/each ~}}
+        None                => value!(None)
+    ), |c: Option<{{snake class.name}}::Method>| c.expect("We can't get there as we mapped to Some, only there to get a parser after the trailing |")));
+
+    pub fn gen_{{snake class.name}}<'a>(input:(&'a mut [u8], usize), method: &Method) -> Result<(&'a mut [u8], usize), GenError> {
+        match *method {
+            {{#each class.methods as |method| ~}}
+            Method::{{camel method.name}}(ref {{snake method.name}}) => {
+                do_gen!(input,
+                    gen_short_uint(&{{class.id}}) >>
+                    gen_{{snake method.name}}({{snake method.name}})
+                )
+            },
+            {{/each ~}}
+        }
+    }
+
     #[derive(Clone, Debug, PartialEq)]
-    pub enum Methods {
+    pub enum Method {
         {{#each class.methods as |method| ~}}
         {{camel method.name}}({{camel method.name}}),
         {{/each ~}}
@@ -139,8 +160,8 @@ pub mod {{snake class.name}} {
             {{/each_flag ~}}
             {{/if ~}}
             {{/each_argument ~}}
-        }))
-    );
+        })
+    ));
 
     pub fn gen_{{snake method.name}}<'a>(input:(&'a mut [u8], usize), {{#if method.has_arguments ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> Result<(&'a mut [u8],usize), GenError> {
         {{#if method.has_flags ~}}
