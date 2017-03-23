@@ -199,8 +199,8 @@ synchronous: {{method.synchronous}}
                     id:            42,
                     methods:       vec![
                         AMQPMethod {
-                            id:          64,
-                            arguments:   vec![
+                            id:            64,
+                            arguments:     vec![
                                 AMQPArgument::Value(AMQPValueArgument {
                                     amqp_type:     AMQPType::LongString,
                                     name:          "argument1".to_string(),
@@ -218,9 +218,10 @@ synchronous: {{method.synchronous}}
                                     },
                                 ]),
                             ],
-                            has_flags:   true,
-                            name:        "method1".to_string(),
-                            synchronous: true,
+                            has_arguments: true,
+                            has_flags:     true,
+                            name:          "method1".to_string(),
+                            synchronous:   true,
                         }
                     ],
                     name:          "class1".to_string(),

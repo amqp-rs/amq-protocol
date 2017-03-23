@@ -47,11 +47,12 @@ pub struct AMQPClass {
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPMethod {
-    pub id:          ShortUInt,
-    pub arguments:   Vec<AMQPArgument>,
-    pub has_flags:   Boolean,
-    pub name:        ShortString,
-    pub synchronous: Boolean,
+    pub id:            ShortUInt,
+    pub arguments:     Vec<AMQPArgument>,
+    pub has_arguments: Boolean,
+    pub has_flags:     Boolean,
+    pub name:          ShortString,
+    pub synchronous:   Boolean,
 }
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
