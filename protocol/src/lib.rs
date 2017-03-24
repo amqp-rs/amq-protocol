@@ -4,5 +4,6 @@ extern crate amq_protocol_types;
 #[macro_use] extern crate nom;
 
 pub mod codegen;
+pub mod frame;
 pub mod protocol;
 pub mod types;
