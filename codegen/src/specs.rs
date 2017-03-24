@@ -38,11 +38,12 @@ pub struct AMQPConstant {
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPClass {
-    pub id:            ShortUInt,
-    pub methods:       Vec<AMQPMethod>,
-    pub name:          ShortString,
-    pub properties:    Vec<AMQPProperty>,
-    pub is_connection: Boolean,
+    pub id:             ShortUInt,
+    pub methods:        Vec<AMQPMethod>,
+    pub name:           ShortString,
+    pub properties:     Vec<AMQPProperty>,
+    pub has_properties: Boolean,
+    pub is_connection:  Boolean,
 }
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]

@@ -124,15 +124,17 @@ struct _AMQPClass {
 
 impl _AMQPClass {
     fn to_specs(&self, domains: &BTreeMap<String, AMQPType>) -> AMQPClass {
+        let properties     = match self.properties {
+            Some(ref properties) => properties.iter().map(|prop| prop.to_specs()).collect(),
+            None                 => Vec::new(),
+        };
         AMQPClass {
-            id:            self.id,
-            methods:       self.methods.iter().map(|method| method.to_specs(domains)).collect(),
-            name:          self.name.clone(),
-            properties:    match self.properties {
-                Some(ref properties) => properties.iter().map(|prop| prop.to_specs()).collect(),
-                None                 => Vec::new(),
-            },
-            is_connection: self.id == 10,
+            id:             self.id,
+            methods:        self.methods.iter().map(|method| method.to_specs(domains)).collect(),
+            name:           self.name.clone(),
+            properties:     properties,
+            has_properties: self.properties.as_ref().map(|p| !p.is_empty()).unwrap_or(false),
+            is_connection:  self.id == 10,
         }
     }
 }
