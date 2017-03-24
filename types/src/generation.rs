@@ -35,6 +35,10 @@ pub fn gen_type<'a>(x: (&'a mut [u8], usize), t: &AMQPType) -> Result<(&'a mut [
     gen_be_u8!(x, t.get_id() as u8)
 }
 
+pub fn gen_id<'a>(x: (&'a mut [u8], usize), id: &ShortUInt) -> Result<(&'a mut [u8], usize), GenError> {
+    gen_short_uint(x, id)
+}
+
 pub fn gen_boolean<'a>(x: (&'a mut [u8], usize), b: &Boolean) -> Result<(&'a mut [u8], usize), GenError> {
     gen_be_u8!(x, if *b { 1 } else { 0 })
 }
@@ -139,6 +143,12 @@ mod test {
     fn test_gen_type() {
         assert_eq!(gen_type((&mut [0], 0), &AMQPType::ShortShortInt).unwrap(), (&mut [98][..], 1));
         assert_eq!(gen_type((&mut [0], 0), &AMQPType::ShortInt).unwrap(),      (&mut [85][..], 1));
+    }
+
+    #[test]
+    fn test_gen_id() {
+        assert_eq!(gen_id((&mut [0, 0], 0), &0).unwrap(),     (&mut [0,   0][..],   2));
+        assert_eq!(gen_id((&mut [0, 0], 0), &65535).unwrap(), (&mut [255, 255][..], 2));
     }
 
     #[test]
