@@ -12,9 +12,13 @@ pub const REVISION:      ShortShortUInt = {{protocol.revision}};
 pub const PORT:          LongUInt       = {{protocol.port}};
 pub const COPYRIGHT:     &'static str   = r#"{{copyright}}"#;
 
-{{#each protocol.constants as |constant| ~}}
-pub const {{sanitize_name constant.name}}: {{constant.type}} = {{constant.value}};
-{{/each ~}}
+pub mod constants {
+    use super::*;
+
+    {{#each protocol.constants as |constant| ~}}
+    pub const {{sanitize_name constant.name}}: {{constant.type}} = {{constant.value}};
+    {{/each ~}}
+}
 
 pub enum AMQPError {
     Soft(AMQPSoftError),
