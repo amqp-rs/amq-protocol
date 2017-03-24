@@ -16,8 +16,8 @@ fn main() {
     let mut codegen = CodeGenerator::new().register_amqp_helpers();
     let mut data    = BTreeMap::new();
 
-    codegen.register_template_string("main", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/templates/main.rs")).to_string()).expect("Failed to register main template");
+    codegen.register_template_string("protocol", include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/templates/protocol.rs")).to_string()).expect("Failed to register protocol template");
     data.insert("protocol".to_string(), specs);
 
-    writeln!(f, "{}", codegen.render("main", &data).expect("Failed to render main template")).expect("Failed to generate protocol.rs");
+    writeln!(f, "{}", codegen.render("protocol", &data).expect("Failed to render protocol template")).expect("Failed to generate protocol.rs");
 }
