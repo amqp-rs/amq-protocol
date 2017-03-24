@@ -105,7 +105,7 @@ pub fn gen_class<'a>(input: (&'a mut [u8], usize), class: &AMQPClass) -> Result<
 #[derive(Clone, Debug, PartialEq)]
 pub enum AMQPClass {
     {{#each protocol.classes as |class| ~}}
-    {{camel class.name}}({{snake class.name}}::Method),
+    {{camel class.name}}({{snake class.name}}::AMQPMethod),
     {{/each ~}}
 }
 
@@ -113,16 +113,16 @@ pub enum AMQPClass {
 pub mod {{snake class.name}} {
     use super::*;
 
-    named!(pub parse_{{snake class.name}}<{{snake class.name}}::Method>, switch!(parse_short_uint,
+    named!(pub parse_{{snake class.name}}<{{snake class.name}}::AMQPMethod>, switch!(parse_short_uint,
         {{#each class.methods as |method| ~}}
-        {{method.id}} => map!(call!(parse_{{snake method.name}}), Method::{{camel method.name}}) {{#unless @last ~}}|{{/unless ~}}
+        {{method.id}} => map!(call!(parse_{{snake method.name}}), AMQPMethod::{{camel method.name}}) {{#unless @last ~}}|{{/unless ~}}
         {{/each ~}}
     ));
 
-    pub fn gen_{{snake class.name}}<'a>(input: (&'a mut [u8], usize), method: &Method) -> Result<(&'a mut [u8], usize), GenError> {
+    pub fn gen_{{snake class.name}}<'a>(input: (&'a mut [u8], usize), method: &AMQPMethod) -> Result<(&'a mut [u8], usize), GenError> {
         match *method {
             {{#each class.methods as |method| ~}}
-            Method::{{camel method.name}}(ref {{snake method.name}}) => {
+            AMQPMethod::{{camel method.name}}(ref {{snake method.name}}) => {
                 do_gen!(input,
                     gen_short_uint(&{{class.id}}) >>
                     gen_{{snake method.name}}({{snake method.name}})
@@ -133,7 +133,7 @@ pub mod {{snake class.name}} {
     }
 
     #[derive(Clone, Debug, PartialEq)]
-    pub enum Method {
+    pub enum AMQPMethod {
         {{#each class.methods as |method| ~}}
         {{camel method.name}}({{camel method.name}}),
         {{/each ~}}
