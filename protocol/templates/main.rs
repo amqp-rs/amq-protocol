@@ -88,13 +88,11 @@ impl AMQPHardError {
 use self::{{snake class.name}}::parse_{{snake class.name}};
 {{/each ~}}
 
-/* FIXME: simplify and get rid of the Option/Some when nom supports trailing | */
-named!(pub parse_class<AMQPClass>, map!(switch!(map!(parse_short_uint, Some),
+named!(pub parse_class<AMQPClass>, switch!(parse_short_uint,
     {{#each protocol.classes as |class| ~}}
-    Some({{class.id}}) => map!(call!(parse_{{snake class.name}}), |c| Some(AMQPClass::{{camel class.name}}(c))) |
+    {{class.id}} => map!(call!(parse_{{snake class.name}}), AMQPClass::{{camel class.name}}) {{#unless @last ~}}|{{/unless ~}}
     {{/each ~}}
-    None               => value!(None)
-), |c: Option<AMQPClass>| c.expect("We can't get there as we mapped to Some, only there to get a parser after the trailing |")));
+));
 
 pub fn gen_class<'a>(input: (&'a mut [u8], usize), class: &AMQPClass) -> Result<(&'a mut [u8], usize), GenError> {
     match *class {
@@ -115,13 +113,11 @@ pub enum AMQPClass {
 pub mod {{snake class.name}} {
     use super::*;
 
-    /* FIXME: simplify and get rid of the Option/Some when nom supports trailing | */
-    named!(pub parse_{{snake class.name}}<{{snake class.name}}::Method>, map!(switch!(map!(parse_short_uint, Some),
+    named!(pub parse_{{snake class.name}}<{{snake class.name}}::Method>, switch!(parse_short_uint,
         {{#each class.methods as |method| ~}}
-        Some({{method.id}}) => map!(call!(parse_{{snake method.name}}), |m| Some(Method::{{camel method.name}}(m))) |
+        {{method.id}} => map!(call!(parse_{{snake method.name}}), Method::{{camel method.name}}) {{#unless @last ~}}|{{/unless ~}}
         {{/each ~}}
-        None                => value!(None)
-    ), |c: Option<{{snake class.name}}::Method>| c.expect("We can't get there as we mapped to Some, only there to get a parser after the trailing |")));
+    ));
 
     pub fn gen_{{snake class.name}}<'a>(input: (&'a mut [u8], usize), method: &Method) -> Result<(&'a mut [u8], usize), GenError> {
         match *method {
