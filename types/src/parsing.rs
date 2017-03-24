@@ -29,6 +29,7 @@ pub fn parse_raw_value(i: &[u8], amqp_type: AMQPType) -> IResult<&[u8], AMQPValu
 
 named!(pub parse_value<AMQPValue>,                 do_parse!(amqp_type: call!(parse_type) >> value: apply!(parse_raw_value, amqp_type) >> (value)));
 named!(pub parse_type<AMQPType>,                   map_opt!(be_u8, |t| AMQPType::from_id(t as char)));
+named!(pub parse_id<ShortUInt>,                    call!(parse_short_uint));
 
 named!(pub parse_boolean<Boolean>,                 map!(be_u8, |b| b != 0));
 named!(pub parse_short_short_int<ShortShortInt>,   call!(be_i8));
@@ -82,6 +83,12 @@ mod test {
     fn test_parse_type() {
         assert_eq!(parse_type(&[116]), IResult::Done(EMPTY, AMQPType::Boolean));
         assert_eq!(parse_type(&[102]), IResult::Done(EMPTY, AMQPType::Float));
+    }
+
+    #[test]
+    fn test_parse_id() {
+        assert_eq!(parse_id(&[0,   0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_id(&[255, 255]), IResult::Done(EMPTY, 65535));
     }
 
     #[test]
