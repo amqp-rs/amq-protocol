@@ -96,7 +96,7 @@ impl AMQPHardError {
 use self::{{snake class.name}}::parse_{{snake class.name}};
 {{/each ~}}
 
-named!(pub parse_class<AMQPClass>, switch!(parse_short_uint,
+named!(pub parse_class<AMQPClass>, switch!(parse_id,
     {{#each protocol.classes as |class| ~}}
     {{class.id}} => map!(call!(parse_{{snake class.name}}), AMQPClass::{{camel class.name}}) {{#unless @last ~}}|{{/unless ~}}
     {{/each ~}}
@@ -121,7 +121,7 @@ pub enum AMQPClass {
 pub mod {{snake class.name}} {
     use super::*;
 
-    named!(pub parse_{{snake class.name}}<{{snake class.name}}::AMQPMethod>, switch!(parse_short_uint,
+    named!(pub parse_{{snake class.name}}<{{snake class.name}}::AMQPMethod>, switch!(parse_id,
         {{#each class.methods as |method| ~}}
         {{method.id}} => map!(call!(parse_{{snake method.name}}), AMQPMethod::{{camel method.name}}) {{#unless @last ~}}|{{/unless ~}}
         {{/each ~}}
@@ -132,7 +132,7 @@ pub mod {{snake class.name}} {
             {{#each class.methods as |method| ~}}
             AMQPMethod::{{camel method.name}}(ref {{snake method.name}}) => {
                 do_gen!(input,
-                    gen_short_uint(&{{class.id}}) >>
+                    gen_id(&{{class.id}}) >>
                     gen_{{snake method.name}}({{snake method.name}})
                 )
             },
@@ -200,7 +200,7 @@ pub mod {{snake class.name}} {
         {{/each_argument ~}}
         {{/if ~}}
         do_gen!(input,
-            gen_short_uint(&{{method.id}})
+            gen_id(&{{method.id}})
             {{#each_argument method.arguments as |argument| ~}}
             {{#if argument_is_value ~}}
             >> gen_{{snake_type argument.type}}(&method.{{snake argument.name}})
