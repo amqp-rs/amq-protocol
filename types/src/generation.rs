@@ -96,10 +96,11 @@ pub fn gen_long_string<'a>(x: (&'a mut [u8], usize), s: &LongString) -> Result<(
 }
 
 pub fn gen_field_array<'a>(x: (&'a mut [u8], usize), a: &FieldArray) -> Result<(&'a mut [u8], usize), GenError> {
-    let (x1, index1) = x;
-    gen_many_ref!((x1, index1 + 4), a, gen_value).and_then(|(x2, index2)| {
-        gen_long_uint((x2, index1), &((index2 - index1 - 4) as LongUInt)).and_then(|(x3, _)| Ok((x3, index2)))
-    })
+    do_gen!(x,
+        len:   gen_skip!(4)                >>
+        start: gen_many_ref!(a, gen_value) >>
+        end:   gen_at_offset!(len, gen_long_uint(&((end - start) as LongUInt)))
+    )
 }
 
 pub fn gen_timestamp<'a>(x: (&'a mut [u8], usize), t: &Timestamp) -> Result<(&'a mut [u8], usize), GenError> {
@@ -107,10 +108,11 @@ pub fn gen_timestamp<'a>(x: (&'a mut [u8], usize), t: &Timestamp) -> Result<(&'a
 }
 
 pub fn gen_field_table<'a>(x: (&'a mut [u8], usize), t: &FieldTable) -> Result<(&'a mut [u8], usize), GenError> {
-    let (x1, index1) = x;
-    gen_many_ref!((x1, index1 + 4), t, gen_field_entry).and_then(|(x2, index2)| {
-        gen_long_uint((x2, index1), &((index2 - index1 - 4) as LongUInt)).and_then(|(x3, _)| Ok((x3, index2)))
-    })
+    do_gen!(x,
+        len:   gen_skip!(4)                      >>
+        start: gen_many_ref!(t, gen_field_entry) >>
+        end:   gen_at_offset!(len, gen_long_uint(&((end - start) as LongUInt)))
+    )
 }
 
 fn gen_field_entry<'a>(x: (&'a mut [u8], usize), e: &(&ShortString, &AMQPValue)) -> Result<(&'a mut [u8], usize), GenError> {
