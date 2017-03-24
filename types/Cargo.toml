@@ -5,7 +5,7 @@ authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications - types"
 repository    = "https://github.com/Keruspe/amq-protocol"
 documentation = "https://docs.rs/amq-protocol-types"
-keywords      = ["amqp","rabbitmq","protocol"]
+keywords      = ["amqp","rabbitmq","protocol","nom"]
 categories    = ["api-bindings","network-programming"]
 license       = "BSD-2-Clause"
 

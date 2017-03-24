@@ -5,7 +5,7 @@ authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications - codegen"
 repository    = "https://github.com/Keruspe/amq-protocol"
 documentation = "https://docs.rs/amq-protocol-codegen"
-keywords      = ["amqp","rabbitmq","protocol"]
+keywords      = ["amqp","rabbitmq","protocol","nom"]
 categories    = ["api-bindings","network-programming"]
 license       = "BSD-2-Clause"
 
@@ -13,7 +13,7 @@ license       = "BSD-2-Clause"
 name = "amq_protocol_codegen"
 
 [dependencies]
-amq-protocol-types = "^0.9.0"
+amq-protocol-types = {path="../types"}
 itertools          = "^0.5.9"
 serde              = "^0.9.11"
 serde_derive       = "^0.9.11"
