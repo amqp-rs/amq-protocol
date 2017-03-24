@@ -211,5 +211,12 @@ pub mod {{snake class.name}} {
         )
     }
     {{/each ~}}
+    {{#if class.has_properties ~}}
+    pub enum AMQPProperty {
+        {{#each class.properties as |property| ~}}
+        {{camel property.name}}({{property.type}}),
+        {{/each ~}}
+    } /* TODO: add bitmask */
+    {{/if ~}}
 }
 {{/each ~}}
