@@ -216,7 +216,17 @@ pub mod {{snake class.name}} {
         {{#each class.properties as |property| ~}}
         {{camel property.name}}({{property.type}}),
         {{/each ~}}
-    } /* TODO: add bitmask */
+    }
+
+    impl AMQPProperty {
+        pub fn get_bitmask(&self) -> ShortUInt {
+            match *self {
+                {{#each class.properties as |property| ~}}
+                AMQPProperty::{{camel property.name}}(_) => {{bitmask 16 @index}},
+                {{/each ~}}
+            }
+        }
+    }
     {{/if ~}}
 }
 {{/each ~}}
