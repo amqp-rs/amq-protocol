@@ -25,3 +25,4 @@ features = ["serde_type"]
 
 [badges]
 travis-ci = { repository = "Keruspe/amq-protocol" }
+appveyor  = { repository = "Keruspe/amq-protocol" }
