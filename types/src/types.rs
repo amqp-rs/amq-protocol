@@ -13,16 +13,15 @@ pub enum AMQPType {
     LongInt,
     LongUInt,
     LongLongInt,
-    LongLongUInt,
     Float,
     Double,
     DecimalValue,
-    ShortString,
     LongString,
     FieldArray,
     Timestamp,
     FieldTable,
     Void,
+    // TODO: byte array (x)
 }
 
 impl AMQPType {
@@ -31,16 +30,15 @@ impl AMQPType {
             't' => Some(AMQPType::Boolean),
             'b' => Some(AMQPType::ShortShortInt),
             'B' => Some(AMQPType::ShortShortUInt),
-            'U' => Some(AMQPType::ShortInt),
+            's' => Some(AMQPType::ShortInt),
             'u' => Some(AMQPType::ShortUInt),
             'I' => Some(AMQPType::LongInt),
             'i' => Some(AMQPType::LongUInt),
             'L' => Some(AMQPType::LongLongInt),
-            'l' => Some(AMQPType::LongLongUInt),
+            'l' => Some(AMQPType::LongLongInt),
             'f' => Some(AMQPType::Float),
             'd' => Some(AMQPType::Double),
             'D' => Some(AMQPType::DecimalValue),
-            's' => Some(AMQPType::ShortString),
             'S' => Some(AMQPType::LongString),
             'A' => Some(AMQPType::FieldArray),
             'T' => Some(AMQPType::Timestamp),
@@ -55,16 +53,14 @@ impl AMQPType {
             AMQPType::Boolean => 't',
             AMQPType::ShortShortInt => 'b',
             AMQPType::ShortShortUInt => 'B',
-            AMQPType::ShortInt => 'U',
+            AMQPType::ShortInt => 's',
             AMQPType::ShortUInt => 'u',
             AMQPType::LongInt => 'I',
             AMQPType::LongUInt => 'i',
             AMQPType::LongLongInt => 'L',
-            AMQPType::LongLongUInt => 'l',
             AMQPType::Float => 'f',
             AMQPType::Double => 'd',
             AMQPType::DecimalValue => 'D',
-            AMQPType::ShortString => 's',
             AMQPType::LongString => 'S',
             AMQPType::FieldArray => 'A',
             AMQPType::Timestamp => 'T',
@@ -92,14 +88,12 @@ pub type ShortUInt      = u16;
 pub type LongInt        = i32;
 pub type LongUInt       = u32;
 pub type LongLongInt    = i64;
-pub type LongLongUInt   = u64;
 pub type Float          = f32;
 pub type Double         = f64;
-pub type ShortString    = String; /* TODO: don't allow size >= 255 */
 pub type LongString     = String;
 pub type FieldArray     = Vec<AMQPValue>;
-pub type Timestamp      = LongLongUInt;
-pub type FieldTable     = BTreeMap<ShortString, AMQPValue>;
+pub type Timestamp      = u64;
+pub type FieldTable     = BTreeMap<LongString, AMQPValue>;
 pub type Void           = ();
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
@@ -115,6 +109,8 @@ mod test {
     #[test]
     fn test_type_from_id() {
         assert_eq!(AMQPType::from_id('T'), Some(AMQPType::Timestamp));
+        assert_eq!(AMQPType::from_id('S'), Some(AMQPType::LongString));
+        assert_eq!(AMQPType::from_id('s'), Some(AMQPType::ShortInt));
         assert_eq!(AMQPType::from_id('z'), None);
     }
 

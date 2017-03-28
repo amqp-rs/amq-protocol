@@ -6,11 +6,10 @@ use amq_protocol_types::parsing::parse_value;
 
 #[test]
 fn test_full_integration() {
-    let mut table = FieldTable::new();
+    let mut table  = FieldTable::new();
     let mut table2 = FieldTable::new();
 
     table2.insert("foo".to_string(), AMQPValue::DecimalValue(DecimalValue { scale: 55, value: 999, }));
-    table2.insert("bar".to_string(), AMQPValue::ShortString("blah".to_string()));
     table2.insert("baz".to_string(), AMQPValue::LongString("blah42".to_string()));
 
     table.insert("foo".to_string(),  AMQPValue::FieldArray(vec![AMQPValue::Boolean(true), AMQPValue::Void]));
@@ -24,7 +23,6 @@ fn test_full_integration() {
     table.insert("eeee".to_string(), AMQPValue::LongInt(-53));
     table.insert("ffff".to_string(), AMQPValue::LongUInt(66666));
     table.insert("gggg".to_string(), AMQPValue::LongLongInt(-9999));
-    table.insert("hhhh".to_string(), AMQPValue::LongLongUInt(0));
     table.insert("iiii".to_string(), AMQPValue::Float(42.3));
     table.insert("tabl".to_string(), AMQPValue::FieldTable(table2));
     table.insert("jjjj".to_string(), AMQPValue::Double(0.00987654321));

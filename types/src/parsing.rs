@@ -14,11 +14,9 @@ pub fn parse_raw_value(i: &[u8], amqp_type: AMQPType) -> IResult<&[u8], AMQPValu
         AMQPType::LongInt        => map!(i, call!(parse_long_int),         |i| AMQPValue::LongInt(i)),
         AMQPType::LongUInt       => map!(i, call!(parse_long_uint),        |u| AMQPValue::LongUInt(u)),
         AMQPType::LongLongInt    => map!(i, call!(parse_long_long_int),    |i| AMQPValue::LongLongInt(i)),
-        AMQPType::LongLongUInt   => map!(i, call!(parse_long_long_uint),   |u| AMQPValue::LongLongUInt(u)),
         AMQPType::Float          => map!(i, call!(parse_float),            |f| AMQPValue::Float(f)),
         AMQPType::Double         => map!(i, call!(parse_double),           |d| AMQPValue::Double(d)),
         AMQPType::DecimalValue   => map!(i, call!(parse_decimal_value),    |d| AMQPValue::DecimalValue(d)),
-        AMQPType::ShortString    => map!(i, call!(parse_short_string),     |s| AMQPValue::ShortString(s)),
         AMQPType::LongString     => map!(i, call!(parse_long_string),      |s| AMQPValue::LongString(s)),
         AMQPType::FieldArray     => map!(i, call!(parse_field_array),      |a| AMQPValue::FieldArray(a)),
         AMQPType::Timestamp      => map!(i, call!(parse_timestamp),        |t| AMQPValue::Timestamp(t)),
@@ -39,18 +37,17 @@ named!(pub parse_short_uint<ShortUInt>,            call!(be_u16));
 named!(pub parse_long_int<LongInt>,                call!(be_i32));
 named!(pub parse_long_uint<LongUInt>,              call!(be_u32));
 named!(pub parse_long_long_int<LongLongInt>,       call!(be_i64));
-named!(pub parse_long_long_uint<LongLongUInt>,     call!(be_u64));
 named!(pub parse_float<Float>,                     call!(be_f32));
 named!(pub parse_double<Double>,                   call!(be_f64));
 named!(pub parse_decimal_value<DecimalValue>,      do_parse!(scale: parse_short_short_uint >> value: parse_long_uint >> (DecimalValue { scale: scale, value: value, })));
-named!(pub parse_short_string<ShortString>,        do_parse!(length: parse_short_short_uint >> s: take_str!(length) >> (s.to_string())));
 named!(pub parse_long_string<LongString>,          do_parse!(length: parse_long_uint >> s: take_str!(length) >> (s.to_string())));
 named!(pub parse_field_array<FieldArray>,          do_parse!(length: parse_long_int >> array: flat_map!(take!(length as usize), fold_many0!(parse_value, FieldArray::new(), |mut acc: FieldArray, elem| {
     acc.push(elem);
     acc
 })) >> (array)));
-named!(pub parse_timestamp<Timestamp>,             call!(parse_long_long_uint));
-named!(pub parse_field_table<FieldTable>,          do_parse!(length: parse_long_uint >> table: flat_map!(take!(length as usize), fold_many0!(complete!(pair!(parse_short_string, parse_value)), FieldTable::new(), |mut acc: FieldTable, (key, value)| {
+named!(pub parse_timestamp<Timestamp>,             call!(be_u64));
+named!(pub parse_table_key<LongString>,            do_parse!(length: parse_short_short_uint >> s: take_str!(length) >> (s.to_string())));
+named!(pub parse_field_table<FieldTable>,          do_parse!(length: parse_long_uint >> table: flat_map!(take!(length as usize), fold_many0!(complete!(pair!(parse_table_key, parse_value)), FieldTable::new(), |mut acc: FieldTable, (key, value)| {
     acc.insert(key, value);
     acc
 })) >> (table)));
@@ -140,12 +137,6 @@ mod test {
     }
 
     #[test]
-    fn test_parse_long_long_uint() {
-        assert_eq!(parse_long_long_uint(&[0,   0,   0,   0,   0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_long_long_uint(&[255, 255, 255, 255, 255, 255, 255, 255]), IResult::Done(EMPTY, 18446744073709551615));
-    }
-
-    #[test]
     fn test_parse_float() {
         assert_eq!(parse_float(&[0,  0,  0,   0]),  IResult::Done(EMPTY, 0.));
         assert_eq!(parse_float(&[66, 41, 174, 20]), IResult::Done(EMPTY, 42.42));
@@ -164,12 +155,6 @@ mod test {
     }
 
     #[test]
-    fn test_parse_short_string() {
-        assert_eq!(parse_short_string(&[0]),                     IResult::Done(EMPTY, ShortString::new()));
-        assert_eq!(parse_short_string(&[4, 116, 101, 115, 116]), IResult::Done(EMPTY, "test".to_string()));
-    }
-
-    #[test]
     fn test_parse_long_string() {
         assert_eq!(parse_long_string(&[0, 0, 0, 0]),                     IResult::Done(EMPTY, LongString::new()));
         assert_eq!(parse_long_string(&[0, 0, 0, 4, 116, 101, 115, 116]), IResult::Done(EMPTY, "test".to_string()));
@@ -177,8 +162,8 @@ mod test {
 
     #[test]
     fn test_parse_field_array() {
-        assert_eq!(parse_field_array(&[0, 0, 0, 0]),                                 IResult::Done(EMPTY, FieldArray::new()));
-        assert_eq!(parse_field_array(&[0, 0, 0, 7, 115, 4, 116, 101, 115, 116, 86]), IResult::Done(EMPTY, vec![AMQPValue::ShortString("test".to_string()), AMQPValue::Void]));
+        assert_eq!(parse_field_array(&[0, 0, 0, 0]),                                          IResult::Done(EMPTY, FieldArray::new()));
+        assert_eq!(parse_field_array(&[0, 0, 0, 10, 83, 0, 0, 0, 4, 116, 101, 115, 116, 86]), IResult::Done(EMPTY, vec![AMQPValue::LongString("test".to_string()), AMQPValue::Void]));
     }
 
     #[test]
@@ -188,12 +173,18 @@ mod test {
     }
 
     #[test]
+    fn test_parse_table_key() {
+        assert_eq!(parse_table_key(&[0]),                     IResult::Done(EMPTY, LongString::new()));
+        assert_eq!(parse_table_key(&[4, 116, 101, 115, 116]), IResult::Done(EMPTY, "test".to_string()));
+    }
+
+    #[test]
     fn test_parse_field_table() {
         let mut table = FieldTable::new();
-        table.insert("test".to_string(), AMQPValue::ShortString("test".to_string()));
+        table.insert("test".to_string(), AMQPValue::LongString("test".to_string()));
         table.insert("tt".to_string(),   AMQPValue::Void);
-        assert_eq!(parse_field_table(&[0, 0, 0, 0]),                                                                      IResult::Done(EMPTY, FieldTable::new()));
-        assert_eq!(parse_field_table(&[0, 0, 0, 15, 4, 116, 101, 115, 116, 115, 4, 116, 101, 115, 116, 2, 116, 116, 86]), IResult::Done(EMPTY, table));
+        assert_eq!(parse_field_table(&[0, 0, 0, 0]),                                                                              IResult::Done(EMPTY, FieldTable::new()));
+        assert_eq!(parse_field_table(&[0, 0, 0, 18, 4, 116, 101, 115, 116, 83, 0, 0, 0, 4, 116, 101, 115, 116, 2, 116, 116, 86]), IResult::Done(EMPTY, table));
     }
 
     #[test]

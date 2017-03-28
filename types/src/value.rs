@@ -12,11 +12,9 @@ pub enum AMQPValue {
     LongInt(LongInt),
     LongUInt(LongUInt),
     LongLongInt(LongLongInt),
-    LongLongUInt(LongLongUInt),
     Float(Float),
     Double(Double),
     DecimalValue(DecimalValue),
-    ShortString(ShortString),
     LongString(LongString),
     FieldArray(FieldArray),
     Timestamp(Timestamp),
@@ -35,11 +33,9 @@ impl AMQPValue {
             AMQPValue::LongInt(_)        => AMQPType::LongInt,
             AMQPValue::LongUInt(_)       => AMQPType::LongUInt,
             AMQPValue::LongLongInt(_)    => AMQPType::LongLongInt,
-            AMQPValue::LongLongUInt(_)   => AMQPType::LongLongUInt,
             AMQPValue::Float(_)          => AMQPType::Float,
             AMQPValue::Double(_)         => AMQPType::Double,
             AMQPValue::DecimalValue(_)   => AMQPType::DecimalValue,
-            AMQPValue::ShortString(_)    => AMQPType::ShortString,
             AMQPValue::LongString(_)     => AMQPType::LongString,
             AMQPValue::FieldArray(_)     => AMQPType::FieldArray,
             AMQPValue::Timestamp(_)      => AMQPType::Timestamp,
@@ -61,7 +57,7 @@ impl<'a> From<&'a Value> for AMQPValue {
             Value::Bool(ref b)   => AMQPValue::Boolean(*b),
             Value::Number(ref n) => {
                 if n.is_u64() {
-                    AMQPValue::LongLongUInt(n.as_u64().unwrap())
+                    AMQPValue::LongLongInt(n.as_u64().unwrap() as i64)
                 } else if n.is_i64() {
                     AMQPValue::LongLongInt(n.as_i64().unwrap())
                 } else {
@@ -93,7 +89,7 @@ mod test {
 
     #[test]
     fn test_from_number_value() {
-        assert_eq!(AMQPValue::from(Value::Number(Number::from(42))),                 AMQPValue::LongLongUInt(42));
+        assert_eq!(AMQPValue::from(Value::Number(Number::from(42))),                 AMQPValue::LongLongInt(42));
         assert_eq!(AMQPValue::from(Value::Number(Number::from(-42))),                AMQPValue::LongLongInt(-42));
         assert_eq!(AMQPValue::from(Value::Number(Number::from_f64(42.42).unwrap())), AMQPValue::Double(42.42));
     }
