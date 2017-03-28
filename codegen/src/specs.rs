@@ -7,13 +7,13 @@ use std::collections::BTreeMap;
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQProtocolDefinition {
-    pub name:          LongString,
+    pub name:          ShortString,
     pub major_version: ShortShortUInt,
     pub minor_version: ShortShortUInt,
     pub revision:      ShortShortUInt,
     pub port:          LongUInt,
     pub copyright:     LongString,
-    pub domains:       BTreeMap<LongString, AMQPType>,
+    pub domains:       BTreeMap<ShortString, AMQPType>,
     pub constants:     Vec<AMQPConstant>,
     pub soft_errors:   Vec<AMQPConstant>,
     pub hard_errors:   Vec<AMQPConstant>,
@@ -30,7 +30,7 @@ impl AMQProtocolDefinition {
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPConstant {
-    pub name:      LongString,
+    pub name:      ShortString,
     pub value:     ShortUInt,
     #[serde(rename="type")]
     pub amqp_type: AMQPType,
@@ -40,7 +40,7 @@ pub struct AMQPConstant {
 pub struct AMQPClass {
     pub id:             ShortUInt,
     pub methods:        Vec<AMQPMethod>,
-    pub name:           LongString,
+    pub name:           ShortString,
     pub properties:     Vec<AMQPProperty>,
     pub has_properties: Boolean,
     pub is_connection:  Boolean,
@@ -52,7 +52,7 @@ pub struct AMQPMethod {
     pub arguments:     Vec<AMQPArgument>,
     pub has_arguments: Boolean,
     pub has_flags:     Boolean,
-    pub name:          LongString,
+    pub name:          ShortString,
     pub synchronous:   Boolean,
 }
 
@@ -66,14 +66,14 @@ pub enum AMQPArgument {
 pub struct AMQPValueArgument {
     #[serde(rename="type")]
     pub amqp_type:     AMQPType,
-    pub name:          LongString,
+    pub name:          ShortString,
     pub default_value: Option<AMQPValue>,
-    pub domain:        Option<LongString>,
+    pub domain:        Option<ShortString>,
 }
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPFlagArgument {
-    pub name:          LongString,
+    pub name:          ShortString,
     pub default_value: Boolean,
 }
 
@@ -81,5 +81,5 @@ pub struct AMQPFlagArgument {
 pub struct AMQPProperty {
     #[serde(rename="type")]
     pub amqp_type: AMQPType,
-    pub name:      LongString,
+    pub name:      ShortString,
 }

@@ -8,7 +8,7 @@ use std::collections::BTreeMap;
 /* Modified version of AMQProtocolDefinition to handle deserialization */
 #[derive(Debug, Deserialize)]
 pub struct _AMQProtocolDefinition {
-    name:          LongString,
+    name:          ShortString,
     #[serde(rename="major-version")]
     major_version: ShortShortUInt,
     #[serde(rename="minor-version")]
@@ -46,7 +46,7 @@ impl _AMQProtocolDefinition {
 
 /* Defined as a two-elems array in the spec */
 #[derive(Debug, Deserialize)]
-struct _AMQPDomain(LongString, _AMQPType);
+struct _AMQPDomain(ShortString, _AMQPType);
 
 /* Subset of AMQPType used in specs for deserialization */
 #[derive(Debug, Deserialize)]
@@ -79,7 +79,7 @@ impl _AMQPType {
             _AMQPType::Short     => AMQPType::ShortUInt,
             _AMQPType::Long      => AMQPType::LongUInt,
             _AMQPType::LongLong  => AMQPType::LongLongUInt,
-            _AMQPType::ShortStr  => AMQPType::LongString,
+            _AMQPType::ShortStr  => AMQPType::ShortString,
             _AMQPType::LongStr   => AMQPType::LongString,
             _AMQPType::Table     => AMQPType::FieldTable,
             _AMQPType::Timestamp => AMQPType::Timestamp,
@@ -97,7 +97,7 @@ enum  _AMQPErrorKind {
 
 #[derive(Debug, Deserialize)]
 struct _AMQPConstant {
-    pub name:   LongString,
+    pub name:   ShortString,
     pub value:  ShortUInt,
     #[serde(rename="class")]
     pub klass: Option<_AMQPErrorKind>,
@@ -117,7 +117,7 @@ impl _AMQPConstant {
 struct _AMQPClass {
     id:         ShortUInt,
     methods:    Vec<_AMQPMethod>,
-    name:       LongString,
+    name:       ShortString,
     properties: Option<Vec<_AMQPProperty>>,
 }
 
@@ -142,12 +142,12 @@ impl _AMQPClass {
 struct _AMQPMethod {
     id:          ShortUInt,
     arguments:   Vec<_AMQPArgument>,
-    name:        LongString,
+    name:        ShortString,
     synchronous: Option<Boolean>,
 }
 
 impl _AMQPMethod {
-    fn to_specs(&self, domains: &BTreeMap<LongString, AMQPType>) -> AMQPMethod {
+    fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>) -> AMQPMethod {
         let arguments = self.arguments_to_specs(domains);
         let has_arguments = !arguments.is_empty();
         let has_flags = arguments.iter().any(|arg| match *arg {
@@ -164,7 +164,7 @@ impl _AMQPMethod {
         }
     }
 
-    fn arguments_to_specs(&self, domains: &BTreeMap<LongString, AMQPType>) -> Vec<AMQPArgument> {
+    fn arguments_to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>) -> Vec<AMQPArgument> {
         let mut arguments                            = Vec::new();
         let mut flags : Option<Vec<AMQPFlagArgument>> = None;
         for argument in &self.arguments {
@@ -191,10 +191,10 @@ impl _AMQPMethod {
 struct _AMQPArgument {
     #[serde(rename="type")]
     amqp_type:     Option<_AMQPType>,
-    name:          LongString,
+    name:          ShortString,
     #[serde(rename="default-value")]
     default_value: Option<Value>,
-    domain:        Option<LongString>,
+    domain:        Option<ShortString>,
 }
 
 impl _AMQPArgument {
@@ -214,7 +214,7 @@ impl _AMQPArgument {
         }
     }
 
-    fn get_type(&self, domains: &BTreeMap<LongString, AMQPType>) -> AMQPType {
+    fn get_type(&self, domains: &BTreeMap<ShortString, AMQPType>) -> AMQPType {
         match self.amqp_type {
             Some(ref amqp_type) => amqp_type.to_specs(),
             None                => {
@@ -232,7 +232,7 @@ impl _AMQPArgument {
 struct _AMQPProperty {
     #[serde(rename="type")]
     amqp_type: _AMQPType,
-    name:      LongString,
+    name:      ShortString,
 }
 
 impl _AMQPProperty {
