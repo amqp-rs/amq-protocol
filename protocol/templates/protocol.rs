@@ -212,20 +212,57 @@ pub mod {{snake class.name}} {
     }
     {{/each ~}}
     {{#if class.has_properties ~}}
-    pub enum AMQPProperty {
+    #[derive(Clone,Debug,PartialEq)]
+    pub struct AMQPProperties {
         {{#each class.properties as |property| ~}}
-        {{camel property.name}}({{property.type}}),
+        {{snake property.name}}: Option<{{property.type}}>,
         {{/each ~}}
     }
 
-    impl AMQPProperty {
-        pub fn get_bitmask(&self) -> ShortUInt {
-            match *self {
+    impl Default for AMQPProperties {
+        fn default() -> AMQPProperties {
+            AMQPProperties {
                 {{#each class.properties as |property| ~}}
-                AMQPProperty::{{camel property.name}}(_) => (1 << (15 - {{@index}})),
+                {{snake property.name}}: None,
                 {{/each ~}}
             }
         }
+    }
+
+    impl AMQPProperties {
+        {{#each class.properties as |property| ~}}
+        pub fn with_{{snake property.name}}(mut self, value: {{property.type}}) -> AMQPProperties {
+            self.{{snake property.name}} = Some(value);
+            self
+        }
+        {{/each ~}}
+
+        pub fn bitmask(&self) -> ShortUInt {
+            {{#each class.properties as |property| ~}}
+            (if self.{{snake property.name}}.is_some() { 1 << (15 - {{@index}}) } else { 0 }) {{#unless @last ~}} + {{/unless ~}}
+            {{/each ~}}
+        }
+    }
+
+    named!(pub parse_properties<AMQPProperties>, do_parse!(
+        flags: parse_short_uint >>
+        {{#each class.properties as |property| ~}}
+        {{snake property.name}}: cond!(flags & (1 << (15 - {{@index}})) != 0, parse_{{snake_type property.type}}) >>
+        {{/each ~}}
+        (AMQPProperties {
+            {{#each class.properties as |property| ~}}
+            {{snake property.name}}: {{snake property.name}},
+            {{/each ~}}
+        })
+    ));
+
+    pub fn gen_properties<'a>(input:(&'a mut [u8],usize), props: &AMQPProperties) -> Result<(&'a mut [u8],usize),GenError> {
+        do_gen!(input,
+            gen_short_uint(&props.bitmask())
+            {{#each class.properties as |property| ~}}
+            >> gen_cond!(props.{{snake property.name}}.is_some(), gen_call!(gen_{{snake_type property.type}}, &props.{{snake property.name}}.as_ref().unwrap()))
+            {{/each ~}}
+        )
     }
     {{/if ~}}
 }
