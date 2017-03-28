@@ -14,7 +14,6 @@ pub fn gen_raw_value<'a>(x: (&'a mut [u8], usize), v: &AMQPValue) -> Result<(&'a
         AMQPValue::LongInt(ref i)        => gen_long_int(x, i),
         AMQPValue::LongUInt(ref u)       => gen_long_uint(x, u),
         AMQPValue::LongLongInt(ref i)    => gen_long_long_int(x, i),
-        AMQPValue::LongLongUInt(ref u)   => gen_long_long_uint(x, u),
         AMQPValue::Float(ref f)          => gen_float(x, f),
         AMQPValue::Double(ref d)         => gen_double(x, d),
         AMQPValue::DecimalValue(ref d)   => gen_decimal_value(x, d),
