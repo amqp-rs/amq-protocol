@@ -105,7 +105,7 @@ pub type ShortString    = String;
 pub type LongString     = String;
 pub type FieldArray     = Vec<AMQPValue>;
 pub type Timestamp      = LongLongUInt;
-pub type FieldTable     = BTreeMap<LongString, AMQPValue>;
+pub type FieldTable     = BTreeMap<ShortString, AMQPValue>;
 pub type Void           = ();
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
