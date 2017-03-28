@@ -14,6 +14,7 @@ pub fn gen_raw_value<'a>(x: (&'a mut [u8], usize), v: &AMQPValue) -> Result<(&'a
         AMQPValue::LongInt(ref i)        => gen_long_int(x, i),
         AMQPValue::LongUInt(ref u)       => gen_long_uint(x, u),
         AMQPValue::LongLongInt(ref i)    => gen_long_long_int(x, i),
+        AMQPValue::LongLongUInt(ref u)   => gen_long_long_uint(x, u),
         AMQPValue::Float(ref f)          => gen_float(x, f),
         AMQPValue::Double(ref d)         => gen_double(x, d),
         AMQPValue::DecimalValue(ref d)   => gen_decimal_value(x, d),
@@ -253,7 +254,7 @@ mod test {
         table.insert("test".to_string(), AMQPValue::Float(42.42));
         table.insert("tt".to_string(),   AMQPValue::LongLongInt(42));
         assert_eq!(gen_field_table((&mut [0, 0, 0, 0],                                                                   0), &FieldTable::new()).unwrap(), (&mut [0, 0, 0, 0][..],                                                                                         4));
-        assert_eq!(gen_field_table((&mut [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0), &table).unwrap(),             (&mut [0, 0, 0, 22, 4, 116, 101, 115, 116, 102, 66, 41, 174, 20, 2, 116, 116, 76, 0, 0, 0, 0, 0, 0, 0, 42][..], 26));
+        assert_eq!(gen_field_table((&mut [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0), &table).unwrap(),             (&mut [0, 0, 0, 22, 4, 116, 101, 115, 116, 102, 66, 41, 174, 20, 2, 116, 116, 108, 0, 0, 0, 0, 0, 0, 0, 42][..], 26));
     }
 
     #[test]

@@ -14,6 +14,7 @@ pub fn parse_raw_value(i: &[u8], amqp_type: AMQPType) -> IResult<&[u8], AMQPValu
         AMQPType::LongInt        => map!(i, call!(parse_long_int),         |i| AMQPValue::LongInt(i)),
         AMQPType::LongUInt       => map!(i, call!(parse_long_uint),        |u| AMQPValue::LongUInt(u)),
         AMQPType::LongLongInt    => map!(i, call!(parse_long_long_int),    |i| AMQPValue::LongLongInt(i)),
+        AMQPType::LongLongUInt   => map!(i, call!(parse_long_long_uint),   |u| AMQPValue::LongLongUInt(u)),
         AMQPType::Float          => map!(i, call!(parse_float),            |f| AMQPValue::Float(f)),
         AMQPType::Double         => map!(i, call!(parse_double),           |d| AMQPValue::Double(d)),
         AMQPType::DecimalValue   => map!(i, call!(parse_decimal_value),    |d| AMQPValue::DecimalValue(d)),

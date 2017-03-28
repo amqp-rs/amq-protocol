@@ -13,6 +13,7 @@ pub enum AMQPType {
     LongInt,
     LongUInt,
     LongLongInt,
+    LongLongUInt,
     Float,
     Double,
     DecimalValue,
@@ -34,6 +35,7 @@ impl AMQPType {
             'u' => Some(AMQPType::ShortUInt),
             'I' => Some(AMQPType::LongInt),
             'i' => Some(AMQPType::LongUInt),
+            /* RabbitMQ treats both 'l' and 'L' as LongLongInt and ignores LongLongUInt */
             'L' => Some(AMQPType::LongLongInt),
             'l' => Some(AMQPType::LongLongInt),
             'f' => Some(AMQPType::Float),
@@ -50,22 +52,24 @@ impl AMQPType {
 
     pub fn get_id(&self) -> char {
         match *self {
-            AMQPType::Boolean => 't',
-            AMQPType::ShortShortInt => 'b',
+            AMQPType::Boolean        => 't',
+            AMQPType::ShortShortInt  => 'b',
             AMQPType::ShortShortUInt => 'B',
-            AMQPType::ShortInt => 's',
-            AMQPType::ShortUInt => 'u',
-            AMQPType::LongInt => 'I',
-            AMQPType::LongUInt => 'i',
-            AMQPType::LongLongInt => 'L',
-            AMQPType::Float => 'f',
-            AMQPType::Double => 'd',
-            AMQPType::DecimalValue => 'D',
-            AMQPType::LongString => 'S',
-            AMQPType::FieldArray => 'A',
-            AMQPType::Timestamp => 'T',
-            AMQPType::FieldTable => 'F',
-            AMQPType::Void => 'V',
+            AMQPType::ShortInt       => 's',
+            AMQPType::ShortUInt      => 'u',
+            AMQPType::LongInt        => 'I',
+            AMQPType::LongUInt       => 'i',
+            /* RabbitMQ treats both 'l' and 'L' as LongLongInt and ignores LongLongUInt */
+            AMQPType::LongLongInt    => 'l',
+            AMQPType::LongLongUInt   => 'l',
+            AMQPType::Float          => 'f',
+            AMQPType::Double         => 'd',
+            AMQPType::DecimalValue   => 'D',
+            AMQPType::LongString     => 'S',
+            AMQPType::FieldArray     => 'A',
+            AMQPType::Timestamp      => 'T',
+            AMQPType::FieldTable     => 'F',
+            AMQPType::Void           => 'V',
         }
     }
 
