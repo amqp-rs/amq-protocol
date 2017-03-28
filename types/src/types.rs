@@ -88,11 +88,12 @@ pub type ShortUInt      = u16;
 pub type LongInt        = i32;
 pub type LongUInt       = u32;
 pub type LongLongInt    = i64;
+pub type LongLongUInt   = u64;
 pub type Float          = f32;
 pub type Double         = f64;
 pub type LongString     = String;
 pub type FieldArray     = Vec<AMQPValue>;
-pub type Timestamp      = u64;
+pub type Timestamp      = LongLongUInt;
 pub type FieldTable     = BTreeMap<LongString, AMQPValue>;
 pub type Void           = ();
 

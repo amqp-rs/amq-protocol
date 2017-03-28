@@ -69,6 +69,10 @@ pub fn gen_long_long_int<'a>(x: (&'a mut [u8], usize), i: &LongLongInt) -> Resul
     gen_be_i64!(x, *i)
 }
 
+pub fn gen_long_long_uint<'a>(x: (&'a mut [u8], usize), i: &LongLongUInt) -> Result<(&'a mut [u8], usize), GenError> {
+    gen_be_u64!(x, *i)
+}
+
 pub fn gen_float<'a>(x: (&'a mut [u8], usize), f: &Float) -> Result<(&'a mut [u8], usize), GenError> {
     gen_be_f32!(x, *f)
 }
@@ -94,7 +98,7 @@ pub fn gen_field_array<'a>(x: (&'a mut [u8], usize), a: &FieldArray) -> Result<(
 }
 
 pub fn gen_timestamp<'a>(x: (&'a mut [u8], usize), t: &Timestamp) -> Result<(&'a mut [u8], usize), GenError> {
-    gen_be_u64!(x, *t)
+    gen_long_long_uint(x, t)
 }
 
 pub fn gen_field_table<'a>(x: (&'a mut [u8], usize), t: &FieldTable) -> Result<(&'a mut [u8], usize), GenError> {
@@ -193,6 +197,12 @@ mod test {
     fn test_gen_long_long_int() {
         assert_eq!(gen_long_long_int((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0).unwrap(),  (&mut [0,   0,   0,   0,   0,   0,   0,   0][..],   8));
         assert_eq!(gen_long_long_int((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &-1).unwrap(), (&mut [255, 255, 255, 255, 255, 255, 255, 255][..], 8));
+    }
+
+    #[test]
+    fn test_gen_long_long_uint() {
+        assert_eq!(gen_long_long_uint((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0).unwrap(),                    (&mut [0,   0,   0,   0,   0,   0,   0,   0][..],   8));
+        assert_eq!(gen_long_long_uint((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &18446744073709551615).unwrap(), (&mut [255, 255, 255, 255, 255, 255, 255, 255][..], 8));
     }
 
     #[test]

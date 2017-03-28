@@ -37,6 +37,7 @@ named!(pub parse_short_uint<ShortUInt>,            call!(be_u16));
 named!(pub parse_long_int<LongInt>,                call!(be_i32));
 named!(pub parse_long_uint<LongUInt>,              call!(be_u32));
 named!(pub parse_long_long_int<LongLongInt>,       call!(be_i64));
+named!(pub parse_long_long_uint<LongLongUInt>,     call!(be_u64));
 named!(pub parse_float<Float>,                     call!(be_f32));
 named!(pub parse_double<Double>,                   call!(be_f64));
 named!(pub parse_decimal_value<DecimalValue>,      do_parse!(scale: parse_short_short_uint >> value: parse_long_uint >> (DecimalValue { scale: scale, value: value, })));
@@ -45,7 +46,7 @@ named!(pub parse_field_array<FieldArray>,          do_parse!(length: parse_long_
     acc.push(elem);
     acc
 })) >> (array)));
-named!(pub parse_timestamp<Timestamp>,             call!(be_u64));
+named!(pub parse_timestamp<Timestamp>,             call!(parse_long_long_uint));
 named!(pub parse_table_key<LongString>,            do_parse!(length: parse_short_short_uint >> s: take_str!(length) >> (s.to_string())));
 named!(pub parse_field_table<FieldTable>,          do_parse!(length: parse_long_uint >> table: flat_map!(take!(length as usize), fold_many0!(complete!(pair!(parse_table_key, parse_value)), FieldTable::new(), |mut acc: FieldTable, (key, value)| {
     acc.insert(key, value);
@@ -134,6 +135,12 @@ mod test {
     fn test_parse_long_long_int() {
         assert_eq!(parse_long_long_int(&[0,   0,   0,   0,   0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
         assert_eq!(parse_long_long_int(&[255, 255, 255, 255, 255, 255, 255, 255]), IResult::Done(EMPTY, -1));
+    }
+
+    #[test]
+    fn test_parse_long_long_uint() {
+        assert_eq!(parse_long_long_uint(&[0,   0,   0,   0,   0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
+        assert_eq!(parse_long_long_uint(&[255, 255, 255, 255, 255, 255, 255, 255]), IResult::Done(EMPTY, 18446744073709551615));
     }
 
     #[test]
