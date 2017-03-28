@@ -1,7 +1,7 @@
 use specs::*;
 use util::*;
 
-use amq_protocol_types::{AMQPType, ShortShortUInt};
+use amq_protocol_types::AMQPType;
 use handlebars::{self, Handlebars, Helper, Renderable, RenderContext, RenderError, to_json};
 use serde_json::{self};
 
@@ -24,7 +24,6 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self.register_helper("snake",         Box::new(snake_helper));
         self.register_helper("snake_type",    Box::new(snake_type_helper));
         self.register_helper("sanitize_name", Box::new(sanitize_name_helper));
-        self.register_helper("bitmask",       Box::new(bitmask_helper));
         self.register_helper("each_argument", Box::new(each_argument_helper));
         self.register_helper("each_flag",     Box::new(each_flag_helper));
         self
@@ -69,15 +68,6 @@ pub fn sanitize_name_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext)
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"sanitize_name\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"sanitize_name\""))?;
     rc.writer.write(param.replace('-', "_").as_bytes())?;
-    Ok(())
-}
-
-pub fn bitmask_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
-    let value1                = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"bitmask\""))?;
-    let value2                = h.param(1).ok_or_else(|| RenderError::new("Second param not found for helper \"bitmask\""))?;
-    let nbits: ShortShortUInt = serde_json::from_value(value1.value().clone()).map_err(|_| RenderError::new("First param is not a ShortShortUInt for helper \"bitmask\""))?;
-    let index: ShortShortUInt = serde_json::from_value(value2.value().clone()).map_err(|_| RenderError::new("Second param is not a ShortShortUInt for helper \"bitmask\""))?;
-    rc.writer.write(format!("{}", 1 << (nbits - index - 1)).as_bytes())?;
     Ok(())
 }
 
