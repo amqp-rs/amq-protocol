@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-types"
-version       = "0.10.0"
+version       = "0.11.0"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications - types"
 repository    = "https://github.com/Keruspe/amq-protocol"
@@ -15,8 +15,8 @@ name = "amq_protocol_types"
 [dependencies]
 cookie-factory = "^0.2.0"
 nom            = "^2.2.0"
-serde          = "^0.9.11"
-serde_derive   = "^0.9.11"
+serde          = "^0.9.12"
+serde_derive   = "^0.9.12"
 serde_json     = "^0.9.9"
 
 [badges]
