@@ -78,7 +78,7 @@ impl _AMQPType {
             _AMQPType::Octet     => AMQPType::ShortShortUInt,
             _AMQPType::Short     => AMQPType::ShortUInt,
             _AMQPType::Long      => AMQPType::LongUInt,
-            _AMQPType::LongLong  => AMQPType::LongLongInt,
+            _AMQPType::LongLong  => AMQPType::LongLongUInt,
             _AMQPType::ShortStr  => AMQPType::LongString,
             _AMQPType::LongStr   => AMQPType::LongString,
             _AMQPType::Table     => AMQPType::FieldTable,
