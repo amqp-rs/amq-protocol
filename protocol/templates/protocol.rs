@@ -222,7 +222,7 @@ pub mod {{snake class.name}} {
         pub fn get_bitmask(&self) -> ShortUInt {
             match *self {
                 {{#each class.properties as |property| ~}}
-                AMQPProperty::{{camel property.name}}(_) => {{bitmask 16 @index}},
+                AMQPProperty::{{camel property.name}}(_) => (1 << (15 - {{@index}})),
                 {{/each ~}}
             }
         }
