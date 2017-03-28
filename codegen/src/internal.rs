@@ -1,7 +1,6 @@
 use specs::*;
 
 use amq_protocol_types::*;
-use itertools::Itertools;
 use serde_json::Value;
 
 use std::collections::BTreeMap;
@@ -35,7 +34,7 @@ impl _AMQProtocolDefinition {
             minor_version: self.minor_version,
             revision:      self.revision,
             port:          self.port,
-            copyright:     self.copyright.iter().join(""),
+            copyright:     self.copyright.iter().fold(LongString::new(), |acc, cur| acc + cur),
             domains:       domains,
             constants:     self.constants.iter().filter_map(|constant| if constant.klass.is_none() { Some(constant.to_specs()) } else { None }).collect(),
             soft_errors:   self.constants.iter().filter_map(|constant| if let Some(_AMQPErrorKind::Soft) = constant.klass { Some(constant.to_specs()) } else { None }).collect(),

@@ -14,7 +14,6 @@ name = "amq_protocol_codegen"
 
 [dependencies]
 amq-protocol-types = "^0.11.0"
-itertools          = "^0.5.9"
 serde              = "^0.9.12"
 serde_derive       = "^0.9.12"
 serde_json         = "^0.9.9"

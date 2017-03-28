@@ -1,6 +1,5 @@
 extern crate amq_protocol_types;
 extern crate handlebars;
-extern crate itertools;
 extern crate serde;
 #[macro_use] extern crate serde_derive;
 extern crate serde_json;
