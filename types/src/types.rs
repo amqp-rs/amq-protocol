@@ -31,7 +31,9 @@ impl AMQPType {
             't' => Some(AMQPType::Boolean),
             'b' => Some(AMQPType::ShortShortInt),
             'B' => Some(AMQPType::ShortShortUInt),
+            /* Specs says 'U', RabbitMQ says 's' (which means ShortString in specs) */
             's' => Some(AMQPType::ShortInt),
+            'U' => Some(AMQPType::ShortInt),
             'u' => Some(AMQPType::ShortUInt),
             'I' => Some(AMQPType::LongInt),
             'i' => Some(AMQPType::LongUInt),
@@ -55,6 +57,7 @@ impl AMQPType {
             AMQPType::Boolean        => 't',
             AMQPType::ShortShortInt  => 'b',
             AMQPType::ShortShortUInt => 'B',
+            /* Specs says 'U', RabbitMQ says 's' (which means ShortString in specs) */
             AMQPType::ShortInt       => 's',
             AMQPType::ShortUInt      => 'u',
             AMQPType::LongInt        => 'I',
