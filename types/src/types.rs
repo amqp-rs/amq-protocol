@@ -17,6 +17,7 @@ pub enum AMQPType {
     Float,
     Double,
     DecimalValue,
+    ShortString,
     LongString,
     FieldArray,
     Timestamp,
@@ -68,6 +69,8 @@ impl AMQPType {
             AMQPType::Float          => 'f',
             AMQPType::Double         => 'd',
             AMQPType::DecimalValue   => 'D',
+            /* ShortString only exists for internal usage, we shouldn't ever have to use this */
+            AMQPType::ShortString    => '_',
             AMQPType::LongString     => 'S',
             AMQPType::FieldArray     => 'A',
             AMQPType::Timestamp      => 'T',
@@ -98,6 +101,7 @@ pub type LongLongInt    = i64;
 pub type LongLongUInt   = u64;
 pub type Float          = f32;
 pub type Double         = f64;
+pub type ShortString    = String;
 pub type LongString     = String;
 pub type FieldArray     = Vec<AMQPValue>;
 pub type Timestamp      = LongLongUInt;

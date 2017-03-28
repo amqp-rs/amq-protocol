@@ -86,6 +86,10 @@ pub fn gen_decimal_value<'a>(x: (&'a mut [u8], usize), d: &DecimalValue) -> Resu
     do_gen!(x, gen_short_short_uint(&d.scale) >> gen_long_uint(&d.value))
 }
 
+fn gen_short_string<'a>(x: (&'a mut [u8], usize), s: &ShortString) -> Result<(&'a mut [u8], usize), GenError> {
+    do_gen!(x, gen_short_short_uint(&(s.len() as ShortShortUInt)) >> gen_slice!(s.as_bytes()))
+}
+
 pub fn gen_long_string<'a>(x: (&'a mut [u8], usize), s: &LongString) -> Result<(&'a mut [u8], usize), GenError> {
     do_gen!(x, gen_long_uint(&(s.len() as LongUInt)) >> gen_slice!(s.as_bytes()))
 }
@@ -110,12 +114,8 @@ pub fn gen_field_table<'a>(x: (&'a mut [u8], usize), t: &FieldTable) -> Result<(
     )
 }
 
-fn gen_table_key<'a>(x: (&'a mut [u8], usize), s: &LongString) -> Result<(&'a mut [u8], usize), GenError> {
-    do_gen!(x, gen_short_short_uint(&(s.len() as ShortShortUInt)) >> gen_slice!(s.as_bytes()))
-}
-
 fn gen_field_entry<'a>(x: (&'a mut [u8], usize), e: &(&LongString, &AMQPValue)) -> Result<(&'a mut [u8], usize), GenError> {
-    do_gen!(x, gen_table_key(e.0) >> gen_value(e.1))
+    do_gen!(x, gen_short_string(e.0) >> gen_value(e.1))
 }
 
 pub fn gen_flags<'a>(x: (&'a mut [u8], usize), f: &AMQPFlags) -> Result<(&'a mut [u8], usize), GenError> {
@@ -225,6 +225,12 @@ mod test {
     }
 
     #[test]
+    fn test_gen_short_string() {
+        assert_eq!(gen_short_string((&mut [0], 0), &"".to_string()).unwrap(),                 (&mut [0][..], 1));
+        assert_eq!(gen_short_string((&mut [0, 0, 0, 0, 0], 0), &"test".to_string()).unwrap(), (&mut [4, 116, 101, 115, 116][..], 5));
+    }
+
+    #[test]
     fn test_gen_long_string() {
         assert_eq!(gen_long_string((&mut [0, 0, 0, 0], 0), &"".to_string()).unwrap(),                 (&mut [0, 0, 0, 0][..], 4));
         assert_eq!(gen_long_string((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &"test".to_string()).unwrap(), (&mut [0, 0, 0, 4, 116, 101, 115, 116][..], 8));
@@ -240,12 +246,6 @@ mod test {
     fn test_gen_timestamp() {
         assert_eq!(gen_timestamp((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0).unwrap(),                    (&mut [0,   0,   0,   0,   0,   0,   0,   0][..],   8));
         assert_eq!(gen_timestamp((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &18446744073709551615).unwrap(), (&mut [255, 255, 255, 255, 255, 255, 255, 255][..], 8));
-    }
-
-    #[test]
-    fn test_gen_table_key() {
-        assert_eq!(gen_table_key((&mut [0], 0), &"".to_string()).unwrap(),                 (&mut [0][..], 1));
-        assert_eq!(gen_table_key((&mut [0, 0, 0, 0, 0], 0), &"test".to_string()).unwrap(), (&mut [4, 116, 101, 115, 116][..], 5));
     }
 
     #[test]

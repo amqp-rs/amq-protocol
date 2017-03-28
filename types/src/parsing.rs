@@ -18,6 +18,8 @@ pub fn parse_raw_value(i: &[u8], amqp_type: AMQPType) -> IResult<&[u8], AMQPValu
         AMQPType::Float          => map!(i, call!(parse_float),            |f| AMQPValue::Float(f)),
         AMQPType::Double         => map!(i, call!(parse_double),           |d| AMQPValue::Double(d)),
         AMQPType::DecimalValue   => map!(i, call!(parse_decimal_value),    |d| AMQPValue::DecimalValue(d)),
+        /* ShortString is only for internal usage and AMQPValue::ShortString shouldn't exist, hence return it as LongString */
+        AMQPType::ShortString    => map!(i, call!(parse_short_string),     |s| AMQPValue::LongString(s)),
         AMQPType::LongString     => map!(i, call!(parse_long_string),      |s| AMQPValue::LongString(s)),
         AMQPType::FieldArray     => map!(i, call!(parse_field_array),      |a| AMQPValue::FieldArray(a)),
         AMQPType::Timestamp      => map!(i, call!(parse_timestamp),        |t| AMQPValue::Timestamp(t)),
@@ -42,14 +44,14 @@ named!(pub parse_long_long_uint<LongLongUInt>,     call!(be_u64));
 named!(pub parse_float<Float>,                     call!(be_f32));
 named!(pub parse_double<Double>,                   call!(be_f64));
 named!(pub parse_decimal_value<DecimalValue>,      do_parse!(scale: parse_short_short_uint >> value: parse_long_uint >> (DecimalValue { scale: scale, value: value, })));
+named!(pub parse_short_string<ShortString>,        do_parse!(length: parse_short_short_uint >> s: take_str!(length) >> (s.to_string())));
 named!(pub parse_long_string<LongString>,          do_parse!(length: parse_long_uint >> s: take_str!(length) >> (s.to_string())));
 named!(pub parse_field_array<FieldArray>,          do_parse!(length: parse_long_int >> array: flat_map!(take!(length as usize), fold_many0!(parse_value, FieldArray::new(), |mut acc: FieldArray, elem| {
     acc.push(elem);
     acc
 })) >> (array)));
 named!(pub parse_timestamp<Timestamp>,             call!(parse_long_long_uint));
-named!(pub parse_table_key<LongString>,            do_parse!(length: parse_short_short_uint >> s: take_str!(length) >> (s.to_string())));
-named!(pub parse_field_table<FieldTable>,          do_parse!(length: parse_long_uint >> table: flat_map!(take!(length as usize), fold_many0!(complete!(pair!(parse_table_key, parse_value)), FieldTable::new(), |mut acc: FieldTable, (key, value)| {
+named!(pub parse_field_table<FieldTable>,          do_parse!(length: parse_long_uint >> table: flat_map!(take!(length as usize), fold_many0!(complete!(pair!(parse_short_string, parse_value)), FieldTable::new(), |mut acc: FieldTable, (key, value)| {
     acc.insert(key, value);
     acc
 })) >> (table)));
@@ -163,6 +165,12 @@ mod test {
     }
 
     #[test]
+    fn test_parse_short_string() {
+        assert_eq!(parse_short_string(&[0]),                     IResult::Done(EMPTY, ShortString::new()));
+        assert_eq!(parse_short_string(&[4, 116, 101, 115, 116]), IResult::Done(EMPTY, "test".to_string()));
+    }
+
+    #[test]
     fn test_parse_long_string() {
         assert_eq!(parse_long_string(&[0, 0, 0, 0]),                     IResult::Done(EMPTY, LongString::new()));
         assert_eq!(parse_long_string(&[0, 0, 0, 4, 116, 101, 115, 116]), IResult::Done(EMPTY, "test".to_string()));
@@ -178,12 +186,6 @@ mod test {
     fn test_parse_timestamp() {
         assert_eq!(parse_timestamp(&[0,   0,   0,   0,   0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
         assert_eq!(parse_timestamp(&[255, 255, 255, 255, 255, 255, 255, 255]), IResult::Done(EMPTY, 18446744073709551615));
-    }
-
-    #[test]
-    fn test_parse_table_key() {
-        assert_eq!(parse_table_key(&[0]),                     IResult::Done(EMPTY, LongString::new()));
-        assert_eq!(parse_table_key(&[4, 116, 101, 115, 116]), IResult::Done(EMPTY, "test".to_string()));
     }
 
     #[test]
