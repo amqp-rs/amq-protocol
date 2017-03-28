@@ -1,5 +1,6 @@
 use frame::*;
 use protocol::*;
+use protocol::basic::parse_properties;
 use types::parsing::*;
 
 use nom::IResult;
@@ -46,16 +47,14 @@ named!(pub parse_raw_frame<AMQPRawFrame>, do_parse!(
 ));
 
 named!(pub parse_content_header<AMQPContentHeader>, do_parse!(
-    class:  parse_id             >>
-    weight: parse_short_uint     >>
-    size:   parse_long_long_uint >>
-    flags:  parse_short_uint     >>
-    list:   parse_field_table    >>
+    class:      parse_id             >>
+    weight:     parse_short_uint     >>
+    size:       parse_long_long_uint >>
+    properties: parse_properties     >>
     (AMQPContentHeader {
-        class_id:       class,
-        weight:         weight,
-        body_size:      size,
-        property_flags: flags,
-        property_list:  list,
+        class_id:   class,
+        weight:     weight,
+        body_size:  size,
+        properties: properties,
     })
 ));

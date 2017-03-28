@@ -52,9 +52,8 @@ pub struct AMQPRawFrame<'a> {
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct AMQPContentHeader {
-    pub class_id:       ShortUInt,
-    pub weight:         ShortUInt,
-    pub body_size:      LongLongUInt,
-    pub property_flags: ShortUInt,
-    pub property_list:  FieldTable,
+    pub class_id:   ShortUInt,
+    pub weight:     ShortUInt,
+    pub body_size:  LongLongUInt,
+    pub properties: basic::AMQPProperties,
 }
