@@ -86,7 +86,7 @@ pub fn gen_decimal_value<'a>(x: (&'a mut [u8], usize), d: &DecimalValue) -> Resu
     do_gen!(x, gen_short_short_uint(&d.scale) >> gen_long_uint(&d.value))
 }
 
-fn gen_short_string<'a>(x: (&'a mut [u8], usize), s: &ShortString) -> Result<(&'a mut [u8], usize), GenError> {
+pub fn gen_short_string<'a>(x: (&'a mut [u8], usize), s: &ShortString) -> Result<(&'a mut [u8], usize), GenError> {
     do_gen!(x, gen_short_short_uint(&(s.len() as ShortShortUInt)) >> gen_slice!(s.as_bytes()))
 }
 
