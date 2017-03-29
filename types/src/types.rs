@@ -22,8 +22,8 @@ pub enum AMQPType {
     FieldArray,
     Timestamp,
     FieldTable,
+    ByteArray,
     Void,
-    // TODO: byte array (x)
 }
 
 impl AMQPType {
@@ -48,6 +48,7 @@ impl AMQPType {
             'A' => Some(AMQPType::FieldArray),
             'T' => Some(AMQPType::Timestamp),
             'F' => Some(AMQPType::FieldTable),
+            'x' => Some(AMQPType::ByteArray),
             'V' => Some(AMQPType::Void),
             _   => None,
         }
@@ -75,6 +76,7 @@ impl AMQPType {
             AMQPType::FieldArray     => 'A',
             AMQPType::Timestamp      => 'T',
             AMQPType::FieldTable     => 'F',
+            AMQPType::ByteArray      => 'x',
             AMQPType::Void           => 'V',
         }
     }
@@ -106,6 +108,7 @@ pub type LongString     = String;
 pub type FieldArray     = Vec<AMQPValue>;
 pub type Timestamp      = LongLongUInt;
 pub type FieldTable     = BTreeMap<ShortString, AMQPValue>;
+pub type ByteArray      = Vec<u8>;
 pub type Void           = ();
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]

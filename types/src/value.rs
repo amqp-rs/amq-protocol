@@ -19,6 +19,7 @@ pub enum AMQPValue {
     FieldArray(FieldArray),
     Timestamp(Timestamp),
     FieldTable(FieldTable),
+    ByteArray(ByteArray),
     Void,
 }
 
@@ -40,6 +41,7 @@ impl AMQPValue {
             AMQPValue::FieldArray(_)     => AMQPType::FieldArray,
             AMQPValue::Timestamp(_)      => AMQPType::Timestamp,
             AMQPValue::FieldTable(_)     => AMQPType::FieldTable,
+            AMQPValue::ByteArray(_)      => AMQPType::ByteArray,
             AMQPValue::Void              => AMQPType::Void,
         }
     }

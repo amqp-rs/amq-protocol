@@ -25,6 +25,8 @@ pub fn parse_raw_value(i: &[u8], amqp_type: AMQPType) -> IResult<&[u8], AMQPValu
         AMQPType::FieldArray     => map!(i, call!(parse_field_array),      |a| AMQPValue::FieldArray(a)),
         AMQPType::Timestamp      => map!(i, call!(parse_timestamp),        |t| AMQPValue::Timestamp(t)),
         AMQPType::FieldTable     => map!(i, call!(parse_field_table),      |t| AMQPValue::FieldTable(t)),
+        /* ByteArray is specific to RabbitMQ */
+        AMQPType::ByteArray      => map!(i, call!(parse_byte_array),       |a| AMQPValue::ByteArray(a)),
         AMQPType::Void           => value!(i, AMQPValue::Void),
     }
 }
@@ -56,6 +58,7 @@ named!(pub parse_field_table<FieldTable>,          do_parse!(length: parse_long_
     acc.insert(key, value);
     acc
 })) >> (table)));
+named!(pub parse_byte_array<ByteArray>,            do_parse!(length: parse_long_uint >> a: take!(length) >> (a.to_vec())));
 
 pub fn parse_flags<'a, 'b>(i: &'a [u8], names: &'b Vec<&'b str>) -> IResult<&'a [u8], AMQPFlags> {
     map!(i, take!((names.len() + 7)/8), |b: &[u8]| AMQPFlags::from_bytes(names, b.to_vec()))
@@ -196,6 +199,12 @@ mod test {
         table.insert("tt".to_string(),   AMQPValue::Void);
         assert_eq!(parse_field_table(&[0, 0, 0, 0]),                                                                              IResult::Done(EMPTY, FieldTable::new()));
         assert_eq!(parse_field_table(&[0, 0, 0, 18, 4, 116, 101, 115, 116, 83, 0, 0, 0, 4, 116, 101, 115, 116, 2, 116, 116, 86]), IResult::Done(EMPTY, table));
+    }
+
+    #[test]
+    fn test_parse_byte_array() {
+        assert_eq!(parse_byte_array(&[0, 0, 0, 0]),              IResult::Done(EMPTY, ByteArray::new()));
+        assert_eq!(parse_byte_array(&[0, 0, 0, 4, 42, 1, 2, 3]), IResult::Done(EMPTY, vec![42, 1, 2, 3]));
     }
 
     #[test]
