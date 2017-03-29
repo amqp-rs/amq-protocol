@@ -25,7 +25,6 @@ pub fn parse_raw_value(i: &[u8], amqp_type: AMQPType) -> IResult<&[u8], AMQPValu
         AMQPType::FieldArray     => map!(i, call!(parse_field_array),      |a| AMQPValue::FieldArray(a)),
         AMQPType::Timestamp      => map!(i, call!(parse_timestamp),        |t| AMQPValue::Timestamp(t)),
         AMQPType::FieldTable     => map!(i, call!(parse_field_table),      |t| AMQPValue::FieldTable(t)),
-        /* ByteArray is specific to RabbitMQ */
         AMQPType::ByteArray      => map!(i, call!(parse_byte_array),       |a| AMQPValue::ByteArray(a)),
         AMQPType::Void           => value!(i, AMQPValue::Void),
     }

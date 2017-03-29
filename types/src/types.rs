@@ -22,7 +22,7 @@ pub enum AMQPType {
     FieldArray,
     Timestamp,
     FieldTable,
-    ByteArray,
+    ByteArray, /* ByteArray is specific to RabbitMQ */
     Void,
 }
 
