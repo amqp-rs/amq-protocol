@@ -1,8 +1,11 @@
 extern crate amq_protocol_types;
+extern crate nom;
 
 use amq_protocol_types::*;
 use amq_protocol_types::generation::gen_value;
 use amq_protocol_types::parsing::parse_value;
+
+use nom::IResult;
 
 #[test]
 fn test_full_integration() {
@@ -31,7 +34,7 @@ fn test_full_integration() {
     table.insert("llll".to_string(), AMQPValue::Void);
 
     let value              = AMQPValue::FieldTable(table);
-    let mut buf: [u8; 512] = [0; 512];
+    let mut buf: [u8; 199] = [0; 199];
 
-    assert_eq!(parse_value(gen_value((&mut buf[..], 0), &value).unwrap().0).to_result().unwrap(), value);
+    assert_eq!(parse_value(gen_value((&mut buf[..], 0), &value).unwrap().0), IResult::Done(&[][..], value));
 }
