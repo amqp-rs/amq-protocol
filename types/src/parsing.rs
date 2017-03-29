@@ -47,7 +47,7 @@ named!(pub parse_double<Double>,                   call!(be_f64));
 named!(pub parse_decimal_value<DecimalValue>,      do_parse!(scale: parse_short_short_uint >> value: parse_long_uint >> (DecimalValue { scale: scale, value: value, })));
 named!(pub parse_short_string<ShortString>,        do_parse!(length: parse_short_short_uint >> s: take_str!(length) >> (s.to_string())));
 named!(pub parse_long_string<LongString>,          do_parse!(length: parse_long_uint >> s: take_str!(length) >> (s.to_string())));
-named!(pub parse_field_array<FieldArray>,          do_parse!(length: parse_long_int >> array: flat_map!(take!(length as usize), fold_many0!(parse_value, FieldArray::new(), |mut acc: FieldArray, elem| {
+named!(pub parse_field_array<FieldArray>,          do_parse!(length: parse_long_uint >> array: flat_map!(take!(length as usize), fold_many0!(complete!(parse_value), FieldArray::new(), |mut acc: FieldArray, elem| {
     acc.push(elem);
     acc
 })) >> (array)));
