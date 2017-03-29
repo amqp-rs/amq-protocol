@@ -258,7 +258,7 @@ synchronous: {{method.synchronous}}
         let mut data    = BTreeMap::new();
         let mut codegen = CodeGenerator::new().register_amqp_helpers();
         data.insert("protocol".to_string(), specs());
-        codegen.register_template_string("main", TEMPLATE.to_string()).unwrap();
+        assert!(codegen.register_template_string("main", TEMPLATE.to_string()).is_ok());
         assert_eq!(codegen.render("main", &data).unwrap(), r#"
 AMQP - 0.9.1
 Copyright 1
