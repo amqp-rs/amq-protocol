@@ -134,122 +134,122 @@ mod test {
 
     #[test]
     fn test_gen_raw_value() {
-        assert_eq!(gen_raw_value((&mut [0, 0, 0, 0], 0), &AMQPValue::LongInt(42)).unwrap(),   (&mut [0, 0, 0, 42][..], 4));
-        assert_eq!(gen_raw_value((&mut [0],          0), &AMQPValue::Boolean(true)).unwrap(), (&mut [1][..],           1));
+        assert_eq!(gen_raw_value((&mut [0, 0, 0, 0], 0), &AMQPValue::LongInt(42)),   Ok((&mut [0, 0, 0, 42][..], 4)));
+        assert_eq!(gen_raw_value((&mut [0],          0), &AMQPValue::Boolean(true)), Ok((&mut [1][..],           1)));
     }
 
     #[test]
     fn test_gen_value() {
-        assert_eq!(gen_value((&mut [0, 0, 0, 0, 0], 0), &AMQPValue::LongInt(42)).unwrap(),   (&mut [73,  0, 0, 0, 42][..], 5));
-        assert_eq!(gen_value((&mut [0, 0],          0), &AMQPValue::Boolean(true)).unwrap(), (&mut [116, 1][..],           2));
+        assert_eq!(gen_value((&mut [0, 0, 0, 0, 0], 0), &AMQPValue::LongInt(42)),   Ok((&mut [73,  0, 0, 0, 42][..], 5)));
+        assert_eq!(gen_value((&mut [0, 0],          0), &AMQPValue::Boolean(true)), Ok((&mut [116, 1][..],           2)));
     }
 
     #[test]
     fn test_gen_type() {
-        assert_eq!(gen_type((&mut [0], 0), &AMQPType::ShortShortInt).unwrap(), (&mut [98][..],  1));
-        assert_eq!(gen_type((&mut [0], 0), &AMQPType::ShortInt).unwrap(),      (&mut [115][..], 1));
+        assert_eq!(gen_type((&mut [0], 0), &AMQPType::ShortShortInt), Ok((&mut [98][..],  1)));
+        assert_eq!(gen_type((&mut [0], 0), &AMQPType::ShortInt),      Ok((&mut [115][..], 1)));
     }
 
     #[test]
     fn test_gen_id() {
-        assert_eq!(gen_id((&mut [0, 0], 0), &0).unwrap(),     (&mut [0,   0][..],   2));
-        assert_eq!(gen_id((&mut [0, 0], 0), &65535).unwrap(), (&mut [255, 255][..], 2));
+        assert_eq!(gen_id((&mut [0, 0], 0), &0),     Ok((&mut [0,   0][..],   2)));
+        assert_eq!(gen_id((&mut [0, 0], 0), &65535), Ok((&mut [255, 255][..], 2)));
     }
 
     #[test]
     fn test_gen_boolean() {
-        assert_eq!(gen_boolean((&mut [0], 0), &false).unwrap(), (&mut [0][..], 1));
-        assert_eq!(gen_boolean((&mut [0], 0), &true).unwrap(),  (&mut [1][..], 1));
+        assert_eq!(gen_boolean((&mut [0], 0), &false), Ok((&mut [0][..], 1)));
+        assert_eq!(gen_boolean((&mut [0], 0), &true),  Ok((&mut [1][..], 1)));
     }
 
     #[test]
     fn test_gen_short_short_int() {
-        assert_eq!(gen_short_short_int((&mut [0], 0), &0).unwrap(),  (&mut [0][..],   1));
-        assert_eq!(gen_short_short_int((&mut [0], 0), &-1).unwrap(), (&mut [255][..], 1));
+        assert_eq!(gen_short_short_int((&mut [0], 0), &0),  Ok((&mut [0][..],   1)));
+        assert_eq!(gen_short_short_int((&mut [0], 0), &-1), Ok((&mut [255][..], 1)));
     }
 
     #[test]
     fn test_gen_short_short_uint() {
-        assert_eq!(gen_short_short_uint((&mut [0], 0), &0).unwrap(),   (&mut [0][..],   1));
-        assert_eq!(gen_short_short_uint((&mut [0], 0), &255).unwrap(), (&mut [255][..], 1));
+        assert_eq!(gen_short_short_uint((&mut [0], 0), &0),   Ok((&mut [0][..],   1)));
+        assert_eq!(gen_short_short_uint((&mut [0], 0), &255), Ok((&mut [255][..], 1)));
     }
 
     #[test]
     fn test_gen_short_int() {
-        assert_eq!(gen_short_int((&mut [0, 0], 0), &0).unwrap(),  (&mut [0,   0][..],   2));
-        assert_eq!(gen_short_int((&mut [0, 0], 0), &-1).unwrap(), (&mut [255, 255][..], 2));
+        assert_eq!(gen_short_int((&mut [0, 0], 0), &0),  Ok((&mut [0,   0][..],   2)));
+        assert_eq!(gen_short_int((&mut [0, 0], 0), &-1), Ok((&mut [255, 255][..], 2)));
     }
 
     #[test]
     fn test_gen_short_uint() {
-        assert_eq!(gen_short_uint((&mut [0, 0], 0), &0).unwrap(),     (&mut [0,   0][..],   2));
-        assert_eq!(gen_short_uint((&mut [0, 0], 0), &65535).unwrap(), (&mut [255, 255][..], 2));
+        assert_eq!(gen_short_uint((&mut [0, 0], 0), &0),     Ok((&mut [0,   0][..],   2)));
+        assert_eq!(gen_short_uint((&mut [0, 0], 0), &65535), Ok((&mut [255, 255][..], 2)));
     }
 
     #[test]
     fn test_gen_long_int() {
-        assert_eq!(gen_long_int((&mut [0, 0, 0, 0], 0), &0).unwrap(),  (&mut [0,   0,   0,   0][..],   4));
-        assert_eq!(gen_long_int((&mut [0, 0, 0, 0], 0), &-1).unwrap(), (&mut [255, 255, 255, 255][..], 4));
+        assert_eq!(gen_long_int((&mut [0, 0, 0, 0], 0), &0),  Ok((&mut [0,   0,   0,   0][..],   4)));
+        assert_eq!(gen_long_int((&mut [0, 0, 0, 0], 0), &-1), Ok((&mut [255, 255, 255, 255][..], 4)));
     }
 
     #[test]
     fn test_gen_long_uint() {
-        assert_eq!(gen_long_uint((&mut [0, 0, 0, 0], 0), &0).unwrap(),          (&mut [0,   0,   0,   0][..],   4));
-        assert_eq!(gen_long_uint((&mut [0, 0, 0, 0], 0), &4294967295).unwrap(), (&mut [255, 255, 255, 255][..], 4));
+        assert_eq!(gen_long_uint((&mut [0, 0, 0, 0], 0), &0),          Ok((&mut [0,   0,   0,   0][..],   4)));
+        assert_eq!(gen_long_uint((&mut [0, 0, 0, 0], 0), &4294967295), Ok((&mut [255, 255, 255, 255][..], 4)));
     }
 
     #[test]
     fn test_gen_long_long_int() {
-        assert_eq!(gen_long_long_int((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0).unwrap(),  (&mut [0,   0,   0,   0,   0,   0,   0,   0][..],   8));
-        assert_eq!(gen_long_long_int((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &-1).unwrap(), (&mut [255, 255, 255, 255, 255, 255, 255, 255][..], 8));
+        assert_eq!(gen_long_long_int((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0),  Ok((&mut [0,   0,   0,   0,   0,   0,   0,   0][..],   8)));
+        assert_eq!(gen_long_long_int((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &-1), Ok((&mut [255, 255, 255, 255, 255, 255, 255, 255][..], 8)));
     }
 
     #[test]
     fn test_gen_long_long_uint() {
-        assert_eq!(gen_long_long_uint((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0).unwrap(),                    (&mut [0,   0,   0,   0,   0,   0,   0,   0][..],   8));
-        assert_eq!(gen_long_long_uint((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &18446744073709551615).unwrap(), (&mut [255, 255, 255, 255, 255, 255, 255, 255][..], 8));
+        assert_eq!(gen_long_long_uint((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0),                    Ok((&mut [0,   0,   0,   0,   0,   0,   0,   0][..],   8)));
+        assert_eq!(gen_long_long_uint((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &18446744073709551615), Ok((&mut [255, 255, 255, 255, 255, 255, 255, 255][..], 8)));
     }
 
     #[test]
     fn test_gen_float() {
-        assert_eq!(gen_float((&mut [0, 0, 0, 0], 0), &0.).unwrap(),    (&mut [0,  0,  0,   0][..],  4));
-        assert_eq!(gen_float((&mut [0, 0, 0, 0], 0), &42.42).unwrap(), (&mut [66, 41, 174, 20][..], 4));
+        assert_eq!(gen_float((&mut [0, 0, 0, 0], 0), &0.),    Ok((&mut [0,  0,  0,   0][..],  4)));
+        assert_eq!(gen_float((&mut [0, 0, 0, 0], 0), &42.42), Ok((&mut [66, 41, 174, 20][..], 4)));
     }
 
     #[test]
     fn test_gen_double() {
-        assert_eq!(gen_double((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0.).unwrap(),    (&mut [0,  0,  0,  0,   0,   0,  0,  0][..],   8));
-        assert_eq!(gen_double((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &42.42).unwrap(), (&mut [64, 69, 53, 194, 143, 92, 40, 246][..], 8));
+        assert_eq!(gen_double((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0.),    Ok((&mut [0,  0,  0,  0,   0,   0,  0,  0][..],   8)));
+        assert_eq!(gen_double((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &42.42), Ok((&mut [64, 69, 53, 194, 143, 92, 40, 246][..], 8)));
     }
 
     #[test]
     fn test_gen_decimal_value() {
-        assert_eq!(gen_decimal_value((&mut [0, 0, 0, 0, 0], 0), &DecimalValue { scale: 0, value: 0 }).unwrap(),  (&mut [0, 0, 0, 0, 0][..], 5));
-        assert_eq!(gen_decimal_value((&mut [0, 0, 0, 0, 0], 0), &DecimalValue { scale: 2, value: 42 }).unwrap(), (&mut [2, 0, 0, 0, 42][..], 5));
+        assert_eq!(gen_decimal_value((&mut [0, 0, 0, 0, 0], 0), &DecimalValue { scale: 0, value: 0 }),  Ok((&mut [0, 0, 0, 0, 0][..], 5)));
+        assert_eq!(gen_decimal_value((&mut [0, 0, 0, 0, 0], 0), &DecimalValue { scale: 2, value: 42 }), Ok((&mut [2, 0, 0, 0, 42][..], 5)));
     }
 
     #[test]
     fn test_gen_short_string() {
-        assert_eq!(gen_short_string((&mut [0], 0), &"".to_string()).unwrap(),                 (&mut [0][..], 1));
-        assert_eq!(gen_short_string((&mut [0, 0, 0, 0, 0], 0), &"test".to_string()).unwrap(), (&mut [4, 116, 101, 115, 116][..], 5));
+        assert_eq!(gen_short_string((&mut [0], 0), &"".to_string()),                 Ok((&mut [0][..], 1)));
+        assert_eq!(gen_short_string((&mut [0, 0, 0, 0, 0], 0), &"test".to_string()), Ok((&mut [4, 116, 101, 115, 116][..], 5)));
     }
 
     #[test]
     fn test_gen_long_string() {
-        assert_eq!(gen_long_string((&mut [0, 0, 0, 0], 0), &"".to_string()).unwrap(),                 (&mut [0, 0, 0, 0][..], 4));
-        assert_eq!(gen_long_string((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &"test".to_string()).unwrap(), (&mut [0, 0, 0, 4, 116, 101, 115, 116][..], 8));
+        assert_eq!(gen_long_string((&mut [0, 0, 0, 0], 0), &"".to_string()),                 Ok((&mut [0, 0, 0, 0][..], 4)));
+        assert_eq!(gen_long_string((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &"test".to_string()), Ok((&mut [0, 0, 0, 4, 116, 101, 115, 116][..], 8)));
     }
 
     #[test]
     fn test_gen_field_array() {
-        assert_eq!(gen_field_array((&mut [0, 0, 0, 0], 0), &FieldArray::new()).unwrap(),                    (&mut [0, 0, 0, 0][..], 4));
-        assert_eq!(gen_field_array((&mut [0, 0, 0, 0, 0, 0], 0), &vec![AMQPValue::Boolean(true)]).unwrap(), (&mut [0, 0, 0, 2, 116, 1][..], 6));
+        assert_eq!(gen_field_array((&mut [0, 0, 0, 0], 0), &FieldArray::new()),                    Ok((&mut [0, 0, 0, 0][..], 4)));
+        assert_eq!(gen_field_array((&mut [0, 0, 0, 0, 0, 0], 0), &vec![AMQPValue::Boolean(true)]), Ok((&mut [0, 0, 0, 2, 116, 1][..], 6)));
     }
 
     #[test]
     fn test_gen_timestamp() {
-        assert_eq!(gen_timestamp((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0).unwrap(),                    (&mut [0,   0,   0,   0,   0,   0,   0,   0][..],   8));
-        assert_eq!(gen_timestamp((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &18446744073709551615).unwrap(), (&mut [255, 255, 255, 255, 255, 255, 255, 255][..], 8));
+        assert_eq!(gen_timestamp((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &0),                    Ok((&mut [0,   0,   0,   0,   0,   0,   0,   0][..],   8)));
+        assert_eq!(gen_timestamp((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &18446744073709551615), Ok((&mut [255, 255, 255, 255, 255, 255, 255, 255][..], 8)));
     }
 
     #[test]
@@ -257,14 +257,14 @@ mod test {
         let mut table = FieldTable::new();
         table.insert("test".to_string(), AMQPValue::Float(42.42));
         table.insert("tt".to_string(),   AMQPValue::LongLongInt(42));
-        assert_eq!(gen_field_table((&mut [0, 0, 0, 0],                                                                   0), &FieldTable::new()).unwrap(), (&mut [0, 0, 0, 0][..],                                                                                         4));
-        assert_eq!(gen_field_table((&mut [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0), &table).unwrap(),             (&mut [0, 0, 0, 22, 4, 116, 101, 115, 116, 102, 66, 41, 174, 20, 2, 116, 116, 108, 0, 0, 0, 0, 0, 0, 0, 42][..], 26));
+        assert_eq!(gen_field_table((&mut [0, 0, 0, 0],                                                                   0), &FieldTable::new()), Ok((&mut [0, 0, 0, 0][..],                                                                                         4)));
+        assert_eq!(gen_field_table((&mut [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0), &table),             Ok((&mut [0, 0, 0, 22, 4, 116, 101, 115, 116, 102, 66, 41, 174, 20, 2, 116, 116, 108, 0, 0, 0, 0, 0, 0, 0, 42][..], 26)));
     }
 
     #[test]
     fn test_gen_byte_array() {
-        assert_eq!(gen_byte_array((&mut [0, 0, 0, 0], 0), &ByteArray::new()).unwrap(),              (&mut [0, 0, 0, 0][..], 4));
-        assert_eq!(gen_byte_array((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &vec![42, 1, 2, 3]).unwrap(), (&mut [0, 0, 0, 4, 42 , 1, 2, 3][..], 8));
+        assert_eq!(gen_byte_array((&mut [0, 0, 0, 0], 0), &ByteArray::new()),              Ok((&mut [0, 0, 0, 0][..], 4)));
+        assert_eq!(gen_byte_array((&mut [0, 0, 0, 0, 0, 0, 0, 0], 0), &vec![42, 1, 2, 3]), Ok((&mut [0, 0, 0, 4, 42 , 1, 2, 3][..], 8)));
     }
 
     #[test]
@@ -274,13 +274,13 @@ mod test {
         flags.add_flag("b".to_string(), false);
         flags.add_flag("c".to_string(), true);
         flags.add_flag("d".to_string(), true);
-        assert_eq!(gen_flags((&mut [0], 0), &flags).unwrap(), (&mut [0b00001101][..], 1));
+        assert_eq!(gen_flags((&mut [0], 0), &flags), Ok((&mut [0b00001101][..], 1)));
         flags.add_flag("e".to_string(), true);
         flags.add_flag("f".to_string(), false);
         flags.add_flag("g".to_string(), true);
         flags.add_flag("h".to_string(), true);
         flags.add_flag("i".to_string(), false);
         flags.add_flag("j".to_string(), true);
-        assert_eq!(gen_flags((&mut [0, 0], 0), &flags).unwrap(), (&mut [0b11011101, 0b00000010][..], 2));
+        assert_eq!(gen_flags((&mut [0, 0], 0), &flags), Ok((&mut [0b11011101, 0b00000010][..], 2)));
     }
 }
