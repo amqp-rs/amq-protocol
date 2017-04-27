@@ -13,14 +13,22 @@ build         = "build.rs"
 [lib]
 name = "amq_protocol"
 
-[build-dependencies]
-amq-protocol-codegen = "^0.24.0"
+[build-dependencies.amq-protocol-codegen]
+version = "^0.24.0"
+path    = "../codegen"
 
 [dependencies]
-amq-protocol-codegen = "^0.24.0"
-amq-protocol-types   = "^0.16.0"
-cookie-factory       = "^0.2.0"
-nom                  = "^2.2.0"
+#cookie-factory = "^0.2.0"
+cookie-factory = {git="git://github.com/Geal/cookie-factory.git"}
+nom            = "^2.2.1"
+
+[dependencies.amq-protocol-codegen]
+version = "^0.24.0"
+path    = "../codegen"
+
+[dependencies.amq-protocol-types]
+version = "^0.17.0"
+path    = "../types"
 
 [badges]
 travis-ci = { repository = "Keruspe/amq-protocol" }
