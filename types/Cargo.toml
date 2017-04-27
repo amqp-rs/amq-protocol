@@ -15,10 +15,10 @@ name = "amq_protocol_types"
 [dependencies]
 #cookie-factory = "^0.2.0"
 cookie-factory = {git = "git://github.com/Geal/cookie-factory.git"}
-nom            = "^2.2.0"
-serde          = "^0.9.12"
-serde_derive   = "^0.9.12"
-serde_json     = "^0.9.9"
+nom            = "^2.2.1"
+serde          = "^1.0.1"
+serde_derive   = "^1.0.1"
+serde_json     = "^1.0.0"
 
 [badges]
 travis-ci = { repository = "Keruspe/amq-protocol" }
