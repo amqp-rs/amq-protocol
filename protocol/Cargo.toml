@@ -31,5 +31,5 @@ version = "^0.17.0"
 path    = "../types"
 
 [badges]
-travis-ci = { repository = "Keruspe/amq-protocol" }
+travis-ci = { repository = "sozu-proxy/amq-protocol" }
 appveyor  = { repository = "Keruspe/amq-protocol" }
