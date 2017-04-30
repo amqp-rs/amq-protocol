@@ -243,3 +243,107 @@ impl _AMQPProperty {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_convert_to_specs() {
+        let def      = _AMQProtocolDefinition {
+            name:          "amqp".to_string(),
+            major_version: 0,
+            minor_version: 9,
+            revision:      1,
+            port:          5672,
+            copyright:     vec!["foo".to_string(), "bar".to_string()],
+            domains:       vec![_AMQPDomain("d1".to_string(), _AMQPType::Bit)],
+            constants:     vec![
+                _AMQPConstant {
+                    name:  "c1".to_string(),
+                    value: 42,
+                    klass: None,
+                },
+                _AMQPConstant {
+                    name:  "c2".to_string(),
+                    value: 43,
+                    klass: Some(_AMQPErrorKind::Soft),
+                },
+                _AMQPConstant {
+                    name:  "c3".to_string(),
+                    value: 256,
+                    klass: Some(_AMQPErrorKind::Hard),
+                },
+            ],
+            classes:       vec![_AMQPClass {
+                id:         42,
+                methods:    vec![_AMQPMethod {
+                    id:          42,
+                    arguments:   vec![_AMQPArgument {
+                        amqp_type:     Some(_AMQPType::Short),
+                        name:          "arg1".to_string(),
+                        default_value: None,
+                        domain:        None,
+                    }],
+                    name:        "meth1".to_string(),
+                    synchronous: None,
+                }],
+                name:       "class1".to_string(),
+                properties: Some(vec![_AMQPProperty {
+                    amqp_type: _AMQPType::Octet,
+                    name:     "prop1".to_string(),
+                }]),
+            }],
+        };
+        let mut dom  = BTreeMap::new();
+        dom.insert("d1".to_string(), AMQPType::Boolean);
+        let expected = AMQProtocolDefinition {
+            name:          "amqp".to_string(),
+            major_version: 0,
+            minor_version: 9,
+            revision:      1,
+            port:          5672,
+            copyright:     "foobar".to_string(),
+            domains:       dom,
+            constants:     vec![AMQPConstant {
+                name:      "c1".to_string(),
+                value:     42,
+                amqp_type: AMQPType::ShortShortUInt,
+            }],
+            soft_errors:   vec![AMQPConstant {
+                name:      "c2".to_string(),
+                value:     43,
+                amqp_type: AMQPType::ShortShortUInt,
+            }],
+            hard_errors:   vec![AMQPConstant {
+                name:      "c3".to_string(),
+                value:     256,
+                amqp_type: AMQPType::ShortUInt,
+            }],
+            classes:       vec![AMQPClass {
+                id:             42,
+                methods:        vec![AMQPMethod {
+                    id:            42,
+                    arguments:     vec![AMQPArgument::Value(AMQPValueArgument {
+                        amqp_type:    AMQPType::ShortUInt,
+                        name:         "arg1".to_string(),
+                        default_value: None,
+                        domain:        None,
+                    })],
+                    name:          "meth1".to_string(),
+                    synchronous:   false,
+                    has_arguments: true,
+                    has_flags:     false,
+                }],
+                name:           "class1".to_string(),
+                properties:     vec![AMQPProperty {
+                    amqp_type: AMQPType::ShortShortUInt,
+                    name:      "prop1".to_string(),
+                }],
+                has_properties: true,
+                is_connection:  false,
+            }],
+        };
+        assert_eq!(def.to_specs(), expected);
+    }
+}
