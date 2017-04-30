@@ -7,7 +7,7 @@ pub fn camel_case(name: &str) -> String {
             new_word = true;
             result
         } else {
-            result.push(if new_word { ch.to_ascii_uppercase() } else { ch.to_ascii_lowercase() });
+            result.push(if new_word { ch.to_ascii_uppercase() } else { ch });
             new_word = false;
             result
         }
@@ -48,6 +48,7 @@ mod test {
     fn test_camel_case() {
         assert_eq!(camel_case(""),                  "");
         assert_eq!(camel_case("foobar"),            "Foobar");
+        assert_eq!(camel_case("FooBar"),            "FooBar");
         assert_eq!(camel_case("foo_bar"),           "FooBar");
         assert_eq!(camel_case("_foo__bar baz-zzz"), "FooBarBazZzz");
     }
