@@ -13,12 +13,12 @@ license       = "BSD-2-Clause"
 name = "amq_protocol_types"
 
 [dependencies]
-#cookie-factory = "^0.2.0"
+#cookie-factory = "^0.2"
 cookie-factory = {git = "git://github.com/Geal/cookie-factory.git"}
-nom            = "^2.2.1"
-serde          = "^1.0.1"
-serde_derive   = "^1.0.1"
-serde_json     = "^1.0.0"
+nom            = "^2.2"
+serde          = "^1.0"
+serde_derive   = "^1.0"
+serde_json     = "^1.0"
 
 [badges]
 travis-ci = { repository = "sozu-proxy/amq-protocol" }
