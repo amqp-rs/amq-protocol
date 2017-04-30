@@ -16,8 +16,8 @@ pub fn camel_case(name: &str) -> String {
 
 pub fn snake_case(name: &str) -> String {
     match name {
-        "type"   => "amqp_type".to_string(),
-        "return" => "amqp_return".to_string(),
+        "type"   => "type_".to_string(),
+        "return" => "return_".to_string(),
         name     => {
             let mut new_word       = false;
             let mut last_was_upper = false;
