@@ -13,8 +13,7 @@ license       = "BSD-2-Clause"
 name = "amq_protocol_types"
 
 [dependencies]
-#cookie-factory = "^0.2"
-cookie-factory = {git = "git://github.com/Geal/cookie-factory.git"}
+cookie-factory = "^0.2.1"
 nom            = "^2.2"
 serde          = "^1.0"
 serde_derive   = "^1.0"

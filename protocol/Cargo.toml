@@ -18,8 +18,7 @@ version = "^0.24"
 path    = "../codegen"
 
 [dependencies]
-#cookie-factory = "^0.2"
-cookie-factory = {git="git://github.com/Geal/cookie-factory.git"}
+cookie-factory = "^0.2.1"
 nom            = "^2.2"
 
 [dependencies.amq-protocol-codegen]

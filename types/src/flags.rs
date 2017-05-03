@@ -1,11 +1,11 @@
-use types::{Boolean, LongString};
+use types::{Boolean, ShortString};
 
 use std::collections::HashMap;
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPFlags{
     flags: Vec<Boolean>,
-    names: HashMap<LongString, usize>,
+    names: HashMap<ShortString, usize>,
 }
 
 impl AMQPFlags {
@@ -16,7 +16,7 @@ impl AMQPFlags {
         }
     }
 
-    pub fn add_flag(&mut self, name: LongString, flag: Boolean) {
+    pub fn add_flag(&mut self, name: ShortString, flag: Boolean) {
         // FIXME: handle collisions
         self.names.insert(name, self.flags.len());
         self.flags.push(flag);
