@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-types"
-version       = "0.17.0"
+version       = "0.18.0"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications - types"
 repository    = "https://github.com/Keruspe/amq-protocol"
