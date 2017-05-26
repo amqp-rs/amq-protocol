@@ -1,7 +1,7 @@
 use url::{percent_encoding, Url};
 use std::str::FromStr;
 
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct AMQPUri {
     pub scheme:    AMQPScheme,
     pub authority: AMQPAuthority,
@@ -30,6 +30,16 @@ pub struct AMQPUserInfo {
 
 fn percent_decode(s: &str) -> Result<String, String> {
     percent_encoding::percent_decode(s.as_bytes()).decode_utf8().map(|s| s.to_string()).map_err(|e| e.to_string())
+}
+
+impl Default for AMQPUri {
+    fn default() -> Self {
+        AMQPUri {
+            scheme:    Default::default(),
+            authority: Default::default(),
+            vhost:     "/".to_string(),
+        }
+    }
 }
 
 impl FromStr for AMQPUri {
@@ -110,20 +120,20 @@ mod test {
 
     #[test]
     fn test_parse_amqp() {
-        let uri = "amqp://localhost/".parse();
+        let uri = "amqp://localhost/%2f".parse();
         assert_eq!(uri, Ok(AMQPUri::default()));
     }
 
     #[test]
     fn test_parse_amqps() {
-        let uri = "amqps://localhost/%2f".parse();
+        let uri = "amqps://localhost/".parse();
         assert_eq!(uri, Ok(AMQPUri {
             scheme:    AMQPScheme::AMQPS,
             authority: AMQPAuthority {
                 port: 5671,
                 ..Default::default()
             },
-            vhost:     "/".to_string(),
+            vhost:     "".to_string(),
         }));
     }
 
