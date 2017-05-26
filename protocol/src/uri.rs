@@ -1,4 +1,4 @@
-use url::Url;
+use url::{percent_encoding, Url};
 use std::str::FromStr;
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -28,11 +28,15 @@ pub struct AMQPUserInfo {
     pub password: String,
 }
 
+fn percent_decode(s: &str) -> Result<String, String> {
+    percent_encoding::percent_decode(s.as_bytes()).decode_utf8().map(|s| s.to_string()).map_err(|e| e.to_string())
+}
+
 impl FromStr for AMQPUri {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let url      = Url::parse(s).map_err(|e| e.to_string())?;
+        let url      = Url::options().parse(s).map_err(|e| e.to_string())?;
         if url.cannot_be_a_base() {
             return Err(format!("Invalid URL: '{}'", s));
         }
@@ -44,12 +48,12 @@ impl FromStr for AMQPUri {
         };
         let username = match url.username() {
             ""       => default.authority.userinfo.username,
-            username => username.to_string(),
+            username => percent_decode(username)?,
         };
-        let password = url.password().map_or(default.authority.userinfo.password, String::from);
-        let host     = url.domain().map_or(default.authority.host, String::from);
+        let password = url.password().map_or(Ok(default.authority.userinfo.password), percent_decode)?;
+        let host     = url.domain().map_or(Ok(default.authority.host), percent_decode)?;
         let port     = url.port().unwrap_or(scheme.default_port());
-        let vhost    = &url.path()[1..];
+        let vhost    = percent_decode(&url.path()[1..])?;
 
         Ok(AMQPUri {
             scheme:    scheme,
@@ -61,7 +65,7 @@ impl FromStr for AMQPUri {
                 host:     host,
                 port:     port,
             },
-            vhost:     vhost.to_string(),
+            vhost:     vhost,
         })
     }
 }
@@ -112,7 +116,7 @@ mod test {
 
     #[test]
     fn test_parse_amqps() {
-        let uri = "amqps://localhost//".parse();
+        let uri = "amqps://localhost/%2f".parse();
         assert_eq!(uri, Ok(AMQPUri {
             scheme:    AMQPScheme::AMQPS,
             authority: AMQPAuthority {
@@ -137,6 +141,23 @@ mod test {
                 port:     5671,
             },
             vhost:     "v".to_string(),
+        }));
+    }
+
+    #[test]
+    fn test_parse_amqps_with_creds_percent() {
+        let uri = "amqp://user%61:%61pass@ho%61st:10000/v%2fhost".parse();
+        assert_eq!(uri, Ok(AMQPUri {
+            scheme:    AMQPScheme::AMQP,
+            authority: AMQPAuthority {
+                userinfo: AMQPUserInfo {
+                    username: "usera".to_string(),
+                    password: "apass".to_string(),
+                },
+                host:     "hoast".to_string(),
+                port:     10000,
+            },
+            vhost:     "v/host".to_string(),
         }));
     }
 
