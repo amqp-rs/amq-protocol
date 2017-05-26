@@ -212,7 +212,7 @@ pub mod {{snake class.name}} {
     }
     {{/each ~}}
     {{#if class.has_properties ~}}
-    #[derive(Clone,Debug,PartialEq)]
+    #[derive(Clone, Debug, PartialEq)]
     pub struct AMQPProperties {
         {{#each class.properties as |property| ~}}
         {{snake property.name}}: Option<{{property.type}}>,
