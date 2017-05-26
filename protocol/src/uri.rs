@@ -46,7 +46,7 @@ impl FromStr for AMQPUri {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let url      = Url::options().parse(s).map_err(|e| e.to_string())?;
+        let url      = Url::parse(s).map_err(|e| e.to_string())?;
         if url.cannot_be_a_base() {
             return Err(format!("Invalid URL: '{}'", s));
         }
