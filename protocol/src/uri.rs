@@ -1,4 +1,5 @@
 use url::{percent_encoding, Url};
+use std::num::ParseIntError;
 use std::str::FromStr;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -6,7 +7,7 @@ pub struct AMQPUri {
     pub scheme:    AMQPScheme,
     pub authority: AMQPAuthority,
     pub vhost:     String,
-    // TODO: query
+    pub query:     AMQPQueryString,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -28,6 +29,11 @@ pub struct AMQPUserInfo {
     pub password: String,
 }
 
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct AMQPQueryString {
+    pub heartbeat: Option<u16>,
+}
+
 fn percent_decode(s: &str) -> Result<String, String> {
     percent_encoding::percent_decode(s.as_bytes()).decode_utf8().map(|s| s.to_string()).map_err(|e| e.to_string())
 }
@@ -38,6 +44,7 @@ impl Default for AMQPUri {
             scheme:    Default::default(),
             authority: Default::default(),
             vhost:     "/".to_string(),
+            query:     Default::default(),
         }
     }
 }
@@ -46,24 +53,25 @@ impl FromStr for AMQPUri {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let url      = Url::parse(s).map_err(|e| e.to_string())?;
+        let url       = Url::parse(s).map_err(|e| e.to_string())?;
         if url.cannot_be_a_base() {
             return Err(format!("Invalid URL: '{}'", s));
         }
-        let default  = AMQPUri::default();
-        let scheme   = match url.scheme() {
+        let default   = AMQPUri::default();
+        let scheme    = match url.scheme() {
             "amqp"  => AMQPScheme::AMQP,
             "amqps" => AMQPScheme::AMQPS,
             scheme  => return Err(format!("Invalid scheme: '{}'", scheme)),
         };
-        let username = match url.username() {
+        let username  = match url.username() {
             ""       => default.authority.userinfo.username,
             username => percent_decode(username)?,
         };
-        let password = url.password().map_or(Ok(default.authority.userinfo.password), percent_decode)?;
-        let host     = url.domain().map_or(Ok(default.authority.host), percent_decode)?;
-        let port     = url.port().unwrap_or(scheme.default_port());
-        let vhost    = percent_decode(&url.path()[1..])?;
+        let password  = url.password().map_or(Ok(default.authority.userinfo.password), percent_decode)?;
+        let host      = url.domain().map_or(Ok(default.authority.host), percent_decode)?;
+        let port      = url.port().unwrap_or(scheme.default_port());
+        let vhost     = percent_decode(&url.path()[1..])?;
+        let heartbeat = url.query_pairs().find(|&(ref key, _)| key == "heartbeat").map_or(Ok(None), |(_, ref value)| value.parse().map(Some)).map_err(|e: ParseIntError| e.to_string())?;
 
         Ok(AMQPUri {
             scheme:    scheme,
@@ -76,6 +84,9 @@ impl FromStr for AMQPUri {
                 port:     port,
             },
             vhost:     vhost,
+            query:     AMQPQueryString {
+                heartbeat: heartbeat,
+            }
         })
     }
 }
@@ -134,12 +145,13 @@ mod test {
                 ..Default::default()
             },
             vhost:     "".to_string(),
+            ..Default::default()
         }));
     }
 
     #[test]
     fn test_parse_amqps_with_creds() {
-        let uri = "amqps://user:pass@hostname/v".parse();
+        let uri = "amqps://user:pass@hostname/v?foo=bar".parse();
         assert_eq!(uri, Ok(AMQPUri {
             scheme:    AMQPScheme::AMQPS,
             authority: AMQPAuthority {
@@ -151,6 +163,7 @@ mod test {
                 port:     5671,
             },
             vhost:     "v".to_string(),
+            ..Default::default()
         }));
     }
 
@@ -168,6 +181,18 @@ mod test {
                 port:     10000,
             },
             vhost:     "v/host".to_string(),
+            ..Default::default()
+        }));
+    }
+
+    #[test]
+    fn test_parse_with_heartbeat() {
+        let uri = "amqp://localhost/%2f?heartbeat=42".parse();
+        assert_eq!(uri, Ok(AMQPUri {
+            query: AMQPQueryString {
+                heartbeat: Some(42),
+            },
+            ..Default::default()
         }));
     }
 
