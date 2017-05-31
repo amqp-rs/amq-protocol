@@ -33,13 +33,13 @@ impl AMQPType {
             'b' => Some(AMQPType::ShortShortInt),
             'B' => Some(AMQPType::ShortShortUInt),
             /* Specs says 'U', RabbitMQ says 's' (which means ShortString in specs) */
-            's' => Some(AMQPType::ShortInt),
+            's' |
             'U' => Some(AMQPType::ShortInt),
             'u' => Some(AMQPType::ShortUInt),
             'I' => Some(AMQPType::LongInt),
             'i' => Some(AMQPType::LongUInt),
             /* RabbitMQ treats both 'l' and 'L' as LongLongInt and ignores LongLongUInt */
-            'L' => Some(AMQPType::LongLongInt),
+            'L' |
             'l' => Some(AMQPType::LongLongInt),
             'f' => Some(AMQPType::Float),
             'd' => Some(AMQPType::Double),
@@ -65,7 +65,7 @@ impl AMQPType {
             AMQPType::LongInt        => 'I',
             AMQPType::LongUInt       => 'i',
             /* RabbitMQ treats both 'l' and 'L' as LongLongInt and ignores LongLongUInt */
-            AMQPType::LongLongInt    => 'l',
+            AMQPType::LongLongInt    |
             AMQPType::LongLongUInt   => 'l',
             AMQPType::Float          => 'f',
             AMQPType::Double         => 'd',

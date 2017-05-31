@@ -10,10 +10,7 @@ pub struct AMQPFlags{
 
 impl AMQPFlags {
     pub fn new() -> AMQPFlags {
-        AMQPFlags {
-            flags: Vec::new(),
-            names: HashMap::new(),
-        }
+        Default::default()
     }
 
     pub fn add_flag(&mut self, name: ShortString, flag: Boolean) {
@@ -23,7 +20,7 @@ impl AMQPFlags {
     }
 
     pub fn get_flag(&self, name: &str) -> Option<Boolean> {
-        if let Some(flag) = self.names.get(name).and_then(|index| self.flags.iter().nth(*index)) {
+        if let Some(flag) = self.names.get(name).and_then(|index| self.flags.get(*index)) {
             Some(*flag)
         } else {
             None
@@ -38,7 +35,7 @@ impl AMQPFlags {
         }).collect()
     }
 
-    pub fn from_bytes(names: &Vec<&str>, bytes: Vec<u8>) -> AMQPFlags {
+    pub fn from_bytes(names: &[&str], bytes: &[u8]) -> AMQPFlags {
         let flags : Vec<Boolean> = bytes.iter().flat_map(|b| {
             let mut v = Vec::new();
             for s in 0..8 {
@@ -50,6 +47,15 @@ impl AMQPFlags {
         AMQPFlags {
             flags: flags,
             names: names.iter().take(len).enumerate().map(|(i, f)| (f.to_string(), i)).collect()
+        }
+    }
+}
+
+impl Default for AMQPFlags {
+    fn default() -> AMQPFlags {
+        AMQPFlags {
+            flags: Vec::new(),
+            names: HashMap::new(),
         }
     }
 }
