@@ -126,7 +126,16 @@ mod test {
         assert_eq!(AMQPType::from_id('T'), Some(AMQPType::Timestamp));
         assert_eq!(AMQPType::from_id('S'), Some(AMQPType::LongString));
         assert_eq!(AMQPType::from_id('s'), Some(AMQPType::ShortInt));
+        assert_eq!(AMQPType::from_id('U'), Some(AMQPType::ShortInt));
+        assert_eq!(AMQPType::from_id('l'), Some(AMQPType::LongLongInt));
         assert_eq!(AMQPType::from_id('z'), None);
+    }
+
+    #[test]
+    fn test_type_get_id() {
+        assert_eq!(AMQPType::LongLongInt.get_id(),  'l');
+        assert_eq!(AMQPType::LongLongUInt.get_id(), 'l');
+        assert_eq!(AMQPType::ShortString.get_id(),  '_');
     }
 
     #[test]

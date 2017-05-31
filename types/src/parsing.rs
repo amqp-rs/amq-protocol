@@ -79,8 +79,11 @@ mod test {
 
     #[test]
     fn test_parse_raw_value() {
-        assert_eq!(parse_raw_value(&[42, 42, 42, 42, 42,  42,  42,  42],  AMQPType::Timestamp),  IResult::Done(EMPTY, AMQPValue::Timestamp(3038287259199220266)));
-        assert_eq!(parse_raw_value(&[0,  0,  0,  4,  116, 101, 115, 116], AMQPType::LongString), IResult::Done(EMPTY, AMQPValue::LongString("test".to_string())));
+        assert_eq!(parse_raw_value(&[42, 42, 42, 42, 42,  42,  42,  42],  AMQPType::Timestamp),    IResult::Done(EMPTY, AMQPValue::Timestamp(3038287259199220266)));
+        assert_eq!(parse_raw_value(&[0,  0,  0,  4,  116, 101, 115, 116], AMQPType::LongString),   IResult::Done(EMPTY, AMQPValue::LongString("test".to_string())));
+        /* Test internal exceptions */
+        assert_eq!(parse_raw_value(&[42, 42, 42, 42, 42,  42,  42,  42],  AMQPType::LongLongUInt), IResult::Done(EMPTY, AMQPValue::LongLongInt(3038287259199220266)));
+        assert_eq!(parse_raw_value(&[4,  116, 101, 115, 116],             AMQPType::ShortString),  IResult::Done(EMPTY, AMQPValue::LongString("test".to_string())));
     }
 
     #[test]
