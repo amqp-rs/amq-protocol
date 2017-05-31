@@ -22,7 +22,7 @@ pub struct _AMQProtocolDefinition {
 }
 
 impl _AMQProtocolDefinition {
-    pub fn to_specs(self) -> AMQProtocolDefinition {
+    pub fn into_specs(self) -> AMQProtocolDefinition {
         let domains = self.domains.iter().fold(BTreeMap::new(), |mut domains, domain| {
             domains.insert(domain.0.clone(), domain.1.to_specs());
             domains
@@ -170,7 +170,7 @@ impl _AMQPMethod {
         for argument in &self.arguments {
             let amqp_type = argument.get_type(domains);
             if amqp_type == AMQPType::Boolean {
-                let mut flgs = flags.take().unwrap_or_else(|| Vec::new());
+                let mut flgs = flags.take().unwrap_or_else(Vec::new);
                 flgs.push(argument.to_flag_specs());
                 flags = Some(flgs);
             } else {
@@ -344,6 +344,6 @@ mod test {
                 is_connection:  false,
             }],
         };
-        assert_eq!(def.to_specs(), expected);
+        assert_eq!(def.into_specs(), expected);
     }
 }

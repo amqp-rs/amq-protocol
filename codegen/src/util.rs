@@ -27,7 +27,7 @@ pub fn snake_case(name: &str) -> String {
                     result
                 } else {
                     let uppercase = ch.is_uppercase();
-                    if new_word || (!last_was_upper && result.len() > 0 && uppercase) {
+                    if new_word || (!last_was_upper && !result.is_empty() && uppercase) {
                         result.push('_');
                         new_word = false;
                     }

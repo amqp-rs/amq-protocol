@@ -46,28 +46,28 @@ impl HandlebarsAMQPExtension for CodeGenerator {
 pub fn camel_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"camel\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"camel\""))?;
-    rc.writer.write(camel_case(param).as_bytes())?;
+    rc.writer.write_all(camel_case(param).as_bytes())?;
     Ok(())
 }
 
 pub fn snake_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"snake\""))?;
-    rc.writer.write(snake_case(param).as_bytes())?;
+    rc.writer.write_all(snake_case(param).as_bytes())?;
     Ok(())
 }
 
 pub fn snake_type_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
     let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
     let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"snake_type\""))?;
-    rc.writer.write(snake_case(&param.to_string()).as_bytes())?;
+    rc.writer.write_all(snake_case(&param.to_string()).as_bytes())?;
     Ok(())
 }
 
 pub fn sanitize_name_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"sanitize_name\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"sanitize_name\""))?;
-    rc.writer.write(param.replace('-', "_").as_bytes())?;
+    rc.writer.write_all(param.replace('-', "_").as_bytes())?;
     Ok(())
 }
 

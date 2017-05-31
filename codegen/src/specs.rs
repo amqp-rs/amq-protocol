@@ -24,7 +24,7 @@ impl AMQProtocolDefinition {
     pub fn load() -> AMQProtocolDefinition {
         let specs = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/specs/amqp-rabbitmq-0.9.1.json"));
 
-        from_str::<_AMQProtocolDefinition>(specs).expect("Failed to parse AMQP specs file").to_specs()
+        from_str::<_AMQProtocolDefinition>(specs).expect("Failed to parse AMQP specs file").into_specs()
     }
 }
 
