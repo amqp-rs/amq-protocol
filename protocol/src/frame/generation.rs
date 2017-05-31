@@ -5,14 +5,14 @@ use types::generation::*;
 
 use cookie_factory::GenError;
 
-pub fn gen_protocol_header<'a>(x: (&'a mut [u8], usize)) -> Result<(&'a mut [u8], usize), GenError> {
+pub fn gen_protocol_header(x: (&mut [u8], usize)) -> Result<(&mut [u8], usize), GenError> {
     do_gen!(x,
         gen_slice!(metadata::NAME.as_bytes()) >>
         gen_slice!(&[0, metadata::MAJOR_VERSION, metadata::MINOR_VERSION, metadata::REVISION])
     )
 }
 
-pub fn gen_heartbeat_frame<'a>(x: (&'a mut [u8], usize)) -> Result<(&'a mut [u8], usize), GenError> {
+pub fn gen_heartbeat_frame(x: (&mut [u8], usize)) -> Result<(&mut [u8], usize), GenError> {
     do_gen!(x, gen_slice!(&[constants::FRAME_HEARTBEAT, 0, 0, 0, 0, 0, 0, constants::FRAME_END]))
 }
 
@@ -27,7 +27,7 @@ pub fn gen_method_frame<'a>(x:(&'a mut [u8], usize), channel_id: ShortUInt, clas
     )
 }
 
-pub fn gen_content_header_frame<'a>(x: (&'a mut [u8], usize), channel_id: ShortUInt, class_id: ShortUInt, length: LongLongUInt, properties: basic::AMQPProperties) -> Result<(&'a mut [u8], usize), GenError> {
+pub fn gen_content_header_frame<'a>(x: (&'a mut [u8], usize), channel_id: ShortUInt, class_id: ShortUInt, length: LongLongUInt, properties: &basic::AMQPProperties) -> Result<(&'a mut [u8], usize), GenError> {
     do_gen!(x,
         gen_short_short_uint(&constants::FRAME_HEADER)                          >>
         gen_id(&channel_id)                                                     >>

@@ -38,7 +38,7 @@ impl AMQPError {
     }
 
     pub fn from_id(id: ShortUInt) -> Option<AMQPError> {
-        AMQPSoftError::from_id(id).map(|e| AMQPError::Soft(e)).or_else(|| AMQPHardError::from_id(id).map(|e| AMQPError::Hard(e)))
+        AMQPSoftError::from_id(id).map(AMQPError::Soft).or_else(|| AMQPHardError::from_id(id).map(AMQPError::Hard))
     }
 }
 
@@ -167,7 +167,7 @@ pub mod {{snake class.name}} {
         {{snake argument.name}}: parse_{{snake_type argument.type}} >>
         {{else}}
         /* FIXME: support multiple flags structs? */
-        flags: apply!(parse_flags, &vec![
+        flags: apply!(parse_flags, &[
             {{#each_flag argument as |flag| ~}}
             "{{flag.name}}",
             {{/each_flag ~}}

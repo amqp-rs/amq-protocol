@@ -1,6 +1,6 @@
-mod frame;
+mod structs;
 
-pub use self::frame::*;
+pub use self::structs::*;
 
 pub mod generation;
 pub mod parsing;

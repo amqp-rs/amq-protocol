@@ -69,7 +69,7 @@ impl FromStr for AMQPUri {
         };
         let password  = url.password().map_or(Ok(default.authority.userinfo.password), percent_decode)?;
         let host      = url.domain().map_or(Ok(default.authority.host), percent_decode)?;
-        let port      = url.port().unwrap_or(scheme.default_port());
+        let port      = url.port().unwrap_or_else(|| scheme.default_port());
         let vhost     = percent_decode(&url.path()[1..])?;
         let heartbeat = url.query_pairs().find(|&(ref key, _)| key == "heartbeat").map_or(Ok(None), |(_, ref value)| value.parse().map(Some)).map_err(|e: ParseIntError| e.to_string())?;
 
