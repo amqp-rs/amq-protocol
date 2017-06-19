@@ -31,6 +31,7 @@ pub struct AMQPUserInfo {
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct AMQPQueryString {
+    pub frame_max: Option<u32>,
     pub heartbeat: Option<u16>,
 }
 
@@ -71,6 +72,7 @@ impl FromStr for AMQPUri {
         let host      = url.domain().map_or(Ok(default.authority.host), percent_decode)?;
         let port      = url.port().unwrap_or_else(|| scheme.default_port());
         let vhost     = percent_decode(&url.path()[1..])?;
+        let frame_max = url.query_pairs().find(|&(ref key, _)| key == "frame_max").map_or(Ok(None), |(_, ref value)| value.parse().map(Some)).map_err(|e: ParseIntError| e.to_string())?;
         let heartbeat = url.query_pairs().find(|&(ref key, _)| key == "heartbeat").map_or(Ok(None), |(_, ref value)| value.parse().map(Some)).map_err(|e: ParseIntError| e.to_string())?;
 
         Ok(AMQPUri {
@@ -85,6 +87,7 @@ impl FromStr for AMQPUri {
             },
             vhost:     vhost,
             query:     AMQPQueryString {
+                frame_max: frame_max,
                 heartbeat: heartbeat,
             }
         })
@@ -186,10 +189,11 @@ mod test {
     }
 
     #[test]
-    fn test_parse_with_heartbeat() {
-        let uri = "amqp://localhost/%2f?heartbeat=42".parse();
+    fn test_parse_with_heartbeat_frame_max() {
+        let uri = "amqp://localhost/%2f?heartbeat=42&frame_max=64".parse();
         assert_eq!(uri, Ok(AMQPUri {
             query: AMQPQueryString {
+                frame_max: Some(64),
                 heartbeat: Some(42),
             },
             ..Default::default()
