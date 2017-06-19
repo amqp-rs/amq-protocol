@@ -23,7 +23,7 @@ nom            = "^3.0"
 url            = "^1.4"
 
 [dependencies.amq-protocol-codegen]
-version = "^0.26"
+version = "^0.27"
 path    = "../codegen"
 
 [dependencies.amq-protocol-types]
