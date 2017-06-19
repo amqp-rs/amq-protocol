@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol"
-version       = "0.18.1"
+version       = "0.19.0"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications"
 repository    = "https://github.com/sozu-proxy/amq-protocol"
@@ -14,13 +14,13 @@ build         = "build.rs"
 name = "amq_protocol"
 
 [build-dependencies.amq-protocol-codegen]
-version = "^0.26"
+version = "^0.27"
 path    = "../codegen"
 
 [dependencies]
 cookie-factory = "^0.2.1"
-nom            = "^3.0"
-url            = "^1.4"
+nom            = "^3.1"
+url            = "^1.5"
 
 [dependencies.amq-protocol-codegen]
 version = "^0.27"
