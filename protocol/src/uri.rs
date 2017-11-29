@@ -95,7 +95,7 @@ impl FromStr for AMQPUri {
 }
 
 impl AMQPScheme {
-    fn default_port(&self) -> u16 {
+    pub fn default_port(&self) -> u16 {
         match *self {
             AMQPScheme::AMQP  => 5672,
             AMQPScheme::AMQPS => 5671,
