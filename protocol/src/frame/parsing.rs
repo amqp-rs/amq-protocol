@@ -1,9 +1,9 @@
+use nom;
+
 use frame::*;
 use protocol::*;
 use protocol::basic::parse_properties;
 use types::parsing::*;
-
-use nom::IResult;
 
 named!(pub parse_channel<AMQPChannel>, map!(parse_id, From::from));
 
@@ -21,7 +21,7 @@ named!(pub parse_frame_type<AMQPFrameType>, switch!(parse_short_short_uint,
     constants::FRAME_HEARTBEAT => value!(AMQPFrameType::Heartbeat)
 ));
 
-pub fn parse_frame(i: &[u8]) -> IResult<&[u8], AMQPFrame> {
+pub fn parse_frame(i: &[u8]) -> Result<(&[u8], AMQPFrame), nom::Err<&[u8]>> {
     let (remaining, raw) = try_parse!(i, parse_raw_frame);
     let (_, frame)       = match raw.frame_type {
         AMQPFrameType::Method    => try_parse!(raw.payload, map!(parse_class,          |m: AMQPClass|         AMQPFrame::Method(raw.channel_id, m))),
@@ -29,7 +29,7 @@ pub fn parse_frame(i: &[u8]) -> IResult<&[u8], AMQPFrame> {
         AMQPFrameType::Body      => (remaining, AMQPFrame::Body(raw.channel_id, Vec::from(raw.payload))),
         AMQPFrameType::Heartbeat => (remaining, AMQPFrame::Heartbeat(raw.channel_id)),
     };
-    IResult::Done(remaining, frame)
+    Ok((remaining, frame))
 }
 
 named!(pub parse_raw_frame<AMQPRawFrame>, do_parse!(
