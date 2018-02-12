@@ -2,9 +2,9 @@ use flags::*;
 use types::*;
 use value::*;
 
-use nom::{be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be_f32, be_f64, IResult};
+use nom::{self, be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be_f32, be_f64};
 
-pub fn parse_raw_value<'a>(i: &'a [u8], amqp_type: &AMQPType) -> IResult<&'a [u8], AMQPValue> {
+pub fn parse_raw_value<'a>(i: &'a [u8], amqp_type: &AMQPType) -> Result<(&'a [u8], AMQPValue), nom::Err<&'a [u8]>> {
     match *amqp_type {
         AMQPType::Boolean        => map!(i, call!(parse_boolean),          |b| AMQPValue::Boolean(b)),
         AMQPType::ShortShortInt  => map!(i, call!(parse_short_short_int),  |i| AMQPValue::ShortShortInt(i)),
@@ -59,7 +59,7 @@ named!(pub parse_field_table<FieldTable>,          do_parse!(length: parse_long_
 })) >> (table)));
 named!(pub parse_byte_array<ByteArray>,            do_parse!(length: parse_long_uint >> a: take!(length) >> (a.to_vec())));
 
-pub fn parse_flags<'a, 'b>(i: &'a [u8], names: &'b [&'b str]) -> IResult<&'a [u8], AMQPFlags> {
+pub fn parse_flags<'a, 'b>(i: &'a [u8], names: &'b [&'b str]) -> Result<(&'a [u8], AMQPFlags), nom::Err<&'a [u8]>> {
     map!(i, take!((names.len() + 7)/8), |b: &[u8]| AMQPFlags::from_bytes(names, b))
 }
 
@@ -67,131 +67,129 @@ pub fn parse_flags<'a, 'b>(i: &'a [u8], names: &'b [&'b str]) -> IResult<&'a [u8
 mod test {
     use super::*;
 
-    use nom::IResult;
-
     const EMPTY: &'static [u8] = b"";
 
     #[test]
     fn test_parse_value() {
-        assert_eq!(parse_value(&[84, 42, 42, 42, 42, 42,  42,  42,  42]),  IResult::Done(EMPTY, AMQPValue::Timestamp(3038287259199220266)));
-        assert_eq!(parse_value(&[83, 0,  0,  0,  4,  116, 101, 115, 116]), IResult::Done(EMPTY, AMQPValue::LongString("test".to_string())));
+        assert_eq!(parse_value(&[84, 42, 42, 42, 42, 42,  42,  42,  42]),  Ok((EMPTY, AMQPValue::Timestamp(3038287259199220266))));
+        assert_eq!(parse_value(&[83, 0,  0,  0,  4,  116, 101, 115, 116]), Ok((EMPTY, AMQPValue::LongString("test".to_string()))));
     }
 
     #[test]
     fn test_parse_raw_value() {
-        assert_eq!(parse_raw_value(&[42, 42, 42, 42, 42,  42,  42,  42],  &AMQPType::Timestamp),    IResult::Done(EMPTY, AMQPValue::Timestamp(3038287259199220266)));
-        assert_eq!(parse_raw_value(&[0,  0,  0,  4,  116, 101, 115, 116], &AMQPType::LongString),   IResult::Done(EMPTY, AMQPValue::LongString("test".to_string())));
+        assert_eq!(parse_raw_value(&[42, 42, 42, 42, 42,  42,  42,  42],  &AMQPType::Timestamp),    Ok((EMPTY, AMQPValue::Timestamp(3038287259199220266))));
+        assert_eq!(parse_raw_value(&[0,  0,  0,  4,  116, 101, 115, 116], &AMQPType::LongString),   Ok((EMPTY, AMQPValue::LongString("test".to_string()))));
         /* Test internal exceptions */
-        assert_eq!(parse_raw_value(&[42, 42, 42, 42, 42,  42,  42,  42],  &AMQPType::LongLongUInt), IResult::Done(EMPTY, AMQPValue::LongLongInt(3038287259199220266)));
-        assert_eq!(parse_raw_value(&[4,  116, 101, 115, 116],             &AMQPType::ShortString),  IResult::Done(EMPTY, AMQPValue::LongString("test".to_string())));
+        assert_eq!(parse_raw_value(&[42, 42, 42, 42, 42,  42,  42,  42],  &AMQPType::LongLongUInt), Ok((EMPTY, AMQPValue::LongLongInt(3038287259199220266))));
+        assert_eq!(parse_raw_value(&[4,  116, 101, 115, 116],             &AMQPType::ShortString),  Ok((EMPTY, AMQPValue::LongString("test".to_string()))));
     }
 
     #[test]
     fn test_parse_type() {
-        assert_eq!(parse_type(&[116]), IResult::Done(EMPTY, AMQPType::Boolean));
-        assert_eq!(parse_type(&[102]), IResult::Done(EMPTY, AMQPType::Float));
+        assert_eq!(parse_type(&[116]), Ok((EMPTY, AMQPType::Boolean)));
+        assert_eq!(parse_type(&[102]), Ok((EMPTY, AMQPType::Float)));
     }
 
     #[test]
     fn test_parse_id() {
-        assert_eq!(parse_id(&[0,   0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_id(&[255, 255]), IResult::Done(EMPTY, 65535));
+        assert_eq!(parse_id(&[0,   0]),   Ok((EMPTY, 0)));
+        assert_eq!(parse_id(&[255, 255]), Ok((EMPTY, 65535)));
     }
 
     #[test]
     fn test_parse_boolean() {
-        assert_eq!(parse_boolean(&[0]), IResult::Done(EMPTY, false));
-        assert_eq!(parse_boolean(&[1]), IResult::Done(EMPTY, true));
+        assert_eq!(parse_boolean(&[0]), Ok((EMPTY, false)));
+        assert_eq!(parse_boolean(&[1]), Ok((EMPTY, true)));
     }
 
     #[test]
     fn test_parse_short_short_int() {
-        assert_eq!(parse_short_short_int(&[0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_short_short_int(&[255]), IResult::Done(EMPTY, -1));
+        assert_eq!(parse_short_short_int(&[0]),   Ok((EMPTY, 0)));
+        assert_eq!(parse_short_short_int(&[255]), Ok((EMPTY, -1)));
     }
 
     #[test]
     fn test_parse_short_short_uint() {
-        assert_eq!(parse_short_short_uint(&[0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_short_short_uint(&[255]), IResult::Done(EMPTY, 255));
+        assert_eq!(parse_short_short_uint(&[0]),   Ok((EMPTY, 0)));
+        assert_eq!(parse_short_short_uint(&[255]), Ok((EMPTY, 255)));
     }
 
     #[test]
     fn test_parse_short_int() {
-        assert_eq!(parse_short_int(&[0,   0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_short_int(&[255, 255]), IResult::Done(EMPTY, -1));
+        assert_eq!(parse_short_int(&[0,   0]),   Ok((EMPTY, 0)));
+        assert_eq!(parse_short_int(&[255, 255]), Ok((EMPTY, -1)));
     }
 
     #[test]
     fn test_parse_short_uint() {
-        assert_eq!(parse_short_uint(&[0,   0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_short_uint(&[255, 255]), IResult::Done(EMPTY, 65535));
+        assert_eq!(parse_short_uint(&[0,   0]),   Ok((EMPTY, 0)));
+        assert_eq!(parse_short_uint(&[255, 255]), Ok((EMPTY, 65535)));
     }
 
     #[test]
     fn test_parse_long_int() {
-        assert_eq!(parse_long_int(&[0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_long_int(&[255, 255, 255, 255]), IResult::Done(EMPTY, -1));
+        assert_eq!(parse_long_int(&[0,   0,   0,   0]),   Ok((EMPTY, 0)));
+        assert_eq!(parse_long_int(&[255, 255, 255, 255]), Ok((EMPTY, -1)));
     }
 
     #[test]
     fn test_parse_long_uint() {
-        assert_eq!(parse_long_uint(&[0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_long_uint(&[255, 255, 255, 255]), IResult::Done(EMPTY, 4294967295));
+        assert_eq!(parse_long_uint(&[0,   0,   0,   0]),   Ok((EMPTY, 0)));
+        assert_eq!(parse_long_uint(&[255, 255, 255, 255]), Ok((EMPTY, 4294967295)));
     }
 
     #[test]
     fn test_parse_long_long_int() {
-        assert_eq!(parse_long_long_int(&[0,   0,   0,   0,   0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_long_long_int(&[255, 255, 255, 255, 255, 255, 255, 255]), IResult::Done(EMPTY, -1));
+        assert_eq!(parse_long_long_int(&[0,   0,   0,   0,   0,   0,   0,   0]),   Ok((EMPTY, 0)));
+        assert_eq!(parse_long_long_int(&[255, 255, 255, 255, 255, 255, 255, 255]), Ok((EMPTY, -1)));
     }
 
     #[test]
     fn test_parse_long_long_uint() {
-        assert_eq!(parse_long_long_uint(&[0,   0,   0,   0,   0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_long_long_uint(&[255, 255, 255, 255, 255, 255, 255, 255]), IResult::Done(EMPTY, 18446744073709551615));
+        assert_eq!(parse_long_long_uint(&[0,   0,   0,   0,   0,   0,   0,   0]),   Ok((EMPTY, 0)));
+        assert_eq!(parse_long_long_uint(&[255, 255, 255, 255, 255, 255, 255, 255]), Ok((EMPTY, 18446744073709551615)));
     }
 
     #[test]
     fn test_parse_float() {
-        assert_eq!(parse_float(&[0,  0,  0,   0]),  IResult::Done(EMPTY, 0.));
-        assert_eq!(parse_float(&[66, 41, 174, 20]), IResult::Done(EMPTY, 42.42));
+        assert_eq!(parse_float(&[0,  0,  0,   0]),  Ok((EMPTY, 0.)));
+        assert_eq!(parse_float(&[66, 41, 174, 20]), Ok((EMPTY, 42.42)));
     }
 
     #[test]
     fn test_parse_double() {
-        assert_eq!(parse_double(&[0,  0,  0,  0,   0,   0,  0,  0]),   IResult::Done(EMPTY, 0.));
-        assert_eq!(parse_double(&[64, 69, 53, 194, 143, 92, 40, 246]), IResult::Done(EMPTY, 42.42));
+        assert_eq!(parse_double(&[0,  0,  0,  0,   0,   0,  0,  0]),   Ok((EMPTY, 0.)));
+        assert_eq!(parse_double(&[64, 69, 53, 194, 143, 92, 40, 246]), Ok((EMPTY, 42.42)));
     }
 
     #[test]
     fn test_parse_decimal_value() {
-        assert_eq!(parse_decimal_value(&[0,   0,   0,   0,   0]),   IResult::Done(EMPTY, DecimalValue { scale: 0,   value: 0          }));
-        assert_eq!(parse_decimal_value(&[255, 255, 255, 255, 255]), IResult::Done(EMPTY, DecimalValue { scale: 255, value: 4294967295 }));
+        assert_eq!(parse_decimal_value(&[0,   0,   0,   0,   0]),   Ok((EMPTY, DecimalValue { scale: 0,   value: 0          })));
+        assert_eq!(parse_decimal_value(&[255, 255, 255, 255, 255]), Ok((EMPTY, DecimalValue { scale: 255, value: 4294967295 })));
     }
 
     #[test]
     fn test_parse_short_string() {
-        assert_eq!(parse_short_string(&[0]),                     IResult::Done(EMPTY, ShortString::new()));
-        assert_eq!(parse_short_string(&[4, 116, 101, 115, 116]), IResult::Done(EMPTY, "test".to_string()));
+        assert_eq!(parse_short_string(&[0]),                     Ok((EMPTY, ShortString::new())));
+        assert_eq!(parse_short_string(&[4, 116, 101, 115, 116]), Ok((EMPTY, "test".to_string())));
     }
 
     #[test]
     fn test_parse_long_string() {
-        assert_eq!(parse_long_string(&[0, 0, 0, 0]),                     IResult::Done(EMPTY, LongString::new()));
-        assert_eq!(parse_long_string(&[0, 0, 0, 4, 116, 101, 115, 116]), IResult::Done(EMPTY, "test".to_string()));
+        assert_eq!(parse_long_string(&[0, 0, 0, 0]),                     Ok((EMPTY, LongString::new())));
+        assert_eq!(parse_long_string(&[0, 0, 0, 4, 116, 101, 115, 116]), Ok((EMPTY, "test".to_string())));
     }
 
     #[test]
     fn test_parse_field_array() {
-        assert_eq!(parse_field_array(&[0, 0, 0, 0]),                                          IResult::Done(EMPTY, FieldArray::new()));
-        assert_eq!(parse_field_array(&[0, 0, 0, 10, 83, 0, 0, 0, 4, 116, 101, 115, 116, 86]), IResult::Done(EMPTY, vec![AMQPValue::LongString("test".to_string()), AMQPValue::Void]));
+        assert_eq!(parse_field_array(&[0, 0, 0, 0]),                                          Ok((EMPTY, FieldArray::new())));
+        assert_eq!(parse_field_array(&[0, 0, 0, 10, 83, 0, 0, 0, 4, 116, 101, 115, 116, 86]), Ok((EMPTY, vec![AMQPValue::LongString("test".to_string()), AMQPValue::Void])));
     }
 
     #[test]
     fn test_parse_timestamp() {
-        assert_eq!(parse_timestamp(&[0,   0,   0,   0,   0,   0,   0,   0]),   IResult::Done(EMPTY, 0));
-        assert_eq!(parse_timestamp(&[255, 255, 255, 255, 255, 255, 255, 255]), IResult::Done(EMPTY, 18446744073709551615));
+        assert_eq!(parse_timestamp(&[0,   0,   0,   0,   0,   0,   0,   0]),   Ok((EMPTY, 0)));
+        assert_eq!(parse_timestamp(&[255, 255, 255, 255, 255, 255, 255, 255]), Ok((EMPTY, 18446744073709551615)));
     }
 
     #[test]
@@ -199,14 +197,14 @@ mod test {
         let mut table = FieldTable::new();
         table.insert("test".to_string(), AMQPValue::LongString("test".to_string()));
         table.insert("tt".to_string(),   AMQPValue::Void);
-        assert_eq!(parse_field_table(&[0, 0, 0, 0]),                                                                              IResult::Done(EMPTY, FieldTable::new()));
-        assert_eq!(parse_field_table(&[0, 0, 0, 18, 4, 116, 101, 115, 116, 83, 0, 0, 0, 4, 116, 101, 115, 116, 2, 116, 116, 86]), IResult::Done(EMPTY, table));
+        assert_eq!(parse_field_table(&[0, 0, 0, 0]),                                                                              Ok((EMPTY, FieldTable::new())));
+        assert_eq!(parse_field_table(&[0, 0, 0, 18, 4, 116, 101, 115, 116, 83, 0, 0, 0, 4, 116, 101, 115, 116, 2, 116, 116, 86]), Ok((EMPTY, table)));
     }
 
     #[test]
     fn test_parse_byte_array() {
-        assert_eq!(parse_byte_array(&[0, 0, 0, 0]),              IResult::Done(EMPTY, ByteArray::new()));
-        assert_eq!(parse_byte_array(&[0, 0, 0, 4, 42, 1, 2, 3]), IResult::Done(EMPTY, vec![42, 1, 2, 3]));
+        assert_eq!(parse_byte_array(&[0, 0, 0, 0]),              Ok((EMPTY, ByteArray::new())));
+        assert_eq!(parse_byte_array(&[0, 0, 0, 4, 42, 1, 2, 3]), Ok((EMPTY, vec![42, 1, 2, 3])));
     }
 
     #[test]
@@ -217,13 +215,13 @@ mod test {
         names.push("b"); flags.add_flag("b".to_string(), false);
         names.push("c"); flags.add_flag("c".to_string(), true);
         names.push("d"); flags.add_flag("d".to_string(), true);
-        assert_eq!(parse_flags(&[0b00001101], &names), IResult::Done(EMPTY, flags.clone()));
+        assert_eq!(parse_flags(&[0b00001101], &names), Ok((EMPTY, flags.clone())));
         names.push("e"); flags.add_flag("e".to_string(), true);
         names.push("f"); flags.add_flag("f".to_string(), false);
         names.push("g"); flags.add_flag("g".to_string(), true);
         names.push("h"); flags.add_flag("h".to_string(), true);
         names.push("i"); flags.add_flag("i".to_string(), false);
         names.push("j"); flags.add_flag("j".to_string(), true);
-        assert_eq!(parse_flags(&[0b11011101, 0b00000010], &names), IResult::Done(EMPTY, flags));
+        assert_eq!(parse_flags(&[0b11011101, 0b00000010], &names), Ok((EMPTY, flags)));
     }
 }

@@ -5,8 +5,6 @@ use amq_protocol_types::*;
 use amq_protocol_types::generation::gen_value;
 use amq_protocol_types::parsing::parse_value;
 
-use nom::IResult;
-
 #[test]
 fn test_full_integration() {
     let mut table  = FieldTable::new();
@@ -36,5 +34,5 @@ fn test_full_integration() {
     let value              = AMQPValue::FieldTable(table);
     let mut buf: [u8; 199] = [0; 199];
 
-    assert_eq!(parse_value(gen_value((&mut buf[..], 0), &value).unwrap().0), IResult::Done(&[][..], value));
+    assert_eq!(parse_value(gen_value((&mut buf[..], 0), &value).unwrap().0), Ok((&[][..], value)));
 }
