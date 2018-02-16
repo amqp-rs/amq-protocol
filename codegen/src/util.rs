@@ -1,5 +1,3 @@
-use std::ascii::AsciiExt;
-
 pub fn camel_case(name: &str) -> String {
     let mut new_word = true;
     name.chars().fold("".to_string(), |mut result, ch| {

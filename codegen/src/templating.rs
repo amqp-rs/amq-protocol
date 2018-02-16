@@ -100,7 +100,7 @@ pub fn each_argument_helper (h: &Helper, r: &Handlebars, rc: &mut RenderContext)
                         map.insert("argument_is_value".to_string(), to_json(&false));
                     },
                 };
-                local_rc.push_block_context(&map);
+                local_rc.push_block_context(&map)?;
             }
             t.render(r, &mut local_rc)?;
             if h.block_param().is_some() {
@@ -135,7 +135,7 @@ pub fn each_flag_helper (h: &Helper, r: &Handlebars, rc: &mut RenderContext) -> 
             if let Some(block_param) = h.block_param() {
                 let mut map = BTreeMap::new();
                 map.insert(block_param.to_string(), to_json(flag));
-                local_rc.push_block_context(&map);
+                local_rc.push_block_context(&map)?;
             }
             t.render(r, &mut local_rc)?;
             if h.block_param().is_some() {
