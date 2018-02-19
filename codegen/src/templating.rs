@@ -2,7 +2,7 @@ use specs::*;
 use util::*;
 
 use amq_protocol_types::AMQPType;
-use handlebars::{self, Handlebars, Helper, Renderable, RenderContext, RenderError, to_json};
+use handlebars::{self, Context, Handlebars, Helper, Output, Renderable, RenderContext, RenderError, to_json};
 use serde_json::{self};
 
 use std::fs::File;
@@ -43,35 +43,35 @@ impl HandlebarsAMQPExtension for CodeGenerator {
     }
 }
 
-pub fn camel_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
+pub fn camel_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"camel\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"camel\""))?;
-    rc.writer.write_all(camel_case(param).as_bytes())?;
+    out.write(&camel_case(param))?;
     Ok(())
 }
 
-pub fn snake_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
+pub fn snake_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"snake\""))?;
-    rc.writer.write_all(snake_case(param).as_bytes())?;
+    out.write(&snake_case(param))?;
     Ok(())
 }
 
-pub fn snake_type_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
+pub fn snake_type_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
     let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
     let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"snake_type\""))?;
-    rc.writer.write_all(snake_case(&param.to_string()).as_bytes())?;
+    out.write(&snake_case(&param.to_string()))?;
     Ok(())
 }
 
-pub fn sanitize_name_helper (h: &Helper, _: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
+pub fn sanitize_name_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"sanitize_name\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"sanitize_name\""))?;
-    rc.writer.write_all(param.replace('-', "_").as_bytes())?;
+    out.write(&param.replace('-', "_"))?;
     Ok(())
 }
 
-pub fn each_argument_helper (h: &Helper, r: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
+pub fn each_argument_helper (h: &Helper, r: &Handlebars, ctx: &Context, rc: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_argument\""))?;
 
     if let Some(t) = h.template() {
@@ -102,7 +102,7 @@ pub fn each_argument_helper (h: &Helper, r: &Handlebars, rc: &mut RenderContext)
                 };
                 local_rc.push_block_context(&map)?;
             }
-            t.render(r, &mut local_rc)?;
+            t.render(r, ctx, &mut local_rc, out)?;
             if h.block_param().is_some() {
                 local_rc.pop_block_context();
             }
@@ -115,7 +115,7 @@ pub fn each_argument_helper (h: &Helper, r: &Handlebars, rc: &mut RenderContext)
     Ok(())
 }
 
-pub fn each_flag_helper (h: &Helper, r: &Handlebars, rc: &mut RenderContext) -> Result<(), RenderError> {
+pub fn each_flag_helper (h: &Helper, r: &Handlebars, ctx: &Context, rc: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_flag\""))?;
 
     if let Some(t) = h.template() {
@@ -137,7 +137,7 @@ pub fn each_flag_helper (h: &Helper, r: &Handlebars, rc: &mut RenderContext) -> 
                 map.insert(block_param.to_string(), to_json(flag));
                 local_rc.push_block_context(&map)?;
             }
-            t.render(r, &mut local_rc)?;
+            t.render(r, ctx, &mut local_rc, out)?;
             if h.block_param().is_some() {
                 local_rc.pop_block_context();
             }
