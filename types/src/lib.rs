@@ -12,4 +12,5 @@ pub use value::*;
 
 pub mod flags;
 pub mod generation;
+///! Parsing utilities for the various AMQP types.
 pub mod parsing;
