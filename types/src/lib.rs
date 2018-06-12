@@ -10,7 +10,9 @@ mod value;
 pub use types::*;
 pub use value::*;
 
+///! Helpers to handle AMQP flags.
 pub mod flags;
+///! Serialization utilities for the various AMQP types.
 pub mod generation;
 ///! Parsing utilities for the various AMQP types.
 pub mod parsing;
