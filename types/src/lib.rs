@@ -1,3 +1,5 @@
+#![deny(missing_docs)]
+
 #[macro_use] extern crate cookie_factory;
 #[macro_use] extern crate nom;
 extern crate serde;
@@ -12,7 +14,7 @@ pub use value::*;
 
 ///! Helpers to handle AMQP flags.
 pub mod flags;
-///! Serialization utilities for the various AMQP types.
+///! Generation utilities for the various AMQP types.
 pub mod generation;
 ///! Parsing utilities for the various AMQP types.
 pub mod parsing;
