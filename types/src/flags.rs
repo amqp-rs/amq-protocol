@@ -1,11 +1,8 @@
 use types::{Boolean, ShortString};
 
-use std::collections::HashMap;
-
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPFlags{
-    flags: Vec<Boolean>,
-    names: HashMap<ShortString, usize>,
+    flags: Vec<(ShortString, Boolean)>,
 }
 
 impl AMQPFlags {
@@ -14,39 +11,32 @@ impl AMQPFlags {
     }
 
     pub fn add_flag(&mut self, name: ShortString, flag: Boolean) {
-        // FIXME: handle collisions
-        self.names.insert(name, self.flags.len());
-        self.flags.push(flag);
+        self.flags.push((name, flag));
     }
 
     pub fn get_flag(&self, name: &str) -> Option<Boolean> {
-        if let Some(flag) = self.names.get(name).and_then(|index| self.flags.get(*index)) {
-            Some(*flag)
-        } else {
-            None
-        }
+        self.flags.iter().find(|(n, _)| n == name).map(|(_, v)| *v)
     }
 
     pub fn get_bytes(&self) -> Vec<u8> {
         self.flags.chunks(8).map(|v| {
-            v.iter().enumerate().map(|(idx, b)| {
+            v.iter().enumerate().map(|(idx, (_, b))| {
                 if *b { 1 << idx } else { 0 }
             }).sum()
         }).collect()
     }
 
     pub fn from_bytes(names: &[&str], bytes: &[u8]) -> AMQPFlags {
-        let flags : Vec<Boolean> = bytes.iter().flat_map(|b| {
+        let flags = names.iter().map(ToString::to_string).zip(bytes.iter().flat_map(|b| {
             let mut v = Vec::new();
             for s in 0..8 {
                 v.push(((b & (1 << s)) >> s) == 1)
             }
             v
-        }).take(names.len()).collect();
-        let len = flags.len();
+        })).collect();
+
         AMQPFlags {
-            flags: flags,
-            names: names.iter().take(len).enumerate().map(|(i, f)| (f.to_string(), i)).collect()
+            flags,
         }
     }
 }
@@ -55,7 +45,6 @@ impl Default for AMQPFlags {
     fn default() -> AMQPFlags {
         AMQPFlags {
             flags: Vec::new(),
-            names: HashMap::new(),
         }
     }
 }
