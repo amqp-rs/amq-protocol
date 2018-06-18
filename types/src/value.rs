@@ -2,28 +2,47 @@ use types::*;
 
 use serde_json::Value;
 
+///! Enumeration referencing the possible AMQP values depending on the types
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub enum AMQPValue {
+    ///! A bool
     Boolean(Boolean),
+    ///! An i8
     ShortShortInt(ShortShortInt),
+    ///! A u8
     ShortShortUInt(ShortShortUInt),
+    ///! An i16
     ShortInt(ShortInt),
+    ///! A u16
     ShortUInt(ShortUInt),
+    ///! An i32
     LongInt(LongInt),
+    ///! A u32
     LongUInt(LongUInt),
+    ///! An i64
     LongLongInt(LongLongInt),
+    ///! An f32
     Float(Float),
+    ///! An f64
     Double(Double),
+    ///! A decimal value
     DecimalValue(DecimalValue),
+    ///! A String
     LongString(LongString),
+    ///! An array of AMQPValue
     FieldArray(FieldArray),
+    ///! A timestamp (u32)
     Timestamp(Timestamp),
+    ///! A Map<String, AMQPValue>
     FieldTable(FieldTable),
+    ///! An array of bytes (RabbitMQ speicific)
     ByteArray(ByteArray),
+    ///! No value
     Void,
 }
 
 impl AMQPValue {
+    ///! Get the AMQPType of an AMQPValue
     pub fn get_type(&self) -> AMQPType {
         match *self {
             AMQPValue::Boolean(_)        => AMQPType::Boolean,
