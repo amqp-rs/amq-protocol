@@ -18,7 +18,7 @@ version = "^0.27"
 path    = "../codegen"
 
 [dependencies]
-cookie-factory = "^0.2.1"
+cookie-factory = "^0.2.4"
 nom            = "^4.0"
 url            = "^1.5"
 
@@ -27,7 +27,7 @@ version = "^0.27"
 path    = "../codegen"
 
 [dependencies.amq-protocol-types]
-version = "^0.20"
+version = "^1.0"
 path    = "../types"
 
 [badges]
