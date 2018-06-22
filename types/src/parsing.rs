@@ -211,7 +211,7 @@ mod test {
 
     #[test]
     fn test_parse_flags() {
-        let mut flags = AMQPFlags::new();
+        let mut flags = AMQPFlags::default();
         let mut names = Vec::new();
         names.push("a"); flags.add_flag("a".to_string(), true);
         names.push("b"); flags.add_flag("b".to_string(), false);

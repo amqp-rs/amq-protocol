@@ -292,7 +292,7 @@ mod test {
 
     #[test]
     fn test_gen_flags() {
-        let mut flags = AMQPFlags::new();
+        let mut flags = AMQPFlags::default();
         flags.add_flag("a".to_string(), true);
         flags.add_flag("b".to_string(), false);
         flags.add_flag("c".to_string(), true);

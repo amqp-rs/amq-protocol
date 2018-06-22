@@ -6,10 +6,6 @@ pub struct AMQPFlags{
 }
 
 impl AMQPFlags {
-    pub fn new() -> AMQPFlags {
-        Default::default()
-    }
-
     pub fn add_flag(&mut self, name: ShortString, flag: Boolean) {
         self.flags.push((name, flag));
     }
@@ -56,12 +52,12 @@ mod test {
     #[test]
     fn test_empty_flags() {
         let empty: &[u8] = &[];
-        assert_eq!(AMQPFlags::new().get_bytes().as_slice(), empty);
+        assert_eq!(AMQPFlags::default().get_bytes().as_slice(), empty);
     }
 
     #[test]
     fn test_flags() {
-        let mut flags = AMQPFlags::new();
+        let mut flags = AMQPFlags::default();
         flags.add_flag("a".to_string(), true);
         flags.add_flag("b".to_string(), false);
         flags.add_flag("c".to_string(), false);
@@ -72,7 +68,7 @@ mod test {
 
     #[test]
     fn test_many_flags() {
-        let mut flags = AMQPFlags::new();
+        let mut flags = AMQPFlags::default();
         flags.add_flag("a".to_string(), true);
         flags.add_flag("b".to_string(), false);
         flags.add_flag("c".to_string(), false);
@@ -88,7 +84,7 @@ mod test {
 
     #[test]
     fn test_lookup_flags() {
-        let mut flags = AMQPFlags::new();
+        let mut flags = AMQPFlags::default();
         flags.add_flag("a".to_string(), true);
         flags.add_flag("b".to_string(), false);
         flags.add_flag("c".to_string(), false);
