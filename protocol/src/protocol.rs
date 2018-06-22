@@ -1,5 +1,7 @@
 include!(concat!(env!("OUT_DIR"), "/protocol.rs"));
 
+pub type BasicProperties = basic::AMQPProperties;
+
 #[cfg(test)]
 mod test {
     use super::*;
