@@ -1,29 +1,26 @@
-sudo: false
 language: rust
 
+sudo: required
+
+addons:
+    apt:
+        packages:
+            - libssl-dev
+
+cache: cargo
+
 rust:
+    - 1.26.0
     - stable
     - beta
     - nightly
-
-before_script:
-    - cargo install cargo-travis
-    - export PATH=$HOME/.cargo/bin:$PATH
 
 script:
     - cargo build --verbose --all
     - cargo test  --verbose --all
 
-after_success:
-    - cargo coveralls --verbose --all
-
-addons:
-    apt:
-        packages:
-            - libcurl4-openssl-dev
-            - libelf-dev
-            - libdw-dev
-            - binutils-dev
-            - cmake
-        sources:
-            - kalakris-cmake
+after_success: |
+    if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
+        bash <(curl https://raw.githubusercontent.com/xd009642/tarpaulin/master/travis-install.sh)
+        cargo tarpaulin --ciserver travis-ci --coveralls $TRAVIS_JOB_ID
+    fi
