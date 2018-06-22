@@ -1,9 +1,30 @@
+use frame::AMQPFrame;
 use protocol::*;
 use protocol::basic::gen_properties;
 use types::*;
 use types::generation::*;
 
 use cookie_factory::GenError;
+
+pub fn gen_frame<'a, 'b>(x: (&'a mut [u8], usize), frame: &'b AMQPFrame) -> Result<(&'a mut [u8], usize), GenError> {
+    match frame {
+        AMQPFrame::ProtocolHeader => {
+            gen_protocol_header(x)
+        },
+        AMQPFrame::Heartbeat(_) => {
+            gen_heartbeat_frame(x)
+        },
+        AMQPFrame::Method(channel_id, method) => {
+            gen_method_frame(x, *channel_id, method)
+        },
+        AMQPFrame::Header(channel_id, class_id, header) => {
+            gen_content_header_frame(x, *channel_id, *class_id, header.body_size, &header.properties)
+        },
+        AMQPFrame::Body(channel_id, data) => {
+            gen_content_body_frame(x, *channel_id, data)
+        }
+    }
+}
 
 pub fn gen_protocol_header(x: (&mut [u8], usize)) -> Result<(&mut [u8], usize), GenError> {
     do_gen!(x,
