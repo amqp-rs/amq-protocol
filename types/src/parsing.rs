@@ -4,7 +4,7 @@ use value::*;
 
 use nom::{self, be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be_f32, be_f64};
 
-///! Parse the [AMQPValue](../type.AMQPValue.html) of the given [AMQPType](../type.AMQPType.html)
+/// Parse the [AMQPValue](../type.AMQPValue.html) of the given [AMQPType](../type.AMQPType.html)
 pub fn parse_raw_value<'a>(i: &'a [u8], amqp_type: &AMQPType) -> Result<(&'a [u8], AMQPValue), nom::Err<&'a [u8]>> {
     match *amqp_type {
         AMQPType::Boolean        => map!(i, call!(parse_boolean),          |b| AMQPValue::Boolean(b)),
@@ -60,7 +60,7 @@ named_attr!(#[doc = "Parse a [FieldTable](../type.FieldTable.html)"],         pu
 })) >> (table)));
 named_attr!(#[doc = "Parse a [ByteArray](../type.ByteArray.html)"],           pub parse_byte_array<ByteArray>,            do_parse!(length: parse_long_uint >> a: take!(length) >> (a.to_vec())));
 
-///! Parse the [AMQPFlags](../type.AMQPFlags.html) for which the names are provided
+/// Parse the [AMQPFlags](../type.AMQPFlags.html) for which the names are provided
 pub fn parse_flags<'a, 'b>(i: &'a [u8], names: &'b [&'b str]) -> Result<(&'a [u8], AMQPFlags), nom::Err<&'a [u8]>> {
     map!(i, take!((names.len() + 7)/8), |b: &[u8]| AMQPFlags::from_bytes(names, b))
 }

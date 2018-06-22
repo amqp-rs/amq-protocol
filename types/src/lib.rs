@@ -1,4 +1,5 @@
 #![deny(missing_docs)]
+#![doc(html_root_url = "https://docs.rs/amq-protocol-types/1.0.0/")]
 
 //! # AMQP types manipulation library
 //!
@@ -20,9 +21,9 @@ mod value;
 pub use types::*;
 pub use value::*;
 
-///! Helpers to handle AMQP flags.
+/// Helpers to handle AMQP flags.
 pub mod flags;
-///! Generation utilities for the various AMQP types.
+/// Generation utilities for the various AMQP types.
 pub mod generation;
-///! Parsing utilities for the various AMQP types.
+/// Parsing utilities for the various AMQP types.
 pub mod parsing;

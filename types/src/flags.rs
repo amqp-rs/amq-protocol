@@ -1,23 +1,23 @@
 use types::{Boolean, ShortString};
 
-///! A struct representing AMQP boolean flags for RPC
+/// A struct representing AMQP boolean flags for RPC
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPFlags{
     flags: Vec<(ShortString, Boolean)>,
 }
 
 impl AMQPFlags {
-    ///! Add a boolean flag with a name
+    /// Add a boolean flag with a name
     pub fn add_flag(&mut self, name: ShortString, flag: Boolean) {
         self.flags.push((name, flag));
     }
 
-    ///! Get the value of a boolean flag by name, if present
+    /// Get the value of a boolean flag by name, if present
     pub fn get_flag(&self, name: &str) -> Option<Boolean> {
         self.flags.iter().find(|(n, _)| n == name).map(|(_, v)| *v)
     }
 
-    ///! Get the AMQPFlags serialized for AMQP RPC
+    /// Get the AMQPFlags serialized for AMQP RPC
     pub fn get_bytes(&self) -> Vec<u8> {
         self.flags.chunks(8).map(|v| {
             v.iter().enumerate().map(|(idx, (_, b))| {
@@ -26,7 +26,7 @@ impl AMQPFlags {
         }).collect()
     }
 
-    ///! Initialize AMQPFlags from AMQP RPC serialization
+    /// Initialize AMQPFlags from AMQP RPC serialization
     pub fn from_bytes(names: &[&str], bytes: &[u8]) -> AMQPFlags {
         let flags = names.iter().map(ToString::to_string).zip(bytes.iter().flat_map(|b| {
             let mut v = Vec::new();
