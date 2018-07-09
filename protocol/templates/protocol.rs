@@ -237,6 +237,12 @@ pub mod {{snake class.name}} {
         }
         {{/each ~}}
 
+        {{#each class.properties as |property| ~}}
+        pub fn {{snake property.name}}(&self) -> &Option<{{property.type}}> {
+            &self.{{snake property.name}}
+        }
+        {{/each ~}}
+
         pub fn bitmask(&self) -> ShortUInt {
             {{#each class.properties as |property| ~}}
             (if self.{{snake property.name}}.is_some() { 1 << (15 - {{@index}}) } else { 0 }) {{#unless @last ~}} + {{/unless ~}}
