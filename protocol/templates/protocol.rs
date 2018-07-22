@@ -8,12 +8,12 @@ use cookie_factory::GenError;
 pub mod metadata {
     use super::*;
 
-    pub const NAME:          &'static str   = "{{protocol.name}}";
+    pub const NAME:          &str           = "{{protocol.name}}";
     pub const MAJOR_VERSION: ShortShortUInt = {{protocol.major_version}};
     pub const MINOR_VERSION: ShortShortUInt = {{protocol.minor_version}};
     pub const REVISION:      ShortShortUInt = {{protocol.revision}};
     pub const PORT:          LongUInt       = {{protocol.port}};
-    pub const COPYRIGHT:     &'static str   = r#"{{copyright}}"#;
+    pub const COPYRIGHT:     &str           = r#"{{copyright}}"#;
 }
 
 pub mod constants {
@@ -177,7 +177,7 @@ pub mod {{snake class.name}} {
         ({{camel method.name}} {
             {{#each_argument method.arguments as |argument| ~}}
             {{#if argument_is_value ~}}
-            {{snake argument.name}}: {{snake argument.name}},
+            {{snake argument.name}},
             {{else}}
             {{#each_flag argument as |flag| ~}}
             {{snake flag.name}}: flags.get_flag("{{snake flag.name}}").unwrap_or({{flag.default_value}}),
@@ -257,7 +257,7 @@ pub mod {{snake class.name}} {
         {{/each ~}}
         (AMQPProperties {
             {{#each class.properties as |property| ~}}
-            {{snake property.name}}: {{snake property.name}},
+            {{snake property.name}},
             {{/each ~}}
         })
     ));

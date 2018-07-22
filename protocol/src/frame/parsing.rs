@@ -25,7 +25,7 @@ pub fn parse_frame(i: &[u8]) -> Result<(&[u8], AMQPFrame), nom::Err<&[u8]>> {
     let (remaining, raw) = try_parse!(i, parse_raw_frame);
     let (_, frame)       = match raw.frame_type {
         AMQPFrameType::Method    => try_parse!(raw.payload, map!(parse_class,          |m: AMQPClass|         AMQPFrame::Method(raw.channel_id, m))),
-        AMQPFrameType::Header    => try_parse!(raw.payload, map!(parse_content_header, |h: AMQPContentHeader| AMQPFrame::Header(raw.channel_id, h.class_id, h))),
+        AMQPFrameType::Header    => try_parse!(raw.payload, map!(parse_content_header, |h: AMQPContentHeader| AMQPFrame::Header(raw.channel_id, h.class_id, Box::new(h)))),
         AMQPFrameType::Body      => (remaining, AMQPFrame::Body(raw.channel_id, Vec::from(raw.payload))),
         AMQPFrameType::Heartbeat => (remaining, AMQPFrame::Heartbeat(raw.channel_id)),
     };
@@ -41,8 +41,8 @@ named!(pub parse_raw_frame<AMQPRawFrame>, do_parse!(
     (AMQPRawFrame {
         frame_type: frame,
         channel_id: channel,
-        size:       size,
-        payload:    payload,
+        size,
+        payload,
     })
 ));
 
@@ -52,9 +52,9 @@ named!(pub parse_content_header<AMQPContentHeader>, do_parse!(
     size:       parse_long_long_uint >>
     properties: parse_properties     >>
     (AMQPContentHeader {
-        class_id:   class,
-        weight:     weight,
-        body_size:  size,
-        properties: properties,
+        class_id:  class,
+        weight,
+        body_size: size,
+        properties,
     })
 ));

@@ -8,8 +8,8 @@ pub enum AMQPChannel {
 }
 
 impl AMQPChannel {
-    pub fn get_id(&self) -> ShortUInt {
-        match *self {
+    pub fn get_id(self) -> ShortUInt {
+        match self {
             AMQPChannel::Global => 0,
             AMQPChannel::Id(id) => id,
         }
@@ -37,7 +37,7 @@ pub enum AMQPFrameType {
 pub enum AMQPFrame {
     ProtocolHeader,
     Method(ShortUInt, AMQPClass),
-    Header(ShortUInt, ShortUInt, AMQPContentHeader),
+    Header(ShortUInt, ShortUInt, Box<AMQPContentHeader>),
     Body(ShortUInt, Vec<u8>),
     Heartbeat(ShortUInt)
 }

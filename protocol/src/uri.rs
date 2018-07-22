@@ -76,20 +76,20 @@ impl FromStr for AMQPUri {
         let heartbeat = url.query_pairs().find(|&(ref key, _)| key == "heartbeat").map_or(Ok(None), |(_, ref value)| value.parse().map(Some)).map_err(|e: ParseIntError| e.to_string())?;
 
         Ok(AMQPUri {
-            scheme:    scheme,
+            scheme,
             authority: AMQPAuthority {
                 userinfo: AMQPUserInfo {
-                    username: username,
-                    password: password,
+                    username,
+                    password,
                 },
-                host:     host,
-                port:     port,
+                host,
+                port,
             },
-            vhost:     vhost,
+            vhost,
             query:     AMQPQueryString {
-                frame_max: frame_max,
-                heartbeat: heartbeat,
-            }
+                frame_max,
+                heartbeat,
+            },
         })
     }
 }
