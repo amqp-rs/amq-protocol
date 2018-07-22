@@ -35,11 +35,11 @@ impl _AMQProtocolDefinition {
             revision:      self.revision,
             port:          self.port,
             copyright:     self.copyright.iter().fold(LongString::new(), |acc, cur| acc + cur),
-            domains:       domains,
+            domains,
             constants:     self.constants.iter().filter_map(|constant| if constant.klass.is_none() { Some(constant.to_specs()) } else { None }).collect(),
             soft_errors:   self.constants.iter().filter_map(|constant| if let Some(_AMQPErrorKind::Soft) = constant.klass { Some(constant.to_specs()) } else { None }).collect(),
             hard_errors:   self.constants.iter().filter_map(|constant| if let Some(_AMQPErrorKind::Hard) = constant.klass { Some(constant.to_specs()) } else { None }).collect(),
-            classes:       classes,
+            classes,
         }
     }
 }
@@ -131,7 +131,7 @@ impl _AMQPClass {
             id:             self.id,
             methods:        self.methods.iter().map(|method| method.to_specs(domains)).collect(),
             name:           self.name.clone(),
-            properties:     properties,
+            properties,
             has_properties: self.properties.as_ref().map(|p| !p.is_empty()).unwrap_or(false),
             is_connection:  self.id == 10,
         }
@@ -156,9 +156,9 @@ impl _AMQPMethod {
         });
         AMQPMethod {
             id:            self.id,
-            arguments:     arguments,
-            has_arguments: has_arguments,
-            has_flags:     has_flags,
+            arguments,
+            has_arguments,
+            has_flags,
             name:          self.name.clone(),
             synchronous:   self.synchronous.unwrap_or(false),
         }
@@ -207,7 +207,7 @@ impl _AMQPArgument {
 
     fn to_value_specs(&self, amqp_type: AMQPType) -> AMQPValueArgument {
         AMQPValueArgument {
-            amqp_type:     amqp_type,
+            amqp_type,
             name:          self.name.clone(),
             default_value: self.default_value.as_ref().map(From::from),
             domain:        self.domain.clone(),
@@ -222,7 +222,7 @@ impl _AMQPArgument {
                     Some(ref domain) => domain,
                     None             => panic!(format!("{} has no type nor domain", self.name)),
                 };
-                domains.get(domain).expect(&format!("No {} domain exists", domain)).clone()
+                domains.get(domain).unwrap_or_else(|| panic!("No {} domain exists", domain)).clone()
             },
         }
     }

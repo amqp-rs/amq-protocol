@@ -31,15 +31,15 @@ impl HandlebarsAMQPExtension for CodeGenerator {
 
     fn simple_codegen(out_dir: &str, target: &str, template_name: &str, template: &str, var_name: &str) {
         let dest_path   = Path::new(out_dir).join(format!("{}.rs", target));
-        let mut f       = File::create(&dest_path).expect(&format!("Failed to create {}.rs", target));
+        let mut f       = File::create(&dest_path).unwrap_or_else(|_| panic!("Failed to create {}.rs", target));
         let specs       = AMQProtocolDefinition::load();
         let mut codegen = CodeGenerator::new().register_amqp_helpers();
         let mut data    = BTreeMap::new();
 
-        codegen.register_template_string(template_name, template.to_string()).expect(&format!("Failed to register {} template", template_name));
+        codegen.register_template_string(template_name, template.to_string()).unwrap_or_else(|_| panic!("Failed to register {} template", template_name));
         data.insert(var_name.to_string(), specs);
 
-        writeln!(f, "{}", codegen.render(template_name, &data).expect(&format!("Failed to render {} template", template_name))).expect(&format!("Failed to generate {}.rs", target));
+        writeln!(f, "{}", codegen.render(template_name, &data).unwrap_or_else(|_| panic!("Failed to render {} template", template_name))).unwrap_or_else(|_| panic!("Failed to generate {}.rs", target));
     }
 }
 
