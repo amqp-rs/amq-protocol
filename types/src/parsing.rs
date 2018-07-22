@@ -7,26 +7,26 @@ use nom::{self, be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be
 /// Parse the [AMQPValue](../type.AMQPValue.html) of the given [AMQPType](../type.AMQPType.html)
 pub fn parse_raw_value<'a>(i: &'a [u8], amqp_type: &AMQPType) -> Result<(&'a [u8], AMQPValue), nom::Err<&'a [u8]>> {
     match *amqp_type {
-        AMQPType::Boolean        => map!(i, call!(parse_boolean),          |b| AMQPValue::Boolean(b)),
-        AMQPType::ShortShortInt  => map!(i, call!(parse_short_short_int),  |i| AMQPValue::ShortShortInt(i)),
-        AMQPType::ShortShortUInt => map!(i, call!(parse_short_short_uint), |u| AMQPValue::ShortShortUInt(u)),
-        AMQPType::ShortInt       => map!(i, call!(parse_short_int),        |i| AMQPValue::ShortInt(i)),
-        AMQPType::ShortUInt      => map!(i, call!(parse_short_uint),       |u| AMQPValue::ShortUInt(u)),
-        AMQPType::LongInt        => map!(i, call!(parse_long_int),         |i| AMQPValue::LongInt(i)),
-        AMQPType::LongUInt       => map!(i, call!(parse_long_uint),        |u| AMQPValue::LongUInt(u)),
-        AMQPType::LongLongInt    => map!(i, call!(parse_long_long_int),    |i| AMQPValue::LongLongInt(i)),
+        AMQPType::Boolean        => map!(i, call!(parse_boolean),          AMQPValue::Boolean),
+        AMQPType::ShortShortInt  => map!(i, call!(parse_short_short_int),  AMQPValue::ShortShortInt),
+        AMQPType::ShortShortUInt => map!(i, call!(parse_short_short_uint), AMQPValue::ShortShortUInt),
+        AMQPType::ShortInt       => map!(i, call!(parse_short_int),        AMQPValue::ShortInt),
+        AMQPType::ShortUInt      => map!(i, call!(parse_short_uint),       AMQPValue::ShortUInt),
+        AMQPType::LongInt        => map!(i, call!(parse_long_int),         AMQPValue::LongInt),
+        AMQPType::LongUInt       => map!(i, call!(parse_long_uint),        AMQPValue::LongUInt),
+        AMQPType::LongLongInt    => map!(i, call!(parse_long_long_int),    AMQPValue::LongLongInt),
         /* Rabbitmq treats LongLongUInt as a LongLongInt hence expose it as such */
-        AMQPType::LongLongUInt   => map!(i, call!(parse_long_long_int),    |u| AMQPValue::LongLongInt(u)),
-        AMQPType::Float          => map!(i, call!(parse_float),            |f| AMQPValue::Float(f)),
-        AMQPType::Double         => map!(i, call!(parse_double),           |d| AMQPValue::Double(d)),
-        AMQPType::DecimalValue   => map!(i, call!(parse_decimal_value),    |d| AMQPValue::DecimalValue(d)),
+        AMQPType::LongLongUInt   => map!(i, call!(parse_long_long_int),    AMQPValue::LongLongInt),
+        AMQPType::Float          => map!(i, call!(parse_float),            AMQPValue::Float),
+        AMQPType::Double         => map!(i, call!(parse_double),           AMQPValue::Double),
+        AMQPType::DecimalValue   => map!(i, call!(parse_decimal_value),    AMQPValue::DecimalValue),
         /* ShortString is only for internal usage and AMQPValue::ShortString shouldn't exist, hence return it as LongString */
-        AMQPType::ShortString    => map!(i, call!(parse_short_string),     |s| AMQPValue::LongString(s)),
-        AMQPType::LongString     => map!(i, call!(parse_long_string),      |s| AMQPValue::LongString(s)),
-        AMQPType::FieldArray     => map!(i, call!(parse_field_array),      |a| AMQPValue::FieldArray(a)),
-        AMQPType::Timestamp      => map!(i, call!(parse_timestamp),        |t| AMQPValue::Timestamp(t)),
-        AMQPType::FieldTable     => map!(i, call!(parse_field_table),      |t| AMQPValue::FieldTable(t)),
-        AMQPType::ByteArray      => map!(i, call!(parse_byte_array),       |a| AMQPValue::ByteArray(a)),
+        AMQPType::ShortString    => map!(i, call!(parse_short_string),     AMQPValue::LongString),
+        AMQPType::LongString     => map!(i, call!(parse_long_string),      AMQPValue::LongString),
+        AMQPType::FieldArray     => map!(i, call!(parse_field_array),      AMQPValue::FieldArray),
+        AMQPType::Timestamp      => map!(i, call!(parse_timestamp),        AMQPValue::Timestamp),
+        AMQPType::FieldTable     => map!(i, call!(parse_field_table),      AMQPValue::FieldTable),
+        AMQPType::ByteArray      => map!(i, call!(parse_byte_array),       AMQPValue::ByteArray),
         AMQPType::Void           => value!(i, AMQPValue::Void),
     }
 }
@@ -46,7 +46,7 @@ named_attr!(#[doc = "Parse a [LongLongInt](../type.LongLongInt.html)"],       pu
 named_attr!(#[doc = "Parse a [LongLongUInt](../type.LongLongUInt.html)"],     pub parse_long_long_uint<LongLongUInt>,     call!(be_u64));
 named_attr!(#[doc = "Parse a [Float](../type.Float.html)"],                   pub parse_float<Float>,                     call!(be_f32));
 named_attr!(#[doc = "Parse a [Double](../type.Double.html)"],                 pub parse_double<Double>,                   call!(be_f64));
-named_attr!(#[doc = "Parse a [DecimalValue](../type.DecimalValue.html)"],     pub parse_decimal_value<DecimalValue>,      do_parse!(scale: parse_short_short_uint >> value: parse_long_uint >> (DecimalValue { scale: scale, value: value, })));
+named_attr!(#[doc = "Parse a [DecimalValue](../type.DecimalValue.html)"],     pub parse_decimal_value<DecimalValue>,      do_parse!(scale: parse_short_short_uint >> value: parse_long_uint >> (DecimalValue { scale, value, })));
 named_attr!(#[doc = "Parse a [ShortString](../type.ShortString.html)"],       pub parse_short_string<ShortString>,        do_parse!(length: parse_short_short_uint >> s: take_str!(length) >> (s.to_string())));
 named_attr!(#[doc = "Parse a [LongString](../type.LongString.html)"],         pub parse_long_string<LongString>,          do_parse!(length: parse_long_uint >> s: take_str!(length) >> (s.to_string())));
 named_attr!(#[doc = "Parse a [FieldArray](../type.FieldArray.html)"],         pub parse_field_array<FieldArray>,          do_parse!(length: parse_long_uint >> array: flat_map!(take!(length as usize), fold_many0!(complete!(parse_value), FieldArray::new(), |mut acc: FieldArray, elem| {
