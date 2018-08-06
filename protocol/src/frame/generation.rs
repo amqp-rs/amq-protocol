@@ -1,10 +1,10 @@
-use frame::AMQPFrame;
-use protocol::*;
-use protocol::basic::gen_properties;
-use types::*;
-use types::generation::*;
+use crate::frame::AMQPFrame;
+use crate::protocol::*;
+use crate::protocol::basic::gen_properties;
+use crate::types::*;
+use crate::types::generation::*;
 
-use cookie_factory::GenError;
+use cookie_factory::{GenError, do_gen, gen_at_offset, gen_call, gen_copy, gen_skip, gen_slice};
 
 /// Serialize a frame in the given buffer
 pub fn gen_frame<'a, 'b>(x: (&'a mut [u8], usize), frame: &'b AMQPFrame) -> Result<(&'a mut [u8], usize), GenError> {

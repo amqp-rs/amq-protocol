@@ -9,17 +9,11 @@
 //! It implements the list of the different kind of types available, a value holder and
 //! serialization.deserialization facilities.
 
-extern crate cookie_factory;
-#[macro_use] extern crate nom;
-extern crate serde;
-#[macro_use] extern crate serde_derive;
-extern crate serde_json;
-
 mod types;
 mod value;
 
-pub use types::*;
-pub use value::*;
+pub use crate::types::*;
+pub use crate::value::*;
 
 /// Helpers to handle AMQP flags.
 pub mod flags;

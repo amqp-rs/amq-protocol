@@ -1,6 +1,7 @@
 [package]
 name          = "amq-protocol-types"
 version       = "1.0.0" # remember to update html_root_url
+edition       = "2018"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications - types"
 repository    = "https://github.com/sozu-proxy/amq-protocol"

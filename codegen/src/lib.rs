@@ -6,19 +6,13 @@
 //! amq-protocol-codegen is a library aiming at providing tools to generate
 //! code from official AMQP specs definition.
 
-extern crate amq_protocol_types;
-extern crate handlebars;
-extern crate serde;
-#[macro_use] extern crate serde_derive;
-extern crate serde_json;
-
 mod internal;
 mod named;
 mod specs;
 mod templating;
 mod util;
 
-pub use named::*;
-pub use specs::*;
-pub use templating::*;
-pub use util::*;
+pub use crate::named::*;
+pub use crate::specs::*;
+pub use crate::templating::*;
+pub use crate::util::*;

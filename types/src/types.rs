@@ -1,7 +1,9 @@
-use value::AMQPValue;
+use crate::value::AMQPValue;
 
 use std::collections::BTreeMap;
 use std::fmt;
+
+use serde_derive::{Deserialize, Serialize};
 
 /// Enumeration referencing all the available AMQP types
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
@@ -112,7 +114,7 @@ impl AMQPType {
 }
 
 impl fmt::Display for AMQPType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self)
     }
 }

@@ -1,9 +1,11 @@
 use nom;
 
-use frame::*;
-use protocol::*;
-use protocol::basic::parse_properties;
-use types::parsing::*;
+use crate::frame::*;
+use crate::protocol::*;
+use crate::protocol::basic::parse_properties;
+use crate::types::parsing::*;
+
+use nom::*;
 
 named_attr!(#[doc = "Parse a channel id"], pub parse_channel<AMQPChannel>, map!(parse_id, From::from));
 
@@ -33,7 +35,7 @@ pub fn parse_frame(i: &[u8]) -> Result<(&[u8], AMQPFrame), nom::Err<&[u8]>> {
     Ok((remaining, frame))
 }
 
-named_attr!(#[doc = "Parse a raw AMQP frame"], pub parse_raw_frame<AMQPRawFrame>, do_parse!(
+named_attr!(#[doc = "Parse a raw AMQP frame"], pub parse_raw_frame<AMQPRawFrame<'_>>, do_parse!(
     frame:   parse_frame_type     >>
     channel: parse_id             >>
     size:    parse_long_uint      >>

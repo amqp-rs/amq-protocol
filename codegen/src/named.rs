@@ -1,5 +1,5 @@
-use specs::*;
-use util::*;
+use crate::specs::*;
+use crate::util::*;
 
 /// Trait allowing us to get the name of an implementor in different forms
 pub trait Named {

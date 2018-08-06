@@ -1,4 +1,6 @@
-use types::{Boolean, ShortString};
+use crate::types::{Boolean, ShortString};
+
+use serde_derive::{Deserialize, Serialize};
 
 /// A struct representing AMQP boolean flags for RPC
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]

@@ -1,5 +1,5 @@
-use specs::*;
-use util::*;
+use crate::specs::*;
+use crate::util::*;
 
 use amq_protocol_types::AMQPType;
 use handlebars::{self, Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output, Renderable, RenderContext, RenderError, ScopedJson, to_json};
@@ -53,7 +53,7 @@ impl HandlebarsAMQPExtension for CodeGenerator {
 /// Helper for converting text to camel case
 pub struct CamelHelper;
 impl HelperDef for CamelHelper {
-    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut Output) -> HelperResult {
+    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut dyn Output) -> HelperResult {
         let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"camel\""))?;
         let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"camel\""))?;
         out.write(&camel_case(param))?;
@@ -64,7 +64,7 @@ impl HelperDef for CamelHelper {
 /// Helper for converting text to snake case
 pub struct SnakeHelper;
 impl HelperDef for SnakeHelper {
-    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut Output) -> HelperResult {
+    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut dyn Output) -> HelperResult {
         let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
         let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"snake\""))?;
         out.write(&snake_case(param))?;
@@ -75,7 +75,7 @@ impl HelperDef for SnakeHelper {
 /// Helper for getting the type name converted to snake case
 pub struct SnakeTypeHelper;
 impl HelperDef for SnakeTypeHelper {
-    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut Output) -> HelperResult {
+    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut dyn Output) -> HelperResult {
         let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
         let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"snake_type\""))?;
         out.write(&snake_case(&param.to_string()))?;
@@ -86,7 +86,7 @@ impl HelperDef for SnakeTypeHelper {
 /// Helper to sanitize name so the it becomes a valid identifier
 pub struct SanitizeNameHelper;
 impl HelperDef for SanitizeNameHelper {
-    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut Output) -> HelperResult {
+    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut dyn Output) -> HelperResult {
         let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"sanitize_name\""))?;
         let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"sanitize_name\""))?;
         out.write(&param.replace('-', "_"))?;
@@ -111,7 +111,7 @@ impl HelperDef for MethodHasFlagsHelper {
 /// Helper to walk through a Vec of [AMQPArgument](../specs.AMQPArgument.html).
 pub struct EachArgumentHelper;
 impl HelperDef for EachArgumentHelper {
-    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, r: &'reg Handlebars, ctx: &'rc Context, rc: &mut RenderContext<'reg>, out: &mut Output) -> HelperResult {
+    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, r: &'reg Handlebars, ctx: &'rc Context, rc: &mut RenderContext<'reg>, out: &mut dyn Output) -> HelperResult {
         let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_argument\""))?;
 
         if let Some(t) = h.template() {
@@ -159,7 +159,7 @@ impl HelperDef for EachArgumentHelper {
 /// Helper to walk through a Vec of [AMQPFlagArgument](../specs.AMQPFlagArgument.html).
 pub struct EachFlagHelper;
 impl HelperDef for EachFlagHelper {
-    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, r: &'reg Handlebars, ctx: &'rc Context, rc: &mut RenderContext<'reg>, out: &mut Output) -> HelperResult {
+    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, r: &'reg Handlebars, ctx: &'rc Context, rc: &mut RenderContext<'reg>, out: &mut dyn Output) -> HelperResult {
         let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_flag\""))?;
 
         if let Some(t) = h.template() {

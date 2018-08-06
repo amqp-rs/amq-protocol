@@ -1,6 +1,7 @@
-use specs::*;
+use crate::specs::*;
 
 use amq_protocol_types::*;
+use serde_derive::Deserialize;
 use serde_json::Value;
 
 use std::collections::BTreeMap;

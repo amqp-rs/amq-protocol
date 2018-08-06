@@ -6,12 +6,6 @@
 //! amq-protocol is a library aiming at providing tools to help
 //! implementing software using AMQP
 
-extern crate amq_protocol_codegen;
-extern crate amq_protocol_types;
-#[macro_use] extern crate cookie_factory;
-#[macro_use] extern crate nom;
-extern crate url;
-
 /// Reexport of amq_protocol_codegen
 pub mod codegen;
 /// AMQP Frame handling utils

@@ -1,5 +1,6 @@
-use types::*;
+use crate::types::*;
 
+use serde_derive::{Deserialize, Serialize};
 use serde_json::Value;
 
 /// Enumeration referencing the possible AMQP values depending on the types

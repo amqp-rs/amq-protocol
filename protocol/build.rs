@@ -1,5 +1,3 @@
-extern crate amq_protocol_codegen;
-
 use amq_protocol_codegen::{CodeGenerator, HandlebarsAMQPExtension};
 
 use std::env;
