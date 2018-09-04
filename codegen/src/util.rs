@@ -1,3 +1,4 @@
+/// Convert input to camel case
 pub fn camel_case(name: &str) -> String {
     let mut new_word = true;
     name.chars().fold("".to_string(), |mut result, ch| {
@@ -12,6 +13,11 @@ pub fn camel_case(name: &str) -> String {
     })
 }
 
+/// Convert input to snake case
+/// For the purpose of the AMQP codegen usage, we also handle a few special cases:
+/// "type" becomes "type_"
+/// "return" becomes "return_"
+/// A word needs to be composed of at least two letters, this makes UInt become uint and not u_int
 pub fn snake_case(name: &str) -> String {
     match name {
         "type"   => "type_".to_string(),

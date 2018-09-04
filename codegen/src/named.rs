@@ -1,9 +1,13 @@
 use specs::*;
 use util::*;
 
+/// Trait allowing us to get the name of an implementor in different forms
 pub trait Named {
+    /// Get the raw name
     fn name(&self)       -> String;
+    /// Get the name converted to camel case
     fn camel_name(&self) -> String;
+    /// Get the name converted to snake case
     fn snake_name(&self) -> String;
 }
 

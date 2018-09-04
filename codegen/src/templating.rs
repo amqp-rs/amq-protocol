@@ -10,10 +10,15 @@ use std::io::Write;
 use std::path::Path;
 use std::collections::BTreeMap;
 
+/// Type alias to avoid making our users explicitely depend on an extra dependency
 pub type CodeGenerator = Handlebars;
 
+/// Our extension for better integration with Handlebars
 pub trait HandlebarsAMQPExtension {
+    /// Register the various standrad helpers we'll need for AMQP codegen
     fn register_amqp_helpers(self) -> Self;
+    /// Generate code using the standard representation of specs and the given template, using the
+    /// given name for the variable holding the [protocol definition](../specs.AMQProtocolDefinition.html).
     fn simple_codegen(out_dir: &str, target: &str, template_name: &str, template: &str, var_name: &str);
 }
 
@@ -43,6 +48,7 @@ impl HandlebarsAMQPExtension for CodeGenerator {
     }
 }
 
+/// Helper for converting text to camel case
 pub fn camel_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"camel\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"camel\""))?;
@@ -50,6 +56,7 @@ pub fn camel_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderCont
     Ok(())
 }
 
+/// Helper for converting text to snake case
 pub fn snake_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"snake\""))?;
@@ -57,6 +64,7 @@ pub fn snake_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderCont
     Ok(())
 }
 
+/// Helper for getting the type name converted to snake case
 pub fn snake_type_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
     let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
     let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"snake_type\""))?;
@@ -64,6 +72,7 @@ pub fn snake_type_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut Rende
     Ok(())
 }
 
+/// Helper to sanitize name so the it becomes a valid identifier
 pub fn sanitize_name_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"sanitize_name\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"sanitize_name\""))?;
@@ -71,6 +80,7 @@ pub fn sanitize_name_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut Re
     Ok(())
 }
 
+/// Helper to walk through a Vec of [AMQPArgument](../specs.AMQPArgument.html).
 pub fn each_argument_helper (h: &Helper, r: &Handlebars, ctx: &Context, rc: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_argument\""))?;
 
@@ -115,6 +125,7 @@ pub fn each_argument_helper (h: &Helper, r: &Handlebars, ctx: &Context, rc: &mut
     Ok(())
 }
 
+/// Helper to walk through a Vec of [AMQPFlagArgument](../specs.AMQPFlagArgument.html).
 pub fn each_flag_helper (h: &Helper, r: &Handlebars, ctx: &Context, rc: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_flag\""))?;
 
