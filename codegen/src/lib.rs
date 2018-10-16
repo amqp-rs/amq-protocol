@@ -1,4 +1,4 @@
-#![warn(missing_docs)]
+#![deny(missing_docs)]
 #![doc(html_root_url = "https://docs.rs/amq-protocol-types/1.0.0/")]
 
 //! # AMQP code generation utilities
@@ -22,30 +22,3 @@ pub use named::*;
 pub use specs::*;
 pub use templating::*;
 pub use util::*;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
