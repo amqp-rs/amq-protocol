@@ -2,7 +2,7 @@ use specs::*;
 use util::*;
 
 use amq_protocol_types::AMQPType;
-use handlebars::{self, Context, Handlebars, Helper, HelperResult, Output, Renderable, RenderContext, RenderError, to_json};
+use handlebars::{self, Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output, Renderable, RenderContext, RenderError, ScopedJson, to_json};
 use serde_json::{self};
 
 use std::fs::File;
@@ -25,13 +25,13 @@ pub trait HandlebarsAMQPExtension {
 impl HandlebarsAMQPExtension for CodeGenerator {
     fn register_amqp_helpers(mut self) -> CodeGenerator {
         self.register_escape_fn(handlebars::no_escape);
-        self.register_helper("camel",            Box::new(camel_helper));
-        self.register_helper("snake",            Box::new(snake_helper));
-        self.register_helper("snake_type",       Box::new(snake_type_helper));
-        self.register_helper("sanitize_name",    Box::new(sanitize_name_helper));
-        self.register_helper("method_has_flags", Box::new(method_has_flags_helper));
-        self.register_helper("each_argument",    Box::new(each_argument_helper));
-        self.register_helper("each_flag",        Box::new(each_flag_helper));
+        self.register_helper("camel",            Box::new(CamelHelper));
+        self.register_helper("snake",            Box::new(SnakeHelper));
+        self.register_helper("snake_type",       Box::new(SnakeTypeHelper));
+        self.register_helper("sanitize_name",    Box::new(SanitizeNameHelper));
+        self.register_helper("method_has_flags", Box::new(MethodHasFlagsHelper));
+        self.register_helper("each_argument",    Box::new(EachArgumentHelper));
+        self.register_helper("each_flag",        Box::new(EachFlagHelper));
         self
     }
 
@@ -51,133 +51,148 @@ impl HandlebarsAMQPExtension for CodeGenerator {
 }
 
 /// Helper for converting text to camel case
-pub fn camel_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> HelperResult {
-    let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"camel\""))?;
-    let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"camel\""))?;
-    out.write(&camel_case(param))?;
-    Ok(())
+pub struct CamelHelper;
+impl HelperDef for CamelHelper {
+    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut Output) -> HelperResult {
+        let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"camel\""))?;
+        let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"camel\""))?;
+        out.write(&camel_case(param))?;
+        Ok(())
+    }
 }
 
 /// Helper for converting text to snake case
-pub fn snake_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> HelperResult {
-    let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
-    let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"snake\""))?;
-    out.write(&snake_case(param))?;
-    Ok(())
+pub struct SnakeHelper;
+impl HelperDef for SnakeHelper {
+    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut Output) -> HelperResult {
+        let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
+        let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"snake\""))?;
+        out.write(&snake_case(param))?;
+        Ok(())
+    }
 }
 
 /// Helper for getting the type name converted to snake case
-pub fn snake_type_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> HelperResult {
-    let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
-    let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"snake_type\""))?;
-    out.write(&snake_case(&param.to_string()))?;
-    Ok(())
+pub struct SnakeTypeHelper;
+impl HelperDef for SnakeTypeHelper {
+    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut Output) -> HelperResult {
+        let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
+        let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"snake_type\""))?;
+        out.write(&snake_case(&param.to_string()))?;
+        Ok(())
+    }
 }
 
 /// Helper to sanitize name so the it becomes a valid identifier
-pub fn sanitize_name_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> HelperResult {
-    let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"sanitize_name\""))?;
-    let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"sanitize_name\""))?;
-    out.write(&param.replace('-', "_"))?;
-    Ok(())
+pub struct SanitizeNameHelper;
+impl HelperDef for SanitizeNameHelper {
+    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut Output) -> HelperResult {
+        let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"sanitize_name\""))?;
+        let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"sanitize_name\""))?;
+        out.write(&param.replace('-', "_"))?;
+        Ok(())
+    }
 }
 
 /// Helper for checking is a method has some flags argument
-pub fn method_has_flags_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> HelperResult {
-    let value     = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"method_has_flags\""))?;
-    let method    = serde_json::from_value::<AMQPMethod>(value.value().clone()).map_err(|_| RenderError::new("Non-AMQPMethod param given to helper \"camel\""))?;
-    let has_flags = method.arguments.iter().any(|arg| match *arg {
-        AMQPArgument::Value(_) => false,
-        AMQPArgument::Flags(_) => true,
-    });
-    if has_flags {
-        out.write("true")?;
-    } else {
-        /* FIXME: writing "false" evaluates to true */
-        out.write("")?;
+pub struct MethodHasFlagsHelper;
+impl HelperDef for MethodHasFlagsHelper {
+    fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
+        let value     = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"method_has_flags\""))?;
+        let method    = serde_json::from_value::<AMQPMethod>(value.value().clone()).map_err(|_| RenderError::new("Non-AMQPMethod param given to helper \"camel\""))?;
+        let has_flags = method.arguments.iter().any(|arg| match *arg {
+            AMQPArgument::Value(_) => false,
+            AMQPArgument::Flags(_) => true,
+        });
+        Ok(Some(ScopedJson::Derived(JsonValue::from(has_flags))))
     }
-    Ok(())
 }
 
 /// Helper to walk through a Vec of [AMQPArgument](../specs.AMQPArgument.html).
-pub fn each_argument_helper (h: &Helper, r: &Handlebars, ctx: &Context, rc: &mut RenderContext, out: &mut Output) -> HelperResult {
-    let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_argument\""))?;
+pub struct EachArgumentHelper;
+impl HelperDef for EachArgumentHelper {
+    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, r: &'reg Handlebars, ctx: &'rc Context, rc: &mut RenderContext<'reg>, out: &mut Output) -> HelperResult {
+        let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_argument\""))?;
 
-    if let Some(t) = h.template() {
-        rc.promote_local_vars();
-        let local_path_root = value.path_root().map(|p| format!("{}/{}", rc.get_path(), p));
-        let arguments : Vec<AMQPArgument> = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not a Vec<AMQPArgument> for helper \"each_argument\""))?;
-        for (index, argument) in arguments.iter().enumerate() {
-            let mut local_rc = rc.derive();
-            if let Some(ref p) = local_path_root {
-                local_rc.push_local_path_root(p.clone());
+        if let Some(t) = h.template() {
+            rc.promote_local_vars();
+            let local_path_root = value.path_root().map(|p| format!("{}/{}", rc.get_path(), p));
+            let arguments : Vec<AMQPArgument> = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not a Vec<AMQPArgument> for helper \"each_argument\""))?;
+            for (index, argument) in arguments.iter().enumerate() {
+                let mut local_rc = rc.derive();
+                if let Some(ref p) = local_path_root {
+                    local_rc.push_local_path_root(p.clone());
+                }
+                local_rc.set_local_var("@index".to_string(), to_json(&index));
+                if let Some(inner_path) = value.path() {
+                    let new_path = format!("{}/{}.[{}]", local_rc.get_path(), inner_path, index);
+                    local_rc.set_path(new_path.clone());
+                }
+                if let Some(block_param) = h.block_param() {
+                    let mut map = BTreeMap::new();
+                    match *argument {
+                        AMQPArgument::Value(ref v) => {
+                            map.insert(block_param.to_string(), to_json(v));
+                            map.insert("argument_is_value".to_string(), to_json(&true));
+                        },
+                        AMQPArgument::Flags(ref f) => {
+                            map.insert(block_param.to_string(), to_json(f));
+                            map.insert("argument_is_value".to_string(), to_json(&false));
+                        },
+                    };
+                    local_rc.push_block_context(&map)?;
+                }
+                t.render(r, ctx, &mut local_rc, out)?;
+                if h.block_param().is_some() {
+                    local_rc.pop_block_context();
+                }
+                if local_path_root.is_some() {
+                    local_rc.pop_local_path_root();
+                }
             }
-            local_rc.set_local_var("@index".to_string(), to_json(&index));
-            if let Some(inner_path) = value.path() {
-                let new_path = format!("{}/{}.[{}]", local_rc.get_path(), inner_path, index);
-                local_rc.set_path(new_path.clone());
-            }
-            if let Some(block_param) = h.block_param() {
-                let mut map = BTreeMap::new();
-                match *argument {
-                    AMQPArgument::Value(ref v) => {
-                        map.insert(block_param.to_string(), to_json(v));
-                        map.insert("argument_is_value".to_string(), to_json(&true));
-                    },
-                    AMQPArgument::Flags(ref f) => {
-                        map.insert(block_param.to_string(), to_json(f));
-                        map.insert("argument_is_value".to_string(), to_json(&false));
-                    },
-                };
-                local_rc.push_block_context(&map)?;
-            }
-            t.render(r, ctx, &mut local_rc, out)?;
-            if h.block_param().is_some() {
-                local_rc.pop_block_context();
-            }
-            if local_path_root.is_some() {
-                local_rc.pop_local_path_root();
-            }
+            rc.demote_local_vars();
         }
-        rc.demote_local_vars();
+        Ok(())
     }
-    Ok(())
 }
 
 /// Helper to walk through a Vec of [AMQPFlagArgument](../specs.AMQPFlagArgument.html).
-pub fn each_flag_helper (h: &Helper, r: &Handlebars, ctx: &Context, rc: &mut RenderContext, out: &mut Output) -> HelperResult {
-    let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_flag\""))?;
+pub struct EachFlagHelper;
+impl HelperDef for EachFlagHelper {
+    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, r: &'reg Handlebars, ctx: &'rc Context, rc: &mut RenderContext<'reg>, out: &mut Output) -> HelperResult {
+        let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_flag\""))?;
 
-    if let Some(t) = h.template() {
-        rc.promote_local_vars();
-        let local_path_root = value.path_root().map(|p| format!("{}/{}", rc.get_path(), p));
-        let flags : Vec<AMQPFlagArgument> = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not a Vec<AMQPFlagArgument> for helper \"each_flag\""))?;
-        for (index, flag) in flags.iter().enumerate() {
-            let mut local_rc = rc.derive();
-            if let Some(ref p) = local_path_root {
-                local_rc.push_local_path_root(p.clone());
+        if let Some(t) = h.template() {
+            rc.promote_local_vars();
+            let local_path_root = value.path_root().map(|p| format!("{}/{}", rc.get_path(), p));
+            let flags : Vec<AMQPFlagArgument> = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not a Vec<AMQPFlagArgument> for helper \"each_flag\""))?;
+            for (index, flag) in flags.iter().enumerate() {
+                let mut local_rc = rc.derive();
+                if let Some(ref p) = local_path_root {
+                    local_rc.push_local_path_root(p.clone());
+                }
+                local_rc.set_local_var("@index".to_string(), to_json(&index));
+                if let Some(inner_path) = value.path() {
+                    let new_path = format!("{}/{}.[{}]", local_rc.get_path(), inner_path, index);
+                    local_rc.set_path(new_path.clone());
+                }
+                if let Some(block_param) = h.block_param() {
+                    let mut map = BTreeMap::new();
+                    map.insert(block_param.to_string(), to_json(flag));
+                    local_rc.push_block_context(&map)?;
+                }
+                t.render(r, ctx, &mut local_rc, out)?;
+                if h.block_param().is_some() {
+                    local_rc.pop_block_context();
+                }
+                if local_path_root.is_some() {
+                    local_rc.pop_local_path_root();
+                }
             }
-            local_rc.set_local_var("@index".to_string(), to_json(&index));
-            if let Some(inner_path) = value.path() {
-                let new_path = format!("{}/{}.[{}]", local_rc.get_path(), inner_path, index);
-                local_rc.set_path(new_path.clone());
-            }
-            if let Some(block_param) = h.block_param() {
-                let mut map = BTreeMap::new();
-                map.insert(block_param.to_string(), to_json(flag));
-                local_rc.push_block_context(&map)?;
-            }
-            t.render(r, ctx, &mut local_rc, out)?;
-            if h.block_param().is_some() {
-                local_rc.pop_block_context();
-            }
-            if local_path_root.is_some() {
-                local_rc.pop_local_path_root();
-            }
+            rc.demote_local_vars();
         }
-        rc.demote_local_vars();
+        Ok(())
     }
-    Ok(())
 }
 
 #[cfg(test)]
