@@ -75,8 +75,6 @@ pub struct AMQPMethod {
     pub id:            ShortUInt,
     /// The arguments of the method
     pub arguments:     Vec<AMQPArgument>,
-    /// Whether this method has arguments or not
-    pub has_arguments: Boolean,
     /// Whether this method has flags or not
     pub has_flags:     Boolean,
     /// The name of the method
