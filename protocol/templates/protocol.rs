@@ -13,7 +13,7 @@ pub mod metadata {
     pub const MINOR_VERSION: ShortShortUInt = {{protocol.minor_version}};
     pub const REVISION:      ShortShortUInt = {{protocol.revision}};
     pub const PORT:          LongUInt       = {{protocol.port}};
-    pub const COPYRIGHT:     &str           = r#"{{copyright}}"#;
+    pub const COPYRIGHT:     &str           = r#"{{protocol.copyright}}"#;
 }
 
 pub mod constants {
