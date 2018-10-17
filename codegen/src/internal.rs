@@ -132,7 +132,6 @@ impl _AMQPClass {
             methods:        self.methods.iter().map(|method| method.to_specs(domains)).collect(),
             name:           self.name.clone(),
             properties,
-            has_properties: self.properties.as_ref().map(|p| !p.is_empty()).unwrap_or(false),
             is_connection:  self.id == 10,
         }
     }
@@ -340,7 +339,6 @@ mod test {
                     amqp_type: AMQPType::ShortShortUInt,
                     name:      "prop1".to_string(),
                 }],
-                has_properties: true,
                 is_connection:  false,
             }],
         };

@@ -64,8 +64,6 @@ pub struct AMQPClass {
     pub name:           ShortString,
     /// The properties of the class
     pub properties:     Vec<AMQPProperty>,
-    /// Whether this class has properties or not
-    pub has_properties: Boolean,
     /// Whether this is the connection class or another one
     pub is_connection:  Boolean,
 }

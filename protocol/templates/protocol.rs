@@ -211,7 +211,7 @@ pub mod {{snake class.name}} {
         )
     }
     {{/each ~}}
-    {{#if class.has_properties ~}}
+    {{#if class.properties ~}}
     #[derive(Clone, Debug, PartialEq)]
     pub struct AMQPProperties {
         {{#each class.properties as |property| ~}}
