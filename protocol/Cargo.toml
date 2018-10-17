@@ -14,7 +14,7 @@ build         = "build.rs"
 name = "amq_protocol"
 
 [build-dependencies.amq-protocol-codegen]
-version = "^0.29"
+version = "^1.0"
 path    = "../codegen"
 
 [dependencies]
@@ -23,7 +23,7 @@ nom            = "^4.0"
 url            = "^1.5"
 
 [dependencies.amq-protocol-codegen]
-version = "^0.29"
+version = "^1.0"
 path    = "../codegen"
 
 [dependencies.amq-protocol-types]
