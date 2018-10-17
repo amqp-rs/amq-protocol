@@ -2,7 +2,7 @@ use specs::*;
 use util::*;
 
 use amq_protocol_types::AMQPType;
-use handlebars::{self, Context, Handlebars, Helper, Output, Renderable, RenderContext, RenderError, to_json};
+use handlebars::{self, Context, Handlebars, Helper, HelperResult, Output, Renderable, RenderContext, RenderError, to_json};
 use serde_json::{self};
 
 use std::fs::File;
@@ -50,7 +50,7 @@ impl HandlebarsAMQPExtension for CodeGenerator {
 }
 
 /// Helper for converting text to camel case
-pub fn camel_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
+pub fn camel_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> HelperResult {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"camel\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"camel\""))?;
     out.write(&camel_case(param))?;
@@ -58,7 +58,7 @@ pub fn camel_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderCont
 }
 
 /// Helper for converting text to snake case
-pub fn snake_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
+pub fn snake_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> HelperResult {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"snake\""))?;
     out.write(&snake_case(param))?;
@@ -66,7 +66,7 @@ pub fn snake_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderCont
 }
 
 /// Helper for getting the type name converted to snake case
-pub fn snake_type_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
+pub fn snake_type_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> HelperResult {
     let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
     let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"snake_type\""))?;
     out.write(&snake_case(&param.to_string()))?;
@@ -74,7 +74,7 @@ pub fn snake_type_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut Rende
 }
 
 /// Helper to sanitize name so the it becomes a valid identifier
-pub fn sanitize_name_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
+pub fn sanitize_name_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> HelperResult {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"sanitize_name\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"sanitize_name\""))?;
     out.write(&param.replace('-', "_"))?;
@@ -82,7 +82,7 @@ pub fn sanitize_name_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut Re
 }
 
 /// Helper for checking is a method has some flags argument
-pub fn method_has_flags_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
+pub fn method_has_flags_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> HelperResult {
     let value     = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"method_has_flags\""))?;
     let method    = serde_json::from_value::<AMQPMethod>(value.value().clone()).map_err(|_| RenderError::new("Non-AMQPMethod param given to helper \"camel\""))?;
     let has_flags = method.arguments.iter().any(|arg| match *arg {
@@ -99,7 +99,7 @@ pub fn method_has_flags_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut
 }
 
 /// Helper to walk through a Vec of [AMQPArgument](../specs.AMQPArgument.html).
-pub fn each_argument_helper (h: &Helper, r: &Handlebars, ctx: &Context, rc: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
+pub fn each_argument_helper (h: &Helper, r: &Handlebars, ctx: &Context, rc: &mut RenderContext, out: &mut Output) -> HelperResult {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_argument\""))?;
 
     if let Some(t) = h.template() {
@@ -144,7 +144,7 @@ pub fn each_argument_helper (h: &Helper, r: &Handlebars, ctx: &Context, rc: &mut
 }
 
 /// Helper to walk through a Vec of [AMQPFlagArgument](../specs.AMQPFlagArgument.html).
-pub fn each_flag_helper (h: &Helper, r: &Handlebars, ctx: &Context, rc: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
+pub fn each_flag_helper (h: &Helper, r: &Handlebars, ctx: &Context, rc: &mut RenderContext, out: &mut Output) -> HelperResult {
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_flag\""))?;
 
     if let Some(t) = h.template() {
