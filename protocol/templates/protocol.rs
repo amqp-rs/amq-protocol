@@ -188,7 +188,7 @@ pub mod {{snake class.name}} {
     ));
 
     pub fn gen_{{snake method.name}}<'a>(input: (&'a mut [u8], usize), {{#if method.arguments ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> Result<(&'a mut [u8],usize), GenError> {
-        {{#if method.has_flags ~}}
+        {{#if (method_has_flags method) ~}}
         /* FIXME: support multiple flags structs? */
         let mut flags = AMQPFlags::default();
         {{#each_argument method.arguments as |argument| ~}}

@@ -25,12 +25,13 @@ pub trait HandlebarsAMQPExtension {
 impl HandlebarsAMQPExtension for CodeGenerator {
     fn register_amqp_helpers(mut self) -> CodeGenerator {
         self.register_escape_fn(handlebars::no_escape);
-        self.register_helper("camel",         Box::new(camel_helper));
-        self.register_helper("snake",         Box::new(snake_helper));
-        self.register_helper("snake_type",    Box::new(snake_type_helper));
-        self.register_helper("sanitize_name", Box::new(sanitize_name_helper));
-        self.register_helper("each_argument", Box::new(each_argument_helper));
-        self.register_helper("each_flag",     Box::new(each_flag_helper));
+        self.register_helper("camel",            Box::new(camel_helper));
+        self.register_helper("snake",            Box::new(snake_helper));
+        self.register_helper("snake_type",       Box::new(snake_type_helper));
+        self.register_helper("sanitize_name",    Box::new(sanitize_name_helper));
+        self.register_helper("method_has_flags", Box::new(method_has_flags_helper));
+        self.register_helper("each_argument",    Box::new(each_argument_helper));
+        self.register_helper("each_flag",        Box::new(each_flag_helper));
         self
     }
 
@@ -77,6 +78,23 @@ pub fn sanitize_name_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut Re
     let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"sanitize_name\""))?;
     let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"sanitize_name\""))?;
     out.write(&param.replace('-', "_"))?;
+    Ok(())
+}
+
+/// Helper for checking is a method has some flags argument
+pub fn method_has_flags_helper (h: &Helper, _: &Handlebars, _: &Context, _: &mut RenderContext, out: &mut Output) -> Result<(), RenderError> {
+    let value     = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"method_has_flags\""))?;
+    let method    = serde_json::from_value::<AMQPMethod>(value.value().clone()).map_err(|_| RenderError::new("Non-AMQPMethod param given to helper \"camel\""))?;
+    let has_flags = method.arguments.iter().any(|arg| match *arg {
+        AMQPArgument::Value(_) => false,
+        AMQPArgument::Flags(_) => true,
+    });
+    if has_flags {
+        out.write("true")?;
+    } else {
+        /* FIXME: writing "false" evaluates to true */
+        out.write("")?;
+    }
     Ok(())
 }
 
@@ -244,7 +262,6 @@ synchronous: {{method.synchronous}}
                                     },
                                 ]),
                             ],
-                            has_flags:     true,
                             name:          "method1".to_string(),
                             synchronous:   true,
                         }
