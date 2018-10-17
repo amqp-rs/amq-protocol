@@ -274,7 +274,6 @@ synchronous: {{method.synchronous}}
                             name:      "property1".to_string(),
                         }
                     ],
-                    is_connection:  false,
                 }
             ],
         }
