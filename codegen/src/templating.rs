@@ -315,7 +315,6 @@ argument1(domain1): LongString
 
 flag1: true
 flag2: false
-
 "#);
     }
 }
