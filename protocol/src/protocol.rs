@@ -1,6 +1,6 @@
-#![allow(missing_docs)]
 include!(concat!(env!("OUT_DIR"), "/protocol.rs"));
 
+/// Type alias for AMQP BasicProperties
 pub type BasicProperties = basic::AMQPProperties;
 
 #[cfg(test)]

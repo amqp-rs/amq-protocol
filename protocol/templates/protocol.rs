@@ -5,31 +5,44 @@ use types::parsing::*;
 
 use cookie_factory::GenError;
 
+/// Protocol metadata
 pub mod metadata {
     use super::*;
 
+    /// The name of the protocol
     pub const NAME:          &str           = "{{protocol.name}}";
+    /// The major version of the protocol
     pub const MAJOR_VERSION: ShortShortUInt = {{protocol.major_version}};
+    /// The minor version of the protocol
     pub const MINOR_VERSION: ShortShortUInt = {{protocol.minor_version}};
+    /// The revision (version) of the protocol
     pub const REVISION:      ShortShortUInt = {{protocol.revision}};
+    /// The default port of the protocol
     pub const PORT:          LongUInt       = {{protocol.port}};
+    /// The copyright holding the protocol
     pub const COPYRIGHT:     &str           = r#"{{protocol.copyright}}"#;
 }
 
+/// Protocol constants
 pub mod constants {
     use super::*;
 
     {{#each protocol.constants as |constant| ~}}
+    /// {{constant.name}} (Generated)
     pub const {{sanitize_name constant.name}}: {{constant.type}} = {{constant.value}};
     {{/each ~}}
 }
 
+/// An AMQP Error
 pub enum AMQPError {
+    /// A soft AMQP error
     Soft(AMQPSoftError),
+    /// A hard AMQP error
     Hard(AMQPHardError),
 }
 
 impl AMQPError {
+    /// Get the id of the error
     pub fn get_id(&self) -> ShortUInt {
         match *self {
             AMQPError::Soft(ref s) => s.get_id(),
@@ -37,18 +50,22 @@ impl AMQPError {
         }
     }
 
+    /// Get the error corresponding to an id
     pub fn from_id(id: ShortUInt) -> Option<AMQPError> {
         AMQPSoftError::from_id(id).map(AMQPError::Soft).or_else(|| AMQPHardError::from_id(id).map(AMQPError::Hard))
     }
 }
 
+/// The available soft AMQP errors
 pub enum AMQPSoftError {
     {{#each protocol.soft_errors as |constant| ~}}
+    /// {{{constant.name}}} (Generated)
     {{camel constant.name}},
     {{/each ~}}
 }
 
 impl AMQPSoftError {
+    /// Get the id of the soft error
     pub fn get_id(&self) -> ShortUInt {
         match *self {
             {{#each protocol.soft_errors as |constant| ~}}
@@ -57,6 +74,7 @@ impl AMQPSoftError {
         }
     }
 
+    /// Get the soft error corresponding to an id
     pub fn from_id(id: ShortUInt) -> Option<AMQPSoftError> {
         match id {
             {{#each protocol.soft_errors as |constant| ~}}
@@ -67,13 +85,16 @@ impl AMQPSoftError {
     }
 }
 
+/// The available hard AMQP errors
 pub enum AMQPHardError {
     {{#each protocol.hard_errors as |constant| ~}}
+    /// {{{constant.name}}} (Generated)
     {{camel constant.name}},
     {{/each ~}}
 }
 
 impl AMQPHardError {
+    /// Get the id of the hard error
     pub fn get_id(&self) -> ShortUInt {
         match *self {
             {{#each protocol.hard_errors as |constant| ~}}
@@ -82,6 +103,7 @@ impl AMQPHardError {
         }
     }
 
+    /// Get the hard error corresponding to an id
     pub fn from_id(id: ShortUInt) -> Option<AMQPHardError> {
         match id {
             {{#each protocol.hard_errors as |constant| ~}}
@@ -96,12 +118,13 @@ impl AMQPHardError {
 use self::{{snake class.name}}::parse_{{snake class.name}};
 {{/each ~}}
 
-named!(pub parse_class<AMQPClass>, switch!(parse_id,
+named_attr!(#[doc =  "Parse an AMQP class"], pub parse_class<AMQPClass>, switch!(parse_id,
     {{#each protocol.classes as |class| ~}}
     {{class.id}} => map!(call!(parse_{{snake class.name}}), AMQPClass::{{camel class.name}}) {{#unless @last ~}}|{{/unless ~}}
     {{/each ~}}
 ));
 
+/// Serialize an AMQP class
 pub fn gen_class<'a>(input: (&'a mut [u8], usize), class: &AMQPClass) -> Result<(&'a mut [u8], usize), GenError> {
     match *class {
         {{#each protocol.classes as |class| ~}}
@@ -110,23 +133,27 @@ pub fn gen_class<'a>(input: (&'a mut [u8], usize), class: &AMQPClass) -> Result<
     }
 }
 
+/// The available AMQP classes
 #[derive(Clone, Debug, PartialEq)]
 pub enum AMQPClass {
     {{#each protocol.classes as |class| ~}}
+    /// {{class.name}} (Generated)
     {{camel class.name}}({{snake class.name}}::AMQPMethod),
     {{/each ~}}
 }
 
 {{#each protocol.classes as |class|}}
+/// {{class.name}} (generated)
 pub mod {{snake class.name}} {
     use super::*;
 
-    named!(pub parse_{{snake class.name}}<{{snake class.name}}::AMQPMethod>, switch!(parse_id,
+    named_attr!(#[doc = "Parse {{class.name}} (Generated)"], pub parse_{{snake class.name}}<{{snake class.name}}::AMQPMethod>, switch!(parse_id,
         {{#each class.methods as |method| ~}}
         {{method.id}} => map!(call!(parse_{{snake method.name}}), AMQPMethod::{{camel method.name}}) {{#unless @last ~}}|{{/unless ~}}
         {{/each ~}}
     ));
 
+    /// Serialize {{class.name}} (Generated)
     pub fn gen_{{snake class.name}}<'a>(input: (&'a mut [u8], usize), method: &AMQPMethod) -> Result<(&'a mut [u8], usize), GenError> {
         match *method {
             {{#each class.methods as |method| ~}}
@@ -140,28 +167,33 @@ pub mod {{snake class.name}} {
         }
     }
 
+    /// The available methods in {{class.name}}
     #[derive(Clone, Debug, PartialEq)]
     pub enum AMQPMethod {
         {{#each class.methods as |method| ~}}
+        /// {{method.name}} (Generated)
         {{camel method.name}}({{camel method.name}}),
         {{/each ~}}
     }
 
     {{#each class.methods as |method|}}
+    /// {{method.name}} (Generated)
     #[derive(Clone, Debug, PartialEq)]
     pub struct {{camel method.name}} {
         {{#each_argument method.arguments as |argument| ~}}
         {{#if argument_is_value ~}}
+        /// {{argument.name}} (Generated)
         pub {{snake argument.name}}: {{argument.type}},
         {{else}}
         {{#each_flag argument as |flag| ~}}
+        /// {{flag.name}} (Generated)
         pub {{snake flag.name}}: Boolean,
         {{/each_flag ~}}
         {{/if ~}}
         {{/each_argument ~}}
     }
 
-    named!(pub parse_{{snake method.name}}<{{camel method.name}}>, do_parse!(
+    named_attr!(#[doc = "Parse {{method.name}} (Generated)"], pub parse_{{snake method.name}}<{{camel method.name}}>, do_parse!(
         {{#each_argument method.arguments as |argument| ~}}
         {{#if argument_is_value ~}}
         {{snake argument.name}}: parse_{{snake_type argument.type}} >>
@@ -187,6 +219,7 @@ pub mod {{snake class.name}} {
         })
     ));
 
+    /// Serialize {{method.name}} (Generated)
     pub fn gen_{{snake method.name}}<'a>(input: (&'a mut [u8], usize), {{#if method.arguments ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> Result<(&'a mut [u8],usize), GenError> {
         {{#if (method_has_flags method) ~}}
         /* FIXME: support multiple flags structs? */
@@ -212,6 +245,7 @@ pub mod {{snake class.name}} {
     }
     {{/each ~}}
     {{#if class.properties ~}}
+    /// {{class.name}} properties (Generated)
     #[derive(Clone, Debug, PartialEq)]
     pub struct AMQPProperties {
         {{#each class.properties as |property| ~}}
@@ -231,6 +265,7 @@ pub mod {{snake class.name}} {
 
     impl AMQPProperties {
         {{#each class.properties as |property| ~}}
+        /// Set {{property.name}} (Generated)
         pub fn with_{{snake property.name}}(mut self, value: {{property.type}}) -> AMQPProperties {
             self.{{snake property.name}} = Some(value);
             self
@@ -238,11 +273,13 @@ pub mod {{snake class.name}} {
         {{/each ~}}
 
         {{#each class.properties as |property| ~}}
+        /// Get {{property.name}} (Generated)
         pub fn {{snake property.name}}(&self) -> &Option<{{property.type}}> {
             &self.{{snake property.name}}
         }
         {{/each ~}}
 
+        /// Get the bitpask for serialization (Generated)
         pub fn bitmask(&self) -> ShortUInt {
             {{#each class.properties as |property| ~}}
             (if self.{{snake property.name}}.is_some() { 1 << (15 - {{@index}}) } else { 0 }) {{#unless @last ~}} + {{/unless ~}}
@@ -250,7 +287,7 @@ pub mod {{snake class.name}} {
         }
     }
 
-    named!(pub parse_properties<AMQPProperties>, do_parse!(
+    named_attr!(#[doc = "Parse {{class.name}} properties (Generated)"], pub parse_properties<AMQPProperties>, do_parse!(
         flags: parse_short_uint >>
         {{#each class.properties as |property| ~}}
         {{snake property.name}}: cond!(flags & (1 << (15 - {{@index}})) != 0, parse_{{snake_type property.type}}) >>
@@ -262,6 +299,7 @@ pub mod {{snake class.name}} {
         })
     ));
 
+    /// Serialize {{class.name}} properties (Generated)
     pub fn gen_properties<'a>(input:(&'a mut [u8],usize), props: &AMQPProperties) -> Result<(&'a mut [u8],usize),GenError> {
         do_gen!(input,
             gen_short_uint(&props.bitmask())
