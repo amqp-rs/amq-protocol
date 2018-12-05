@@ -1,3 +1,4 @@
+#![allow(missing_docs)]
 include!(concat!(env!("OUT_DIR"), "/protocol.rs"));
 
 pub type BasicProperties = basic::AMQPProperties;

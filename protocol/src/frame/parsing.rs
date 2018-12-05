@@ -5,22 +5,23 @@ use protocol::*;
 use protocol::basic::parse_properties;
 use types::parsing::*;
 
-named!(pub parse_channel<AMQPChannel>, map!(parse_id, From::from));
+named_attr!(#[doc = "Parse a channel id"], pub parse_channel<AMQPChannel>, map!(parse_id, From::from));
 
-named!(pub parse_protocol_header, do_parse!(
+named_attr!(#[doc = "Parse the protocol header"], pub parse_protocol_header, do_parse!(
     tag!(metadata::NAME.as_bytes())                                                        >>
     tag!(&[0])                                                                             >>
     version: tag!(&[metadata::MAJOR_VERSION, metadata::MINOR_VERSION, metadata::REVISION]) >>
     (version)
 ));
 
-named!(pub parse_frame_type<AMQPFrameType>, switch!(parse_short_short_uint,
+named_attr!(#[doc = "Parse the frame type"], pub parse_frame_type<AMQPFrameType>, switch!(parse_short_short_uint,
     constants::FRAME_METHOD    => value!(AMQPFrameType::Method) |
     constants::FRAME_HEADER    => value!(AMQPFrameType::Header) |
     constants::FRAME_BODY      => value!(AMQPFrameType::Body)   |
     constants::FRAME_HEARTBEAT => value!(AMQPFrameType::Heartbeat)
 ));
 
+/// Parse a full AMQP Frame (with contents)
 pub fn parse_frame(i: &[u8]) -> Result<(&[u8], AMQPFrame), nom::Err<&[u8]>> {
     let (remaining, raw) = try_parse!(i, parse_raw_frame);
     let (_, frame)       = match raw.frame_type {
@@ -32,7 +33,7 @@ pub fn parse_frame(i: &[u8]) -> Result<(&[u8], AMQPFrame), nom::Err<&[u8]>> {
     Ok((remaining, frame))
 }
 
-named!(pub parse_raw_frame<AMQPRawFrame>, do_parse!(
+named_attr!(#[doc = "Parse a raw AMQP frame"], pub parse_raw_frame<AMQPRawFrame>, do_parse!(
     frame:   parse_frame_type     >>
     channel: parse_id             >>
     size:    parse_long_uint      >>
@@ -46,7 +47,7 @@ named!(pub parse_raw_frame<AMQPRawFrame>, do_parse!(
     })
 ));
 
-named!(pub parse_content_header<AMQPContentHeader>, do_parse!(
+named_attr!(#[doc = "Parse a content header frame"], pub parse_content_header<AMQPContentHeader>, do_parse!(
     class:      parse_id             >>
     weight:     parse_short_uint     >>
     size:       parse_long_long_uint >>

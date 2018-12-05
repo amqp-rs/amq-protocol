@@ -6,6 +6,7 @@ use types::generation::*;
 
 use cookie_factory::GenError;
 
+/// Serialize a frame in the given buffer
 pub fn gen_frame<'a, 'b>(x: (&'a mut [u8], usize), frame: &'b AMQPFrame) -> Result<(&'a mut [u8], usize), GenError> {
     match frame {
         AMQPFrame::ProtocolHeader => {
@@ -26,6 +27,7 @@ pub fn gen_frame<'a, 'b>(x: (&'a mut [u8], usize), frame: &'b AMQPFrame) -> Resu
     }
 }
 
+/// Serialize the protocol header in the given buffer
 pub fn gen_protocol_header(x: (&mut [u8], usize)) -> Result<(&mut [u8], usize), GenError> {
     do_gen!(x,
         gen_slice!(metadata::NAME.as_bytes()) >>
@@ -33,10 +35,12 @@ pub fn gen_protocol_header(x: (&mut [u8], usize)) -> Result<(&mut [u8], usize), 
     )
 }
 
+/// Serialize an heartbeat frame in the given buffer
 pub fn gen_heartbeat_frame(x: (&mut [u8], usize)) -> Result<(&mut [u8], usize), GenError> {
     do_gen!(x, gen_slice!(&[constants::FRAME_HEARTBEAT, 0, 0, 0, 0, 0, 0, constants::FRAME_END]))
 }
 
+/// Serialize a method frame in the given buffer
 pub fn gen_method_frame<'a>(x:(&'a mut [u8], usize), channel_id: ShortUInt, class: &AMQPClass) -> Result<(&'a mut [u8], usize), GenError> {
     do_gen!(x,
         gen_short_short_uint(&constants::FRAME_METHOD)                          >>
@@ -48,6 +52,7 @@ pub fn gen_method_frame<'a>(x:(&'a mut [u8], usize), channel_id: ShortUInt, clas
     )
 }
 
+/// Serialize a content header frame in the given buffer
 pub fn gen_content_header_frame<'a>(x: (&'a mut [u8], usize), channel_id: ShortUInt, class_id: ShortUInt, length: LongLongUInt, properties: &basic::AMQPProperties) -> Result<(&'a mut [u8], usize), GenError> {
     do_gen!(x,
         gen_short_short_uint(&constants::FRAME_HEADER)                          >>
@@ -64,6 +69,7 @@ pub fn gen_content_header_frame<'a>(x: (&'a mut [u8], usize), channel_id: ShortU
    )
 }
 
+/// Serialize a content body frame in the given buffer
 pub fn gen_content_body_frame<'a>(x: (&'a mut [u8], usize), channel_id: ShortUInt, content: &[u8]) -> Result<(&'a mut [u8], usize), GenError> {
     do_gen!(x,
         gen_short_short_uint(&constants::FRAME_BODY) >>

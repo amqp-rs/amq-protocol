@@ -2,36 +2,54 @@ use url::{percent_encoding, Url};
 use std::num::ParseIntError;
 use std::str::FromStr;
 
+/// An AMQP Uri
 #[derive(Clone, Debug, PartialEq)]
 pub struct AMQPUri {
+    /// The scheme used by the AMQP connection
     pub scheme:    AMQPScheme,
+    /// The connection information
     pub authority: AMQPAuthority,
+    /// The target vhost
     pub vhost:     String,
+    /// The optional query string to pass parameters to the server
     pub query:     AMQPQueryString,
 }
 
+/// The scheme used by the AMQP connection
 #[derive(Clone, Debug, PartialEq)]
 pub enum AMQPScheme {
+    /// Plain AMQP
     AMQP,
+    /// Encrypted AMQP over TLS
     AMQPS,
 }
 
+/// The connection information
 #[derive(Clone, Debug, PartialEq)]
 pub struct AMQPAuthority {
+    /// The credentials used to connect to the server
     pub userinfo: AMQPUserInfo,
+    /// The server's host
     pub host:     String,
+    /// The port the server listens on
     pub port:     u16,
 }
 
+/// The credentials used to connect to the server
 #[derive(Clone, Debug, PartialEq)]
 pub struct AMQPUserInfo {
+    /// The username
     pub username: String,
+    /// The password
     pub password: String,
 }
 
+/// The optional query string to pass parameters to the server
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct AMQPQueryString {
+    /// The maximum size of an AMQP Frame
     pub frame_max: Option<u32>,
+    /// The maximum time between two heartbeats
     pub heartbeat: Option<u16>,
 }
 
@@ -95,6 +113,7 @@ impl FromStr for AMQPUri {
 }
 
 impl AMQPScheme {
+    /// The default port for this scheme
     pub fn default_port(&self) -> u16 {
         match *self {
             AMQPScheme::AMQP  => 5672,
