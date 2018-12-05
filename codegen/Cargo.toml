@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-codegen"
-version       = "1.0.0" # remember to update html_root_url
+version       = "1.0.1" # remember to update html_root_url
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications - codegen"
 repository    = "https://github.com/sozu-proxy/amq-protocol"
