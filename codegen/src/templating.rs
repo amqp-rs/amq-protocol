@@ -43,10 +43,10 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         let mut data    = BTreeMap::new();
 
         codegen.set_strict_mode(true);
-        codegen.register_template_string(template_name, template.to_string()).unwrap_or_else(|_| panic!("Failed to register {} template", template_name));
+        codegen.register_template_string(template_name, template.to_string()).unwrap_or_else(|e| panic!("Failed to register {} template: {}", template_name, e));
         data.insert(var_name.to_string(), specs);
 
-        writeln!(f, "{}", codegen.render(template_name, &data).unwrap_or_else(|err| panic!("Failed to render {} template: {}", template_name, err))).unwrap_or_else(|_| panic!("Failed to generate {}.rs", target));
+        writeln!(f, "{}", codegen.render(template_name, &data).unwrap_or_else(|err| panic!("Failed to render {} template: {}", template_name, err))).unwrap_or_else(|e| panic!("Failed to generate {}.rs: {}", target, e));
     }
 }
 
