@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol"
-version       = "0.23.0"
+version       = "1.0.0"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications"
 repository    = "https://github.com/sozu-proxy/amq-protocol"
