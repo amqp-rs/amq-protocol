@@ -9,11 +9,17 @@ addons:
 
 cache: cargo
 
-rust:
-    - 1.31.0
-    - stable
-    - beta
-    - nightly
+matrix:
+    include:
+        - rust: 1.31.0
+        - rust: stable
+        - rust: beta
+        - rust: nightly
+        - rust: nightly
+          os: osx
+        - rust: nightly
+          script:
+                - cargo -Z minimal-versions test --verbose --all
 
 script:
     - cargo build --verbose --all
