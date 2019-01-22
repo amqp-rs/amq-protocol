@@ -1,5 +1,5 @@
 #![deny(missing_docs)]
-#![doc(html_root_url = "https://docs.rs/amq-protocol/1.0.0/")]
+#![doc(html_root_url = "https://docs.rs/amq-protocol/1.1.0/")]
 
 //! # AMQP manipulation library
 //!
