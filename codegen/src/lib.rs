@@ -1,5 +1,5 @@
 #![deny(missing_docs)]
-#![doc(html_root_url = "https://docs.rs/amq-protocol-codegen/1.0.1/")]
+#![doc(html_root_url = "https://docs.rs/amq-protocol-codegen/1.1.0/")]
 
 //! # AMQP code generation utilities
 //!
