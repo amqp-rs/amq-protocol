@@ -2,7 +2,7 @@ use crate::flags::*;
 use crate::types::*;
 use crate::value::*;
 
-use nom::{self, apply, be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be_f32, be_f64, call, complete, do_parse, error_position, fold_many0, flat_map, map, map_opt, map_res, named_attr, pair, take, take_str, tuple, tuple_parser, value};
+use nom::{self, apply, be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be_f32, be_f64, call, complete, do_parse, fold_many0, flat_map, map, map_opt, named_attr, pair, take, take_str, value};
 
 /// Parse the [AMQPValue](../type.AMQPValue.html) of the given [AMQPType](../type.AMQPType.html)
 pub fn parse_raw_value<'a>(i: &'a [u8], amqp_type: &AMQPType) -> Result<(&'a [u8], AMQPValue), nom::Err<&'a [u8]>> {
