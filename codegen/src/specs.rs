@@ -1,7 +1,7 @@
 use crate::internal::*;
 
 use amq_protocol_types::*;
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use serde_json::from_str;
 
 use std::collections::BTreeMap;

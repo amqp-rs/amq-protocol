@@ -14,14 +14,16 @@ license       = "BSD-2-Clause"
 name = "amq_protocol_codegen"
 
 [dependencies]
-handlebars   = "^1.1"
-serde        = "^1.0"
-serde_derive = "^1.0"
-serde_json   = "^1.0"
+handlebars = "^1.1"
+serde_json = "^1.0"
 
 [dependencies.amq-protocol-types]
 version = "^1.1"
 path    = "../types"
+
+[dependencies.serde]
+version  = "^1.0"
+features = ["derive"]
 
 [badges]
 travis-ci = { repository = "sozu-proxy/amq-protocol" }

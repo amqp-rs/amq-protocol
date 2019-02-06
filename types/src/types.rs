@@ -3,7 +3,7 @@ use crate::value::AMQPValue;
 use std::collections::BTreeMap;
 use std::fmt;
 
-use serde_derive::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 
 /// Enumeration referencing all the available AMQP types
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
