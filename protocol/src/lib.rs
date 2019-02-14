@@ -13,6 +13,8 @@ pub mod codegen;
 pub mod frame;
 /// The AMQ Protocol implementation (Generated)
 pub mod protocol;
+/// Utility to handle sasl auth with AMQP server
+pub mod sasl;
 /// Reexport of amq_protocol_types
 pub mod types;
 /// AMQP Uri utils
