@@ -6,7 +6,7 @@ use std::fmt;
 use serde::{Deserialize, Serialize};
 
 /// Enumeration referencing all the available AMQP types
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub enum AMQPType {
     /// A bool
     Boolean,
@@ -157,7 +157,7 @@ pub type ByteArray      = Vec<u8>;
 pub type Void           = ();
 
 /// A Decimal value composed of a scale and a value
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
 pub struct DecimalValue {
     /// The scale of the value
     pub scale: ShortShortUInt,
