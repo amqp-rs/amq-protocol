@@ -35,6 +35,7 @@ pub mod constants {
 }
 
 /// An AMQP Error
+#[derive(Clone, Debug, PartialEq)]
 pub enum AMQPError {
     /// A soft AMQP error
     Soft(AMQPSoftError),
@@ -58,6 +59,7 @@ impl AMQPError {
 }
 
 /// The available soft AMQP errors
+#[derive(Clone, Debug, PartialEq)]
 pub enum AMQPSoftError {
     {{#each protocol.soft_errors as |constant| ~}}
     /// {{{constant.name}}} (Generated)
@@ -87,6 +89,7 @@ impl AMQPSoftError {
 }
 
 /// The available hard AMQP errors
+#[derive(Clone, Debug, PartialEq)]
 pub enum AMQPHardError {
     {{#each protocol.hard_errors as |constant| ~}}
     /// {{{constant.name}}} (Generated)
