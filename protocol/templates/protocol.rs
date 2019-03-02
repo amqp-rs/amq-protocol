@@ -197,6 +197,18 @@ pub mod {{snake class.name}} {
         {{/each_argument ~}}
     }
 
+    impl {{camel method.name}} {
+        /// Get the id of the AMQP method
+        pub fn get_id() -> ShortUInt {
+            return {{method.id}};
+        }
+
+        /// Get the id of the AMQP class which this method belongs to
+        pub fn get_class_id() -> ShortUInt {
+            return {{class.id}};
+        }
+    }
+
     named_attr!(#[doc = "Parse {{method.name}} (Generated)"], pub parse_{{snake method.name}}<{{camel method.name}}>, do_parse!(
         {{#each_argument method.arguments as |argument| ~}}
         {{#if argument_is_value ~}}
