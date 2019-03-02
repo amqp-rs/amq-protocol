@@ -202,7 +202,6 @@ pub mod {{snake class.name}} {
         {{#if argument_is_value ~}}
         {{snake argument.name}}: parse_{{snake_type argument.type}} >>
         {{else}}
-        /* FIXME: support multiple flags structs? */
         flags: apply!(parse_flags, &[
             {{#each_flag argument as |flag| ~}}
             "{{flag.name}}",
@@ -226,7 +225,6 @@ pub mod {{snake class.name}} {
     /// Serialize {{method.name}} (Generated)
     pub fn gen_{{snake method.name}}<'a>(input: (&'a mut [u8], usize), {{#if method.arguments ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> Result<(&'a mut [u8],usize), GenError> {
         {{#if (method_has_flags method) ~}}
-        /* FIXME: support multiple flags structs? */
         let mut flags = AMQPFlags::default();
         {{#each_argument method.arguments as |argument| ~}}
         {{#unless argument_is_value ~}}
