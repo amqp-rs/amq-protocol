@@ -29,6 +29,7 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self.register_helper("snake",            Box::new(SnakeHelper));
         self.register_helper("snake_type",       Box::new(SnakeTypeHelper));
         self.register_helper("sanitize_name",    Box::new(SanitizeNameHelper));
+        self.register_helper("class_name_is",    Box::new(ClassNameIsHelper));
         self.register_helper("method_has_flags", Box::new(MethodHasFlagsHelper));
         self.register_helper("method_has_flag",  Box::new(MethodHasFlagHelper));
         self.register_helper("each_argument",    Box::new(EachArgumentHelper));
@@ -95,7 +96,20 @@ impl HelperDef for SanitizeNameHelper {
     }
 }
 
-/// Helper for checking is a method has some flags argument
+/// Helper for checking if a class name is the one provided
+pub struct ClassNameIsHelper;
+impl HelperDef for ClassNameIsHelper {
+    fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
+        let arg0  = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"class_name_is\""))?;
+        let arg1  = h.param(0).ok_or_else(|| RenderError::new("Second param not found for helper \"class_name_is\""))?;
+        let value = serde_json::from_value::<AMQPClass>(arg0.value().clone()).map_err(|_| RenderError::new("Non-AMQPClass first param given to helper \"class_name_is\""))?;
+        let name  = arg1.value().as_str().ok_or_else(|| RenderError::new("Non-string second param given to helper \"class_name_is\""))?;
+        let res   = value.name == name;
+        Ok(Some(ScopedJson::Derived(JsonValue::from(res))))
+    }
+}
+
+/// Helper for checking if a method has some flags argument
 pub struct MethodHasFlagsHelper;
 impl HelperDef for MethodHasFlagsHelper {
     fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
@@ -109,14 +123,14 @@ impl HelperDef for MethodHasFlagsHelper {
     }
 }
 
-/// Helper for checking is a method has the given flag argument
+/// Helper for checking if a method has the given flag argument
 pub struct MethodHasFlagHelper;
 impl HelperDef for MethodHasFlagHelper {
     fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
         let arg0     = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"method_has_flag\""))?;
         let arg1     = h.param(1).ok_or_else(|| RenderError::new("Second param not found for helper \"method_has_flag\""))?;
         let method   = serde_json::from_value::<AMQPMethod>(arg0.value().clone()).map_err(|_| RenderError::new("Non-AMQPMethod first param given to helper \"method_has_flag\""))?;
-        let flag     = arg1.value().as_str().ok_or_else(|| RenderError::new("Nonèstring second param given to helper \"method_has_flag\""))?;
+        let flag     = arg1.value().as_str().ok_or_else(|| RenderError::new("Non-string second param given to helper \"method_has_flag\""))?;
         let has_flag = method.arguments.iter().any(|arg| match arg {
             AMQPArgument::Value(_) => false,
             AMQPArgument::Flags(flags) => flags.iter().any(|f| f.name == flag),
