@@ -151,6 +151,11 @@ pub enum AMQPClass {
 pub mod {{snake class.name}} {
     use super::*;
 
+    /// Get the id of the AMQP class
+    pub fn get_id() -> ShortUInt {
+        return {{class.id}};
+    }
+
     named_attr!(#[doc = "Parse {{class.name}} (Generated)"], pub parse_{{snake class.name}}<{{snake class.name}}::AMQPMethod>, switch!(parse_id,
         {{#each class.methods as |method| ~}}
         {{method.id}} => map!(call!(parse_{{snake method.name}}), AMQPMethod::{{camel method.name}}) {{#unless @last ~}}|{{/unless ~}}
