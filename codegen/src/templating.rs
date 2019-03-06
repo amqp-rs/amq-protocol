@@ -101,7 +101,7 @@ pub struct ClassNameIsHelper;
 impl HelperDef for ClassNameIsHelper {
     fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
         let arg0  = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"class_name_is\""))?;
-        let arg1  = h.param(0).ok_or_else(|| RenderError::new("Second param not found for helper \"class_name_is\""))?;
+        let arg1  = h.param(1).ok_or_else(|| RenderError::new("Second param not found for helper \"class_name_is\""))?;
         let value = serde_json::from_value::<AMQPClass>(arg0.value().clone()).map_err(|_| RenderError::new("Non-AMQPClass first param given to helper \"class_name_is\""))?;
         let name  = arg1.value().as_str().ok_or_else(|| RenderError::new("Non-string second param given to helper \"class_name_is\""))?;
         let res   = value.name == name;
