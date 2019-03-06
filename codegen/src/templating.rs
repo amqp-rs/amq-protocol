@@ -19,7 +19,13 @@ pub trait HandlebarsAMQPExtension {
     fn register_amqp_helpers(self) -> Self;
     /// Generate code using the standard representation of specs and the given template, using the
     /// given name for the variable holding the [protocol definition](../specs.AMQProtocolDefinition.html).
-    fn simple_codegen(out_dir: &str, target: &str, template_name: &str, template: &str, var_name: &str);
+    fn simple_codegen(out_dir: &str, target: &str, template_name: &str, template: &str, var_name: &str) {
+        Self::simple_codegen_with_data(out_dir, target, template_name, template, var_name, None);
+    }
+    /// Generate code using the standard representation of specs and the given template, using the
+    /// given name for the variable holding the [protocol definition](../specs.AMQProtocolDefinition.html),
+    /// and also passing data to the templte.
+    fn simple_codegen_with_data(out_dir: &str, target: &str, template_name: &str, template: &str, var_name: &str, data: Option<serde_json::Value>);
 }
 
 impl HandlebarsAMQPExtension for CodeGenerator {
@@ -38,16 +44,16 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self
     }
 
-    fn simple_codegen(out_dir: &str, target: &str, template_name: &str, template: &str, var_name: &str) {
+    fn simple_codegen_with_data(out_dir: &str, target: &str, template_name: &str, template: &str, var_name: &str, data: Option<serde_json::Value>) {
         let dest_path   = Path::new(out_dir).join(format!("{}.rs", target));
         let mut f       = File::create(&dest_path).unwrap_or_else(|_| panic!("Failed to create {}.rs", target));
         let specs       = AMQProtocolDefinition::load();
         let mut codegen = CodeGenerator::new().register_amqp_helpers();
-        let mut data    = BTreeMap::new();
+        let mut data    = data.unwrap_or_default();
 
         codegen.set_strict_mode(true);
         codegen.register_template_string(template_name, template.to_string()).unwrap_or_else(|e| panic!("Failed to register {} template: {}", template_name, e));
-        data.insert(var_name.to_string(), specs);
+        data[var_name] = serde_json::to_value(specs).unwrap_or_else(|e| panic!("Failed to serialize specs: {}", e));
 
         writeln!(f, "{}", codegen.render(template_name, &data).unwrap_or_else(|err| panic!("Failed to render {} template: {}", template_name, err))).unwrap_or_else(|e| panic!("Failed to generate {}.rs: {}", target, e));
     }
