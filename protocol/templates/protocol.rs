@@ -151,11 +151,6 @@ pub enum AMQPClass {
 pub mod {{snake class.name}} {
     use super::*;
 
-    /// Get the id of the AMQP class
-    pub fn get_id() -> ShortUInt {
-        return {{class.id}};
-    }
-
     named_attr!(#[doc = "Parse {{class.name}} (Generated)"], pub parse_{{snake class.name}}<{{snake class.name}}::AMQPMethod>, switch!(parse_id,
         {{#each class.methods as |method| ~}}
         {{method.id}} => map!(call!(parse_{{snake method.name}}), AMQPMethod::{{camel method.name}}) {{#unless @last ~}}|{{/unless ~}}
@@ -200,18 +195,6 @@ pub mod {{snake class.name}} {
         {{/each_flag ~}}
         {{/if ~}}
         {{/each_argument ~}}
-    }
-
-    impl {{camel method.name}} {
-        /// Get the id of the AMQP method
-        pub fn get_id() -> ShortUInt {
-            return {{method.id}};
-        }
-
-        /// Get the id of the AMQP class which this method belongs to
-        pub fn get_class_id() -> ShortUInt {
-            return {{class.id}};
-        }
     }
 
     named_attr!(#[doc = "Parse {{method.name}} (Generated)"], pub parse_{{snake method.name}}<{{camel method.name}}>, do_parse!(
