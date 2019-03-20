@@ -2,7 +2,7 @@ use crate::internal::*;
 
 use amq_protocol_types::*;
 use serde::{Deserialize, Serialize};
-use serde_json::from_str;
+use serde_json::{from_str, Value};
 
 use std::collections::BTreeMap;
 
@@ -35,10 +35,10 @@ pub struct AMQProtocolDefinition {
 
 impl AMQProtocolDefinition {
     /// Load protocol definition from reference specification
-    pub fn load() -> AMQProtocolDefinition {
+    pub fn load(metadata: Option<Value>) -> AMQProtocolDefinition {
         let specs = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/specs/amqp-rabbitmq-0.9.1.json"));
 
-        from_str::<_AMQProtocolDefinition>(specs).expect("Failed to parse AMQP specs file").into_specs()
+        from_str::<_AMQProtocolDefinition>(specs).expect("Failed to parse AMQP specs file").into_specs(&metadata.unwrap_or_default())
     }
 }
 
@@ -65,6 +65,8 @@ pub struct AMQPClass {
     pub name:           ShortString,
     /// The properties of the class
     pub properties:     Vec<AMQPProperty>,
+    /// Extra metadata for code generation
+    pub metadata:       Value,
 }
 
 /// A method as defined in the AMQP specification
@@ -78,6 +80,8 @@ pub struct AMQPMethod {
     pub name:          ShortString,
     /// Whether this method is synchronous or not
     pub synchronous:   Boolean,
+    /// Extra metadata for code generation
+    pub metadata:      Value,
 }
 
 /// An argument as defined in the AMQP specification

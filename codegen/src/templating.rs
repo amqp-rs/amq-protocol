@@ -3,12 +3,12 @@ use crate::util::*;
 
 use amq_protocol_types::AMQPType;
 use handlebars::{self, Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output, Renderable, RenderContext, RenderError, ScopedJson, to_json};
-use serde_json::{self};
+use serde_json::{self, Value};
 
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
-use std::collections::BTreeMap;
 
 /// Type alias to avoid making our users explicitely depend on an extra dependency
 pub type CodeGenerator = Handlebars;
@@ -25,7 +25,7 @@ pub trait HandlebarsAMQPExtension {
     /// Generate code using the standard representation of specs and the given template, using the
     /// given name for the variable holding the [protocol definition](../specs.AMQProtocolDefinition.html),
     /// and also passing data to the templte.
-    fn simple_codegen_with_data(out_dir: &str, target: &str, template_name: &str, template: &str, var_name: &str, data: Option<serde_json::Value>);
+    fn simple_codegen_with_data(out_dir: &str, target: &str, template_name: &str, template: &str, var_name: &str, data: Option<Value>);
 }
 
 impl HandlebarsAMQPExtension for CodeGenerator {
@@ -44,16 +44,16 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self
     }
 
-    fn simple_codegen_with_data(out_dir: &str, target: &str, template_name: &str, template: &str, var_name: &str, data: Option<serde_json::Value>) {
+    fn simple_codegen_with_data(out_dir: &str, target: &str, template_name: &str, template: &str, var_name: &str, metadata: Option<Value>) {
         let dest_path   = Path::new(out_dir).join(format!("{}.rs", target));
         let mut f       = File::create(&dest_path).unwrap_or_else(|_| panic!("Failed to create {}.rs", target));
-        let specs       = AMQProtocolDefinition::load();
+        let specs       = AMQProtocolDefinition::load(metadata);
         let mut codegen = CodeGenerator::new().register_amqp_helpers();
-        let mut data    = data.unwrap_or_default();
+        let mut data    = BTreeMap::new();
 
         codegen.set_strict_mode(true);
         codegen.register_template_string(template_name, template.to_string()).unwrap_or_else(|e| panic!("Failed to register {} template: {}", template_name, e));
-        data[var_name] = serde_json::to_value(specs).unwrap_or_else(|e| panic!("Failed to serialize specs: {}", e));
+        data.insert(var_name.to_string(), serde_json::to_value(specs).unwrap_or_else(|e| panic!("Failed to serialize specs: {}", e)));
 
         writeln!(f, "{}", codegen.render(template_name, &data).unwrap_or_else(|err| panic!("Failed to render {} template: {}", template_name, err))).unwrap_or_else(|e| panic!("Failed to generate {}.rs: {}", target, e));
     }
@@ -331,6 +331,7 @@ synchronous: {{method.synchronous}}
                             ],
                             name:          "method1".to_string(),
                             synchronous:   true,
+                            metadata:      Value::default(),
                         }
                     ],
                     name:           "class1".to_string(),
@@ -340,6 +341,7 @@ synchronous: {{method.synchronous}}
                             name:      "property1".to_string(),
                         }
                     ],
+                    metadata: Value::default(),
                 }
             ],
         }

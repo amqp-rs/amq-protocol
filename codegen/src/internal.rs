@@ -23,12 +23,12 @@ pub struct _AMQProtocolDefinition {
 }
 
 impl _AMQProtocolDefinition {
-    pub fn into_specs(self) -> AMQProtocolDefinition {
+    pub fn into_specs(self, metadata: &Value) -> AMQProtocolDefinition {
         let domains = self.domains.iter().fold(BTreeMap::new(), |mut domains, domain| {
             domains.insert(domain.0.clone(), domain.1.to_specs());
             domains
         });
-        let classes = self.classes.iter().map(|klass| klass.to_specs(&domains)).collect();
+        let classes = self.classes.iter().map(|klass| klass.to_specs(&domains, metadata)).collect();
         AMQProtocolDefinition {
             name:          self.name,
             major_version: self.major_version,
@@ -123,16 +123,19 @@ struct _AMQPClass {
 }
 
 impl _AMQPClass {
-    fn to_specs(&self, domains: &BTreeMap<String, AMQPType>) -> AMQPClass {
-        let properties     = match self.properties {
+    fn to_specs(&self, domains: &BTreeMap<String, AMQPType>, metadata: &Value) -> AMQPClass {
+        let class_md   = metadata.as_object().and_then(|m| m.get(&self.name));
+        let metadata   = class_md.and_then(|c| c.as_object()).and_then(|c| c.get("metadata")).cloned().unwrap_or_default();
+        let properties = match self.properties {
             Some(ref properties) => properties.iter().map(|prop| prop.to_specs()).collect(),
             None                 => Vec::new(),
         };
         AMQPClass {
             id:             self.id,
-            methods:        self.methods.iter().map(|method| method.to_specs(domains)).collect(),
+            methods:        self.methods.iter().map(|method| method.to_specs(domains, class_md)).collect(),
             name:           self.name.clone(),
             properties,
+            metadata,
         }
     }
 }
@@ -146,13 +149,14 @@ struct _AMQPMethod {
 }
 
 impl _AMQPMethod {
-    fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>) -> AMQPMethod {
+    fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>, class_md: Option<&Value>) -> AMQPMethod {
         let arguments = self.arguments_to_specs(domains);
         AMQPMethod {
             id:            self.id,
             arguments,
             name:          self.name.clone(),
             synchronous:   self.synchronous.unwrap_or(false),
+            metadata:      class_md.and_then(|c| c.as_object()).and_then(|c| c.get(&self.name)).and_then(|c| c.as_object()).and_then(|m| m.get("metadata")).cloned().unwrap_or_default(),
         }
     }
 
@@ -324,14 +328,16 @@ mod test {
                     })],
                     name:          "meth1".to_string(),
                     synchronous:   false,
+                    metadata:      Value::default(),
                 }],
                 name:           "class1".to_string(),
                 properties:     vec![AMQPProperty {
                     amqp_type: AMQPType::ShortShortUInt,
                     name:      "prop1".to_string(),
                 }],
+                metadata:       Value::default(),
             }],
         };
-        assert_eq!(def.into_specs(), expected);
+        assert_eq!(def.into_specs(&Value::default()), expected);
     }
 }
