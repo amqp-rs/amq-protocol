@@ -1,10 +1,9 @@
 use crate::specs::*;
 
 use amq_protocol_types::*;
+use hashbrown::HashMap;
 use serde::Deserialize;
 use serde_json::Value;
-
-use std::collections::BTreeMap;
 
 /* Modified version of AMQProtocolDefinition to handle deserialization */
 #[derive(Debug, Deserialize)]
@@ -24,7 +23,7 @@ pub struct _AMQProtocolDefinition {
 
 impl _AMQProtocolDefinition {
     pub fn into_specs(self, metadata: &Value) -> AMQProtocolDefinition {
-        let domains = self.domains.iter().fold(BTreeMap::new(), |mut domains, domain| {
+        let domains = self.domains.iter().fold(HashMap::new(), |mut domains, domain| {
             domains.insert(domain.0.clone(), domain.1.to_specs());
             domains
         });
@@ -123,7 +122,7 @@ struct _AMQPClass {
 }
 
 impl _AMQPClass {
-    fn to_specs(&self, domains: &BTreeMap<String, AMQPType>, metadata: &Value) -> AMQPClass {
+    fn to_specs(&self, domains: &HashMap<String, AMQPType>, metadata: &Value) -> AMQPClass {
         let class_md   = metadata.as_object().and_then(|m| m.get(&self.name));
         let metadata   = class_md.and_then(|c| c.as_object()).and_then(|c| c.get("metadata")).cloned().unwrap_or_default();
         let properties = match self.properties {
@@ -149,7 +148,7 @@ struct _AMQPMethod {
 }
 
 impl _AMQPMethod {
-    fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>, class_md: Option<&Value>) -> AMQPMethod {
+    fn to_specs(&self, domains: &HashMap<ShortString, AMQPType>, class_md: Option<&Value>) -> AMQPMethod {
         let arguments = self.arguments_to_specs(domains);
         AMQPMethod {
             id:            self.id,
@@ -160,7 +159,7 @@ impl _AMQPMethod {
         }
     }
 
-    fn arguments_to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>) -> Vec<AMQPArgument> {
+    fn arguments_to_specs(&self, domains: &HashMap<ShortString, AMQPType>) -> Vec<AMQPArgument> {
         let mut arguments                            = Vec::new();
         let mut flags : Option<Vec<AMQPFlagArgument>> = None;
         for argument in &self.arguments {
@@ -210,7 +209,7 @@ impl _AMQPArgument {
         }
     }
 
-    fn get_type(&self, domains: &BTreeMap<ShortString, AMQPType>) -> AMQPType {
+    fn get_type(&self, domains: &HashMap<ShortString, AMQPType>) -> AMQPType {
         match self.amqp_type {
             Some(ref amqp_type) => amqp_type.to_specs(),
             None                => {
@@ -291,7 +290,7 @@ mod test {
                 }]),
             }],
         };
-        let mut dom  = BTreeMap::new();
+        let mut dom  = HashMap::new();
         dom.insert("d1".to_string(), AMQPType::Boolean);
         let expected = AMQProtocolDefinition {
             name:          "amqp".to_string(),

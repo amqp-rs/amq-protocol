@@ -3,9 +3,9 @@ use crate::util::*;
 
 use amq_protocol_types::AMQPType;
 use handlebars::{self, Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output, Renderable, RenderContext, RenderError, ScopedJson, to_json};
+use hashbrown::HashMap;
 use serde_json::{self, Value};
 
-use std::collections::BTreeMap;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
@@ -47,7 +47,7 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         let mut f       = File::create(&dest_path).unwrap_or_else(|_| panic!("Failed to create {}.rs", target));
         let specs       = AMQProtocolDefinition::load(metadata);
         let mut codegen = CodeGenerator::new().register_amqp_helpers();
-        let mut data    = BTreeMap::new();
+        let mut data    = HashMap::new();
 
         codegen.set_strict_mode(true);
         codegen.register_template_string(template_name, template.to_string()).unwrap_or_else(|e| panic!("Failed to register {} template: {}", template_name, e));
@@ -152,7 +152,7 @@ impl HelperDef for EachArgumentHelper {
                     local_rc.set_path(new_path.clone());
                 }
                 if let Some(block_param) = h.block_param() {
-                    let mut map = BTreeMap::new();
+                    let mut map = HashMap::new();
                     match *argument {
                         AMQPArgument::Value(ref v) => {
                             map.insert(block_param.to_string(), to_json(v));
@@ -200,7 +200,7 @@ impl HelperDef for EachFlagHelper {
                     local_rc.set_path(new_path.clone());
                 }
                 if let Some(block_param) = h.block_param() {
-                    let mut map = BTreeMap::new();
+                    let mut map = HashMap::new();
                     map.insert(block_param.to_string(), to_json(flag));
                     local_rc.push_block_context(&map)?;
                 }
@@ -223,8 +223,6 @@ mod test {
     use super::*;
 
     use amq_protocol_types::*;
-
-    use std::collections::BTreeMap;
 
     pub const TEMPLATE: &'static str = r#"
 {{protocol.name}} - {{protocol.major_version}}.{{protocol.minor_version}}.{{protocol.revision}}
@@ -258,7 +256,7 @@ synchronous: {{method.synchronous}}
 "#;
 
     fn specs() -> AMQProtocolDefinition {
-        let mut domains = BTreeMap::new();
+        let mut domains = HashMap::new();
         domains.insert("domain1".to_string(), AMQPType::LongString);
         AMQProtocolDefinition {
             name:          "AMQP".to_string(),
@@ -321,7 +319,7 @@ synchronous: {{method.synchronous}}
 
     #[test]
     fn main_template() {
-        let mut data    = BTreeMap::new();
+        let mut data    = HashMap::new();
         let mut codegen = CodeGenerator::new().register_amqp_helpers();
         data.insert("protocol".to_string(), specs());
         assert!(codegen.register_template_string("main", TEMPLATE.to_string()).is_ok());
