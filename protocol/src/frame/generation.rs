@@ -43,39 +43,39 @@ pub fn gen_heartbeat_frame(x: (&mut [u8], usize)) -> Result<(&mut [u8], usize), 
 /// Serialize a method frame in the given buffer
 pub fn gen_method_frame<'a>(x:(&'a mut [u8], usize), channel_id: ShortUInt, class: &AMQPClass) -> Result<(&'a mut [u8], usize), GenError> {
     do_gen!(x,
-        gen_short_short_uint(&constants::FRAME_METHOD)                          >>
-        gen_id(&channel_id)                                                     >>
-        len:   gen_skip!(4)                                                     >>
-        start: gen_class(class)                                                 >>
-        end:   gen_at_offset!(len, gen_long_uint(&((end - start) as LongUInt))) >>
-        gen_short_short_uint(&constants::FRAME_END)
+        gen_short_short_uint(constants::FRAME_METHOD)                        >>
+        gen_id(channel_id)                                                   >>
+        len:   gen_skip!(4)                                                  >>
+        start: gen_class(class)                                              >>
+        end:   gen_at_offset!(len, gen_long_uint((end - start) as LongUInt)) >>
+        gen_short_short_uint(constants::FRAME_END)
     )
 }
 
 /// Serialize a content header frame in the given buffer
 pub fn gen_content_header_frame<'a>(x: (&'a mut [u8], usize), channel_id: ShortUInt, class_id: ShortUInt, length: LongLongUInt, properties: &basic::AMQPProperties) -> Result<(&'a mut [u8], usize), GenError> {
     do_gen!(x,
-        gen_short_short_uint(&constants::FRAME_HEADER)                          >>
-        gen_id(&channel_id)                                                     >>
-        len:   gen_skip!(4)                                                     >>
+        gen_short_short_uint(constants::FRAME_HEADER)                        >>
+        gen_id(channel_id)                                                   >>
+        len:   gen_skip!(4)                                                  >>
         start: do_gen!(
-            gen_id(&class_id)           >>
-            gen_short_uint(&0)          >> // weight
-            gen_long_long_uint(&length) >>
+            gen_id(class_id)           >>
+            gen_short_uint(0)          >> // weight
+            gen_long_long_uint(length) >>
             gen_properties(&properties)
         ) >>
-        end:   gen_at_offset!(len, gen_long_uint(&((end - start) as LongUInt))) >>
-        gen_short_short_uint(&constants::FRAME_END)
+        end:   gen_at_offset!(len, gen_long_uint((end - start) as LongUInt)) >>
+        gen_short_short_uint(constants::FRAME_END)
    )
 }
 
 /// Serialize a content body frame in the given buffer
 pub fn gen_content_body_frame<'a>(x: (&'a mut [u8], usize), channel_id: ShortUInt, content: &[u8]) -> Result<(&'a mut [u8], usize), GenError> {
     do_gen!(x,
-        gen_short_short_uint(&constants::FRAME_BODY) >>
-        gen_id(&channel_id)                          >>
-        gen_long_uint(&(content.len() as LongUInt))  >>
-        gen_slice!(content)                          >>
-        gen_short_short_uint(&constants::FRAME_END)
+        gen_short_short_uint(constants::FRAME_BODY) >>
+        gen_id(channel_id)                          >>
+        gen_long_uint(content.len() as LongUInt)    >>
+        gen_slice!(content)                         >>
+        gen_short_short_uint(constants::FRAME_END)
     )
 }

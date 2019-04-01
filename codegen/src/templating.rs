@@ -265,7 +265,7 @@ synchronous: {{method.synchronous}}
             revision:      1,
             port:          5672,
             copyright:     "Copyright 1\nCopyright 2".to_string(),
-            domains:       domains,
+            domains,
             constants:     vec![
                 AMQPConstant {
                     name:      "constant1".to_string(),

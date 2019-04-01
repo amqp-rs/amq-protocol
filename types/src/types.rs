@@ -85,8 +85,8 @@ impl AMQPType {
     /// ShortString doesn't have an id, we return '_' instead
     /// ShortInt is supposed to be 'U' but we use 's'
     /// LongLongUInt is supposed to be 'L' but we return 'l' as LongLongInt
-    pub fn get_id(&self) -> char {
-        match *self {
+    pub fn get_id(self) -> char {
+        match self {
             AMQPType::Boolean        => 't',
             AMQPType::ShortShortInt  => 'b',
             AMQPType::ShortShortUInt => 'B',
@@ -164,6 +164,15 @@ pub struct DecimalValue {
     /// The actual value
     pub value: LongUInt,
 }
+
+/// A Reference pointing to a ShortString
+pub type ShortStringRef<'a> = &'a str;
+/// A Reference pointing to a LongString
+pub type LongStringRef<'a>  = &'a str;
+/// A Reference pointing to a FieldArray
+pub type FieldArrayRef<'a>  = &'a [AMQPValue];
+/// A Reference pointing to a ByteArray
+pub type ByteArrayRef<'a>   = &'a [u8];
 
 #[cfg(test)]
 mod test {

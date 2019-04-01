@@ -122,7 +122,7 @@ struct _AMQPClass {
 }
 
 impl _AMQPClass {
-    fn to_specs(&self, domains: &HashMap<String, AMQPType>, metadata: &Value) -> AMQPClass {
+    fn to_specs(&self, domains: &HashMap<ShortString, AMQPType>, metadata: &Value) -> AMQPClass {
         let class_md   = metadata.as_object().and_then(|m| m.get(&self.name));
         let metadata   = class_md.and_then(|c| c.as_object()).and_then(|c| c.get("metadata")).cloned().unwrap_or_default();
         let properties = match self.properties {
@@ -217,7 +217,7 @@ impl _AMQPArgument {
                     Some(ref domain) => domain,
                     None             => panic!(format!("{} has no type nor domain", self.name)),
                 };
-                domains.get(domain).unwrap_or_else(|| panic!("No {} domain exists", domain)).clone()
+                *domains.get(domain).unwrap_or_else(|| panic!("No {} domain exists", domain))
             },
         }
     }

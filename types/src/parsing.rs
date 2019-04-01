@@ -5,8 +5,8 @@ use crate::value::*;
 use nom::{self, apply, be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be_f32, be_f64, call, complete, do_parse, fold_many0, flat_map, map, map_opt, named_attr, pair, take, take_str, value};
 
 /// Parse the [AMQPValue](../type.AMQPValue.html) of the given [AMQPType](../type.AMQPType.html)
-pub fn parse_raw_value<'a>(i: &'a [u8], amqp_type: &AMQPType) -> Result<(&'a [u8], AMQPValue), nom::Err<&'a [u8]>> {
-    match *amqp_type {
+pub fn parse_raw_value(i: &[u8], amqp_type: AMQPType) -> Result<(&[u8], AMQPValue), nom::Err<&[u8]>> {
+    match amqp_type {
         AMQPType::Boolean        => map!(i, call!(parse_boolean),          AMQPValue::Boolean),
         AMQPType::ShortShortInt  => map!(i, call!(parse_short_short_int),  AMQPValue::ShortShortInt),
         AMQPType::ShortShortUInt => map!(i, call!(parse_short_short_uint), AMQPValue::ShortShortUInt),
@@ -31,7 +31,7 @@ pub fn parse_raw_value<'a>(i: &'a [u8], amqp_type: &AMQPType) -> Result<(&'a [u8
     }
 }
 
-named_attr!(#[doc = "Parse an [AMQPValue](../type.AMQPValue.html)"],          pub parse_value<AMQPValue>,                 do_parse!(amqp_type: call!(parse_type) >> value: apply!(parse_raw_value, &amqp_type) >> (value)));
+named_attr!(#[doc = "Parse an [AMQPValue](../type.AMQPValue.html)"],          pub parse_value<AMQPValue>,                 do_parse!(amqp_type: call!(parse_type) >> value: apply!(parse_raw_value, amqp_type) >> (value)));
 named_attr!(#[doc = "Parse an [AMQPType](../type.AMQPType.html)"],            pub parse_type<AMQPType>,                   map_opt!(be_u8, |t| AMQPType::from_id(t as char)));
 named_attr!(#[doc = "Parse an id [(ShortUInt)](../type.ShortUInt.html)"],     pub parse_id<ShortUInt>,                    call!(parse_short_uint));
 
@@ -79,11 +79,11 @@ mod test {
 
     #[test]
     fn test_parse_raw_value() {
-        assert_eq!(parse_raw_value(&[42, 42, 42, 42, 42,  42,  42,  42],  &AMQPType::Timestamp),    Ok((EMPTY, AMQPValue::Timestamp(3038287259199220266))));
-        assert_eq!(parse_raw_value(&[0,  0,  0,  4,  116, 101, 115, 116], &AMQPType::LongString),   Ok((EMPTY, AMQPValue::LongString("test".to_string()))));
+        assert_eq!(parse_raw_value(&[42, 42, 42, 42, 42,  42,  42,  42],  AMQPType::Timestamp),    Ok((EMPTY, AMQPValue::Timestamp(3038287259199220266))));
+        assert_eq!(parse_raw_value(&[0,  0,  0,  4,  116, 101, 115, 116], AMQPType::LongString),   Ok((EMPTY, AMQPValue::LongString("test".to_string()))));
         /* Test internal exceptions */
-        assert_eq!(parse_raw_value(&[42, 42, 42, 42, 42,  42,  42,  42],  &AMQPType::LongLongUInt), Ok((EMPTY, AMQPValue::LongLongInt(3038287259199220266))));
-        assert_eq!(parse_raw_value(&[4,  116, 101, 115, 116],             &AMQPType::ShortString),  Ok((EMPTY, AMQPValue::LongString("test".to_string()))));
+        assert_eq!(parse_raw_value(&[42, 42, 42, 42, 42,  42,  42,  42],  AMQPType::LongLongUInt), Ok((EMPTY, AMQPValue::LongLongInt(3038287259199220266))));
+        assert_eq!(parse_raw_value(&[4,  116, 101, 115, 116],             AMQPType::ShortString),  Ok((EMPTY, AMQPValue::LongString("test".to_string()))));
     }
 
     #[test]

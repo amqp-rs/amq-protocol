@@ -163,7 +163,7 @@ pub mod {{snake class.name}} {
             {{#each class.methods as |method| ~}}
             AMQPMethod::{{camel method.name}}(ref {{snake method.name}}) => {
                 do_gen!(input,
-                    gen_id(&{{class.id}}) >>
+                    gen_id({{class.id}}) >>
                     gen_{{snake method.name}}({{snake method.name}})
                 )
             },
@@ -235,10 +235,10 @@ pub mod {{snake class.name}} {
         {{/each_argument ~}}
         {{/if ~}}
         do_gen!(input,
-            gen_id(&{{method.id}})
+            gen_id({{method.id}})
             {{#each_argument method.arguments as |argument| ~}}
             {{#if argument_is_value ~}}
-            >> gen_{{snake_type argument.type}}(&method.{{snake argument.name}})
+            >> gen_{{snake_type argument.type}}(method.{{snake argument.name}}.as_gen_ref())
             {{else}}
             >> gen_flags(&flags)
             {{/if ~}}
@@ -282,6 +282,7 @@ pub mod {{snake class.name}} {
         {{/each ~}}
 
         /// Get the bitpask for serialization (Generated)
+        #[allow(clippy::identity_op)]
         pub fn bitmask(&self) -> ShortUInt {
             {{#each class.properties as |property| ~}}
             (if self.{{snake property.name}}.is_some() { 1 << (15 - {{@index}}) } else { 0 }) {{#unless @last ~}} + {{/unless ~}}
@@ -289,7 +290,7 @@ pub mod {{snake class.name}} {
         }
     }
 
-    named_attr!(#[doc = "Parse {{class.name}} properties (Generated)"], pub parse_properties<AMQPProperties>, do_parse!(
+    named_attr!(#[doc = "Parse {{class.name}} properties (Generated)"] #[allow(clippy::identity_op)], pub parse_properties<AMQPProperties>, do_parse!(
         flags: parse_short_uint >>
         {{#each class.properties as |property| ~}}
         {{snake property.name}}: cond!(flags & (1 << (15 - {{@index}})) != 0, parse_{{snake_type property.type}}) >>
@@ -302,11 +303,12 @@ pub mod {{snake class.name}} {
     ));
 
     /// Serialize {{class.name}} properties (Generated)
+    #[clippy::cyclomatic_complexity = "32"]
     pub fn gen_properties<'a>(input:(&'a mut [u8],usize), props: &AMQPProperties) -> Result<(&'a mut [u8],usize),GenError> {
         do_gen!(input,
-            gen_short_uint(&props.bitmask())
+            gen_short_uint(props.bitmask())
             {{#each class.properties as |property| ~}}
-            >> gen_cond!(props.{{snake property.name}}.is_some(), gen_call!(gen_{{snake_type property.type}}, &props.{{snake property.name}}.as_ref().unwrap()))
+            >> gen_cond!(props.{{snake property.name}}.is_some(), gen_call!(gen_{{snake_type property.type}}, props.{{snake property.name}}.as_ref().unwrap().as_gen_ref()))
             {{/each ~}}
         )
     }
