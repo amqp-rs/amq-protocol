@@ -39,6 +39,7 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self.register_helper("method_has_flag",  Box::new(MethodHasFlagHelper));
         self.register_helper("each_argument",    Box::new(EachArgumentHelper));
         self.register_helper("each_flag",        Box::new(EachFlagHelper));
+        self.register_helper("map_has_key",      Box::new(MapHasKeyHelper));
         self
     }
 
@@ -215,6 +216,19 @@ impl HelperDef for EachFlagHelper {
             rc.demote_local_vars();
         }
         Ok(())
+    }
+}
+
+/// Helper for checking if a map contains a given key
+pub struct MapHasKeyHelper;
+impl HelperDef for MapHasKeyHelper {
+    fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
+        let arg0    = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"map_has_key\""))?;
+        let arg1    = h.param(1).ok_or_else(|| RenderError::new("Second param not found for helper \"map_has_key\""))?;
+        let map     = arg0.value();
+        let key     = arg1.value().as_str().ok_or_else(|| RenderError::new("Non-string second param given to helper \"map_has_key\""))?;
+        let has_key = map.as_object().map(|map| map.contains_key(key)).unwrap_or(false);
+        Ok(Some(ScopedJson::Derived(JsonValue::from(has_key))))
     }
 }
 
