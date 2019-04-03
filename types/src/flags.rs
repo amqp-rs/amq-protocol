@@ -52,7 +52,7 @@ impl Default for AMQPFlags {
     }
 }
 
-impl CopyOrClone for AMQPFlags {
+impl CopyOrClone<AMQPFlags> for AMQPFlags {
     fn copy_or_clone(&self) -> Self {
         self.clone()
     }

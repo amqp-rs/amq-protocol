@@ -175,14 +175,14 @@ pub type FieldArrayRef<'a>  = &'a [AMQPValue];
 pub type ByteArrayRef<'a>   = &'a [u8];
 
 /// Copy if the type supports it, otherwise clone
-pub trait CopyOrClone {
+pub trait CopyOrClone<T> {
     /// Either copy or clone
-    fn copy_or_clone(&self) -> Self;
+    fn copy_or_clone(&self) -> T;
 }
 
 macro_rules! impl_copyorclone_cpy {
     ($t:ty) => {
-        impl CopyOrClone for $t {
+        impl CopyOrClone<$t> for $t {
             fn copy_or_clone(&self) -> Self {
                 *self
             }
@@ -192,7 +192,7 @@ macro_rules! impl_copyorclone_cpy {
 
 macro_rules! impl_copyorclone_cln {
     ($t:ty) => {
-        impl CopyOrClone for $t {
+        impl CopyOrClone<$t> for $t {
             fn copy_or_clone(&self) -> Self {
                 self.clone()
             }
@@ -218,6 +218,12 @@ impl_copyorclone_cln!(LongString);
 impl_copyorclone_cln!(FieldArray);
 impl_copyorclone_cln!(FieldTable);
 impl_copyorclone_cln!(ByteArray);
+
+impl CopyOrClone<String> for str {
+    fn copy_or_clone(&self) -> String {
+        self.to_string()
+    }
+}
 
 #[cfg(test)]
 mod test {
