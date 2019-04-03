@@ -22,7 +22,7 @@ version = "^1.2.0"
 path    = "../types"
 
 [dependencies.hashbrown]
-version  = "^0.1"
+version  = "^0.2"
 features = ["serde"]
 
 [dependencies.serde]
