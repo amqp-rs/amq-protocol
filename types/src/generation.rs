@@ -325,9 +325,8 @@ mod test {
     fn test_gen_field_table() {
         let mut table = FieldTable::new();
         table.insert("test".to_string(),  AMQPValue::Float(42.42));
-        table.insert("test2".to_string(), AMQPValue::LongLongInt(42));
-        assert_eq!(gen_field_table((&mut [0, 0, 0, 0],                                                                            0), &FieldTable::new()), Ok((&mut [0, 0, 0, 0][..],                                                                                                         4)));
-        assert_eq!(gen_field_table((&mut [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0), &table),             Ok((&mut [0, 0, 0, 25, 5, 116, 101, 115, 116, 50, 108, 0, 0, 0, 0, 0, 0, 0, 42, 4, 116, 101, 115, 116, 102, 66, 41, 174, 20][..], 29)));
+        assert_eq!(gen_field_table((&mut [0, 0, 0, 0],                               0), &FieldTable::new()), Ok((&mut [0, 0, 0, 0][..],                                                4)));
+        assert_eq!(gen_field_table((&mut [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0), &table),             Ok((&mut [0, 0, 0, 10, 4, 116, 101, 115, 116, 102, 66, 41, 174, 20][..], 14)));
     }
 
     #[test]
