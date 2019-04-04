@@ -1,8 +1,8 @@
 use crate::value::AMQPValue;
 
+use std::collections::BTreeMap;
 use std::fmt;
 
-use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
 
 /// Enumeration referencing all the available AMQP types
@@ -150,7 +150,7 @@ pub type FieldArray     = Vec<AMQPValue>;
 /// A timestamp (u32)
 pub type Timestamp      = LongLongUInt;
 /// A Map<String, AMQPValue>
-pub type FieldTable     = HashMap<ShortString, AMQPValue>;
+pub type FieldTable     = BTreeMap<ShortString, AMQPValue>;
 /// An array of bytes (RabbitMQ specific)
 pub type ByteArray      = Vec<u8>;
 /// No value

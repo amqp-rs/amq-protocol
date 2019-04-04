@@ -1,9 +1,10 @@
 use crate::internal::*;
 
 use amq_protocol_types::*;
-use hashbrown::HashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::{from_str, Value};
+
+use std::collections::BTreeMap;
 
 /// Structure holding the definition of the protocol
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
@@ -21,7 +22,7 @@ pub struct AMQProtocolDefinition {
     /// The copyright holder of the protocol specification
     pub copyright:     LongString,
     /// The domains defined by the protocol specification
-    pub domains:       HashMap<ShortString, AMQPType>,
+    pub domains:       BTreeMap<ShortString, AMQPType>,
     /// The constants defined by the protocol specification
     pub constants:     Vec<AMQPConstant>,
     /// The soft errors defined by the protocol specification

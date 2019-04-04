@@ -238,6 +238,8 @@ mod test {
 
     use amq_protocol_types::*;
 
+    use std::collections::BTreeMap;
+
     pub const TEMPLATE: &'static str = r#"
 {{protocol.name}} - {{protocol.major_version}}.{{protocol.minor_version}}.{{protocol.revision}}
 {{protocol.copyright}}
@@ -270,7 +272,7 @@ synchronous: {{method.synchronous}}
 "#;
 
     fn specs() -> AMQProtocolDefinition {
-        let mut domains = HashMap::new();
+        let mut domains = BTreeMap::new();
         domains.insert("domain1".to_string(), AMQPType::LongString);
         AMQProtocolDefinition {
             name:          "AMQP".to_string(),
