@@ -1,0 +1,75 @@
+{
+    "access": {
+        "request-ok": {
+            "metadata": {
+                "has_ticket": true
+            }
+        }
+    },
+    "exchange": {
+        "declare": {
+            "metadata": {
+                "has_ticket": true
+            }
+        },
+        "delete": {
+            "metadata": {
+                "has_ticket": true
+            }
+        },
+        "bind": {
+            "metadata": {
+                "has_ticket": true
+            }
+        },
+        "unbind": {
+            "metadata": {
+                "has_ticket": true
+            }
+        }
+    },
+    "queue": {
+        "declare": {
+            "metadata": {
+                "has_ticket": true
+            }
+        },
+        "bind": {
+            "metadata": {
+                "has_ticket": true
+            }
+        },
+        "purge": {
+            "metadata": {
+                "has_ticket": true
+            }
+        },
+        "delete": {
+            "metadata": {
+                "has_ticket": true
+            }
+        },
+        "unbind": {
+            "metadata": {
+                "has_ticket": true
+            }
+        }
+    },
+    "basic": {
+        "consume": {
+            "metadata": {
+                "has_ticket": true
+            }
+        },
+        "publish": {
+            "metadata": {
+                "has_ticket": true
+            }
+        },
+        "get": {
+            "metadata": {
+                "has_ticket": true
+            }
+        }
+    }
+}

@@ -198,6 +198,9 @@ pub mod {{snake class.name}} {
     }
 
     named_attr!(#[doc = "Parse {{method.name}} (Generated)"], pub parse_{{snake method.name}}<{{camel method.name}}>, do_parse!(
+        {{#if method.metadata.has_ticket ~}}
+        parse_short_uint >>
+        {{/if ~}}
         {{#each_argument method.arguments as |argument| ~}}
         {{#if argument_is_value ~}}
         {{snake argument.name}}: parse_{{snake_type argument.type}} >>
@@ -236,6 +239,9 @@ pub mod {{snake class.name}} {
         {{/if ~}}
         do_gen!(input,
             gen_id({{method.id}})
+            {{#if method.metadata.has_ticket ~}}
+            >> gen_short_uint(0)
+            {{/if ~}}
             {{#each_argument method.arguments as |argument| ~}}
             {{#if argument_is_value ~}}
             >> gen_{{snake_type argument.type}}(method.{{snake argument.name}}.as_gen_ref())

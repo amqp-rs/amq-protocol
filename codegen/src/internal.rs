@@ -163,7 +163,7 @@ impl _AMQPMethod {
     fn arguments_to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>) -> Vec<AMQPArgument> {
         let mut arguments                            = Vec::new();
         let mut flags : Option<Vec<AMQPFlagArgument>> = None;
-        for argument in &self.arguments {
+        for argument in self.arguments.iter().filter(|arg| arg.name != "ticket") {
             let amqp_type = argument.get_type(domains);
             if amqp_type == AMQPType::Boolean {
                 let mut flgs = flags.take().unwrap_or_else(Vec::new);
