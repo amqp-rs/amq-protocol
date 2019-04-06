@@ -38,7 +38,8 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self.register_helper("method_has_flag", Box::new(MethodHasFlagHelper));
         self.register_helper("each_argument",   Box::new(EachArgumentHelper));
         self.register_helper("each_flag",       Box::new(EachFlagHelper));
-        self.register_helper("map_has_key",     Box::new(MapHasKeyHelper));
+        self.register_helper("array_contains",  Box::new(ArrayContainsHelper));
+        self.register_helper("map_contains",    Box::new(MapContainsHelper));
         self
     }
 
@@ -205,14 +206,27 @@ impl HelperDef for EachFlagHelper {
     }
 }
 
-/// Helper for checking if a map contains a given key
-pub struct MapHasKeyHelper;
-impl HelperDef for MapHasKeyHelper {
+/// Helper for checking if an array contains a given element
+pub struct ArrayContainsHelper;
+impl HelperDef for ArrayContainsHelper {
     fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
-        let arg0    = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"map_has_key\""))?;
-        let arg1    = h.param(1).ok_or_else(|| RenderError::new("Second param not found for helper \"map_has_key\""))?;
+        let arg0   = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"array_contains\""))?;
+        let arg1   = h.param(1).ok_or_else(|| RenderError::new("Second param not found for helper \"array_contains\""))?;
+        let array  = arg0.value();
+        let elem   = arg1.value();
+        let has_it = array.as_array().map(|array| array.contains(elem)).unwrap_or(false);
+        Ok(Some(ScopedJson::Derived(JsonValue::from(has_it))))
+    }
+}
+
+/// Helper for checking if a map contains a given key
+pub struct MapContainsHelper;
+impl HelperDef for MapContainsHelper {
+    fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
+        let arg0    = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"map_contains\""))?;
+        let arg1    = h.param(1).ok_or_else(|| RenderError::new("Second param not found for helper \"map_contains\""))?;
         let map     = arg0.value();
-        let key     = arg1.value().as_str().ok_or_else(|| RenderError::new("Non-string second param given to helper \"map_has_key\""))?;
+        let key     = arg1.value().as_str().ok_or_else(|| RenderError::new("Non-string second param given to helper \"map_contains\""))?;
         let has_key = map.as_object().map(|map| map.contains_key(key)).unwrap_or(false);
         Ok(Some(ScopedJson::Derived(JsonValue::from(has_key))))
     }
