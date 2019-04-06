@@ -202,7 +202,7 @@ pub mod {{snake class.name}} {
     named_attr!(#[doc = "Parse {{method.name}} (Generated)"], pub parse_{{snake method.name false}}<{{camel method.name}}>, do_parse!(
         {{#each_argument method.arguments as |argument| ~}}
         {{#if argument_is_value ~}}
-        {{snake argument.name}}: parse_{{snake_type argument.type}} >>
+        {{#unless (array_contains method.metadata.force_default argument.name) ~}}{{snake argument.name}}: {{/unless ~}}parse_{{snake_type argument.type}} >>
         {{else}}
         flags: apply!(parse_flags, &[
             {{#each_flag argument as |flag| ~}}
@@ -227,7 +227,7 @@ pub mod {{snake class.name}} {
     ));
 
     /// Serialize {{method.name}} (Generated)
-    pub fn gen_{{snake method.name false}}<'a>(input: (&'a mut [u8], usize), {{#if method.arguments ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> Result<(&'a mut [u8],usize), GenError> {
+    pub fn gen_{{snake method.name false}}<'a>(input: (&'a mut [u8], usize), {{#if method.arguments ~}}{{#if method.metadata.is_empty ~}}_{{/if ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> Result<(&'a mut [u8],usize), GenError> {
         {{#each_argument method.arguments as |argument| ~}}
         {{#unless argument_is_value ~}}
         let mut flags = AMQPFlags::default();
