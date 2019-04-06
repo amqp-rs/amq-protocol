@@ -35,6 +35,7 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self.register_helper("snake",           Box::new(SnakeHelper));
         self.register_helper("snake_type",      Box::new(SnakeTypeHelper));
         self.register_helper("sanitize_name",   Box::new(SanitizeNameHelper));
+        self.register_helper("param_type",      Box::new(ParamTypeHelper));
         self.register_helper("method_has_flag", Box::new(MethodHasFlagHelper));
         self.register_helper("each_argument",   Box::new(EachArgumentHelper));
         self.register_helper("each_flag",       Box::new(EachFlagHelper));
@@ -84,7 +85,7 @@ impl HelperDef for SnakeHelper {
 pub struct SnakeTypeHelper;
 impl HelperDef for SnakeTypeHelper {
     fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut dyn Output) -> HelperResult {
-        let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake\""))?;
+        let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"snake_type\""))?;
         let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"snake_type\""))?;
         out.write(&snake_case(&param.to_string(), true))?;
         Ok(())
@@ -98,6 +99,21 @@ impl HelperDef for SanitizeNameHelper {
         let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"sanitize_name\""))?;
         let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"sanitize_name\""))?;
         out.write(&param.replace('-', "_"))?;
+        Ok(())
+    }
+}
+
+/// Helper to compute the type we should use for an AMQPType when passed as input param
+pub struct ParamTypeHelper;
+impl HelperDef for ParamTypeHelper {
+    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut dyn Output) -> HelperResult {
+        let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"param_type\""))?;
+        let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"param_type\""))?;
+        let param_type      = match param {
+            AMQPType::ShortString | AMQPType::LongString => "&str".to_string(),
+            t                                            => t.to_string(),
+        };
+        out.write(&param_type)?;
         Ok(())
     }
 }
