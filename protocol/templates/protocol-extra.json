@@ -2,73 +2,78 @@
     "access": {
         "request-ok": {
             "metadata": {
-                "has_ticket": true
+                "force_default": ["ticket"]
             }
         }
     },
     "exchange": {
         "declare": {
             "metadata": {
-                "has_ticket": true
+                "force_default": ["ticket"]
             }
         },
         "delete": {
             "metadata": {
-                "has_ticket": true
+                "force_default": ["ticket"]
             }
         },
         "bind": {
             "metadata": {
-                "has_ticket": true
+                "force_default": ["ticket"]
             }
         },
         "unbind": {
             "metadata": {
-                "has_ticket": true
+                "force_default": ["ticket"]
             }
         }
     },
     "queue": {
         "declare": {
             "metadata": {
-                "has_ticket": true
+                "force_default": ["ticket"]
             }
         },
         "bind": {
             "metadata": {
-                "has_ticket": true
+                "force_default": ["ticket"]
             }
         },
         "purge": {
             "metadata": {
-                "has_ticket": true
+                "force_default": ["ticket"]
             }
         },
         "delete": {
             "metadata": {
-                "has_ticket": true
+                "force_default": ["ticket"]
             }
         },
         "unbind": {
             "metadata": {
-                "has_ticket": true
+                "force_default": ["ticket"]
             }
         }
     },
     "basic": {
+        "qos": {
+            "metadata": {
+                "force_default": ["prefetch-size"]
+            }
+        },
         "consume": {
             "metadata": {
-                "has_ticket": true
+                "force_default": ["ticket"]
             }
         },
         "publish": {
             "metadata": {
-                "has_ticket": true
+                "force_default": ["ticket"]
             }
         },
         "get": {
             "metadata": {
-                "has_ticket": true
+                "force_default": ["ticket"]
             }
         }
     }

@@ -186,8 +186,10 @@ pub mod {{snake class.name}} {
     pub struct {{camel method.name}} {
         {{#each_argument method.arguments as |argument| ~}}
         {{#if argument_is_value ~}}
+        {{#unless (array_contains method.metadata.force_default argument.name) ~}}
         /// {{argument.name}} (Generated)
         pub {{snake argument.name}}: {{argument.type}},
+        {{/unless ~}}
         {{else}}
         {{#each_flag argument as |flag| ~}}
         /// {{flag.name}} (Generated)
@@ -198,9 +200,6 @@ pub mod {{snake class.name}} {
     }
 
     named_attr!(#[doc = "Parse {{method.name}} (Generated)"], pub parse_{{snake method.name false}}<{{camel method.name}}>, do_parse!(
-        {{#if method.metadata.has_ticket ~}}
-        parse_short_uint >>
-        {{/if ~}}
         {{#each_argument method.arguments as |argument| ~}}
         {{#if argument_is_value ~}}
         {{snake argument.name}}: parse_{{snake_type argument.type}} >>
@@ -215,7 +214,9 @@ pub mod {{snake class.name}} {
         ({{camel method.name}} {
             {{#each_argument method.arguments as |argument| ~}}
             {{#if argument_is_value ~}}
+            {{#unless (array_contains method.metadata.force_default argument.name) ~}}
             {{snake argument.name}},
+            {{/unless ~}}
             {{else}}
             {{#each_flag argument as |flag| ~}}
             {{snake flag.name}}: flags.get_flag("{{snake flag.name}}").unwrap_or({{flag.default_value}}),
@@ -237,12 +238,9 @@ pub mod {{snake class.name}} {
         {{/each_argument ~}}
         do_gen!(input,
             gen_id({{method.id}})
-            {{#if method.metadata.has_ticket ~}}
-            >> gen_short_uint(0)
-            {{/if ~}}
             {{#each_argument method.arguments as |argument| ~}}
             {{#if argument_is_value ~}}
-            >> gen_{{snake_type argument.type}}(method.{{snake argument.name}}.as_gen_ref())
+            >> gen_{{snake_type argument.type}}({{#if (array_contains method.metadata.force_default argument.name) ~}}Default::default(){{else}}method.{{snake argument.name}}.as_gen_ref(){{/if ~}})
             {{else}}
             >> gen_flags(&flags)
             {{/if ~}}
