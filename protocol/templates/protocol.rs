@@ -124,7 +124,7 @@ use self::{{snake class.name}}::parse_{{snake class.name}};
 
 named_attr!(#[doc =  "Parse an AMQP class"], pub parse_class<AMQPClass>, switch!(parse_id,
     {{#each protocol.classes as |class| ~}}
-    {{class.id}} => map!(call!(parse_{{snake class.name}}), AMQPClass::{{camel class.name}}) {{#unless @last ~}}|{{/unless ~}}
+    {{class.id}} => map!(call!(parse_{{snake class.name false}}), AMQPClass::{{camel class.name}}) {{#unless @last ~}}|{{/unless ~}}
     {{/each ~}}
 ));
 
@@ -132,7 +132,7 @@ named_attr!(#[doc =  "Parse an AMQP class"], pub parse_class<AMQPClass>, switch!
 pub fn gen_class<'a>(input: (&'a mut [u8], usize), class: &AMQPClass) -> Result<(&'a mut [u8], usize), GenError> {
     match *class {
         {{#each protocol.classes as |class| ~}}
-        AMQPClass::{{camel class.name}}(ref {{snake class.name}}) => {{snake class.name}}::gen_{{snake class.name}}(input, {{snake class.name}}),
+        AMQPClass::{{camel class.name}}(ref {{snake class.name}}) => {{snake class.name}}::gen_{{snake class.name false}}(input, {{snake class.name}}),
         {{/each ~}}
     }
 }
@@ -151,20 +151,20 @@ pub enum AMQPClass {
 pub mod {{snake class.name}} {
     use super::*;
 
-    named_attr!(#[doc = "Parse {{class.name}} (Generated)"], pub parse_{{snake class.name}}<{{snake class.name}}::AMQPMethod>, switch!(parse_id,
+    named_attr!(#[doc = "Parse {{class.name}} (Generated)"], pub parse_{{snake class.name false}}<{{snake class.name}}::AMQPMethod>, switch!(parse_id,
         {{#each class.methods as |method| ~}}
-        {{method.id}} => map!(call!(parse_{{snake method.name}}), AMQPMethod::{{camel method.name}}) {{#unless @last ~}}|{{/unless ~}}
+        {{method.id}} => map!(call!(parse_{{snake method.name false}}), AMQPMethod::{{camel method.name}}) {{#unless @last ~}}|{{/unless ~}}
         {{/each ~}}
     ));
 
     /// Serialize {{class.name}} (Generated)
-    pub fn gen_{{snake class.name}}<'a>(input: (&'a mut [u8], usize), method: &AMQPMethod) -> Result<(&'a mut [u8], usize), GenError> {
+    pub fn gen_{{snake class.name false}}<'a>(input: (&'a mut [u8], usize), method: &AMQPMethod) -> Result<(&'a mut [u8], usize), GenError> {
         match *method {
             {{#each class.methods as |method| ~}}
             AMQPMethod::{{camel method.name}}(ref {{snake method.name}}) => {
                 do_gen!(input,
                     gen_id({{class.id}}) >>
-                    gen_{{snake method.name}}({{snake method.name}})
+                    gen_{{snake method.name false}}({{snake method.name}})
                 )
             },
             {{/each ~}}
@@ -197,7 +197,7 @@ pub mod {{snake class.name}} {
         {{/each_argument ~}}
     }
 
-    named_attr!(#[doc = "Parse {{method.name}} (Generated)"], pub parse_{{snake method.name}}<{{camel method.name}}>, do_parse!(
+    named_attr!(#[doc = "Parse {{method.name}} (Generated)"], pub parse_{{snake method.name false}}<{{camel method.name}}>, do_parse!(
         {{#if method.metadata.has_ticket ~}}
         parse_short_uint >>
         {{/if ~}}
@@ -226,7 +226,7 @@ pub mod {{snake class.name}} {
     ));
 
     /// Serialize {{method.name}} (Generated)
-    pub fn gen_{{snake method.name}}<'a>(input: (&'a mut [u8], usize), {{#if method.arguments ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> Result<(&'a mut [u8],usize), GenError> {
+    pub fn gen_{{snake method.name false}}<'a>(input: (&'a mut [u8], usize), {{#if method.arguments ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> Result<(&'a mut [u8],usize), GenError> {
         {{#if (method_has_flags method) ~}}
         let mut flags = AMQPFlags::default();
         {{#each_argument method.arguments as |argument| ~}}
@@ -274,7 +274,7 @@ pub mod {{snake class.name}} {
     impl AMQPProperties {
         {{#each class.properties as |property| ~}}
         /// Set {{property.name}} (Generated)
-        pub fn with_{{snake property.name}}(mut self, value: {{property.type}}) -> AMQPProperties {
+        pub fn with_{{snake property.name false}}(mut self, value: {{property.type}}) -> AMQPProperties {
             self.{{snake property.name}} = Some(value);
             self
         }

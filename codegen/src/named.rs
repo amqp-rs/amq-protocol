@@ -23,7 +23,7 @@ macro_rules! named {
             }
 
             fn snake_name(&self) -> String {
-                snake_case(&self.name)
+                snake_case(&self.name, true)
             }
         }
     }
