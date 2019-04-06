@@ -31,15 +31,14 @@ pub trait HandlebarsAMQPExtension {
 impl HandlebarsAMQPExtension for CodeGenerator {
     fn register_amqp_helpers(mut self) -> CodeGenerator {
         self.register_escape_fn(handlebars::no_escape);
-        self.register_helper("camel",            Box::new(CamelHelper));
-        self.register_helper("snake",            Box::new(SnakeHelper));
-        self.register_helper("snake_type",       Box::new(SnakeTypeHelper));
-        self.register_helper("sanitize_name",    Box::new(SanitizeNameHelper));
-        self.register_helper("method_has_flags", Box::new(MethodHasFlagsHelper));
-        self.register_helper("method_has_flag",  Box::new(MethodHasFlagHelper));
-        self.register_helper("each_argument",    Box::new(EachArgumentHelper));
-        self.register_helper("each_flag",        Box::new(EachFlagHelper));
-        self.register_helper("map_has_key",      Box::new(MapHasKeyHelper));
+        self.register_helper("camel",           Box::new(CamelHelper));
+        self.register_helper("snake",           Box::new(SnakeHelper));
+        self.register_helper("snake_type",      Box::new(SnakeTypeHelper));
+        self.register_helper("sanitize_name",   Box::new(SanitizeNameHelper));
+        self.register_helper("method_has_flag", Box::new(MethodHasFlagHelper));
+        self.register_helper("each_argument",   Box::new(EachArgumentHelper));
+        self.register_helper("each_flag",       Box::new(EachFlagHelper));
+        self.register_helper("map_has_key",     Box::new(MapHasKeyHelper));
         self
     }
 
@@ -100,20 +99,6 @@ impl HelperDef for SanitizeNameHelper {
         let param = value.value().as_str().ok_or_else(|| RenderError::new("Non-string param given to helper \"sanitize_name\""))?;
         out.write(&param.replace('-', "_"))?;
         Ok(())
-    }
-}
-
-/// Helper for checking if a method has some flags argument
-pub struct MethodHasFlagsHelper;
-impl HelperDef for MethodHasFlagsHelper {
-    fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
-        let value     = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"method_has_flags\""))?;
-        let method    = serde_json::from_value::<AMQPMethod>(value.value().clone()).map_err(|_| RenderError::new("Non-AMQPMethod param given to helper \"method_has_flags\""))?;
-        let has_flags = method.arguments.iter().any(|arg| match arg {
-            AMQPArgument::Value(_) => false,
-            AMQPArgument::Flags(_) => true,
-        });
-        Ok(Some(ScopedJson::Derived(JsonValue::from(has_flags))))
     }
 }
 

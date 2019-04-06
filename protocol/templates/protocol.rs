@@ -227,16 +227,14 @@ pub mod {{snake class.name}} {
 
     /// Serialize {{method.name}} (Generated)
     pub fn gen_{{snake method.name false}}<'a>(input: (&'a mut [u8], usize), {{#if method.arguments ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> Result<(&'a mut [u8],usize), GenError> {
-        {{#if (method_has_flags method) ~}}
-        let mut flags = AMQPFlags::default();
         {{#each_argument method.arguments as |argument| ~}}
         {{#unless argument_is_value ~}}
+        let mut flags = AMQPFlags::default();
         {{#each_flag argument as |flag| ~}}
         flags.add_flag("{{snake flag.name}}".to_string(), method.{{snake flag.name}});
         {{/each_flag ~}}
         {{/unless ~}}
         {{/each_argument ~}}
-        {{/if ~}}
         do_gen!(input,
             gen_id({{method.id}})
             {{#if method.metadata.has_ticket ~}}
