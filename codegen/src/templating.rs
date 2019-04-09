@@ -1,7 +1,7 @@
 use crate::specs::*;
 use crate::util::*;
 
-use amq_protocol_types::AMQPType;
+use amq_protocol_types::{AMQPType, AMQPValue};
 use handlebars::{self, Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output, Renderable, RenderContext, RenderError, ScopedJson, to_json};
 use hashbrown::HashMap;
 use serde_json::{self, Value};
@@ -40,6 +40,7 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self.register_helper("each_argument",   Box::new(EachArgumentHelper));
         self.register_helper("each_flag",       Box::new(EachFlagHelper));
         self.register_helper("array_contains",  Box::new(ArrayContainsHelper));
+        self.register_helper("amqp_value",      Box::new(AMQPValueHelper));
         self
     }
 
@@ -234,11 +235,38 @@ impl HelperDef for ArrayContainsHelper {
     }
 }
 
+/// Helper for checking if an array contains a given element
+pub struct AMQPValueHelper;
+impl HelperDef for AMQPValueHelper {
+    fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
+        let arg              = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"amqp_value\""))?;
+        let param: AMQPValue = serde_json::from_value(arg.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPValue for helper \"amqp_value\""))?;
+        let value            = match param {
+            AMQPValue::Boolean(v)        => serde_json::to_value(v)?,
+            AMQPValue::ShortShortInt(v)  => serde_json::to_value(v)?,
+            AMQPValue::ShortShortUInt(v) => serde_json::to_value(v)?,
+            AMQPValue::ShortInt(v)       => serde_json::to_value(v)?,
+            AMQPValue::ShortUInt(v)      => serde_json::to_value(v)?,
+            AMQPValue::LongInt(v)        => serde_json::to_value(v)?,
+            AMQPValue::LongUInt(v)       => serde_json::to_value(v)?,
+            AMQPValue::LongLongInt(v)    => serde_json::to_value(v)?,
+            AMQPValue::Float(v)          => serde_json::to_value(v)?,
+            AMQPValue::Double(v)         => serde_json::to_value(v)?,
+            AMQPValue::DecimalValue(v)   => serde_json::to_value(v)?,
+            AMQPValue::LongString(v)     => serde_json::to_value(v)?,
+            AMQPValue::FieldArray(v)     => serde_json::to_value(v)?,
+            AMQPValue::Timestamp(v)      => serde_json::to_value(v)?,
+            AMQPValue::FieldTable(v)     => serde_json::to_value(v)?,
+            AMQPValue::ByteArray(v)      => serde_json::to_value(v)?,
+            AMQPValue::Void              => JsonValue::Null,
+        };
+        Ok(Some(ScopedJson::Derived(value)))
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
-
-    use amq_protocol_types::*;
 
     use std::collections::BTreeMap;
 

@@ -240,7 +240,7 @@ pub mod {{snake class.name}} {
             gen_id({{method.id}})
             {{#each_argument method.arguments as |argument| ~}}
             {{#if argument_is_value ~}}
-            >> gen_{{snake_type argument.type}}({{#if (array_contains method.metadata.force_default argument.name) ~}}Default::default(){{else}}method.{{snake argument.name}}.as_gen_ref(){{/if ~}})
+            >> gen_{{snake_type argument.type}}({{#if (array_contains method.metadata.force_default argument.name) ~}}{{amqp_value argument.default_value}}{{else}}method.{{snake argument.name}}.as_gen_ref(){{/if ~}})
             {{else}}
             >> gen_flags(&flags)
             {{/if ~}}
