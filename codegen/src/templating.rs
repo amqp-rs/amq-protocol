@@ -31,16 +31,18 @@ pub trait HandlebarsAMQPExtension {
 impl HandlebarsAMQPExtension for CodeGenerator {
     fn register_amqp_helpers(mut self) -> CodeGenerator {
         self.register_escape_fn(handlebars::no_escape);
-        self.register_helper("camel",           Box::new(CamelHelper));
-        self.register_helper("snake",           Box::new(SnakeHelper));
-        self.register_helper("snake_type",      Box::new(SnakeTypeHelper));
-        self.register_helper("sanitize_name",   Box::new(SanitizeNameHelper));
-        self.register_helper("param_type",      Box::new(ParamTypeHelper));
-        self.register_helper("method_has_flag", Box::new(MethodHasFlagHelper));
-        self.register_helper("each_argument",   Box::new(EachArgumentHelper));
-        self.register_helper("each_flag",       Box::new(EachFlagHelper));
-        self.register_helper("array_contains",  Box::new(ArrayContainsHelper));
-        self.register_helper("amqp_value",      Box::new(AMQPValueHelper));
+        self.register_helper("camel",                Box::new(CamelHelper));
+        self.register_helper("snake",                Box::new(SnakeHelper));
+        self.register_helper("snake_type",           Box::new(SnakeTypeHelper));
+        self.register_helper("sanitize_name",        Box::new(SanitizeNameHelper));
+        self.register_helper("param_type",           Box::new(ParamTypeHelper));
+        self.register_helper("param_type_to_value",  Box::new(ParamTypeToValueHelper));
+        self.register_helper("method_has_flag",      Box::new(MethodHasFlagHelper));
+        self.register_helper("each_argument",        Box::new(EachArgumentHelper));
+        self.register_helper("each_flag",            Box::new(EachFlagHelper));
+        self.register_helper("array_contains",       Box::new(ArrayContainsHelper));
+        self.register_helper("amqp_value",           Box::new(AMQPValueHelper));
+        self.register_helper("argument_type",        Box::new(ArgumentTypeHelper));
         self
     }
 
@@ -115,6 +117,20 @@ impl HelperDef for ParamTypeHelper {
             t                                            => t.to_string(),
         };
         out.write(&param_type)?;
+        Ok(())
+    }
+}
+
+/// Helper to compute the real value we should use when got the type using param_type
+pub struct ParamTypeToValueHelper;
+impl HelperDef for ParamTypeToValueHelper {
+    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut dyn Output) -> HelperResult {
+        let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"param_type_to_value\""))?;
+        let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"param_type_to_value\""))?;
+        match param {
+            AMQPType::ShortString | AMQPType::LongString => out.write(".to_string()")?,
+            _                                            => (),
+        };
         Ok(())
     }
 }
@@ -235,7 +251,7 @@ impl HelperDef for ArrayContainsHelper {
     }
 }
 
-/// Helper for checking if an array contains a given element
+/// Helper for "unwrapping" an amqp_value
 pub struct AMQPValueHelper;
 impl HelperDef for AMQPValueHelper {
     fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
@@ -261,6 +277,34 @@ impl HelperDef for AMQPValueHelper {
             AMQPValue::Void              => JsonValue::Null,
         };
         Ok(Some(ScopedJson::Derived(value)))
+    }
+}
+
+/// Helper for getting the AMQPType from a method argument
+pub struct ArgumentTypeHelper;
+impl HelperDef for ArgumentTypeHelper {
+    fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
+        let arg0   = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"argument_type\""))?;
+        let arg1   = h.param(1).ok_or_else(|| RenderError::new("Second param not found for helper \"argument_type\""))?;
+        let method = serde_json::from_value::<AMQPMethod>(arg0.value().clone()).map_err(|_| RenderError::new("Non-AMQPMethod first param given to helper \"argument_type\""))?;
+        let arg    = arg1.value().as_str().ok_or_else(|| RenderError::new("Non-string second param given to helper \"argument_type\""))?;
+        let amqp_t = method.arguments.iter().filter_map(|a| {
+            if let AMQPArgument::Value(a) = a {
+                if a.name == arg {
+                    Some(a.amqp_type)
+                } else {
+                    None
+                }
+            } else {
+                None
+            }
+        }).next();
+
+        if let Some(amqp_t) = amqp_t {
+            Ok(Some(ScopedJson::Derived(serde_json::to_value(amqp_t)?)))
+        } else {
+            Ok(None)
+        }
     }
 }
 
