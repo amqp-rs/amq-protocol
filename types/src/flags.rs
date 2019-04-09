@@ -1,4 +1,4 @@
-use crate::types::{Boolean, CopyOrClone, ShortString};
+use crate::types::{Boolean, ShortString};
 
 use serde::{Deserialize, Serialize};
 
@@ -49,12 +49,6 @@ impl Default for AMQPFlags {
         AMQPFlags {
             flags: Vec::new(),
         }
-    }
-}
-
-impl CopyOrClone<AMQPFlags> for AMQPFlags {
-    fn copy_or_clone(&self) -> Self {
-        self.clone()
     }
 }
 

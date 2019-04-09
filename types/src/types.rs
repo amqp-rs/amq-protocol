@@ -174,57 +174,6 @@ pub type FieldArrayRef<'a>  = &'a [AMQPValue];
 /// A Reference pointing to a ByteArray
 pub type ByteArrayRef<'a>   = &'a [u8];
 
-/// Copy if the type supports it, otherwise clone
-pub trait CopyOrClone<T> {
-    /// Either copy or clone
-    fn copy_or_clone(&self) -> T;
-}
-
-macro_rules! impl_copyorclone_cpy {
-    ($t:ty) => {
-        impl CopyOrClone<$t> for $t {
-            fn copy_or_clone(&self) -> Self {
-                *self
-            }
-        }
-    }
-}
-
-macro_rules! impl_copyorclone_cln {
-    ($t:ty) => {
-        impl CopyOrClone<$t> for $t {
-            fn copy_or_clone(&self) -> Self {
-                self.clone()
-            }
-        }
-    }
-}
-
-impl_copyorclone_cln!(AMQPValue);
-impl_copyorclone_cpy!(AMQPType);
-impl_copyorclone_cpy!(Boolean);
-impl_copyorclone_cpy!(ShortShortInt);
-impl_copyorclone_cpy!(ShortShortUInt);
-impl_copyorclone_cpy!(ShortInt);
-impl_copyorclone_cpy!(ShortUInt);
-impl_copyorclone_cpy!(LongInt);
-impl_copyorclone_cpy!(LongUInt);
-impl_copyorclone_cpy!(LongLongInt);
-impl_copyorclone_cpy!(LongLongUInt);
-impl_copyorclone_cpy!(Float);
-impl_copyorclone_cpy!(Double);
-impl_copyorclone_cpy!(DecimalValue);
-impl_copyorclone_cln!(LongString);
-impl_copyorclone_cln!(FieldArray);
-impl_copyorclone_cln!(FieldTable);
-impl_copyorclone_cln!(ByteArray);
-
-impl CopyOrClone<String> for str {
-    fn copy_or_clone(&self) -> String {
-        self.to_string()
-    }
-}
-
 #[cfg(test)]
 mod test {
     use super::*;
