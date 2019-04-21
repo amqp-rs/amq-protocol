@@ -240,7 +240,7 @@ pub mod {{snake class.name}} {
             gen_id({{method.id}})
             {{#each_argument method.arguments as |argument| ~}}
             {{#if argument_is_value ~}}
-            >> gen_{{snake_type argument.type}}({{#if (array_contains method.metadata.force_default argument.name) ~}}{{amqp_value argument.default_value}}{{else}}method.{{snake argument.name}}.as_gen_ref(){{/if ~}})
+            >> gen_{{snake_type argument.type}}({{#if (array_contains method.metadata.force_default argument.name) ~}}{{amqp_value argument.default_value}}{{else}}{{maybe_gen_ref argument.type}}method.{{snake argument.name}}{{/if ~}})
             {{else}}
             >> gen_flags(&flags)
             {{/if ~}}
@@ -310,7 +310,7 @@ pub mod {{snake class.name}} {
         do_gen!(input,
             gen_short_uint(props.bitmask())
             {{#each class.properties as |property| ~}}
-            >> gen_cond!(props.{{snake property.name}}.is_some(), gen_call!(gen_{{snake_type property.type}}, props.{{snake property.name}}.as_ref().unwrap().as_gen_ref()))
+            >> gen_cond!(props.{{snake property.name}}.is_some(), gen_call!(gen_{{snake_type property.type}}, {{maybe_gen_ref property.type}}props.{{snake property.name}}{{maybe_as_gen_ref property.type}}.unwrap()))
             {{/each ~}}
         )
     }

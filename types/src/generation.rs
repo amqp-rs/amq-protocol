@@ -4,52 +4,6 @@ use crate::value::*;
 
 use cookie_factory::{GenError, do_gen, gen_at_offset, gen_be_f32, gen_be_f64, gen_be_i8, gen_be_i16, gen_be_i32, gen_be_i64, gen_be_u8, gen_be_u16, gen_be_u32, gen_be_u64, gen_call, gen_copy, gen_many_ref, gen_skip, gen_slice};
 
-/// Helper to pass either a reference or a copy to the generators
-pub trait AsGenRef<'a, T> {
-    /// Returns either a reference or a copy
-    fn as_gen_ref(&'a self) -> T;
-}
-
-macro_rules! impl_asgenref_ref {
-    ($t:ty) => {
-        impl<'a> AsGenRef<'a, &'a $t> for $t {
-            fn as_gen_ref(&'a self) -> &'a $t {
-                self
-            }
-        }
-    }
-}
-
-macro_rules! impl_asgenref_cpy {
-    ($t:ty) => {
-        impl<'a> AsGenRef<'a, $t> for $t {
-            fn as_gen_ref(&'a self) -> $t {
-                *self
-            }
-        }
-    }
-}
-
-impl_asgenref_ref!(AMQPValue);
-impl_asgenref_cpy!(AMQPType);
-impl_asgenref_cpy!(Boolean);
-impl_asgenref_cpy!(ShortShortInt);
-impl_asgenref_cpy!(ShortShortUInt);
-impl_asgenref_cpy!(ShortInt);
-impl_asgenref_cpy!(ShortUInt);
-impl_asgenref_cpy!(LongInt);
-impl_asgenref_cpy!(LongUInt);
-impl_asgenref_cpy!(LongLongInt);
-impl_asgenref_cpy!(LongLongUInt);
-impl_asgenref_cpy!(Float);
-impl_asgenref_cpy!(Double);
-impl_asgenref_cpy!(DecimalValue);
-impl_asgenref_ref!(LongString);
-impl_asgenref_ref!(FieldArray);
-impl_asgenref_ref!(FieldTable);
-impl_asgenref_ref!(ByteArray);
-impl_asgenref_ref!(AMQPFlags);
-
 /// Generate the [AMQPValue](../type.AMQPValue.html) in the given buffer (x)
 pub fn gen_raw_value<'a>(x: (&'a mut [u8], usize), v: &AMQPValue) -> Result<(&'a mut [u8], usize), GenError> {
     match *v {
