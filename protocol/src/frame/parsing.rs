@@ -8,7 +8,7 @@ use crate::{
 };
 
 use nom::{
-    bytes::complete::{tag, take},
+    bytes::streaming::{tag, take},
     combinator::{flat_map, map, map_opt, map_res},
 };
 

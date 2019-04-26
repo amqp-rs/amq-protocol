@@ -6,11 +6,11 @@ use crate::{
 
 use nom::{
     self,
-    bytes::complete::take,
-    combinator::{flat_map, map, map_opt, map_parser, map_res},
+    bytes::streaming::take,
+    combinator::{complete, flat_map, map, map_opt, map_parser, map_res},
     error::ErrorKind,
     multi::fold_many0,
-    number::complete::{be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be_f32, be_f64},
+    number::streaming::{be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be_f32, be_f64},
     sequence::pair,
 };
 
@@ -132,7 +132,7 @@ pub fn parse_long_string(i: &[u8]) -> ParserResult<'_, LongString> {
 /// Parse a [FieldArray](../type.FieldArray.html)
 pub fn parse_field_array(i: &[u8]) -> ParserResult<'_, FieldArray> {
     // FIXME: check EOF
-    map_parser(flat_map(parse_long_uint, take), fold_many0(parse_value, FieldArray::new(), |mut acc, elem| {
+    map_parser(flat_map(parse_long_uint, take), fold_many0(complete(parse_value), FieldArray::new(), |mut acc, elem| {
         acc.push(elem);
         acc
     }))(i)
@@ -146,7 +146,7 @@ pub fn parse_timestamp(i: &[u8]) -> ParserResult<'_, Timestamp> {
 /// Parse a [FieldTable](../type.FieldTable.html)
 pub fn parse_field_table(i: &[u8]) -> ParserResult<'_, FieldTable> {
     // FIXME: check EOF
-    map_parser(flat_map(parse_long_uint, take), fold_many0(pair(parse_short_string, parse_value), FieldTable::new(), |mut acc, (key, value)| {
+    map_parser(flat_map(parse_long_uint, take), fold_many0(complete(pair(parse_short_string, parse_value)), FieldTable::new(), |mut acc, (key, value)| {
         acc.insert(key, value);
         acc
     }))(i)
