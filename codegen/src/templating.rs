@@ -35,9 +35,8 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self.register_helper("snake",               Box::new(SnakeHelper));
         self.register_helper("snake_type",          Box::new(SnakeTypeHelper));
         self.register_helper("sanitize_name",       Box::new(SanitizeNameHelper));
-        self.register_helper("param_type",          Box::new(ParamTypeHelper));
-        self.register_helper("param_type_to_value", Box::new(ParamTypeToValueHelper));
         self.register_helper("pass_by_ref",         Box::new(PassByRefHelper));
+        self.register_helper("use_str_ref",         Box::new(UseStrRefHelper));
         self.register_helper("method_has_flag",     Box::new(MethodHasFlagHelper));
         self.register_helper("each_argument",       Box::new(EachArgumentHelper));
         self.register_helper("each_flag",           Box::new(EachFlagHelper));
@@ -107,35 +106,6 @@ impl HelperDef for SanitizeNameHelper {
     }
 }
 
-/// Helper to compute the type we should use for an AMQPType when passed as input param
-pub struct ParamTypeHelper;
-impl HelperDef for ParamTypeHelper {
-    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut dyn Output) -> HelperResult {
-        let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"param_type\""))?;
-        let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"param_type\""))?;
-        let param_type      = match param {
-            AMQPType::ShortString | AMQPType::LongString => "&str".to_string(),
-            t                                            => t.to_string(),
-        };
-        out.write(&param_type)?;
-        Ok(())
-    }
-}
-
-/// Helper to compute the real value we should use when got the type using param_type
-pub struct ParamTypeToValueHelper;
-impl HelperDef for ParamTypeToValueHelper {
-    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut dyn Output) -> HelperResult {
-        let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"param_type_to_value\""))?;
-        let param = serde_json::from_value::<AMQPType>(value.value().clone()).ok();
-        match param {
-            Some(AMQPType::ShortString) | Some(AMQPType::LongString) => out.write(".to_string()")?,
-            _                                                        => (),
-        };
-        Ok(())
-    }
-}
-
 /// Helper to check whether a param is passed by ref or not
 pub struct PassByRefHelper;
 impl HelperDef for PassByRefHelper {
@@ -147,6 +117,20 @@ impl HelperDef for PassByRefHelper {
             _                                                                                                                => false,
         };
         Ok(Some(ScopedJson::Derived(JsonValue::from(pass_by_ref))))
+    }
+}
+
+/// Helper to check whether a param is passed using an &str or its real type
+pub struct UseStrRefHelper;
+impl HelperDef for UseStrRefHelper {
+    fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
+        let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"use_str_ref\""))?;
+        let param = serde_json::from_value::<AMQPType>(value.value().clone()).ok();
+        let use_str_ref     = match param {
+            Some(AMQPType::ShortString) | Some(AMQPType::LongString) => true,
+            _                                                        => false,
+        };
+        Ok(Some(ScopedJson::Derived(JsonValue::from(use_str_ref))))
     }
 }
 
