@@ -8,12 +8,10 @@
 //! code from official AMQP specs definition.
 
 mod internal;
-mod named;
 mod specs;
 mod templating;
 mod util;
 
-pub use crate::named::*;
 pub use crate::specs::*;
 pub use crate::templating::*;
 pub use crate::util::*;
