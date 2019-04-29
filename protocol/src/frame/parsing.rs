@@ -1,5 +1,3 @@
-use nom;
-
 use crate::{
     frame::*,
     protocol::*,
@@ -9,7 +7,7 @@ use crate::{
 
 use nom::{
     bytes::streaming::{tag, take},
-    combinator::{flat_map, map, map_opt, map_res},
+    combinator::{all_consuming, flat_map, map, map_opt, map_res},
 };
 
 /// Parse a channel id
@@ -36,9 +34,8 @@ pub fn parse_frame_type(i: &[u8]) -> ParserResult<'_, AMQPFrameType> {
 /// Parse a full AMQP Frame (with contents)
 pub fn parse_frame(i: &[u8]) -> ParserResult<'_, AMQPFrame> {
     map_res(parse_raw_frame, |raw| match raw.frame_type {
-        // FIXME: check EOF
-        AMQPFrameType::Method    => parse_class(raw.payload).map(|(_, m)| AMQPFrame::Method(raw.channel_id, m)),
-        AMQPFrameType::Header    => parse_content_header(raw.payload).map(|(_, h)| AMQPFrame::Header(raw.channel_id, h.class_id, Box::new(h))),
+        AMQPFrameType::Method    => all_consuming(parse_class)(raw.payload).map(|(_, m)| AMQPFrame::Method(raw.channel_id, m)),
+        AMQPFrameType::Header    => all_consuming(parse_content_header)(raw.payload).map(|(_, h)| AMQPFrame::Header(raw.channel_id, h.class_id, Box::new(h))),
         AMQPFrameType::Body      => Ok(AMQPFrame::Body(raw.channel_id, Vec::from(raw.payload))),
         AMQPFrameType::Heartbeat => Ok(AMQPFrame::Heartbeat(raw.channel_id)),
     })(i)

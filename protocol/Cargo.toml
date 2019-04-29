@@ -23,7 +23,7 @@ path    = "../codegen"
 
 [dependencies]
 cookie-factory = "^0.2.4"
-nom            = { git="git://github.com/Keruspe/nom" }
+nom            = "=5.0.0-alpha2"
 url            = "^1.7"
 
 [dependencies.amq-protocol-codegen]
