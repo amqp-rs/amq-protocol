@@ -157,6 +157,7 @@ impl _AMQPMethod {
             name:          self.name.clone(),
             synchronous:   self.synchronous.unwrap_or(false),
             metadata:      class_md.and_then(|c| c.as_object()).and_then(|c| c.get(&self.name)).and_then(|c| c.as_object()).and_then(|m| m.get("metadata")).cloned().unwrap_or_default(),
+            is_reply:      self.name.ends_with("-ok"),
         }
     }
 
@@ -329,6 +330,7 @@ mod test {
                     name:          "meth1".to_string(),
                     synchronous:   false,
                     metadata:      Value::default(),
+                    is_reply:      false,
                 }],
                 name:           "class1".to_string(),
                 properties:     vec![AMQPProperty {

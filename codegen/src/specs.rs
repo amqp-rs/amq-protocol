@@ -82,6 +82,8 @@ pub struct AMQPMethod {
     pub synchronous:   Boolean,
     /// Extra metadata for code generation
     pub metadata:      Value,
+    /// Whether this method is a reply or not
+    pub is_reply:      bool,
 }
 
 /// An argument as defined in the AMQP specification
