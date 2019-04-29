@@ -35,10 +35,9 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self.register_helper("snake",               Box::new(SnakeHelper));
         self.register_helper("snake_type",          Box::new(SnakeTypeHelper));
         self.register_helper("sanitize_name",       Box::new(SanitizeNameHelper));
-        self.register_helper("maybe_gen_ref",       Box::new(MaybeGenRefHelper));
-        self.register_helper("maybe_as_gen_ref",    Box::new(MaybeAsGenRefHelper));
         self.register_helper("param_type",          Box::new(ParamTypeHelper));
         self.register_helper("param_type_to_value", Box::new(ParamTypeToValueHelper));
+        self.register_helper("pass_by_ref",         Box::new(PassByRefHelper));
         self.register_helper("method_has_flag",     Box::new(MethodHasFlagHelper));
         self.register_helper("each_argument",       Box::new(EachArgumentHelper));
         self.register_helper("each_flag",           Box::new(EachFlagHelper));
@@ -108,36 +107,6 @@ impl HelperDef for SanitizeNameHelper {
     }
 }
 
-/// Helper to compute whether we should use a ref or not for generation
-pub struct MaybeGenRefHelper;
-impl HelperDef for MaybeGenRefHelper {
-    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut dyn Output) -> HelperResult {
-        let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"maybe_gen_ref\""))?;
-        let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"maybe_gen_ref\""))?;
-        let maybe_ref       = match param {
-            AMQPType::ShortString | AMQPType::LongString | AMQPType::FieldArray | AMQPType::FieldTable | AMQPType::ByteArray => "&",
-            _                                                                                                                => "",
-        };
-        out.write(maybe_ref)?;
-        Ok(())
-    }
-}
-
-/// Helper to compute whether we should use as_ref() or not for generation
-pub struct MaybeAsGenRefHelper;
-impl HelperDef for MaybeAsGenRefHelper {
-    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>, out: &mut dyn Output) -> HelperResult {
-        let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"maybe_gen_ref\""))?;
-        let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"maybe_gen_ref\""))?;
-        let maybe_ref       = match param {
-            AMQPType::ShortString | AMQPType::LongString | AMQPType::FieldArray | AMQPType::FieldTable | AMQPType::ByteArray => ".as_ref()",
-            _                                                                                                                => "",
-        };
-        out.write(maybe_ref)?;
-        Ok(())
-    }
-}
-
 /// Helper to compute the type we should use for an AMQPType when passed as input param
 pub struct ParamTypeHelper;
 impl HelperDef for ParamTypeHelper {
@@ -164,6 +133,20 @@ impl HelperDef for ParamTypeToValueHelper {
             _                                                        => (),
         };
         Ok(())
+    }
+}
+
+/// Helper to check whether a param is passed by ref or not
+pub struct PassByRefHelper;
+impl HelperDef for PassByRefHelper {
+    fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
+        let value           = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"pass_by_ref\""))?;
+        let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPType for helper \"pass_by_ref\""))?;
+        let pass_by_ref     = match param {
+            AMQPType::ShortString | AMQPType::LongString | AMQPType::FieldArray | AMQPType::FieldTable | AMQPType::ByteArray => true,
+            _                                                                                                                => false,
+        };
+        Ok(Some(ScopedJson::Derived(JsonValue::from(pass_by_ref))))
     }
 }
 
