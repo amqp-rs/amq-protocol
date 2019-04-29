@@ -193,12 +193,14 @@ impl HelperDef for EachArgumentHelper {
             rc.promote_local_vars();
             let local_path_root = value.path_root().map(|p| format!("{}/{}", rc.get_path(), p));
             let arguments : Vec<AMQPArgument> = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not a Vec<AMQPArgument> for helper \"each_argument\""))?;
+            let len = arguments.len();
             for (index, argument) in arguments.iter().enumerate() {
                 let mut local_rc = rc.derive();
                 if let Some(ref p) = local_path_root {
                     local_rc.push_local_path_root(p.clone());
                 }
                 local_rc.set_local_var("@index".to_string(), to_json(&index));
+                local_rc.set_local_var("@last".to_string(), to_json(index == len - 1));
                 if let Some(inner_path) = value.path() {
                     let new_path = format!("{}/{}.[{}]", local_rc.get_path(), inner_path, index);
                     local_rc.set_path(new_path.clone());

@@ -1,10 +1,12 @@
-use crate::types::*;
-use crate::types::flags::*;
-use crate::types::generation::*;
-use crate::types::parsing::*;
+use crate::types::{
+    *,
+    flags::*,
+    generation::*,
+    parsing::*,
+};
 
 use cookie_factory::{GenError, do_gen, gen_call, gen_cond};
-use nom::*;
+use nom::combinator::{flat_map, map, map_opt};
 
 /// Protocol metadata
 pub mod metadata {
@@ -122,11 +124,15 @@ impl AMQPHardError {
 use self::{{snake class.name}}::parse_{{snake class.name}};
 {{/each ~}}
 
-named_attr!(#[doc =  "Parse an AMQP class"], pub parse_class<AMQPClass>, switch!(parse_id,
-    {{#each protocol.classes as |class| ~}}
-    {{class.id}} => map!(call!(parse_{{snake class.name false}}), AMQPClass::{{camel class.name}}) {{#unless @last ~}}|{{/unless ~}}
-    {{/each ~}}
-));
+/// Parse an AMQP class
+pub fn parse_class(i: &[u8]) -> ParserResult<'_, AMQPClass> {
+    map_opt(flat_map(parse_id, |id| move |i| match id {
+        {{#each protocol.classes as |class| ~}}
+        {{class.id}} => map(map(parse_{{snake class.name false}}, AMQPClass::{{camel class.name}}), Some)(i),
+        {{/each ~}}
+        _ => Ok((i, None)),
+    }), std::convert::identity)(i)
+}
 
 /// Serialize an AMQP class
 pub fn gen_class<'a>(input: (&'a mut [u8], usize), class: &AMQPClass) -> Result<(&'a mut [u8], usize), GenError> {
@@ -151,11 +157,15 @@ pub enum AMQPClass {
 pub mod {{snake class.name}} {
     use super::*;
 
-    named_attr!(#[doc = "Parse {{class.name}} (Generated)"], pub parse_{{snake class.name false}}<{{snake class.name}}::AMQPMethod>, switch!(parse_id,
-        {{#each class.methods as |method| ~}}
-        {{method.id}} => map!(call!(parse_{{snake method.name false}}), AMQPMethod::{{camel method.name}}) {{#unless @last ~}}|{{/unless ~}}
-        {{/each ~}}
-    ));
+    /// Parse {{class.name}} (Generated)
+    pub fn parse_{{snake class.name false}}(i: &[u8]) -> ParserResult<'_, {{snake class.name}}::AMQPMethod> {
+        map_opt(flat_map(parse_id, |id| move |i| match id {
+            {{#each class.methods as |method| ~}}
+            {{method.id}} => map(map(parse_{{snake method.name false}}, AMQPMethod::{{camel method.name}}), Some)(i),
+            {{/each ~}}
+            _ => Ok((i, None)),
+        }), std::convert::identity)(i)
+    }
 
     /// Serialize {{class.name}} (Generated)
     pub fn gen_{{snake class.name false}}<'a>(input: (&'a mut [u8], usize), method: &AMQPMethod) -> Result<(&'a mut [u8], usize), GenError> {
@@ -199,19 +209,20 @@ pub mod {{snake class.name}} {
         {{/each_argument ~}}
     }
 
-    named_attr!(#[doc = "Parse {{method.name}} (Generated)"], pub parse_{{snake method.name false}}<{{camel method.name}}>, do_parse!(
+    /// Parse {{method.name}} (Generated)
+    pub fn parse_{{snake method.name false}}(i: &[u8]) -> ParserResult<'_, {{camel method.name}}> {
         {{#each_argument method.arguments as |argument| ~}}
         {{#if argument_is_value ~}}
-        {{#unless (array_contains method.metadata.force_default argument.name) ~}}{{snake argument.name}}: {{/unless ~}}parse_{{snake_type argument.type}} >>
+        let (i, {{#if (array_contains method.metadata.force_default argument.name) ~}}_{{else}}{{snake argument.name}}{{/if ~}}) = parse_{{snake_type argument.type}}(i)?;
         {{else}}
-        flags: apply!(parse_flags, &[
+        let (i, flags) = parse_flags(i, &[
             {{#each_flag argument as |flag| ~}}
             "{{flag.name}}",
             {{/each_flag ~}}
-        ]) >>
+        ])?;
         {{/if ~}}
         {{/each_argument ~}}
-        ({{camel method.name}} {
+        Ok((i, {{camel method.name}} {
             {{#each_argument method.arguments as |argument| ~}}
             {{#if argument_is_value ~}}
             {{#unless (array_contains method.metadata.force_default argument.name) ~}}
@@ -223,8 +234,8 @@ pub mod {{snake class.name}} {
             {{/each_flag ~}}
             {{/if ~}}
             {{/each_argument ~}}
-        })
-    ));
+        }))
+    }
 
     /// Serialize {{method.name}} (Generated)
     pub fn gen_{{snake method.name false}}<'a>(input: (&'a mut [u8], usize), {{#if method.arguments ~}}{{#if method.metadata.is_empty ~}}_{{/if ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> Result<(&'a mut [u8],usize), GenError> {
@@ -292,17 +303,19 @@ pub mod {{snake class.name}} {
         }
     }
 
-    named_attr!(#[doc = "Parse {{class.name}} properties (Generated)"] #[allow(clippy::identity_op)], pub parse_properties<AMQPProperties>, do_parse!(
-        flags: parse_short_uint >>
+    /// Parse {{class.name}} properties (Generated)
+    #[allow(clippy::identity_op)]
+    pub fn parse_properties(i: &[u8]) -> ParserResult<'_, AMQPProperties> {
+        let (i, flags) = parse_short_uint(i)?;
         {{#each class.properties as |property| ~}}
-        {{snake property.name}}: cond!(flags & (1 << (15 - {{@index}})) != 0, parse_{{snake_type property.type}}) >>
+        let (i, {{snake property.name}}) = if flags & (1 << (15 - {{@index}})) != 0 { map(parse_{{snake_type property.type}}, Some)(i)? } else { (i, None) };
         {{/each ~}}
-        (AMQPProperties {
+        Ok((i, AMQPProperties {
             {{#each class.properties as |property| ~}}
             {{snake property.name}},
             {{/each ~}}
-        })
-    ));
+        }))
+    }
 
     /// Serialize {{class.name}} properties (Generated)
     #[clippy::cyclomatic_complexity = "32"]
