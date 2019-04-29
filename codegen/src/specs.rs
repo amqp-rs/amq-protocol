@@ -107,6 +107,8 @@ pub struct AMQPValueArgument {
     pub default_value: Option<AMQPValue>,
     /// The domain of the argument's value
     pub domain:        Option<ShortString>,
+    /// Whether the default value is forced or not
+    pub force_default: bool,
 }
 
 /// An argument holding flags as defined in the AMQP specification

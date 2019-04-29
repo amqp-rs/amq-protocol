@@ -40,7 +40,6 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self.register_helper("method_has_flag",     Box::new(MethodHasFlagHelper));
         self.register_helper("each_argument",       Box::new(EachArgumentHelper));
         self.register_helper("each_flag",           Box::new(EachFlagHelper));
-        self.register_helper("array_contains",      Box::new(ArrayContainsHelper));
         self.register_helper("amqp_value",          Box::new(AMQPValueHelper));
         self.register_helper("argument_type",       Box::new(ArgumentTypeHelper));
         self
@@ -239,19 +238,6 @@ impl HelperDef for EachFlagHelper {
     }
 }
 
-/// Helper for checking if an array contains a given element
-pub struct ArrayContainsHelper;
-impl HelperDef for ArrayContainsHelper {
-    fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
-        let arg0   = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"array_contains\""))?;
-        let arg1   = h.param(1).ok_or_else(|| RenderError::new("Second param not found for helper \"array_contains\""))?;
-        let array  = arg0.value();
-        let elem   = arg1.value();
-        let has_it = array.as_array().map(|array| array.contains(elem)).unwrap_or(false);
-        Ok(Some(ScopedJson::Derived(JsonValue::from(has_it))))
-    }
-}
-
 /// Helper for "unwrapping" an amqp_value
 pub struct AMQPValueHelper;
 impl HelperDef for AMQPValueHelper {
@@ -373,6 +359,7 @@ synchronous: {{method.synchronous}}
                                     name:          "argument1".to_string(),
                                     default_value: Some(AMQPValue::LongString("value1".to_string())),
                                     domain:        Some("domain1".to_string()),
+                                    force_default: false,
                                 }),
                                 AMQPArgument::Flags(vec![
                                     AMQPFlagArgument {

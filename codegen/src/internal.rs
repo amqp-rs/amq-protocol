@@ -6,6 +6,13 @@ use serde_json::Value;
 
 use std::collections::BTreeMap;
 
+const ENFORCED_DEFAULTS: &'static [(&'static str, &'static [(&'static str, &'static [&'static str])])] = &[
+    ("access",   &[("request-ok", &["ticket"])                                                                                                      ]),
+    ("basic",    &[("consume",    &["ticket"]), ("get",     &["ticket"]), ("publish", &["ticket"]), ("qos",    &["prefetch-size"])                  ]),
+    ("exchange", &[("bind",       &["ticket"]), ("declare", &["ticket"]), ("delete",  &["ticket"]), ("unbind", &["ticket"])                         ]),
+    ("queue",    &[("bind",       &["ticket"]), ("declare", &["ticket"]), ("delete",  &["ticket"]), ("purge",  &["ticket"]), ("unbind", &["ticket"])]),
+];
+
 /* Modified version of AMQProtocolDefinition to handle deserialization */
 #[derive(Debug, Deserialize)]
 pub struct _AMQProtocolDefinition {
@@ -126,13 +133,21 @@ impl _AMQPClass {
     fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>, metadata: &Value) -> AMQPClass {
         let class_md   = metadata.as_object().and_then(|m| m.get(&self.name));
         let metadata   = class_md.and_then(|c| c.as_object()).and_then(|c| c.get("metadata")).cloned().unwrap_or_default();
+        let defaults   = (|name| {
+            for (class, defaults) in ENFORCED_DEFAULTS {
+                if class == &name {
+                    return Some(*defaults);
+                }
+            }
+            None
+        })(&self.name);
         let properties = match self.properties {
             Some(ref properties) => properties.iter().map(|prop| prop.to_specs()).collect(),
             None                 => Vec::new(),
         };
         AMQPClass {
             id:             self.id,
-            methods:        self.methods.iter().map(|method| method.to_specs(domains, class_md)).collect(),
+            methods:        self.methods.iter().map(|method| method.to_specs(domains, class_md, defaults)).collect(),
             name:           self.name.clone(),
             properties,
             metadata,
@@ -149,8 +164,16 @@ struct _AMQPMethod {
 }
 
 impl _AMQPMethod {
-    fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>, class_md: Option<&Value>) -> AMQPMethod {
-        let arguments = self.arguments_to_specs(domains);
+    fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>, class_md: Option<&Value>, defaults: Option<&'static [(&'static str, &'static [&'static str])]>) -> AMQPMethod {
+        let defaults = defaults.and_then(|defaults| {
+            for (method, defaults) in defaults {
+                if method == &self.name.as_str() {
+                    return Some(*defaults);
+                }
+            }
+            None
+        });
+        let arguments = self.arguments_to_specs(domains, defaults);
         AMQPMethod {
             id:            self.id,
             arguments,
@@ -161,7 +184,7 @@ impl _AMQPMethod {
         }
     }
 
-    fn arguments_to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>) -> Vec<AMQPArgument> {
+    fn arguments_to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>, defaults: Option<&'static [&'static str]>) -> Vec<AMQPArgument> {
         let mut arguments                            = Vec::new();
         let mut flags : Option<Vec<AMQPFlagArgument>> = None;
         for argument in &self.arguments {
@@ -174,7 +197,7 @@ impl _AMQPMethod {
                 if let Some(flags) = flags.take() {
                     arguments.push(AMQPArgument::Flags(flags));
                 }
-                arguments.push(AMQPArgument::Value(argument.to_value_specs(amqp_type)));
+                arguments.push(AMQPArgument::Value(argument.to_value_specs(amqp_type, defaults)));
             }
         }
         if let Some(flags) = flags.take() {
@@ -202,12 +225,13 @@ impl _AMQPArgument {
         }
     }
 
-    fn to_value_specs(&self, amqp_type: AMQPType) -> AMQPValueArgument {
+    fn to_value_specs(&self, amqp_type: AMQPType, defaults: Option<&'static [&'static str]>) -> AMQPValueArgument {
         AMQPValueArgument {
             amqp_type,
             name:          self.name.clone(),
             default_value: self.default_value.as_ref().map(From::from),
             domain:        self.domain.clone(),
+            force_default: defaults.map(|defaults| defaults.contains(&self.name.as_str())).unwrap_or(false)
         }
     }
 
@@ -326,6 +350,7 @@ mod test {
                         name:         "arg1".to_string(),
                         default_value: None,
                         domain:        None,
+                        force_default: false,
                     })],
                     name:          "meth1".to_string(),
                     synchronous:   false,

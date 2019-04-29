@@ -2,79 +2,7 @@
     "access": {
         "request-ok": {
             "metadata": {
-                "force_default": ["ticket"],
                 "is_empty": true
-            }
-        }
-    },
-    "exchange": {
-        "declare": {
-            "metadata": {
-                "force_default": ["ticket"]
-            }
-        },
-        "delete": {
-            "metadata": {
-                "force_default": ["ticket"]
-            }
-        },
-        "bind": {
-            "metadata": {
-                "force_default": ["ticket"]
-            }
-        },
-        "unbind": {
-            "metadata": {
-                "force_default": ["ticket"]
-            }
-        }
-    },
-    "queue": {
-        "declare": {
-            "metadata": {
-                "force_default": ["ticket"]
-            }
-        },
-        "bind": {
-            "metadata": {
-                "force_default": ["ticket"]
-            }
-        },
-        "purge": {
-            "metadata": {
-                "force_default": ["ticket"]
-            }
-        },
-        "delete": {
-            "metadata": {
-                "force_default": ["ticket"]
-            }
-        },
-        "unbind": {
-            "metadata": {
-                "force_default": ["ticket"]
-            }
-        }
-    },
-    "basic": {
-        "qos": {
-            "metadata": {
-                "force_default": ["prefetch-size"]
-            }
-        },
-        "consume": {
-            "metadata": {
-                "force_default": ["ticket"]
-            }
-        },
-        "publish": {
-            "metadata": {
-                "force_default": ["ticket"]
-            }
-        },
-        "get": {
-            "metadata": {
-                "force_default": ["ticket"]
             }
         }
     }

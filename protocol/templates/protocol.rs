@@ -196,7 +196,7 @@ pub mod {{snake class.name}} {
     pub struct {{camel method.name}} {
         {{#each_argument method.arguments as |argument| ~}}
         {{#if argument_is_value ~}}
-        {{#unless (array_contains method.metadata.force_default argument.name) ~}}
+        {{#unless argument.force_default ~}}
         /// {{argument.name}} (Generated)
         pub {{snake argument.name}}: {{argument.type}},
         {{/unless ~}}
@@ -213,7 +213,7 @@ pub mod {{snake class.name}} {
     pub fn parse_{{snake method.name false}}(i: &[u8]) -> ParserResult<'_, {{camel method.name}}> {
         {{#each_argument method.arguments as |argument| ~}}
         {{#if argument_is_value ~}}
-        let (i, {{#if (array_contains method.metadata.force_default argument.name) ~}}_{{else}}{{snake argument.name}}{{/if ~}}) = parse_{{snake_type argument.type}}(i)?;
+        let (i, {{#if argument.force_default ~}}_{{else}}{{snake argument.name}}{{/if ~}}) = parse_{{snake_type argument.type}}(i)?;
         {{else}}
         let (i, flags) = parse_flags(i, &[
             {{#each_flag argument as |flag| ~}}
@@ -225,7 +225,7 @@ pub mod {{snake class.name}} {
         Ok((i, {{camel method.name}} {
             {{#each_argument method.arguments as |argument| ~}}
             {{#if argument_is_value ~}}
-            {{#unless (array_contains method.metadata.force_default argument.name) ~}}
+            {{#unless argument.force_default ~}}
             {{snake argument.name}},
             {{/unless ~}}
             {{else}}
@@ -251,7 +251,7 @@ pub mod {{snake class.name}} {
             gen_id({{method.id}})
             {{#each_argument method.arguments as |argument| ~}}
             {{#if argument_is_value ~}}
-            >> gen_{{snake_type argument.type}}({{#if (array_contains method.metadata.force_default argument.name) ~}}{{amqp_value argument.default_value}}{{else}}{{#if (pass_by_ref argument.type) ~}}&{{/if ~}}method.{{snake argument.name}}{{/if ~}})
+            >> gen_{{snake_type argument.type}}({{#if argument.force_default ~}}{{amqp_value argument.default_value}}{{else}}{{#if (pass_by_ref argument.type) ~}}&{{/if ~}}method.{{snake argument.name}}{{/if ~}})
             {{else}}
             >> gen_flags(&flags)
             {{/if ~}}
