@@ -289,7 +289,8 @@ impl HelperDef for ArgumentTypeHelper {
         let arg1   = h.param(1).ok_or_else(|| RenderError::new("Second param not found for helper \"argument_type\""))?;
         let method = serde_json::from_value::<AMQPMethod>(arg0.value().clone()).map_err(|_| RenderError::new("Non-AMQPMethod first param given to helper \"argument_type\""))?;
         let arg    = arg1.value().as_str().ok_or_else(|| RenderError::new("Non-string second param given to helper \"argument_type\""))?;
-        let amqp_t = method.arguments.iter().filter_map(|a| {
+
+        Ok(method.arguments.iter().filter_map(|a| {
             if let AMQPArgument::Value(a) = a {
                 if a.name.replace("-", "_") == arg {
                     Some(a.amqp_type)
@@ -299,13 +300,7 @@ impl HelperDef for ArgumentTypeHelper {
             } else {
                 None
             }
-        }).next();
-
-        if let Some(amqp_t) = amqp_t {
-            Ok(Some(ScopedJson::Derived(serde_json::to_value(amqp_t)?)))
-        } else {
-            Ok(None)
-        }
+        }).next().map(serde_json::to_value).transpose()?.map(ScopedJson::Derived))
     }
 }
 
