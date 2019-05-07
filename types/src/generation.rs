@@ -1,6 +1,8 @@
-use crate::flags::*;
-use crate::types::*;
-use crate::value::*;
+use crate::{
+    flags::*,
+    types::*,
+    value::*,
+};
 
 use cookie_factory::{GenError, do_gen, gen_at_offset, gen_be_f32, gen_be_f64, gen_be_i8, gen_be_i16, gen_be_i32, gen_be_i64, gen_be_u8, gen_be_u16, gen_be_u32, gen_be_u64, gen_call, gen_copy, gen_many_ref, gen_skip, gen_slice};
 

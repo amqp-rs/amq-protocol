@@ -12,6 +12,8 @@ mod specs;
 mod templating;
 mod util;
 
-pub use crate::specs::*;
-pub use crate::templating::*;
-pub use crate::util::*;
+pub use crate::{
+    specs::*,
+    templating::*,
+    util::*,
+};

@@ -1,7 +1,9 @@
 use crate::{
     frame::*,
-    protocol::*,
-    protocol::basic::parse_properties,
+    protocol::{
+        *,
+        basic::parse_properties,
+    },
     types::parsing::*,
 };
 

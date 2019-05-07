@@ -1,14 +1,18 @@
-use crate::specs::*;
-use crate::util::*;
+use crate::{
+    specs::*,
+    util::*,
+};
 
 use amq_protocol_types::{AMQPType, AMQPValue};
 use handlebars::{self, Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output, Renderable, RenderContext, RenderError, ScopedJson, to_json};
 use serde_json::{self, Value};
 
-use std::collections::HashMap;
-use std::fs::File;
-use std::io::Write;
-use std::path::Path;
+use std::{
+    collections::HashMap,
+    fs::File,
+    io::Write,
+    path::Path,
+};
 
 /// Type alias to avoid making our users explicitely depend on an extra dependency
 pub type CodeGenerator = Handlebars;

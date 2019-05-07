@@ -1,5 +1,7 @@
-use crate::types::*;
-use crate::protocol::*;
+use crate::{
+    protocol::*,
+    types::*,
+};
 
 /// Enum representing an AMQP channel
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]

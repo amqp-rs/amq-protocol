@@ -1,6 +1,9 @@
 use url::{percent_encoding, Url};
-use std::num::ParseIntError;
-use std::str::FromStr;
+
+use std::{
+    num::ParseIntError,
+    str::FromStr,
+};
 
 /// An AMQP Uri
 #[derive(Clone, Debug, PartialEq)]

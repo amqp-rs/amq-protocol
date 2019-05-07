@@ -1,8 +1,14 @@
-use crate::frame::AMQPFrame;
-use crate::protocol::*;
-use crate::protocol::basic::gen_properties;
-use crate::types::*;
-use crate::types::generation::*;
+use crate::{
+    frame::AMQPFrame,
+    protocol::{
+        *,
+        basic::gen_properties,
+    },
+    types::{
+        *,
+        generation::*,
+    },
+};
 
 use cookie_factory::{GenError, do_gen, gen_at_offset, gen_call, gen_copy, gen_skip, gen_slice};
 

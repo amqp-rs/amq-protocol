@@ -1,8 +1,10 @@
 mod structs;
 
-pub use self::generation::gen_frame;
-pub use self::parsing::parse_frame;
-pub use self::structs::*;
+pub use self::{
+    generation::gen_frame,
+    parsing::parse_frame,
+    structs::*,
+};
 
 pub use cookie_factory::GenError;
 pub use nom::Offset;

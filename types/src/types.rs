@@ -1,7 +1,9 @@
 use crate::value::AMQPValue;
 
-use std::collections::BTreeMap;
-use std::fmt;
+use std::{
+    collections::BTreeMap,
+    fmt,
+};
 
 use serde::{Deserialize, Serialize};
 
