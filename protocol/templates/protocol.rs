@@ -152,6 +152,17 @@ pub enum AMQPClass {
     {{/each ~}}
 }
 
+impl AMQPClass {
+    /// Get the AMQP class id (Generated)
+    pub fn get_amqp_class_id(&self) -> u16 {
+        match self {
+            {{#each protocol.classes as |class| ~}}
+            AMQPClass::{{camel class.name}}(_) => {{class.id}},
+            {{/each ~}}
+        }
+    }
+}
+
 {{#each protocol.classes as |class|}}
 /// {{class.name}} (generated)
 pub mod {{snake class.name}} {
@@ -209,6 +220,18 @@ pub mod {{snake class.name}} {
         {{/each_flag ~}}
         {{/if ~}}
         {{/each_argument ~}}
+    }
+
+    impl {{camel method.name}} {
+        /// Get the AMQP class id for {{method.name}} (Generated)
+        pub fn get_amqp_class_id(&self) -> u16 {
+            {{class.id}}
+        }
+
+        /// Get the AMQP method id for {{method.name}} (Generated)
+        pub fn get_amqp_method_id(&self) -> u16 {
+            {{method.id}}
+        }
     }
 
     /// Parse {{method.name}} (Generated)
