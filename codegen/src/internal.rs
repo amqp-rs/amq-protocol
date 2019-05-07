@@ -6,11 +6,16 @@ use serde_json::Value;
 
 use std::collections::BTreeMap;
 
-const ENFORCED_DEFAULTS: &'static [(&'static str, &'static [(&'static str, &'static [&'static str])])] = &[
-    ("access",   &[("request-ok", &["ticket"])                                                                                                      ]),
-    ("basic",    &[("consume",    &["ticket"]), ("get",     &["ticket"]), ("publish", &["ticket"]), ("qos",    &["prefetch-size"])                  ]),
-    ("exchange", &[("bind",       &["ticket"]), ("declare", &["ticket"]), ("delete",  &["ticket"]), ("unbind", &["ticket"])                         ]),
-    ("queue",    &[("bind",       &["ticket"]), ("declare", &["ticket"]), ("delete",  &["ticket"]), ("purge",  &["ticket"]), ("unbind", &["ticket"])]),
+type MethodDefaults = (&'static str, &'static [&'static str]);
+type ClassDefaults = (&'static str, &'static [MethodDefaults]);
+
+const ENFORCED_DEFAULTS: &[ClassDefaults] = &[
+    ("access",     &[("request-ok", &["ticket"])                                                                                                                    ]),
+    ("basic",      &[("consume",    &["ticket"]), ("get",     &["ticket"]), ("publish", &["ticket"]), ("get-empty", &["cluster-id"]), ("qos",    &["prefetch-size"])]),
+    ("channel",    &[("open",       &["out-of-band"]),                      ("open-ok", &["channel-id"])                                                            ]),
+    ("connection", &[("open",       &["capabilities", "insist"]),           ("open-ok", &["known-hosts"])                                                           ]),
+    ("exchange",   &[("bind",       &["ticket"]), ("declare", &["ticket"]), ("delete",  &["ticket"]), ("unbind", &["ticket"])                                       ]),
+    ("queue",      &[("bind",       &["ticket"]), ("declare", &["ticket"]), ("delete",  &["ticket"]), ("purge",  &["ticket"]),        ("unbind", &["ticket"])       ]),
 ];
 
 /* Modified version of AMQProtocolDefinition to handle deserialization */
@@ -131,18 +136,18 @@ struct _AMQPClass {
 
 impl _AMQPClass {
     fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>, metadata: &Value) -> AMQPClass {
-        let class_md   = metadata.as_object().and_then(|m| m.get(&self.name));
-        let metadata   = class_md.and_then(|c| c.as_object()).and_then(|c| c.get("metadata")).cloned().unwrap_or_default();
+        let class_md   = metadata.get(&self.name);
+        let metadata   = class_md.and_then(|c| c.get("metadata")).cloned().unwrap_or_default();
         let defaults   = (|name| {
             for (class, defaults) in ENFORCED_DEFAULTS {
-                if class == &name {
+                if class == name {
                     return Some(*defaults);
                 }
             }
             None
         })(&self.name);
         let properties = match self.properties {
-            Some(ref properties) => properties.iter().map(|prop| prop.to_specs()).collect(),
+            Some(ref properties) => properties.iter().map(_AMQPProperty::to_specs).collect(),
             None                 => Vec::new(),
         };
         AMQPClass {
@@ -174,13 +179,20 @@ impl _AMQPMethod {
             None
         });
         let arguments = self.arguments_to_specs(domains, defaults);
+        let is_reply = self.name.ends_with("-ok");
+        let mut metadata = class_md.and_then(|c| c.get(&self.name)).and_then(|m| m.get("metadata")).cloned().unwrap_or_default();
+        if is_reply && metadata.get("state").is_none() {
+            if let Some(state) = class_md.and_then(|c| c.get(&self.name.replace("-ok", ""))).and_then(|m| m.get("metadata")).and_then(|m| m.get("state")) {
+                metadata["state"] = state.clone();
+            }
+        }
         AMQPMethod {
             id:            self.id,
             arguments,
             name:          self.name.clone(),
             synchronous:   self.synchronous.unwrap_or(false),
-            metadata:      class_md.and_then(|c| c.as_object()).and_then(|c| c.get(&self.name)).and_then(|c| c.as_object()).and_then(|m| m.get("metadata")).cloned().unwrap_or_default(),
-            is_reply:      self.name.ends_with("-ok"),
+            metadata,
+            is_reply,
         }
     }
 
@@ -188,16 +200,17 @@ impl _AMQPMethod {
         let mut arguments                            = Vec::new();
         let mut flags : Option<Vec<AMQPFlagArgument>> = None;
         for argument in &self.arguments {
+            let force_default = defaults.map(|defaults| defaults.contains(&argument.name.as_str())).unwrap_or(false);
             let amqp_type = argument.get_type(domains);
             if amqp_type == AMQPType::Boolean {
                 let mut flgs = flags.take().unwrap_or_else(Vec::new);
-                flgs.push(argument.to_flag_specs());
+                flgs.push(argument.to_flag_specs(force_default));
                 flags = Some(flgs);
             } else {
                 if let Some(flags) = flags.take() {
                     arguments.push(AMQPArgument::Flags(flags));
                 }
-                arguments.push(AMQPArgument::Value(argument.to_value_specs(amqp_type, defaults)));
+                arguments.push(AMQPArgument::Value(argument.to_value_specs(amqp_type, force_default)));
             }
         }
         if let Some(flags) = flags.take() {
@@ -218,20 +231,21 @@ struct _AMQPArgument {
 }
 
 impl _AMQPArgument {
-    fn to_flag_specs(&self) -> AMQPFlagArgument {
+    fn to_flag_specs(&self, force_default: bool) -> AMQPFlagArgument {
         AMQPFlagArgument {
             name:          self.name.clone(),
-            default_value: self.default_value.as_ref().and_then(|v| v.as_u64()).map(|u| u != 0).unwrap_or(false),
+            default_value: self.default_value.as_ref().and_then(Value::as_u64).map(|u| u != 0).unwrap_or(false),
+            force_default,
         }
     }
 
-    fn to_value_specs(&self, amqp_type: AMQPType, defaults: Option<&'static [&'static str]>) -> AMQPValueArgument {
+    fn to_value_specs(&self, amqp_type: AMQPType, force_default: bool) -> AMQPValueArgument {
         AMQPValueArgument {
             amqp_type,
             name:          self.name.clone(),
             default_value: self.default_value.as_ref().map(From::from),
             domain:        self.domain.clone(),
-            force_default: defaults.map(|defaults| defaults.contains(&self.name.as_str())).unwrap_or(false)
+            force_default,
         }
     }
 

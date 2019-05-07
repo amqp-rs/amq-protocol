@@ -118,6 +118,8 @@ pub struct AMQPFlagArgument {
     pub name:          ShortString,
     /// The default value for the flag
     pub default_value: Boolean,
+    /// Whether the default value is forced or not
+    pub force_default: bool,
 }
 
 /// A property as defined in the AMQP specification

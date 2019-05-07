@@ -256,7 +256,7 @@ impl HelperDef for AMQPValueHelper {
             AMQPValue::Float(v)          => serde_json::to_value(v)?,
             AMQPValue::Double(v)         => serde_json::to_value(v)?,
             AMQPValue::DecimalValue(v)   => serde_json::to_value(v)?,
-            AMQPValue::LongString(v)     => serde_json::to_value(v)?,
+            AMQPValue::LongString(v)     => serde_json::to_value(format!("\"{}\"", v))?,
             AMQPValue::FieldArray(v)     => serde_json::to_value(v)?,
             AMQPValue::Timestamp(v)      => serde_json::to_value(v)?,
             AMQPValue::FieldTable(v)     => serde_json::to_value(v)?,
@@ -365,10 +365,12 @@ synchronous: {{method.synchronous}}
                                     AMQPFlagArgument {
                                         name:         "flag1".to_string(),
                                         default_value: true,
+                                        force_default: false,
                                     },
                                     AMQPFlagArgument {
                                         name:         "flag2".to_string(),
                                         default_value: false,
+                                        force_default: false,
                                     },
                                 ]),
                             ],

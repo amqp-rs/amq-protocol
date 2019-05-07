@@ -5,5 +5,36 @@
                 "is_empty": true
             }
         }
+    },
+    "basic": {
+        "get-empty": {
+            "metadata": {
+                "is_empty": true
+            }
+        }
+    },
+    "channel": {
+        "open": {
+            "metadata": {
+                "is_empty": true
+            }
+        },
+        "open-ok": {
+            "metadata": {
+                "is_empty": true
+            }
+        }
+    },
+    "connection": {
+        "open": {
+            "metadata": {
+                "empty_flags": true
+            }
+        },
+        "open-ok": {
+            "metadata": {
+                "is_empty": true
+            }
+        }
     }
 }
