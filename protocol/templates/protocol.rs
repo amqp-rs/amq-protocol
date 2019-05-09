@@ -203,7 +203,7 @@ pub mod {{snake class.name}} {
 
     {{#each class.methods as |method|}}
     /// {{method.name}} (Generated)
-    #[derive(Clone, Debug, PartialEq)]
+    #[derive(Clone, Debug, Default, PartialEq)]
     pub struct {{camel method.name}} {
         {{#each_argument method.arguments as |argument| ~}}
         {{#if argument_is_value ~}}
