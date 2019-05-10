@@ -86,6 +86,10 @@ pub struct AMQPMethod {
     pub is_reply:      bool,
     /// Whether all the arguments have force_default or not
     pub ignore_args:   bool,
+    /// Whether this method can be sent from client to server
+    pub c2s:           bool,
+    /// Whether this method can be received from server to client
+    pub s2c:           bool,
 }
 
 /// An argument as defined in the AMQP specification

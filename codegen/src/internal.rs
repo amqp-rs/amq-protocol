@@ -18,6 +18,28 @@ const ENFORCED_DEFAULTS: &[ClassDefaults] = &[
     ("queue",      &[("bind",       &["ticket"]), ("declare", &["ticket"]), ("delete",  &["ticket"]), ("purge",  &["ticket"]),        ("unbind", &["ticket"])       ]),
 ];
 
+const SEND_ONLY: &[(&str, &[&str])] = &[
+    ("access",     &["request"]),
+    ("basic",      &["cancel", "consume", "get", "publish", "qos", "recover", "recover-async", "reject"]),
+    ("channel",    &["open"]),
+    ("confirm",    &["select"]),
+    ("connection", &["open", "secure-ok", "start-ok", "tune-ok"]),
+    ("exchange",   &["bind", "declare", "delete", "unbind"]),
+    ("queue",      &["bind", "declare", "delete", "purge",  "unbind"]),
+    ("tx",         &["commit", "rollback", "select"]),
+];
+
+const RECEIVE_ONLY: &[(&str, &[&str])] = &[
+    ("access",     &["request-ok"]),
+    ("basic",      &["cancel-ok", "consume-ok", "deliver", "get-empty", "get-ok", "qos-ok", "recover-ok", "return"]),
+    ("channel",    &["open-ok"]),
+    ("confirm",    &["select-ok"]),
+    ("connection", &["open-ok", "secure", "start", "tune"]),
+    ("exchange",   &["bind-ok", "declare-ok", "delete-ok", "unbind-ok"]),
+    ("queue",      &["bind-ok", "declare-ok", "delete-ok", "purge-ok", "unbind-ok"]),
+    ("tx",         &["commit-ok", "rollback-ok", "select-ok"]),
+];
+
 /* Modified version of AMQProtocolDefinition to handle deserialization */
 #[derive(Debug, Deserialize)]
 pub struct _AMQProtocolDefinition {
@@ -136,9 +158,9 @@ struct _AMQPClass {
 
 impl _AMQPClass {
     fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>, metadata: &Value) -> AMQPClass {
-        let class_md   = metadata.get(&self.name);
-        let metadata   = class_md.and_then(|c| c.get("metadata")).cloned().unwrap_or_default();
-        let defaults   = (|name| {
+        let class_md     = metadata.get(&self.name);
+        let metadata     = class_md.and_then(|c| c.get("metadata")).cloned().unwrap_or_default();
+        let defaults     = (|name| {
             for (class, defaults) in ENFORCED_DEFAULTS {
                 if class == name {
                     return Some(*defaults);
@@ -146,13 +168,29 @@ impl _AMQPClass {
             }
             None
         })(&self.name);
-        let properties = match self.properties {
+        let send_only    = (|name| {
+            for (class, send_only) in SEND_ONLY {
+                if class == name {
+                    return Some(*send_only);
+                }
+            }
+            None
+        })(&self.name);
+        let receive_only = (|name| {
+            for (class, send_only) in RECEIVE_ONLY {
+                if class == name {
+                    return Some(*send_only);
+                }
+            }
+            None
+        })(&self.name);
+        let properties   = match self.properties {
             Some(ref properties) => properties.iter().map(_AMQPProperty::to_specs).collect(),
             None                 => Vec::new(),
         };
         AMQPClass {
             id:             self.id,
-            methods:        self.methods.iter().map(|method| method.to_specs(domains, class_md, defaults)).collect(),
+            methods:        self.methods.iter().map(|method| method.to_specs(domains, class_md, defaults, send_only, receive_only)).collect(),
             name:           self.name.clone(),
             properties,
             metadata,
@@ -169,7 +207,7 @@ struct _AMQPMethod {
 }
 
 impl _AMQPMethod {
-    fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>, class_md: Option<&Value>, defaults: Option<&'static [(&'static str, &'static [&'static str])]>) -> AMQPMethod {
+    fn to_specs(&self, domains: &BTreeMap<ShortString, AMQPType>, class_md: Option<&Value>, defaults: Option<&'static [(&'static str, &'static [&'static str])]>, send_only: Option<&'static [&'static str]>, receive_only: Option<&'static [&'static str]>) -> AMQPMethod {
         let defaults = defaults.and_then(|defaults| {
             for (method, defaults) in defaults {
                 if method == &self.name.as_str() {
@@ -187,6 +225,8 @@ impl _AMQPMethod {
             }
         }
         let ignore_args = arguments.iter().all(AMQPArgument::force_default);
+        let c2s = !receive_only.map(|receive_only| receive_only.contains(&self.name.as_str())).unwrap_or(false);
+        let s2c = !send_only.map(|send_only| send_only.contains(&self.name.as_str())).unwrap_or(false);
         AMQPMethod {
             id:            self.id,
             arguments,
@@ -195,6 +235,8 @@ impl _AMQPMethod {
             metadata,
             is_reply,
             ignore_args,
+            c2s,
+            s2c,
         }
     }
 
@@ -375,6 +417,8 @@ mod test {
                     metadata:      Value::default(),
                     is_reply:      false,
                     ignore_args:   false,
+                    c2s:           true,
+                    s2c:           true,
                 }],
                 name:           "class1".to_string(),
                 properties:     vec![AMQPProperty {
