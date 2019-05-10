@@ -84,6 +84,8 @@ pub struct AMQPMethod {
     pub metadata:      Value,
     /// Whether this method is a reply or not
     pub is_reply:      bool,
+    /// Whether all the arguments have force_default or not
+    pub ignore_args:   bool,
 }
 
 /// An argument as defined in the AMQP specification
@@ -93,6 +95,15 @@ pub enum AMQPArgument {
     Value(AMQPValueArgument),
     /// The argument is holding flags
     Flags(Vec<AMQPFlagArgument>),
+}
+
+impl AMQPArgument {
+    pub(crate) fn force_default(&self) -> bool {
+        match self {
+            AMQPArgument::Value(v) => v.force_default,
+            AMQPArgument::Flags(f) => f.iter().all(|f| f.force_default),
+        }
+    }
 }
 
 /// An argument holding a value as defined in the AMQP specification

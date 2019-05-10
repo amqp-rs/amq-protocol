@@ -358,6 +358,7 @@ synchronous: {{method.synchronous}}
                             synchronous:   true,
                             metadata:      Value::default(),
                             is_reply:      false,
+                            ignore_args:   false,
                         }
                     ],
                     name:           "class1".to_string(),

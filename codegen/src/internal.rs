@@ -186,6 +186,7 @@ impl _AMQPMethod {
                 metadata["state"] = state.clone();
             }
         }
+        let ignore_args = arguments.iter().all(|a| a.force_default());
         AMQPMethod {
             id:            self.id,
             arguments,
@@ -193,6 +194,7 @@ impl _AMQPMethod {
             synchronous:   self.synchronous.unwrap_or(false),
             metadata,
             is_reply,
+            ignore_args,
         }
     }
 
@@ -370,6 +372,7 @@ mod test {
                     synchronous:   false,
                     metadata:      Value::default(),
                     is_reply:      false,
+                    ignore_args:   false,
                 }],
                 name:           "class1".to_string(),
                 properties:     vec![AMQPProperty {
