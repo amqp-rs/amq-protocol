@@ -1,5 +1,3 @@
-pub use nom::Err as ParserError;
-
 use crate::{
     flags::*,
     types::*,
@@ -16,8 +14,10 @@ use nom::{
     sequence::pair,
 };
 
+/// Error returned by parsers
+pub type ParserError<'a> = nom::Err<(&'a [u8], ErrorKind)>;
 /// Return type of parsers
-pub type ParserResult<'a, T> = Result<(&'a [u8], T), ParserError<(&'a [u8], ErrorKind)>>;
+pub type ParserResult<'a, T> = Result<(&'a [u8], T), ParserError<'a>>;
 
 /// Parse the [AMQPValue](../type.AMQPValue.html) of the given [AMQPType](../type.AMQPType.html)
 pub fn parse_raw_value(amqp_type: AMQPType) -> impl Fn(&[u8]) -> ParserResult<'_, AMQPValue> {
