@@ -186,7 +186,7 @@ impl _AMQPMethod {
                 metadata["state"] = state.clone();
             }
         }
-        let ignore_args = arguments.iter().all(|a| a.force_default());
+        let ignore_args = arguments.iter().all(AMQPArgument::force_default);
         AMQPMethod {
             id:            self.id,
             arguments,
