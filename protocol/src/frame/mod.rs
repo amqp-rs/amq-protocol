@@ -7,6 +7,7 @@ pub use self::{
 };
 
 pub use cookie_factory::GenError;
+pub use crate::types::parsing::{ParserError, ParserResult};
 pub use nom::Offset;
 
 /// Serialization utils
