@@ -212,12 +212,14 @@ pub mod {{snake class.name}} {
         pub {{snake argument.name}}: {{argument.type}},
         {{/unless ~}}
         {{else}}
-        {{#each_flag argument as |flag| ~}}
+        {{#unless argument.ignore_flags ~}}
+        {{#each argument.flags as |flag| ~}}
         {{#unless flag.force_default ~}}
         /// {{flag.name}} (Generated)
         pub {{snake flag.name}}: Boolean,
         {{/unless ~}}
-        {{/each_flag ~}}
+        {{/each ~}}
+        {{/unless ~}}
         {{/if ~}}
         {{/each_argument ~}}
     }
@@ -240,10 +242,10 @@ pub mod {{snake class.name}} {
         {{#if argument_is_value ~}}
         let (i, {{#if argument.force_default ~}}_{{else}}{{snake argument.name}}{{/if ~}}) = parse_{{snake_type argument.type}}(i)?;
         {{else}}
-        let (i, {{#if method.metadata.empty_flags ~}}_{{else}}flags{{/if ~}}) = parse_flags(i, &[
-            {{#each_flag argument as |flag| ~}}
+        let (i, {{#if argument.ignore_flags ~}}_{{else}}flags{{/if ~}}) = parse_flags(i, &[
+            {{#each argument.flags as |flag| ~}}
             "{{flag.name}}",
-            {{/each_flag ~}}
+            {{/each ~}}
         ])?;
         {{/if ~}}
         {{/each_argument ~}}
@@ -254,11 +256,13 @@ pub mod {{snake class.name}} {
             {{snake argument.name}},
             {{/unless ~}}
             {{else}}
-            {{#each_flag argument as |flag| ~}}
+            {{#unless argument.ignore_flags ~}}
+            {{#each argument.flags as |flag| ~}}
             {{#unless flag.force_default ~}}
             {{snake flag.name}}: flags.get_flag("{{snake flag.name}}").unwrap_or({{flag.default_value}}),
             {{/unless ~}}
-            {{/each_flag ~}}
+            {{/each ~}}
+            {{/unless ~}}
             {{/if ~}}
             {{/each_argument ~}}
         }))
@@ -269,9 +273,9 @@ pub mod {{snake class.name}} {
         {{#each_argument method.arguments as |argument| ~}}
         {{#unless argument_is_value ~}}
         let mut flags = AMQPFlags::default();
-        {{#each_flag argument as |flag| ~}}
+        {{#each argument.flags as |flag| ~}}
         flags.add_flag("{{snake flag.name}}".to_string(), {{#if flag.force_default ~}}{{flag.default_value}}{{else}}method.{{snake flag.name}}{{/if ~}});
-        {{/each_flag ~}}
+        {{/each ~}}
         {{/unless ~}}
         {{/each_argument ~}}
         do_gen!(input,

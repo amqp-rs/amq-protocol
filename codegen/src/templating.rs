@@ -35,16 +35,15 @@ pub trait HandlebarsAMQPExtension {
 impl HandlebarsAMQPExtension for CodeGenerator {
     fn register_amqp_helpers(mut self) -> CodeGenerator {
         self.register_escape_fn(handlebars::no_escape);
-        self.register_helper("camel",               Box::new(CamelHelper));
-        self.register_helper("snake",               Box::new(SnakeHelper));
-        self.register_helper("snake_type",          Box::new(SnakeTypeHelper));
-        self.register_helper("sanitize_name",       Box::new(SanitizeNameHelper));
-        self.register_helper("pass_by_ref",         Box::new(PassByRefHelper));
-        self.register_helper("use_str_ref",         Box::new(UseStrRefHelper));
-        self.register_helper("method_has_flag",     Box::new(MethodHasFlagHelper));
-        self.register_helper("each_argument",       Box::new(EachArgumentHelper));
-        self.register_helper("each_flag",           Box::new(EachFlagHelper));
-        self.register_helper("amqp_value",          Box::new(AMQPValueHelper));
+        self.register_helper("camel",           Box::new(CamelHelper));
+        self.register_helper("snake",           Box::new(SnakeHelper));
+        self.register_helper("snake_type",      Box::new(SnakeTypeHelper));
+        self.register_helper("sanitize_name",   Box::new(SanitizeNameHelper));
+        self.register_helper("pass_by_ref",     Box::new(PassByRefHelper));
+        self.register_helper("use_str_ref",     Box::new(UseStrRefHelper));
+        self.register_helper("method_has_flag", Box::new(MethodHasFlagHelper));
+        self.register_helper("each_argument",   Box::new(EachArgumentHelper));
+        self.register_helper("amqp_value",      Box::new(AMQPValueHelper));
         self
     }
 
@@ -146,7 +145,7 @@ impl HelperDef for MethodHasFlagHelper {
         let flag     = arg1.value().as_str().ok_or_else(|| RenderError::new("Non-string second param given to helper \"method_has_flag\""))?;
         let has_flag = method.arguments.iter().any(|arg| match arg {
             AMQPArgument::Value(_) => false,
-            AMQPArgument::Flags(flags) => flags.iter().any(|f| f.name == flag),
+            AMQPArgument::Flags(f) => f.flags.iter().any(|f| f.name == flag),
         });
         Ok(Some(ScopedJson::Derived(JsonValue::from(has_flag))))
     }
@@ -186,45 +185,6 @@ impl HelperDef for EachArgumentHelper {
                             map.insert("argument_is_value".to_string(), to_json(&false));
                         },
                     };
-                    local_rc.push_block_context(&map)?;
-                }
-                t.render(r, ctx, &mut local_rc, out)?;
-                if h.block_param().is_some() {
-                    local_rc.pop_block_context();
-                }
-                if local_path_root.is_some() {
-                    local_rc.pop_local_path_root();
-                }
-            }
-            rc.demote_local_vars();
-        }
-        Ok(())
-    }
-}
-
-/// Helper to walk through a Vec of [AMQPFlagArgument](../specs.AMQPFlagArgument.html).
-pub struct EachFlagHelper;
-impl HelperDef for EachFlagHelper {
-    fn call<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, r: &'reg Handlebars, ctx: &'rc Context, rc: &mut RenderContext<'reg>, out: &mut dyn Output) -> HelperResult {
-        let value = h.param(0).ok_or_else(|| RenderError::new("Param not found for helper \"each_flag\""))?;
-
-        if let Some(t) = h.template() {
-            rc.promote_local_vars();
-            let local_path_root = value.path_root().map(|p| format!("{}/{}", rc.get_path(), p));
-            let flags : Vec<AMQPFlagArgument> = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not a Vec<AMQPFlagArgument> for helper \"each_flag\""))?;
-            for (index, flag) in flags.iter().enumerate() {
-                let mut local_rc = rc.derive();
-                if let Some(ref p) = local_path_root {
-                    local_rc.push_local_path_root(p.clone());
-                }
-                local_rc.set_local_var("@index".to_string(), to_json(&index));
-                if let Some(inner_path) = value.path() {
-                    let new_path = format!("{}/{}.[{}]", local_rc.get_path(), inner_path, index);
-                    local_rc.set_path(new_path.clone());
-                }
-                if let Some(block_param) = h.block_param() {
-                    let mut map = HashMap::new();
-                    map.insert(block_param.to_string(), to_json(flag));
                     local_rc.push_block_context(&map)?;
                 }
                 t.render(r, ctx, &mut local_rc, out)?;
@@ -298,9 +258,9 @@ synchronous: {{method.synchronous}}
 {{#if argument_is_value ~}}
 {{argument.name}}({{argument.domain}}): {{argument.type}}
 {{else}}
-{{#each_flag argument as |flag| ~}}
+{{#each argument.flags as |flag| ~}}
 {{flag.name}}: {{flag.default_value}}
-{{/each_flag ~}}
+{{/each ~}}
 {{/if ~}}
 {{/each_argument ~}}
 {{/each ~}}
@@ -341,18 +301,21 @@ synchronous: {{method.synchronous}}
                                     domain:        Some("domain1".to_string()),
                                     force_default: false,
                                 }),
-                                AMQPArgument::Flags(vec![
-                                    AMQPFlagArgument {
-                                        name:         "flag1".to_string(),
-                                        default_value: true,
-                                        force_default: false,
-                                    },
-                                    AMQPFlagArgument {
-                                        name:         "flag2".to_string(),
-                                        default_value: false,
-                                        force_default: false,
-                                    },
-                                ]),
+                                AMQPArgument::Flags(AMQPFlagsArgument {
+                                    ignore_flags: false,
+                                    flags: vec![
+                                        AMQPFlagArgument {
+                                            name:         "flag1".to_string(),
+                                            default_value: true,
+                                            force_default: false,
+                                        },
+                                        AMQPFlagArgument {
+                                            name:         "flag2".to_string(),
+                                            default_value: false,
+                                            force_default: false,
+                                        },
+                                    ]
+                                }),
                             ],
                             name:          "method1".to_string(),
                             synchronous:   true,

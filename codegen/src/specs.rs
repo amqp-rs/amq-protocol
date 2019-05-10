@@ -94,14 +94,14 @@ pub enum AMQPArgument {
     /// The argument is holding a value
     Value(AMQPValueArgument),
     /// The argument is holding flags
-    Flags(Vec<AMQPFlagArgument>),
+    Flags(AMQPFlagsArgument),
 }
 
 impl AMQPArgument {
     pub(crate) fn force_default(&self) -> bool {
         match self {
             AMQPArgument::Value(v) => v.force_default,
-            AMQPArgument::Flags(f) => f.iter().all(|f| f.force_default),
+            AMQPArgument::Flags(f) => f.force_default(),
         }
     }
 }
@@ -122,7 +122,22 @@ pub struct AMQPValueArgument {
     pub force_default: bool,
 }
 
-/// An argument holding flags as defined in the AMQP specification
+/// An argument holding a flags as defined in the AMQP specification
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+pub struct AMQPFlagsArgument {
+    /// Whether all the flags have force_default or not
+    pub ignore_flags: bool,
+    /// The actual flags
+    pub flags:        Vec<AMQPFlagArgument>,
+}
+
+impl AMQPFlagsArgument {
+    pub(crate) fn force_default(&self) -> bool {
+        self.flags.iter().all(|f| f.force_default)
+    }
+}
+
+/// An argument holding a flag as defined in the AMQP specification
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPFlagArgument {
     /// The name of the flag

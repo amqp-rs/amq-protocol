@@ -210,13 +210,15 @@ impl _AMQPMethod {
                 flags = Some(flgs);
             } else {
                 if let Some(flags) = flags.take() {
-                    arguments.push(AMQPArgument::Flags(flags));
+                    let ignore_flags = flags.iter().all(|f| f.force_default);
+                    arguments.push(AMQPArgument::Flags(AMQPFlagsArgument { ignore_flags, flags }));
                 }
                 arguments.push(AMQPArgument::Value(argument.to_value_specs(amqp_type, force_default)));
             }
         }
         if let Some(flags) = flags.take() {
-            arguments.push(AMQPArgument::Flags(flags));
+            let ignore_flags = flags.iter().all(|f| f.force_default);
+            arguments.push(AMQPArgument::Flags(AMQPFlagsArgument { ignore_flags, flags }));
         }
         arguments
     }
