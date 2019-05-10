@@ -15,7 +15,7 @@ name = "amq_protocol_types"
 
 [dependencies]
 cookie-factory = "^0.2.4"
-nom            = "=5.0.0-alpha2"
+nom            = "=5.0.0-beta1"
 serde_json     = "^1.0"
 
 [dependencies.serde]
