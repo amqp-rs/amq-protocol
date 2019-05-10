@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-types"
-version       = "2.0.0-beta4" # remember to update html_root_url
+version       = "2.0.0-beta5" # remember to update html_root_url
 edition       = "2018"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications - types"
