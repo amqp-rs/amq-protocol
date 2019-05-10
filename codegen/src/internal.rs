@@ -20,7 +20,7 @@ const ENFORCED_DEFAULTS: &[ClassDefaults] = &[
 
 const SEND_ONLY: &[(&str, &[&str])] = &[
     ("access",     &["request"]),
-    ("basic",      &["cancel", "consume", "get", "publish", "qos", "recover", "recover-async", "reject"]),
+    ("basic",      &["consume", "get", "publish", "qos", "recover", "recover-async", "reject"]),
     ("channel",    &["open"]),
     ("confirm",    &["select"]),
     ("connection", &["open", "secure-ok", "start-ok", "tune-ok"]),
@@ -31,7 +31,7 @@ const SEND_ONLY: &[(&str, &[&str])] = &[
 
 const RECEIVE_ONLY: &[(&str, &[&str])] = &[
     ("access",     &["request-ok"]),
-    ("basic",      &["cancel-ok", "consume-ok", "deliver", "get-empty", "get-ok", "qos-ok", "recover-ok", "return"]),
+    ("basic",      &["consume-ok", "deliver", "get-empty", "get-ok", "qos-ok", "recover-ok", "return"]),
     ("channel",    &["open-ok"]),
     ("confirm",    &["select-ok"]),
     ("connection", &["open-ok", "secure", "start", "tune"]),
