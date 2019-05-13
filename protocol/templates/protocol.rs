@@ -5,7 +5,7 @@ use crate::types::{
     parsing::*,
 };
 
-use cookie_factory::{GenError, do_gen, gen_call, gen_cond};
+use cookie_factory::GenError;
 use nom::combinator::{flat_map, map, map_opt};
 
 /// Protocol metadata
@@ -135,7 +135,7 @@ pub fn parse_class(i: &[u8]) -> ParserResult<'_, AMQPClass> {
 }
 
 /// Serialize an AMQP class
-pub fn gen_class<'a>(input: (&'a mut [u8], usize), class: &AMQPClass) -> Result<(&'a mut [u8], usize), GenError> {
+pub fn gen_class<'a>(input: &'a mut [u8], class: &'a AMQPClass) -> Result<&'a mut [u8], GenError> {
     match *class {
         {{#each protocol.classes as |class| ~}}
         AMQPClass::{{camel class.name}}(ref {{snake class.name}}) => {{snake class.name}}::gen_{{snake class.name false}}(input, {{snake class.name}}),
@@ -179,14 +179,11 @@ pub mod {{snake class.name}} {
     }
 
     /// Serialize {{class.name}} (Generated)
-    pub fn gen_{{snake class.name false}}<'a>(input: (&'a mut [u8], usize), method: &AMQPMethod) -> Result<(&'a mut [u8], usize), GenError> {
+    pub fn gen_{{snake class.name false}}<'a>(input: &'a mut [u8], method: &'a AMQPMethod) -> Result<&'a mut [u8], GenError> {
         match *method {
             {{#each class.methods as |method| ~}}
             AMQPMethod::{{camel method.name}}(ref {{snake method.name}}) => {
-                do_gen!(input,
-                    gen_id({{class.id}}) >>
-                    gen_{{snake method.name false}}({{snake method.name}})
-                )
+                gen_{{snake method.name false}}(gen_id(input, {{class.id}})?, {{snake method.name}})
             },
             {{/each ~}}
         }
@@ -269,7 +266,7 @@ pub mod {{snake class.name}} {
     }
 
     /// Serialize {{method.name}} (Generated)
-    pub fn gen_{{snake method.name false}}<'a>(input: (&'a mut [u8], usize), {{#if method.arguments ~}}{{#if method.ignore_args ~}}_{{/if ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> Result<(&'a mut [u8],usize), GenError> {
+    pub fn gen_{{snake method.name false}}<'a>(input: &'a mut [u8], {{#if method.arguments ~}}{{#if method.ignore_args ~}}_{{/if ~}}method{{else}}_{{/if ~}}: &'a {{camel method.name}}) -> Result<&'a mut [u8], GenError> {
         {{#each_argument method.arguments as |argument| ~}}
         {{#unless argument_is_value ~}}
         let mut flags = AMQPFlags::default();
@@ -278,16 +275,15 @@ pub mod {{snake class.name}} {
         {{/each ~}}
         {{/unless ~}}
         {{/each_argument ~}}
-        do_gen!(input,
-            gen_id({{method.id}})
-            {{#each_argument method.arguments as |argument| ~}}
-            {{#if argument_is_value ~}}
-            >> gen_{{snake_type argument.type}}({{#if argument.force_default ~}}{{amqp_value argument.default_value}}{{else}}{{#if (pass_by_ref argument.type) ~}}&{{/if ~}}method.{{snake argument.name}}{{/if ~}})
-            {{else}}
-            >> gen_flags(&flags)
-            {{/if ~}}
-            {{/each_argument ~}}
-        )
+        let input = gen_id(input, {{method.id}})?;
+        {{#each_argument method.arguments as |argument| ~}}
+        {{#if argument_is_value ~}}
+        let input = gen_{{snake_type argument.type}}(input, {{#if argument.force_default ~}}{{amqp_value argument.default_value}}{{else}}{{#if (pass_by_ref argument.type) ~}}&{{/if ~}}method.{{snake argument.name}}{{/if ~}})?;
+        {{else}}
+        let input = gen_flags(input, &flags)?;
+        {{/if ~}}
+        {{/each_argument ~}}
+        Ok(input)
     }
     {{/each ~}}
     {{#if class.properties ~}}
@@ -350,13 +346,14 @@ pub mod {{snake class.name}} {
 
     /// Serialize {{class.name}} properties (Generated)
     #[clippy::cyclomatic_complexity = "32"]
-    pub fn gen_properties<'a>(input:(&'a mut [u8],usize), props: &AMQPProperties) -> Result<(&'a mut [u8],usize),GenError> {
-        do_gen!(input,
-            gen_short_uint(props.bitmask())
-            {{#each class.properties as |property| ~}}
-            >> gen_cond!(props.{{snake property.name}}.is_some(), gen_call!(gen_{{snake_type property.type}}, {{#if (pass_by_ref property.type) ~}}&{{/if ~}}props.{{snake property.name}}{{#if (pass_by_ref property.type) ~}}.as_ref(){{/if ~}}.unwrap()))
-            {{/each ~}}
-        )
+    pub fn gen_properties<'a>(input: &'a mut [u8], props: &'a AMQPProperties) -> Result<&'a mut [u8], GenError> {
+        let mut input = gen_short_uint(input, props.bitmask())?;
+        {{#each class.properties as |property| ~}}
+        if let Some(prop) = props.{{snake property.name}}{{#if (pass_by_ref property.type) ~}}.as_ref(){{/if ~}} {
+            input = gen_{{snake_type property.type}}(input, prop{{#if (use_str_ref property.type) ~}}.as_str(){{/if ~}})?;
+        }
+        {{/each ~}}
+        Ok(input)
     }
     {{/if ~}}
 }

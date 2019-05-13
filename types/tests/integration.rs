@@ -33,5 +33,7 @@ fn test_full_integration() {
     let value              = AMQPValue::FieldTable(table);
     let mut buf: [u8; 199] = [0; 199];
 
-    assert_eq!(parse_value(gen_value((&mut buf[..], 0), &value).unwrap().0), Ok((&[][..], value)));
+    gen_value(&mut buf[..], &value).unwrap();
+
+    assert_eq!(parse_value(&buf), Ok((&[][..], value)));
 }

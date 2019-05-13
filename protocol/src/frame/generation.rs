@@ -10,10 +10,10 @@ use crate::{
     },
 };
 
-use cookie_factory::{GenError, do_gen, gen_at_offset, gen_call, gen_copy, gen_skip, gen_slice};
+use cookie_factory::{GenError, slice};
 
 /// Serialize a frame in the given buffer
-pub fn gen_frame<'a, 'b>(x: (&'a mut [u8], usize), frame: &'b AMQPFrame) -> Result<(&'a mut [u8], usize), GenError> {
+pub fn gen_frame<'a>(x: &'a mut [u8], frame: &'a AMQPFrame) -> Result<&'a mut [u8], GenError> {
     match frame {
         AMQPFrame::ProtocolHeader => {
             gen_protocol_header(x)
@@ -34,54 +34,26 @@ pub fn gen_frame<'a, 'b>(x: (&'a mut [u8], usize), frame: &'b AMQPFrame) -> Resu
 }
 
 /// Serialize the protocol header in the given buffer
-pub fn gen_protocol_header(x: (&mut [u8], usize)) -> Result<(&mut [u8], usize), GenError> {
-    do_gen!(x,
-        gen_slice!(metadata::NAME.as_bytes()) >>
-        gen_slice!(&[0, metadata::MAJOR_VERSION, metadata::MINOR_VERSION, metadata::REVISION])
-    )
+pub fn gen_protocol_header(x: &mut [u8]) -> Result<&mut [u8], GenError> {
+    slice(&[0, metadata::MAJOR_VERSION, metadata::MINOR_VERSION, metadata::REVISION])(slice(metadata::NAME.as_bytes())(x)?)
 }
 
 /// Serialize an heartbeat frame in the given buffer
-pub fn gen_heartbeat_frame(x: (&mut [u8], usize)) -> Result<(&mut [u8], usize), GenError> {
-    do_gen!(x, gen_slice!(&[constants::FRAME_HEARTBEAT, 0, 0, 0, 0, 0, 0, constants::FRAME_END]))
+pub fn gen_heartbeat_frame(x: &mut [u8]) -> Result<&mut [u8], GenError> {
+    slice(&[constants::FRAME_HEARTBEAT, 0, 0, 0, 0, 0, 0, constants::FRAME_END])(x)
 }
 
 /// Serialize a method frame in the given buffer
-pub fn gen_method_frame<'a>(x:(&'a mut [u8], usize), channel_id: ShortUInt, class: &AMQPClass) -> Result<(&'a mut [u8], usize), GenError> {
-    do_gen!(x,
-        gen_short_short_uint(constants::FRAME_METHOD)                        >>
-        gen_id(channel_id)                                                   >>
-        len:   gen_skip!(4)                                                  >>
-        start: gen_class(class)                                              >>
-        end:   gen_at_offset!(len, gen_long_uint((end - start) as LongUInt)) >>
-        gen_short_short_uint(constants::FRAME_END)
-    )
+pub fn gen_method_frame<'a>(x: &'a mut [u8], channel_id: ShortUInt, class: &'a AMQPClass) -> Result<&'a mut [u8], GenError> {
+    gen_short_short_uint(gen_with_len(gen_id(gen_short_short_uint(x, constants::FRAME_METHOD)?, channel_id)?, move |x| gen_class(x, class))?, constants::FRAME_END)
 }
 
 /// Serialize a content header frame in the given buffer
-pub fn gen_content_header_frame<'a>(x: (&'a mut [u8], usize), channel_id: ShortUInt, class_id: ShortUInt, length: LongLongUInt, properties: &basic::AMQPProperties) -> Result<(&'a mut [u8], usize), GenError> {
-    do_gen!(x,
-        gen_short_short_uint(constants::FRAME_HEADER)                        >>
-        gen_id(channel_id)                                                   >>
-        len:   gen_skip!(4)                                                  >>
-        start: do_gen!(
-            gen_id(class_id)           >>
-            gen_short_uint(0)          >> // weight
-            gen_long_long_uint(length) >>
-            gen_properties(&properties)
-        ) >>
-        end:   gen_at_offset!(len, gen_long_uint((end - start) as LongUInt)) >>
-        gen_short_short_uint(constants::FRAME_END)
-   )
+pub fn gen_content_header_frame<'a>(x: &'a mut [u8], channel_id: ShortUInt, class_id: ShortUInt, length: LongLongUInt, properties: &'a basic::AMQPProperties) -> Result<&'a mut [u8], GenError> {
+    gen_short_short_uint(gen_with_len(gen_id(gen_short_short_uint(x, constants::FRAME_HEADER)?, channel_id)?, move |x| gen_properties(gen_long_long_uint(gen_short_uint(gen_id(x, class_id)?, 0 /* weight */)?, length)?, &properties))?, constants::FRAME_END)
 }
 
 /// Serialize a content body frame in the given buffer
-pub fn gen_content_body_frame<'a>(x: (&'a mut [u8], usize), channel_id: ShortUInt, content: &[u8]) -> Result<(&'a mut [u8], usize), GenError> {
-    do_gen!(x,
-        gen_short_short_uint(constants::FRAME_BODY) >>
-        gen_id(channel_id)                          >>
-        gen_long_uint(content.len() as LongUInt)    >>
-        gen_slice!(content)                         >>
-        gen_short_short_uint(constants::FRAME_END)
-    )
+pub fn gen_content_body_frame<'a>(x: &'a mut [u8], channel_id: ShortUInt, content: &'a [u8]) -> Result<&'a mut [u8], GenError> {
+    gen_short_short_uint(slice(content)(gen_long_uint(gen_id(gen_short_short_uint(x, constants::FRAME_BODY)?, channel_id)?, content.len() as LongUInt)?)?, constants::FRAME_END)
 }
