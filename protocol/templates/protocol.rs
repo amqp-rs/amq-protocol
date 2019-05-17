@@ -310,7 +310,13 @@ pub mod {{snake class.name}} {
             2
             {{#each_argument method.arguments as |argument| ~}}
             {{#unless argument_is_value ~}}
-            + 1
+            + {
+                let mut flags = AMQPFlags::default();
+                {{#each argument.flags as |flag| ~}}
+                flags.add_flag("{{snake flag.name}}".to_string(), {{#if flag.force_default ~}}{{flag.default_value}}{{else}}self.{{snake flag.name}}{{/if ~}});
+                {{/each ~}}
+                flags.get_gen_size()
+            }
             {{else}}
             {{#if argument.force_default ~}}
             + {{gen_size argument.default_value}}
