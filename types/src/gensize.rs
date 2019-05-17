@@ -25,7 +25,8 @@ pub trait GenSize {
     }
 }
 
-pub(crate) struct Length;
+/// Struct to compute the serialization size of length-prefixed values
+pub struct Length;
 pub(crate) struct ShortLength;
 
 impl GenSize for Length {

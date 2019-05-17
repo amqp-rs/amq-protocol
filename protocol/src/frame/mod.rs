@@ -6,8 +6,10 @@ pub use self::{
     structs::*,
 };
 
-pub use cookie_factory::GenError;
-pub use crate::types::parsing::{ParserError, ParserResult};
+pub use crate::types::{
+    generation::{GenError, GenResult},
+    parsing::{ParserError, ParserResult},
+};
 pub use nom::Offset;
 
 /// Serialization utils

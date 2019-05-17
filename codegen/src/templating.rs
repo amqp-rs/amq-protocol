@@ -3,7 +3,10 @@ use crate::{
     util::*,
 };
 
-use amq_protocol_types::{AMQPType, AMQPValue};
+use amq_protocol_types::{
+    AMQPType, AMQPValue,
+    generation::GenSize,
+};
 use handlebars::{self, Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output, Renderable, RenderContext, RenderError, ScopedJson, to_json};
 use serde_json::{self, Value};
 
@@ -44,6 +47,7 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self.register_helper("method_has_flag", Box::new(MethodHasFlagHelper));
         self.register_helper("each_argument",   Box::new(EachArgumentHelper));
         self.register_helper("amqp_value",      Box::new(AMQPValueHelper));
+        self.register_helper("gen_size",        Box::new(GenSizeHelper));
         self
     }
 
@@ -227,6 +231,16 @@ impl HelperDef for AMQPValueHelper {
             AMQPValue::Void              => JsonValue::Null,
         };
         Ok(Some(ScopedJson::Derived(value)))
+    }
+}
+
+/// Helper for computing the gen size of an AMQPValue
+pub struct GenSizeHelper;
+impl HelperDef for GenSizeHelper {
+    fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
+        let arg              = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"gen_size\""))?;
+        let param: AMQPValue = serde_json::from_value(arg.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPValue for helper \"gen_size\""))?;
+        Ok(Some(ScopedJson::Derived(JsonValue::from(param.get_gen_size()))))
     }
 }
 

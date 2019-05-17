@@ -4,11 +4,11 @@ pub use cookie_factory::GenError;
 pub type GenResult<'a> = Result<&'a mut [u8], GenError>;
 
 /// Trait for computing the size required for serialization
-pub use crate::gensize::GenSize;
+pub use crate::gensize::{GenSize, Length};
 
 use crate::{
     flags::*,
-    gensize::{Length, ShortLength},
+    gensize::ShortLength,
     types::*,
     value::*,
 };

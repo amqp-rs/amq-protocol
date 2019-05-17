@@ -5,7 +5,6 @@ use crate::types::{
     parsing::*,
 };
 
-use cookie_factory::GenError;
 use nom::combinator::{flat_map, map, map_opt};
 
 /// Protocol metadata
@@ -135,11 +134,21 @@ pub fn parse_class(i: &[u8]) -> ParserResult<'_, AMQPClass> {
 }
 
 /// Serialize an AMQP class
-pub fn gen_class<'a>(input: &'a mut [u8], class: &'a AMQPClass) -> Result<&'a mut [u8], GenError> {
+pub fn gen_class<'a>(input: &'a mut [u8], class: &'a AMQPClass) -> GenResult<'a> {
     match *class {
         {{#each protocol.classes as |class| ~}}
         AMQPClass::{{camel class.name}}(ref {{snake class.name}}) => {{snake class.name}}::gen_{{snake class.name false}}(input, {{snake class.name}}),
         {{/each ~}}
+    }
+}
+
+impl GenSize for AMQPClass {
+    fn get_gen_size(&self) -> usize {
+        match self {
+            {{#each protocol.classes as |class| ~}}
+            AMQPClass::{{camel class.name}}(m) => m.get_gen_size(),
+            {{/each ~}}
+        }
     }
 }
 
@@ -179,13 +188,23 @@ pub mod {{snake class.name}} {
     }
 
     /// Serialize {{class.name}} (Generated)
-    pub fn gen_{{snake class.name false}}<'a>(input: &'a mut [u8], method: &'a AMQPMethod) -> Result<&'a mut [u8], GenError> {
+    pub fn gen_{{snake class.name false}}<'a>(input: &'a mut [u8], method: &'a AMQPMethod) -> GenResult<'a> {
         match *method {
             {{#each class.methods as |method| ~}}
             AMQPMethod::{{camel method.name}}(ref {{snake method.name}}) => {
                 gen_{{snake method.name false}}(gen_id(input, {{class.id}})?, {{snake method.name}})
             },
             {{/each ~}}
+        }
+    }
+
+    impl GenSize for AMQPMethod {
+        fn get_gen_size(&self) -> usize {
+            2 + match self {
+                {{#each class.methods as |method| ~}}
+                AMQPMethod::{{camel method.name}}(m) => m.get_gen_size(),
+                {{/each ~}}
+            }
         }
     }
 
@@ -266,7 +285,7 @@ pub mod {{snake class.name}} {
     }
 
     /// Serialize {{method.name}} (Generated)
-    pub fn gen_{{snake method.name false}}<'a>(input: &'a mut [u8], {{#if method.arguments ~}}{{#if method.ignore_args ~}}_{{/if ~}}method{{else}}_{{/if ~}}: &'a {{camel method.name}}) -> Result<&'a mut [u8], GenError> {
+    pub fn gen_{{snake method.name false}}<'a>(input: &'a mut [u8], {{#if method.arguments ~}}{{#if method.ignore_args ~}}_{{/if ~}}method{{else}}_{{/if ~}}: &'a {{camel method.name}}) -> GenResult<'a> {
         {{#each_argument method.arguments as |argument| ~}}
         {{#unless argument_is_value ~}}
         let mut flags = AMQPFlags::default();
@@ -284,6 +303,23 @@ pub mod {{snake class.name}} {
         {{/if ~}}
         {{/each_argument ~}}
         Ok(input)
+    }
+
+    impl GenSize for {{camel method.name}} {
+        fn get_gen_size(&self) -> usize {
+            2
+            {{#each_argument method.arguments as |argument| ~}}
+            {{#unless argument_is_value ~}}
+            + 1
+            {{else}}
+            {{#if argument.force_default ~}}
+            + {{gen_size argument.default_value}}
+            {{else}}
+            + self.{{snake argument.name}}.get_gen_size()
+            {{/if ~}}
+            {{/unless ~}}
+            {{/each_argument ~}}
+        }
     }
     {{/each ~}}
     {{#if class.properties ~}}
@@ -346,7 +382,7 @@ pub mod {{snake class.name}} {
 
     /// Serialize {{class.name}} properties (Generated)
     #[clippy::cyclomatic_complexity = "32"]
-    pub fn gen_properties<'a>(input: &'a mut [u8], props: &'a AMQPProperties) -> Result<&'a mut [u8], GenError> {
+    pub fn gen_properties<'a>(input: &'a mut [u8], props: &'a AMQPProperties) -> GenResult<'a> {
         let mut input = gen_short_uint(input, props.bitmask())?;
         {{#each class.properties as |property| ~}}
         if let Some(prop) = props.{{snake property.name}}{{#if (pass_by_ref property.type) ~}}.as_ref(){{/if ~}} {
@@ -354,6 +390,18 @@ pub mod {{snake class.name}} {
         }
         {{/each ~}}
         Ok(input)
+    }
+
+    impl GenSize for AMQPProperties {
+        fn get_gen_size(&self) -> usize {
+            let mut size = self.bitmask().get_gen_size();
+            {{#each class.properties as |property| ~}}
+            if let Some(prop) = self.{{snake property.name}}{{#if (pass_by_ref property.type) ~}}.as_ref(){{/if ~}} {
+                size += prop.get_gen_size();
+            }
+            {{/each ~}}
+            size
+        }
     }
     {{/if ~}}
 }
