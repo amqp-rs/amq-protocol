@@ -10,12 +10,12 @@ use crate::{
     },
 };
 
-use cookie_factory::slice;
+use cookie_factory::{length, slice};
 
 /// Serialize a frame in the given buffer
-pub fn gen_frame<'a>(x: &'a mut [u8], frame: &'a AMQPFrame) -> GenResult<'a> {
+pub fn gen_frame<'a>(x: &'a mut [u8], frame: &'a AMQPFrame) -> Result<(usize, &'a mut [u8]), GenError> {
     frame.check_gen_size(x)?;
-    match frame {
+    length(move |x| match frame {
         AMQPFrame::ProtocolHeader => {
             gen_protocol_header(x)
         },
@@ -31,7 +31,7 @@ pub fn gen_frame<'a>(x: &'a mut [u8], frame: &'a AMQPFrame) -> GenResult<'a> {
         AMQPFrame::Body(channel_id, data) => {
             gen_content_body_frame(x, *channel_id, data)
         }
-    }
+    })(x)
 }
 
 fn gen_protocol_header(x: &mut [u8]) -> GenResult<'_> {
