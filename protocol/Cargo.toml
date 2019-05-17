@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol"
-version       = "2.0.0-rc3" # remember to update html_root_url
+version       = "2.0.0-rc4" # remember to update html_root_url
 edition       = "2018"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications"
@@ -15,7 +15,7 @@ build         = "build.rs"
 name = "amq_protocol"
 
 [build-dependencies.amq-protocol-codegen]
-version = "=2.0.0-rc3"
+version = "=2.0.0-rc4"
 path    = "../codegen"
 
 [dependencies]
@@ -24,11 +24,11 @@ nom            = "=5.0.0-beta1"
 url            = "^1.7"
 
 [dependencies.amq-protocol-codegen]
-version = "=2.0.0-rc3"
+version = "=2.0.0-rc4"
 path    = "../codegen"
 
 [dependencies.amq-protocol-types]
-version = "=2.0.0-rc3"
+version = "=2.0.0-rc4"
 path    = "../types"
 
 [badges]
