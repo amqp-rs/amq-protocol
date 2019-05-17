@@ -239,8 +239,14 @@ pub struct GenSizeHelper;
 impl HelperDef for GenSizeHelper {
     fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
         let arg              = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"gen_size\""))?;
+        let arg2             = h.param(1).ok_or_else(|| RenderError::new("Second param not found for helper \"gen_size\""))?;
         let param: AMQPValue = serde_json::from_value(arg.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPValue for helper \"gen_size\""))?;
-        Ok(Some(ScopedJson::Derived(JsonValue::from(param.get_gen_size()))))
+        let paramt: AMQPType = serde_json::from_value(arg2.value().clone()).map_err(|_| RenderError::new("Param 2 is not an AMQPType for helper \"gen_size\""))?;
+        Ok(Some(ScopedJson::Derived(JsonValue::from(if let AMQPType::ShortString = paramt {
+            param.get_gen_size() - 3
+        } else {
+            param.get_gen_size()
+        }))))
     }
 }
 

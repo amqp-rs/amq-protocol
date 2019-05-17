@@ -319,7 +319,7 @@ pub mod {{snake class.name}} {
             }
             {{else}}
             {{#if argument.force_default ~}}
-            + {{gen_size argument.default_value}}
+            + {{gen_size argument.default_value argument.type}}
             {{else}}
             + self.{{snake argument.name}}.get_gen_size()
             {{/if ~}}
