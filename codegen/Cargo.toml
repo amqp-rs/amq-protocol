@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-codegen"
-version       = "2.0.0-rc2" # remember to update html_root_url
+version       = "2.0.0-rc3" # remember to update html_root_url
 edition       = "2018"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications - codegen"
@@ -18,7 +18,7 @@ handlebars = "^2.0.0-beta.2"
 serde_json = "^1.0"
 
 [dependencies.amq-protocol-types]
-version = "=2.0.0-rc2"
+version = "=2.0.0-rc3"
 path    = "../types"
 
 [dependencies.serde]
