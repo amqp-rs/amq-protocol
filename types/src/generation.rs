@@ -1,15 +1,20 @@
+/// Serialization error
+pub use cookie_factory::GenError;
+/// Serialization result
+pub type GenResult<'a> = Result<&'a mut [u8], GenError>;
+
 use crate::{
     flags::*,
     types::*,
     value::*,
 };
 
-use cookie_factory::{GenError, be_f32, be_f64, be_i8, be_i16, be_i32, be_i64, be_u8, be_u16, be_u32, be_u64, length, many_ref, slice};
+use cookie_factory::{be_f32, be_f64, be_i8, be_i16, be_i32, be_i64, be_u8, be_u16, be_u32, be_u64, length, many_ref, slice};
 
 /// Apply a generator and serialize its length at the beginning of buffer
-pub fn gen_with_len<'a, F>(x: &'a mut [u8], f: F) -> Result<&'a mut [u8], GenError>
+pub fn gen_with_len<'a, F>(x: &'a mut [u8], f: F) -> GenResult<'a>
 where
-    F: Fn(&'a mut [u8]) -> Result<&'a mut [u8], GenError>
+    F: Fn(&'a mut [u8]) -> GenResult<'a>
 {
     if x.len() < 4 {
         return Err(GenError::BufferTooSmall(4));
@@ -23,7 +28,7 @@ where
 }
 
 /// Generate the [AMQPValue](../type.AMQPValue.html) in the given buffer (x)
-pub fn gen_raw_value<'a>(x: &'a mut [u8], v: &'a AMQPValue) -> Result<&'a mut [u8], GenError> {
+pub fn gen_raw_value<'a>(x: &'a mut [u8], v: &'a AMQPValue) -> GenResult<'a> {
     match *v {
         AMQPValue::Boolean(b)        => gen_boolean(x, b),
         AMQPValue::ShortShortInt(i)  => gen_short_short_int(x, i),
@@ -46,119 +51,119 @@ pub fn gen_raw_value<'a>(x: &'a mut [u8], v: &'a AMQPValue) -> Result<&'a mut [u
 }
 
 /// Generate the [AMQPValue](../type.AMQPValue.html) preceded with its [AMQPType](../type.AMQPType.html) in the given buffer (x)
-pub fn gen_value<'a>(x: &'a mut [u8], v: &'a AMQPValue) -> Result<&'a mut [u8], GenError> {
+pub fn gen_value<'a>(x: &'a mut [u8], v: &'a AMQPValue) -> GenResult<'a> {
     gen_raw_value(gen_type(x, v.get_type())?, v)
 }
 
 /// Generate the [AMQPType](../type.AMQPType.html) in the given buffer (x)
-pub fn gen_type(x: &mut [u8], t: AMQPType) -> Result<&mut [u8], GenError> {
+pub fn gen_type(x: &mut [u8], t: AMQPType) -> GenResult<'_> {
     gen_short_short_uint(x, t.get_id() as ShortShortUInt)
 }
 
 /// Generate the id ([ShortUInt](../type.ShortUInt.html)) in the given buffer (x)
-pub fn gen_id(x: &mut [u8], id: ShortUInt) -> Result<&mut [u8], GenError> {
+pub fn gen_id(x: &mut [u8], id: ShortUInt) -> GenResult<'_> {
     gen_short_uint(x, id)
 }
 
 /// Generate the [Boolean](../type.Boolean.html) in the given buffer (x)
-pub fn gen_boolean(x: &mut [u8], b: Boolean) -> Result<&mut [u8], GenError> {
+pub fn gen_boolean(x: &mut [u8], b: Boolean) -> GenResult<'_> {
     gen_short_short_uint(x, if b { 1 } else { 0 })
 }
 
 /// Generate the [ShortShortInt](../type.ShortShortInt.html) in the given buffer (x)
-pub fn gen_short_short_int(x: &mut [u8], i: ShortShortInt) -> Result<&mut [u8], GenError> {
+pub fn gen_short_short_int(x: &mut [u8], i: ShortShortInt) -> GenResult<'_> {
     be_i8(i)(x)
 }
 
 /// Generate the [ShortShortUInt](../type.ShortShortUInt.html) in the given buffer (x)
-pub fn gen_short_short_uint(x: &mut [u8], u: ShortShortUInt) -> Result<&mut [u8], GenError> {
+pub fn gen_short_short_uint(x: &mut [u8], u: ShortShortUInt) -> GenResult<'_> {
     be_u8(u)(x)
 }
 
 /// Generate the [ShortInt](../type.ShortInt.html) in the given buffer (x)
-pub fn gen_short_int(x: &mut [u8], i: ShortInt) -> Result<&mut [u8], GenError> {
+pub fn gen_short_int(x: &mut [u8], i: ShortInt) -> GenResult<'_> {
     be_i16(i)(x)
 }
 
 /// Generate the [ShortUInt](../type.ShortUInt.html) in the given buffer (x)
-pub fn gen_short_uint(x: &mut [u8], u: ShortUInt) -> Result<&mut [u8], GenError> {
+pub fn gen_short_uint(x: &mut [u8], u: ShortUInt) -> GenResult<'_> {
     be_u16(u)(x)
 }
 
 /// Generate the [LongInt](../type.LongInt.html) in the given buffer (x)
-pub fn gen_long_int(x: &mut [u8], i: LongInt) -> Result<&mut [u8], GenError> {
+pub fn gen_long_int(x: &mut [u8], i: LongInt) -> GenResult<'_> {
     be_i32(i)(x)
 }
 
 /// Generate the [LongUInt](../type.LongUInt.html) in the given buffer (x)
-pub fn gen_long_uint(x: &mut [u8], u: LongUInt) -> Result<&mut [u8], GenError> {
+pub fn gen_long_uint(x: &mut [u8], u: LongUInt) -> GenResult<'_> {
     be_u32(u)(x)
 }
 
 /// Generate the [LongLongInt](../type.LongLongInt.html) in the given buffer (x)
-pub fn gen_long_long_int(x: &mut [u8], i: LongLongInt) -> Result<&mut [u8], GenError> {
+pub fn gen_long_long_int(x: &mut [u8], i: LongLongInt) -> GenResult<'_> {
     be_i64(i)(x)
 }
 
 /// Generate the [LongLongUInt](../type.LongLongUInt.html) in the given buffer (x)
-pub fn gen_long_long_uint(x: &mut [u8], u: LongLongUInt) -> Result<&mut [u8], GenError> {
+pub fn gen_long_long_uint(x: &mut [u8], u: LongLongUInt) -> GenResult<'_> {
     be_u64(u)(x)
 }
 
 /// Generate the [Float](../type.Float.html) in the given buffer (x)
-pub fn gen_float(x: &mut [u8], f: Float) -> Result<&mut [u8], GenError> {
+pub fn gen_float(x: &mut [u8], f: Float) -> GenResult<'_> {
     be_f32(f)(x)
 }
 
 /// Generate the [Double](../type.Double.html) in the given buffer (x)
-pub fn gen_double(x: &mut [u8], d: Double) -> Result<&mut [u8], GenError> {
+pub fn gen_double(x: &mut [u8], d: Double) -> GenResult<'_> {
     be_f64(d)(x)
 }
 
 /// Generate the [DecimalValue](../type.DecimalValue.html) in the given buffer (x)
-pub fn gen_decimal_value(x: &mut [u8], d: DecimalValue) -> Result<&mut [u8], GenError> {
+pub fn gen_decimal_value(x: &mut [u8], d: DecimalValue) -> GenResult<'_> {
     gen_long_uint(gen_short_short_uint(x, d.scale)?, d.value)
 }
 
 /// Generate the [ShortString](../type.ShortString.html) in the given buffer (x)
-pub fn gen_short_string<'a>(x: &'a mut [u8], s: ShortStringRef<'a>) -> Result<&'a mut [u8], GenError> {
+pub fn gen_short_string<'a>(x: &'a mut [u8], s: ShortStringRef<'a>) -> GenResult<'a> {
     let len = s.len();
     slice(s.as_bytes())(gen_short_short_uint(x, len as ShortShortUInt)?)
 }
 
 /// Generate the [LongString](../type.LongString.html) in the given buffer (x)
-pub fn gen_long_string<'a>(x: &'a mut [u8], s: LongStringRef<'a>) -> Result<&'a mut [u8], GenError> {
+pub fn gen_long_string<'a>(x: &'a mut [u8], s: LongStringRef<'a>) -> GenResult<'a> {
     let len = s.len();
     slice(s.as_bytes())(gen_long_uint(x, len as LongUInt)?)
 }
 
 /// Generate the [FieldArray](../type.FieldArray.html) in the given buffer (x)
-pub fn gen_field_array<'a>(x: &'a mut [u8], a: FieldArrayRef<'a>) -> Result<&'a mut [u8], GenError> {
+pub fn gen_field_array<'a>(x: &'a mut [u8], a: FieldArrayRef<'a>) -> GenResult<'a> {
     gen_with_len(x, many_ref(a, move |field| move |x| gen_value(x, field)))
 }
 
 /// Generate the [Timestamp](../type.Timestamp.html) in the given buffer (x)
-pub fn gen_timestamp(x: &mut [u8], t: Timestamp) -> Result<&mut [u8], GenError> {
+pub fn gen_timestamp(x: &mut [u8], t: Timestamp) -> GenResult<'_> {
     gen_long_long_uint(x, t)
 }
 
 /// Generate the [FieldTable](../type.FieldTable.html) in the given buffer (x)
-pub fn gen_field_table<'a>(x: &'a mut [u8], t: &'a FieldTable) -> Result<&'a mut [u8], GenError> {
+pub fn gen_field_table<'a>(x: &'a mut [u8], t: &'a FieldTable) -> GenResult<'a> {
     gen_with_len(x, many_ref(t, move |entry| move |x| gen_field_entry(x, entry)))
 }
 
-fn gen_field_entry<'a>(x: &'a mut [u8], e: (&'a ShortString, &'a AMQPValue)) -> Result<&'a mut [u8], GenError> {
+fn gen_field_entry<'a>(x: &'a mut [u8], e: (&'a ShortString, &'a AMQPValue)) -> GenResult<'a> {
     gen_value(gen_short_string(x, e.0)?, e.1)
 }
 
 /// Generate the [BiteArray](../type.ByteArray.html) in the given buffer (x)
-pub fn gen_byte_array<'a>(x: &'a mut [u8], a: ByteArrayRef<'a>) -> Result<&'a mut [u8], GenError> {
+pub fn gen_byte_array<'a>(x: &'a mut [u8], a: ByteArrayRef<'a>) -> GenResult<'a> {
     slice(a)(gen_long_uint(x, a.len() as LongUInt)?)
 }
 
 /// Generate the [AMQPFlags](../type.AMQPFlags.html) in the given buffer (x)
-pub fn gen_flags<'a>(x: &'a mut [u8], f: &AMQPFlags) -> Result<&'a mut [u8], GenError> {
-    f.get_bytes().iter().fold(Ok(x), |acc: Result<&'a mut [u8], GenError>, b| {
+pub fn gen_flags<'a>(x: &'a mut [u8], f: &AMQPFlags) -> GenResult<'a> {
+    f.get_bytes().iter().fold(Ok(x), |acc: GenResult<'a>, b| {
         acc.and_then(|x| gen_short_short_uint(x, *b))
     })
 }
