@@ -46,7 +46,7 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         self.register_helper("use_str_ref",     Box::new(UseStrRefHelper));
         self.register_helper("method_has_flag", Box::new(MethodHasFlagHelper));
         self.register_helper("each_argument",   Box::new(EachArgumentHelper));
-        self.register_helper("amqp_value",      Box::new(AMQPValueHelper));
+        self.register_helper("amqp_value_ref",  Box::new(AMQPValueRefHelper));
         self.register_helper("gen_size",        Box::new(GenSizeHelper));
         self
     }
@@ -55,7 +55,7 @@ impl HandlebarsAMQPExtension for CodeGenerator {
         let dest_path   = Path::new(out_dir).join(format!("{}.rs", target));
         let mut f       = File::create(&dest_path).unwrap_or_else(|_| panic!("Failed to create {}.rs", target));
         let specs       = AMQProtocolDefinition::load(metadata);
-        let mut codegen = CodeGenerator::new().register_amqp_helpers();
+        let mut codegen = CodeGenerator::default().register_amqp_helpers();
         let mut data    = HashMap::new();
 
         codegen.set_strict_mode(true);
@@ -206,8 +206,8 @@ impl HelperDef for EachArgumentHelper {
 }
 
 /// Helper for "unwrapping" an amqp_value
-pub struct AMQPValueHelper;
-impl HelperDef for AMQPValueHelper {
+pub struct AMQPValueRefHelper;
+impl HelperDef for AMQPValueRefHelper {
     fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
         let arg              = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"amqp_value\""))?;
         let param: AMQPValue = serde_json::from_value(arg.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPValue for helper \"amqp_value\""))?;
@@ -223,11 +223,12 @@ impl HelperDef for AMQPValueHelper {
             AMQPValue::Float(v)          => serde_json::to_value(v)?,
             AMQPValue::Double(v)         => serde_json::to_value(v)?,
             AMQPValue::DecimalValue(v)   => serde_json::to_value(v)?,
-            AMQPValue::LongString(v)     => serde_json::to_value(format!("\"{}\"", v))?,
-            AMQPValue::FieldArray(v)     => serde_json::to_value(v)?,
+            AMQPValue::ShortString(v)    => serde_json::to_value(format!("ShortStringRef(\"{}\")", v.0))?,
+            AMQPValue::LongString(v)     => serde_json::to_value(format!("LongStringRef(\"{}\")", v.0))?,
+            AMQPValue::FieldArray(v)     => serde_json::to_value(v.0)?,
             AMQPValue::Timestamp(v)      => serde_json::to_value(v)?,
-            AMQPValue::FieldTable(v)     => serde_json::to_value(v)?,
-            AMQPValue::ByteArray(v)      => serde_json::to_value(v)?,
+            AMQPValue::FieldTable(v)     => serde_json::to_value(v.0)?,
+            AMQPValue::ByteArray(v)      => serde_json::to_value(v.0)?,
             AMQPValue::Void              => JsonValue::Null,
         };
         Ok(Some(ScopedJson::Derived(value)))
@@ -239,20 +240,16 @@ pub struct GenSizeHelper;
 impl HelperDef for GenSizeHelper {
     fn call_inner<'reg: 'rc, 'rc>(&self, h: &Helper<'reg, 'rc>, _: &'reg Handlebars, _: &'rc Context, _: &mut RenderContext<'reg>) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
         let arg              = h.param(0).ok_or_else(|| RenderError::new("First param not found for helper \"gen_size\""))?;
-        let arg2             = h.param(1).ok_or_else(|| RenderError::new("Second param not found for helper \"gen_size\""))?;
         let param: AMQPValue = serde_json::from_value(arg.value().clone()).map_err(|_| RenderError::new("Param is not an AMQPValue for helper \"gen_size\""))?;
-        let paramt: AMQPType = serde_json::from_value(arg2.value().clone()).map_err(|_| RenderError::new("Param 2 is not an AMQPType for helper \"gen_size\""))?;
-        Ok(Some(ScopedJson::Derived(JsonValue::from(if let AMQPType::ShortString = paramt {
-            param.get_gen_size() - 3
-        } else {
-            param.get_gen_size()
-        }))))
+        Ok(Some(ScopedJson::Derived(JsonValue::from(param.get_gen_size() - 1))))
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+
+    use amq_protocol_types::LongString;
 
     use std::collections::BTreeMap;
 
@@ -288,7 +285,7 @@ synchronous: {{method.synchronous}}
 "#;
 
     fn specs() -> AMQProtocolDefinition {
-        let mut domains = BTreeMap::new();
+        let mut domains = BTreeMap::default();
         domains.insert("domain1".to_string(), AMQPType::LongString);
         AMQProtocolDefinition {
             name:          "AMQP".to_string(),
@@ -305,8 +302,8 @@ synchronous: {{method.synchronous}}
                     value:     128,
                 }
             ],
-            soft_errors:   Vec::new(),
-            hard_errors:   Vec::new(),
+            soft_errors:   Vec::default(),
+            hard_errors:   Vec::default(),
             classes:       vec![
                 AMQPClass {
                     id:             42,
@@ -317,7 +314,7 @@ synchronous: {{method.synchronous}}
                                 AMQPArgument::Value(AMQPValueArgument {
                                     amqp_type:     AMQPType::LongString,
                                     name:          "argument1".to_string(),
-                                    default_value: Some(AMQPValue::LongString("value1".to_string())),
+                                    default_value: Some(AMQPValue::LongString(LongString("value1".to_string()))),
                                     domain:        Some("domain1".to_string()),
                                     force_default: false,
                                 }),
@@ -362,7 +359,7 @@ synchronous: {{method.synchronous}}
     #[test]
     fn main_template() {
         let mut data    = HashMap::new();
-        let mut codegen = CodeGenerator::new().register_amqp_helpers();
+        let mut codegen = CodeGenerator::default().register_amqp_helpers();
         data.insert("protocol".to_string(), specs());
         assert!(codegen.register_template_string("main", TEMPLATE.to_string()).is_ok());
         assert_eq!(codegen.render("main", &data).unwrap(), r#"

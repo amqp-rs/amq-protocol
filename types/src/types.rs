@@ -143,20 +143,26 @@ pub type LongLongUInt   = u64;
 pub type Float          = f32;
 /// A f64
 pub type Double         = f64;
-/// A String (deprecated)
-pub type ShortString    = String;
-/// A String
-pub type LongString     = String;
-/// An array of AMQPValue
-pub type FieldArray     = Vec<AMQPValue>;
 /// A timestamp (u32)
 pub type Timestamp      = LongLongUInt;
-/// A Map<String, AMQPValue>
-pub type FieldTable     = BTreeMap<ShortString, AMQPValue>;
-/// An array of bytes (RabbitMQ specific)
-pub type ByteArray      = Vec<u8>;
 /// No value
 pub type Void           = ();
+
+/// A String (deprecated)
+#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
+pub struct ShortString(pub String);
+/// A String
+#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
+pub struct LongString(pub String);
+/// An array of AMQPValue
+#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
+pub struct FieldArray(pub Vec<AMQPValue>);
+/// A Map<String, AMQPValue>
+#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
+pub struct FieldTable(pub BTreeMap<ShortString, AMQPValue>);
+/// An array of bytes (RabbitMQ specific)
+#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+pub struct ByteArray(pub Vec<u8>);
 
 /// A Decimal value composed of a scale and a value
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -168,13 +174,35 @@ pub struct DecimalValue {
 }
 
 /// A Reference pointing to a ShortString
-pub type ShortStringRef<'a> = &'a str;
+pub struct ShortStringRef<'a>(pub &'a str);
 /// A Reference pointing to a LongString
-pub type LongStringRef<'a>  = &'a str;
-/// A Reference pointing to a FieldArray
-pub type FieldArrayRef<'a>  = &'a [AMQPValue];
-/// A Reference pointing to a ByteArray
-pub type ByteArrayRef<'a>   = &'a [u8];
+pub struct LongStringRef<'a>(pub &'a str);
+
+impl<'a> ShortString {
+    /// Get a reference to a ShortString
+    pub fn as_ref(&'a self) -> ShortStringRef<'a> {
+        ShortStringRef(&self.0)
+    }
+}
+
+impl Default for ShortStringRef<'static> {
+    fn default() -> Self {
+        Self("")
+    }
+}
+
+impl<'a> LongString {
+    /// Get a reference to a LongString
+    pub fn as_ref(&'a self) -> LongStringRef<'a> {
+        LongStringRef(&self.0)
+    }
+}
+
+impl Default for LongStringRef<'static> {
+    fn default() -> Self {
+        Self("")
+    }
+}
 
 #[cfg(test)]
 mod test {

@@ -10,7 +10,7 @@ use std::collections::BTreeMap;
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQProtocolDefinition {
     /// The name of the protocol
-    pub name:          ShortString,
+    pub name:          String,
     /// The major protocol version
     pub major_version: ShortShortUInt,
     /// The minor protocol version
@@ -20,9 +20,9 @@ pub struct AMQProtocolDefinition {
     /// The default port of the protocol
     pub port:          LongUInt,
     /// The copyright holder of the protocol specification
-    pub copyright:     LongString,
+    pub copyright:     String,
     /// The domains defined by the protocol specification
-    pub domains:       BTreeMap<ShortString, AMQPType>,
+    pub domains:       BTreeMap<String, AMQPType>,
     /// The constants defined by the protocol specification
     pub constants:     Vec<AMQPConstant>,
     /// The soft errors defined by the protocol specification
@@ -46,7 +46,7 @@ impl AMQProtocolDefinition {
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPConstant {
     /// The name of the constant
-    pub name:      ShortString,
+    pub name:      String,
     /// The value of the constant
     pub value:     ShortUInt,
     /// The type of the constant
@@ -62,7 +62,7 @@ pub struct AMQPClass {
     /// The methods of the class
     pub methods:        Vec<AMQPMethod>,
     /// The name of the class
-    pub name:           ShortString,
+    pub name:           String,
     /// The properties of the class
     pub properties:     Vec<AMQPProperty>,
     /// Extra metadata for code generation
@@ -77,7 +77,7 @@ pub struct AMQPMethod {
     /// The arguments of the method
     pub arguments:     Vec<AMQPArgument>,
     /// The name of the method
-    pub name:          ShortString,
+    pub name:          String,
     /// Whether this method is synchronous or not
     pub synchronous:   Boolean,
     /// Extra metadata for code generation
@@ -117,11 +117,11 @@ pub struct AMQPValueArgument {
     #[serde(rename="type")]
     pub amqp_type:     AMQPType,
     /// The name of the argument's value
-    pub name:          ShortString,
+    pub name:          String,
     /// The default value of the argument's value
     pub default_value: Option<AMQPValue>,
     /// The domain of the argument's value
-    pub domain:        Option<ShortString>,
+    pub domain:        Option<String>,
     /// Whether the default value is forced or not
     pub force_default: bool,
 }
@@ -145,7 +145,7 @@ impl AMQPFlagsArgument {
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPFlagArgument {
     /// The name of the flag
-    pub name:          ShortString,
+    pub name:          String,
     /// The default value for the flag
     pub default_value: Boolean,
     /// Whether the default value is forced or not
@@ -159,5 +159,5 @@ pub struct AMQPProperty {
     #[serde(rename="type")]
     pub amqp_type: AMQPType,
     /// The name of the property
-    pub name:      ShortString,
+    pub name:      String,
 }

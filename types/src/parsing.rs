@@ -35,8 +35,7 @@ pub fn parse_raw_value(amqp_type: AMQPType) -> impl Fn(&[u8]) -> ParserResult<'_
         AMQPType::Float          => map(parse_float,            AMQPValue::Float)(i),
         AMQPType::Double         => map(parse_double,           AMQPValue::Double)(i),
         AMQPType::DecimalValue   => map(parse_decimal_value,    AMQPValue::DecimalValue)(i),
-        /* ShortString is only for internal usage and AMQPValue::ShortString shouldn't exist, hence return it as LongString */
-        AMQPType::ShortString    => map(parse_short_string,     AMQPValue::LongString)(i),
+        AMQPType::ShortString    => map(parse_short_string,     AMQPValue::ShortString)(i),
         AMQPType::LongString     => map(parse_long_string,      AMQPValue::LongString)(i),
         AMQPType::FieldArray     => map(parse_field_array,      AMQPValue::FieldArray)(i),
         AMQPType::Timestamp      => map(parse_timestamp,        AMQPValue::Timestamp)(i),
@@ -123,18 +122,18 @@ pub fn parse_decimal_value(i: &[u8]) -> ParserResult<'_, DecimalValue> {
 
 /// Parse a [ShortString](../type.ShortString.html)
 pub fn parse_short_string(i: &[u8]) -> ParserResult<'_, ShortString> {
-    map(map_res(flat_map(parse_short_short_uint, take), std::str::from_utf8), ToString::to_string)(i)
+    map(map(map_res(flat_map(parse_short_short_uint, take), std::str::from_utf8), ToString::to_string), ShortString)(i)
 }
 
 /// Parse a [LongString](../type.LongString.html)
 pub fn parse_long_string(i: &[u8]) -> ParserResult<'_, LongString> {
-    map(map_res(flat_map(parse_long_uint, take), std::str::from_utf8), ToString::to_string)(i)
+    map(map(map_res(flat_map(parse_long_uint, take), std::str::from_utf8), ToString::to_string), LongString)(i)
 }
 
 /// Parse a [FieldArray](../type.FieldArray.html)
 pub fn parse_field_array(i: &[u8]) -> ParserResult<'_, FieldArray> {
-    map_parser(flat_map(parse_long_uint, take), all_consuming(fold_many0(complete(parse_value), FieldArray::new(), |mut acc, elem| {
-        acc.push(elem);
+    map_parser(flat_map(parse_long_uint, take), all_consuming(fold_many0(complete(parse_value), FieldArray::default(), |mut acc, elem| {
+        acc.0.push(elem);
         acc
     })))(i)
 }
@@ -146,15 +145,15 @@ pub fn parse_timestamp(i: &[u8]) -> ParserResult<'_, Timestamp> {
 
 /// Parse a [FieldTable](../type.FieldTable.html)
 pub fn parse_field_table(i: &[u8]) -> ParserResult<'_, FieldTable> {
-    map_parser(flat_map(parse_long_uint, take), all_consuming(fold_many0(complete(pair(parse_short_string, parse_value)), FieldTable::new(), |mut acc, (key, value)| {
-        acc.insert(key, value);
+    map_parser(flat_map(parse_long_uint, take), all_consuming(fold_many0(complete(pair(parse_short_string, parse_value)), FieldTable::default(), |mut acc, (key, value)| {
+        acc.0.insert(key, value);
         acc
     })))(i)
 }
 
 /// Parse a [ByteArray](../type.ByteArray.html)
 pub fn parse_byte_array(i: &[u8]) -> ParserResult<'_, ByteArray> {
-    map(flat_map(parse_long_uint, take), |a| a.to_vec())(i)
+    map(flat_map(parse_long_uint, take), |a| ByteArray(a.to_vec()))(i)
 }
 
 /// Parse the [AMQPFlags](../type.AMQPFlags.html) for which the names are provided
@@ -171,16 +170,16 @@ mod test {
     #[test]
     fn test_parse_value() {
         assert_eq!(parse_value(&[84, 42, 42, 42, 42, 42,  42,  42,  42]),  Ok((EMPTY, AMQPValue::Timestamp(3038287259199220266))));
-        assert_eq!(parse_value(&[83, 0,  0,  0,  4,  116, 101, 115, 116]), Ok((EMPTY, AMQPValue::LongString("test".to_string()))));
+        assert_eq!(parse_value(&[83, 0,  0,  0,  4,  116, 101, 115, 116]), Ok((EMPTY, AMQPValue::LongString(LongString("test".to_string())))));
     }
 
     #[test]
     fn test_parse_raw_value() {
         assert_eq!(parse_raw_value(AMQPType::Timestamp)   (&[42, 42, 42, 42, 42,  42,  42,  42]),  Ok((EMPTY, AMQPValue::Timestamp(3038287259199220266))));
-        assert_eq!(parse_raw_value(AMQPType::LongString)  (&[0,  0,  0,  4,  116, 101, 115, 116]), Ok((EMPTY, AMQPValue::LongString("test".to_string()))));
+        assert_eq!(parse_raw_value(AMQPType::LongString)  (&[0,  0,  0,  4,  116, 101, 115, 116]), Ok((EMPTY, AMQPValue::LongString(LongString("test".to_string())))));
         /* Test internal exceptions */
         assert_eq!(parse_raw_value(AMQPType::LongLongUInt)(&[42, 42, 42, 42, 42,  42,  42,  42]),  Ok((EMPTY, AMQPValue::LongLongInt(3038287259199220266))));
-        assert_eq!(parse_raw_value(AMQPType::ShortString) (&[4,  116, 101, 115, 116]),             Ok((EMPTY, AMQPValue::LongString("test".to_string()))));
+        assert_eq!(parse_raw_value(AMQPType::ShortString) (&[4,  116, 101, 115, 116]),             Ok((EMPTY, AMQPValue::ShortString(ShortString("test".to_string())))));
     }
 
     #[test]
@@ -269,20 +268,20 @@ mod test {
 
     #[test]
     fn test_parse_short_string() {
-        assert_eq!(parse_short_string(&[0]),                     Ok((EMPTY, ShortString::new())));
-        assert_eq!(parse_short_string(&[4, 116, 101, 115, 116]), Ok((EMPTY, "test".to_string())));
+        assert_eq!(parse_short_string(&[0]),                     Ok((EMPTY, ShortString::default())));
+        assert_eq!(parse_short_string(&[4, 116, 101, 115, 116]), Ok((EMPTY, ShortString("test".to_string()))));
     }
 
     #[test]
     fn test_parse_long_string() {
-        assert_eq!(parse_long_string(&[0, 0, 0, 0]),                     Ok((EMPTY, LongString::new())));
-        assert_eq!(parse_long_string(&[0, 0, 0, 4, 116, 101, 115, 116]), Ok((EMPTY, "test".to_string())));
+        assert_eq!(parse_long_string(&[0, 0, 0, 0]),                     Ok((EMPTY, LongString::default())));
+        assert_eq!(parse_long_string(&[0, 0, 0, 4, 116, 101, 115, 116]), Ok((EMPTY, LongString("test".to_string()))));
     }
 
     #[test]
     fn test_parse_field_array() {
-        assert_eq!(parse_field_array(&[0, 0, 0, 0]),                                          Ok((EMPTY, FieldArray::new())));
-        assert_eq!(parse_field_array(&[0, 0, 0, 10, 83, 0, 0, 0, 4, 116, 101, 115, 116, 86]), Ok((EMPTY, vec![AMQPValue::LongString("test".to_string()), AMQPValue::Void])));
+        assert_eq!(parse_field_array(&[0, 0, 0, 0]),                                          Ok((EMPTY, FieldArray::default())));
+        assert_eq!(parse_field_array(&[0, 0, 0, 10, 83, 0, 0, 0, 4, 116, 101, 115, 116, 86]), Ok((EMPTY, FieldArray(vec![AMQPValue::LongString(LongString("test".to_string())), AMQPValue::Void]))));
     }
 
     #[test]
@@ -293,17 +292,17 @@ mod test {
 
     #[test]
     fn test_parse_field_table() {
-        let mut table = FieldTable::new();
-        table.insert("test".to_string(), AMQPValue::LongString("test".to_string()));
-        table.insert("tt".to_string(),   AMQPValue::Void);
-        assert_eq!(parse_field_table(&[0, 0, 0, 0]),                                                                              Ok((EMPTY, FieldTable::new())));
+        let mut table = FieldTable::default();
+        table.0.insert(ShortString("test".to_string()), AMQPValue::LongString(LongString("test".to_string())));
+        table.0.insert(ShortString("tt".to_string()),   AMQPValue::Void);
+        assert_eq!(parse_field_table(&[0, 0, 0, 0]),                                                                              Ok((EMPTY, FieldTable::default())));
         assert_eq!(parse_field_table(&[0, 0, 0, 18, 4, 116, 101, 115, 116, 83, 0, 0, 0, 4, 116, 101, 115, 116, 2, 116, 116, 86]), Ok((EMPTY, table)));
     }
 
     #[test]
     fn test_parse_byte_array() {
-        assert_eq!(parse_byte_array(&[0, 0, 0, 0]),              Ok((EMPTY, ByteArray::new())));
-        assert_eq!(parse_byte_array(&[0, 0, 0, 4, 42, 1, 2, 3]), Ok((EMPTY, vec![42, 1, 2, 3])));
+        assert_eq!(parse_byte_array(&[0, 0, 0, 0]),              Ok((EMPTY, ByteArray::default())));
+        assert_eq!(parse_byte_array(&[0, 0, 0, 4, 42, 1, 2, 3]), Ok((EMPTY, ByteArray(vec![42, 1, 2, 3]))));
     }
 
     #[test]

@@ -28,6 +28,8 @@ pub enum AMQPValue {
     Double(Double),
     /// A decimal value
     DecimalValue(DecimalValue),
+    /// A String (deprecated)
+    ShortString(ShortString),
     /// A String
     LongString(LongString),
     /// An array of AMQPValue
@@ -57,6 +59,7 @@ impl AMQPValue {
             AMQPValue::Float(_)          => AMQPType::Float,
             AMQPValue::Double(_)         => AMQPType::Double,
             AMQPValue::DecimalValue(_)   => AMQPType::DecimalValue,
+            AMQPValue::ShortString(_)    => AMQPType::ShortString,
             AMQPValue::LongString(_)     => AMQPType::LongString,
             AMQPValue::FieldArray(_)     => AMQPType::FieldArray,
             AMQPValue::Timestamp(_)      => AMQPType::Timestamp,
@@ -65,34 +68,29 @@ impl AMQPValue {
             AMQPValue::Void              => AMQPType::Void,
         }
     }
-}
 
-impl From<Value> for AMQPValue {
-    fn from(v: Value) -> AMQPValue {
-        From::from(&v)
-    }
-}
-
-impl<'a> From<&'a Value> for AMQPValue {
-    fn from(v: &Value) -> AMQPValue {
-        match *v {
-            Value::Bool(ref b)   => AMQPValue::Boolean(*b),
-            Value::Number(ref n) => {
-                if n.is_u64() {
-                    AMQPValue::LongLongInt(n.as_u64().unwrap() as i64)
-                } else if n.is_i64() {
-                    AMQPValue::LongLongInt(n.as_i64().unwrap())
-                } else {
-                    AMQPValue::Double(n.as_f64().unwrap())
-                }
-            },
-            Value::String(ref s) => AMQPValue::LongString(s.clone()),
-            Value::Array(ref v)  => AMQPValue::FieldArray(v.iter().map(From::from).collect()),
-            Value::Object(ref o) => AMQPValue::FieldTable(o.iter().fold(FieldTable::new(), |mut table, (k, v)| {
-                table.insert(k.clone(), From::from(v));
-                table
-            })),
-            Value::Null          => AMQPValue::Void,
+    /// Convert a serde_json::Value into an AMQPValue
+    pub fn try_from(value: &Value, amqp_type: AMQPType) -> Option<AMQPValue> {
+        match amqp_type {
+            AMQPType::Boolean        => value.as_bool().map(AMQPValue::Boolean),
+            AMQPType::ShortShortInt  => value.as_i64().map(|i| AMQPValue::ShortShortInt(i as ShortShortInt)),
+            AMQPType::ShortShortUInt => value.as_u64().map(|u| AMQPValue::ShortShortUInt(u as ShortShortUInt)),
+            AMQPType::ShortInt       => value.as_i64().map(|i| AMQPValue::ShortInt(i as ShortInt)),
+            AMQPType::ShortUInt      => value.as_u64().map(|u| AMQPValue::ShortUInt(u as ShortUInt)),
+            AMQPType::LongInt        => value.as_i64().map(|i| AMQPValue::LongInt(i as LongInt)),
+            AMQPType::LongUInt       => value.as_u64().map(|u| AMQPValue::LongUInt(u as LongUInt)),
+            AMQPType::LongLongInt    => value.as_i64().map(|i| AMQPValue::LongLongInt(i as LongLongInt)),
+            AMQPType::LongLongUInt   => value.as_i64().map(|i| AMQPValue::LongLongInt(i as LongLongInt)), /* Not a typo; AMQPValue::LongLongUInt doesn't exist */
+            AMQPType::Float          => value.as_f64().map(|i| AMQPValue::Float(i as Float)),
+            AMQPType::Double         => value.as_f64().map(|i| AMQPValue::Double(i as Double)),
+            AMQPType::DecimalValue   => None,
+            AMQPType::ShortString    => value.as_str().map(ToString::to_string).map(ShortString).map(AMQPValue::ShortString),
+            AMQPType::LongString     => value.as_str().map(ToString::to_string).map(LongString).map(AMQPValue::LongString),
+            AMQPType::FieldArray     => None,
+            AMQPType::Timestamp      => value.as_u64().map(|t| AMQPValue::Timestamp(t as Timestamp)),
+            AMQPType::FieldTable     => None,
+            AMQPType::ByteArray      => None,
+            AMQPType::Void           => value.as_null().map(|_| AMQPValue::Void),
         }
     }
 }
@@ -101,47 +99,29 @@ impl<'a> From<&'a Value> for AMQPValue {
 mod test {
     use super::*;
 
-    use serde_json::{map, Number};
+    use serde_json::Number;
 
     #[test]
     fn test_from_bool_value() {
-        assert_eq!(AMQPValue::from(Value::Bool(false)), AMQPValue::Boolean(false));
-        assert_eq!(AMQPValue::from(Value::Bool(true)),  AMQPValue::Boolean(true));
+        assert_eq!(AMQPValue::try_from(&Value::Bool(false), AMQPType::Boolean), Some(AMQPValue::Boolean(false)));
+        assert_eq!(AMQPValue::try_from(&Value::Bool(true),  AMQPType::Boolean), Some(AMQPValue::Boolean(true)));
     }
 
     #[test]
     fn test_from_number_value() {
-        assert_eq!(AMQPValue::from(Value::Number(Number::from(42))),                 AMQPValue::LongLongInt(42));
-        assert_eq!(AMQPValue::from(Value::Number(Number::from(-42))),                AMQPValue::LongLongInt(-42));
-        assert_eq!(AMQPValue::from(Value::Number(Number::from_f64(42.42).unwrap())), AMQPValue::Double(42.42));
+        assert_eq!(AMQPValue::try_from(&Value::Number(Number::from(42)),                 AMQPType::LongLongUInt), Some(AMQPValue::LongLongInt(42)));
+        assert_eq!(AMQPValue::try_from(&Value::Number(Number::from(-42)),                AMQPType::LongLongInt),  Some(AMQPValue::LongLongInt(-42)));
+        assert_eq!(AMQPValue::try_from(&Value::Number(Number::from_f64(42.42).unwrap()), AMQPType::Double),       Some(AMQPValue::Double(42.42)));
     }
 
     #[test]
     fn test_from_string_value() {
-        assert_eq!(AMQPValue::from(Value::String(String::new())),      AMQPValue::LongString(String::new()));
-        assert_eq!(AMQPValue::from(Value::String("test".to_string())), AMQPValue::LongString("test".to_string()));
-    }
-
-    #[test]
-    fn test_from_array_value() {
-        assert_eq!(AMQPValue::from(Value::Array(Vec::new())),        AMQPValue::FieldArray(FieldArray::new()));
-        assert_eq!(AMQPValue::from(Value::Array(vec![Value::Null])), AMQPValue::FieldArray(vec![AMQPValue::Void]));
-    }
-
-    #[test]
-    fn test_from_object_value() {
-        let mut value_map = map::Map::new();
-        let mut table     = FieldTable::new();
-
-        value_map.insert("test".to_string(), Value::Null);
-        table.insert("test".to_string(), AMQPValue::Void);
-
-        assert_eq!(AMQPValue::from(Value::Object(map::Map::new())), AMQPValue::FieldTable(FieldTable::new()));
-        assert_eq!(AMQPValue::from(Value::Object(value_map)),       AMQPValue::FieldTable(table));
+        assert_eq!(AMQPValue::try_from(&Value::String(String::new()),      AMQPType::LongString), Some(AMQPValue::LongString(LongString::default())));
+        assert_eq!(AMQPValue::try_from(&Value::String("test".to_string()), AMQPType::LongString), Some(AMQPValue::LongString(LongString("test".to_string()))));
     }
 
     #[test]
     fn test_from_null_value() {
-        assert_eq!(AMQPValue::from(Value::Null), AMQPValue::Void);
+        assert_eq!(AMQPValue::try_from(&Value::Null, AMQPType::Void), Some(AMQPValue::Void));
     }
 }

@@ -1,16 +1,16 @@
-use crate::types::{Boolean, ShortString};
+use crate::types::Boolean;
 
 use serde::{Deserialize, Serialize};
 
 /// A struct representing AMQP boolean flags for RPC
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPFlags{
-    flags: Vec<(ShortString, Boolean)>,
+    flags: Vec<(String, Boolean)>,
 }
 
 impl AMQPFlags {
     /// Add a boolean flag with a name
-    pub fn add_flag(&mut self, name: ShortString, flag: Boolean) {
+    pub fn add_flag(&mut self, name: String, flag: Boolean) {
         self.flags.push((name, flag));
     }
 

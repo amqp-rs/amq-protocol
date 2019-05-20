@@ -297,7 +297,9 @@ pub mod {{snake class.name}} {
         let input = gen_id(input, {{method.id}})?;
         {{#each_argument method.arguments as |argument| ~}}
         {{#if argument_is_value ~}}
-        let input = gen_{{snake_type argument.type}}(input, {{#if argument.force_default ~}}{{amqp_value argument.default_value}}{{else}}{{#if (pass_by_ref argument.type) ~}}&{{/if ~}}method.{{snake argument.name}}{{/if ~}})?;
+        {{#if argument.force_default ~}}
+        {{/if ~}}
+        let input = gen_{{snake_type argument.type}}(input, {{#if (and (pass_by_ref argument.type) (not (use_str_ref argument.type))) ~}}&{{/if ~}}{{#if argument.force_default ~}}{{amqp_value_ref argument.default_value}}{{else}}method.{{snake argument.name}}{{#if (use_str_ref argument.type) ~}}.as_ref(){{/if ~}}{{/if ~}})?;
         {{else}}
         let input = gen_flags(input, &flags)?;
         {{/if ~}}
@@ -319,7 +321,7 @@ pub mod {{snake class.name}} {
             }
             {{else}}
             {{#if argument.force_default ~}}
-            + {{gen_size argument.default_value argument.type}}
+            + {{gen_size argument.default_value}}
             {{else}}
             + self.{{snake argument.name}}.get_gen_size()
             {{/if ~}}
@@ -392,7 +394,7 @@ pub mod {{snake class.name}} {
         let mut input = gen_short_uint(input, props.bitmask())?;
         {{#each class.properties as |property| ~}}
         if let Some(prop) = props.{{snake property.name}}{{#if (pass_by_ref property.type) ~}}.as_ref(){{/if ~}} {
-            input = gen_{{snake_type property.type}}(input, prop{{#if (use_str_ref property.type) ~}}.as_str(){{/if ~}})?;
+            input = gen_{{snake_type property.type}}(input, prop{{#if (use_str_ref property.type) ~}}.as_ref(){{/if ~}})?;
         }
         {{/each ~}}
         Ok(input)
