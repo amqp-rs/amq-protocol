@@ -84,8 +84,8 @@ impl AMQPValue {
             AMQPType::Float          => value.as_f64().map(|i| AMQPValue::Float(i as Float)),
             AMQPType::Double         => value.as_f64().map(|i| AMQPValue::Double(i as Double)),
             AMQPType::DecimalValue   => None,
-            AMQPType::ShortString    => value.as_str().map(ToString::to_string).map(ShortString).map(AMQPValue::ShortString),
-            AMQPType::LongString     => value.as_str().map(ToString::to_string).map(LongString).map(AMQPValue::LongString),
+            AMQPType::ShortString    => value.as_str().map(ShortString::from).map(AMQPValue::ShortString),
+            AMQPType::LongString     => value.as_str().map(LongString::from).map(AMQPValue::LongString),
             AMQPType::FieldArray     => None,
             AMQPType::Timestamp      => value.as_u64().map(|t| AMQPValue::Timestamp(t as Timestamp)),
             AMQPType::FieldTable     => None,
@@ -117,7 +117,7 @@ mod test {
     #[test]
     fn test_from_string_value() {
         assert_eq!(AMQPValue::try_from(&Value::String(String::new()),      AMQPType::LongString), Some(AMQPValue::LongString(LongString::default())));
-        assert_eq!(AMQPValue::try_from(&Value::String("test".to_string()), AMQPType::LongString), Some(AMQPValue::LongString(LongString("test".to_string()))));
+        assert_eq!(AMQPValue::try_from(&Value::String("test".to_string()), AMQPType::LongString), Some(AMQPValue::LongString("test".into())));
     }
 
     #[test]

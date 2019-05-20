@@ -185,6 +185,12 @@ impl<'a> ShortString {
     }
 }
 
+impl From<&str> for ShortString {
+    fn from(s: &str) -> Self {
+        Self(s.to_owned())
+    }
+}
+
 impl Default for ShortStringRef<'static> {
     fn default() -> Self {
         Self("")
@@ -195,6 +201,12 @@ impl<'a> LongString {
     /// Get a reference to a LongString
     pub fn as_ref(&'a self) -> LongStringRef<'a> {
         LongStringRef(&self.0)
+    }
+}
+
+impl From<&str> for LongString {
+    fn from(s: &str) -> Self {
+        Self(s.to_owned())
     }
 }
 

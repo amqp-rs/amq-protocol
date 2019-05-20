@@ -249,8 +249,6 @@ impl HelperDef for GenSizeHelper {
 mod test {
     use super::*;
 
-    use amq_protocol_types::LongString;
-
     use std::collections::BTreeMap;
 
     pub const TEMPLATE: &'static str = r#"
@@ -314,7 +312,7 @@ synchronous: {{method.synchronous}}
                                 AMQPArgument::Value(AMQPValueArgument {
                                     amqp_type:     AMQPType::LongString,
                                     name:          "argument1".to_string(),
-                                    default_value: Some(AMQPValue::LongString(LongString("value1".to_string()))),
+                                    default_value: Some(AMQPValue::LongString("value1".into())),
                                     domain:        Some("domain1".to_string()),
                                     force_default: false,
                                 }),

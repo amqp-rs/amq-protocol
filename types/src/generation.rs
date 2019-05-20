@@ -301,14 +301,14 @@ mod test {
 
     #[test]
     fn test_gen_short_string() {
-        assert_eq!(test_gen!(&mut [0],             gen_short_string, ShortStringRef::default()),                Ok((vec![0],                     1)));
-        assert_eq!(test_gen!(&mut [0, 0, 0, 0, 0], gen_short_string, ShortString("test".to_string()).as_ref()), Ok((vec![4, 116, 101, 115, 116], 5)));
+        assert_eq!(test_gen!(&mut [0],             gen_short_string, ShortStringRef::default()), Ok((vec![0],                     1)));
+        assert_eq!(test_gen!(&mut [0, 0, 0, 0, 0], gen_short_string, ShortStringRef("test")),    Ok((vec![4, 116, 101, 115, 116], 5)));
     }
 
     #[test]
     fn test_gen_long_string() {
-        assert_eq!(test_gen!(&mut [0, 0, 0, 0],             gen_long_string, LongStringRef::default()),                Ok((vec![0, 0, 0, 0],                     4)));
-        assert_eq!(test_gen!(&mut [0, 0, 0, 0, 0, 0, 0, 0], gen_long_string, LongString("test".to_string()).as_ref()), Ok((vec![0, 0, 0, 4, 116, 101, 115, 116], 8)));
+        assert_eq!(test_gen!(&mut [0, 0, 0, 0],             gen_long_string, LongStringRef::default()), Ok((vec![0, 0, 0, 0],                     4)));
+        assert_eq!(test_gen!(&mut [0, 0, 0, 0, 0, 0, 0, 0], gen_long_string, LongStringRef("test")),    Ok((vec![0, 0, 0, 4, 116, 101, 115, 116], 8)));
     }
 
     #[test]
@@ -326,8 +326,8 @@ mod test {
     #[test]
     fn test_gen_field_table() {
         let mut table = FieldTable::default();
-        table.0.insert(ShortString("test".to_string()),  AMQPValue::Float(42.42));
-        table.0.insert(ShortString("test2".to_string()), AMQPValue::Boolean(false));
+        table.0.insert("test".into(),  AMQPValue::Float(42.42));
+        table.0.insert("test2".into(), AMQPValue::Boolean(false));
         assert_eq!(test_gen!(&mut [0, 0, 0, 0],                                                       gen_field_table, &FieldTable::default()), Ok((vec![0, 0, 0, 0],                                                                                  4)));
         assert_eq!(test_gen!(&mut [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], gen_field_table, &table),                 Ok((vec![0, 0, 0, 18, 4, 116, 101, 115, 116, 102, 66, 41, 174, 20, 5, 116, 101, 115, 116, 50, 116, 0], 22)));
     }

@@ -170,16 +170,16 @@ mod test {
     #[test]
     fn test_parse_value() {
         assert_eq!(parse_value(&[84, 42, 42, 42, 42, 42,  42,  42,  42]),  Ok((EMPTY, AMQPValue::Timestamp(3038287259199220266))));
-        assert_eq!(parse_value(&[83, 0,  0,  0,  4,  116, 101, 115, 116]), Ok((EMPTY, AMQPValue::LongString(LongString("test".to_string())))));
+        assert_eq!(parse_value(&[83, 0,  0,  0,  4,  116, 101, 115, 116]), Ok((EMPTY, AMQPValue::LongString("test".into()))));
     }
 
     #[test]
     fn test_parse_raw_value() {
         assert_eq!(parse_raw_value(AMQPType::Timestamp)   (&[42, 42, 42, 42, 42,  42,  42,  42]),  Ok((EMPTY, AMQPValue::Timestamp(3038287259199220266))));
-        assert_eq!(parse_raw_value(AMQPType::LongString)  (&[0,  0,  0,  4,  116, 101, 115, 116]), Ok((EMPTY, AMQPValue::LongString(LongString("test".to_string())))));
+        assert_eq!(parse_raw_value(AMQPType::LongString)  (&[0,  0,  0,  4,  116, 101, 115, 116]), Ok((EMPTY, AMQPValue::LongString("test".into()))));
         /* Test internal exceptions */
         assert_eq!(parse_raw_value(AMQPType::LongLongUInt)(&[42, 42, 42, 42, 42,  42,  42,  42]),  Ok((EMPTY, AMQPValue::LongLongInt(3038287259199220266))));
-        assert_eq!(parse_raw_value(AMQPType::ShortString) (&[4,  116, 101, 115, 116]),             Ok((EMPTY, AMQPValue::ShortString(ShortString("test".to_string())))));
+        assert_eq!(parse_raw_value(AMQPType::ShortString) (&[4,  116, 101, 115, 116]),             Ok((EMPTY, AMQPValue::ShortString("test".into()))));
     }
 
     #[test]
@@ -269,19 +269,19 @@ mod test {
     #[test]
     fn test_parse_short_string() {
         assert_eq!(parse_short_string(&[0]),                     Ok((EMPTY, ShortString::default())));
-        assert_eq!(parse_short_string(&[4, 116, 101, 115, 116]), Ok((EMPTY, ShortString("test".to_string()))));
+        assert_eq!(parse_short_string(&[4, 116, 101, 115, 116]), Ok((EMPTY, "test".into())));
     }
 
     #[test]
     fn test_parse_long_string() {
         assert_eq!(parse_long_string(&[0, 0, 0, 0]),                     Ok((EMPTY, LongString::default())));
-        assert_eq!(parse_long_string(&[0, 0, 0, 4, 116, 101, 115, 116]), Ok((EMPTY, LongString("test".to_string()))));
+        assert_eq!(parse_long_string(&[0, 0, 0, 4, 116, 101, 115, 116]), Ok((EMPTY, "test".into())));
     }
 
     #[test]
     fn test_parse_field_array() {
         assert_eq!(parse_field_array(&[0, 0, 0, 0]),                                          Ok((EMPTY, FieldArray::default())));
-        assert_eq!(parse_field_array(&[0, 0, 0, 10, 83, 0, 0, 0, 4, 116, 101, 115, 116, 86]), Ok((EMPTY, FieldArray(vec![AMQPValue::LongString(LongString("test".to_string())), AMQPValue::Void]))));
+        assert_eq!(parse_field_array(&[0, 0, 0, 10, 83, 0, 0, 0, 4, 116, 101, 115, 116, 86]), Ok((EMPTY, FieldArray(vec![AMQPValue::LongString("test".into()), AMQPValue::Void]))));
     }
 
     #[test]
@@ -293,8 +293,8 @@ mod test {
     #[test]
     fn test_parse_field_table() {
         let mut table = FieldTable::default();
-        table.0.insert(ShortString("test".to_string()), AMQPValue::LongString(LongString("test".to_string())));
-        table.0.insert(ShortString("tt".to_string()),   AMQPValue::Void);
+        table.0.insert("test".into(), AMQPValue::LongString("test".into()));
+        table.0.insert("tt".into(),   AMQPValue::Void);
         assert_eq!(parse_field_table(&[0, 0, 0, 0]),                                                                              Ok((EMPTY, FieldTable::default())));
         assert_eq!(parse_field_table(&[0, 0, 0, 18, 4, 116, 101, 115, 116, 83, 0, 0, 0, 4, 116, 101, 115, 116, 2, 116, 116, 86]), Ok((EMPTY, table)));
     }
