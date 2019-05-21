@@ -197,10 +197,21 @@ impl Default for ShortStringRef<'static> {
     }
 }
 
+impl<'a> From<&'a str> for ShortStringRef<'a> {
+    fn from(s: &'a str) -> Self {
+        Self(s)
+    }
+}
+
 impl<'a> LongString {
     /// Get a reference to a LongString
     pub fn as_ref(&'a self) -> LongStringRef<'a> {
         LongStringRef(&self.0)
+    }
+
+    /// Get a reference to a LongString as &str
+    pub fn as_str(&'a self) -> &'a str {
+        self.0.as_str()
     }
 }
 
@@ -213,6 +224,30 @@ impl From<&str> for LongString {
 impl Default for LongStringRef<'static> {
     fn default() -> Self {
         Self("")
+    }
+}
+
+impl<'a> From<&'a str> for LongStringRef<'a> {
+    fn from(s: &'a str) -> Self {
+        Self(s)
+    }
+}
+
+impl From<Vec<AMQPValue>> for FieldArray {
+    fn from(v: Vec<AMQPValue>) -> Self {
+        Self(v)
+    }
+}
+
+impl From<BTreeMap<ShortString, AMQPValue>> for FieldTable {
+    fn from(m: BTreeMap<ShortString, AMQPValue>) -> Self {
+        Self(m)
+    }
+}
+
+impl From<Vec<u8>> for ByteArray {
+    fn from(v: Vec<u8>) -> Self {
+        Self(v)
     }
 }
 
