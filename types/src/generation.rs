@@ -140,21 +140,21 @@ pub fn gen_decimal_value(x: &mut [u8], d: DecimalValue) -> GenResult<'_> {
 }
 
 /// Generate the [ShortString](../type.ShortString.html) in the given buffer (x)
-pub fn gen_short_string<'a>(x: &'a mut [u8], s: ShortStringRef<'a>) -> GenResult<'a> {
+pub fn gen_short_string<'a, 'b>(x: &'a mut [u8], s: ShortStringRef<'b>) -> GenResult<'a> {
     s.check_gen_size(x)?;
-    slice(s.0.as_bytes())(gen_short_short_uint(x, s.0.len() as ShortShortUInt)?)
+    slice(s.as_bytes())(gen_short_short_uint(x, s.len() as ShortShortUInt)?)
 }
 
 /// Generate the [LongString](../type.LongString.html) in the given buffer (x)
-pub fn gen_long_string<'a>(x: &'a mut [u8], s: LongStringRef<'a>) -> GenResult<'a> {
+pub fn gen_long_string<'a, 'b>(x: &'a mut [u8], s: LongStringRef<'b>) -> GenResult<'a> {
     s.check_gen_size(x)?;
-    slice(s.0.as_bytes())(gen_long_uint(x, s.0.len() as LongUInt)?)
+    slice(s.as_bytes())(gen_long_uint(x, s.len() as LongUInt)?)
 }
 
 /// Generate the [FieldArray](../type.FieldArray.html) in the given buffer (x)
 pub fn gen_field_array<'a>(x: &'a mut [u8], a: &'a FieldArray) -> GenResult<'a> {
     a.check_gen_size(x)?;
-    gen_with_len(x, many_ref(&a.0, move |field| move |x| gen_value(x, field)))
+    gen_with_len(x, many_ref(a.as_slice(), move |field| move |x| gen_value(x, field)))
 }
 
 /// Generate the [Timestamp](../type.Timestamp.html) in the given buffer (x)
@@ -165,7 +165,7 @@ pub fn gen_timestamp(x: &mut [u8], t: Timestamp) -> GenResult<'_> {
 /// Generate the [FieldTable](../type.FieldTable.html) in the given buffer (x)
 pub fn gen_field_table<'a>(x: &'a mut [u8], t: &'a FieldTable) -> GenResult<'a> {
     t.check_gen_size(x)?;
-    gen_with_len(x, many_ref(&t.0, move |entry| move |x| gen_field_entry(x, entry)))
+    gen_with_len(x, many_ref(t, move |entry| move |x| gen_field_entry(x, entry)))
 }
 
 fn gen_field_entry<'a>(x: &'a mut [u8], e: (&'a ShortString, &'a AMQPValue)) -> GenResult<'a> {
@@ -175,7 +175,7 @@ fn gen_field_entry<'a>(x: &'a mut [u8], e: (&'a ShortString, &'a AMQPValue)) -> 
 /// Generate the [BiteArray](../type.ByteArray.html) in the given buffer (x)
 pub fn gen_byte_array<'a>(x: &'a mut [u8], a: &'a ByteArray) -> GenResult<'a> {
     a.check_gen_size(x)?;
-    slice(&a.0)(gen_long_uint(x, a.0.len() as LongUInt)?)
+    slice(a.as_slice())(gen_long_uint(x, a.len() as LongUInt)?)
 }
 
 /// Generate the [AMQPFlags](../type.AMQPFlags.html) in the given buffer (x)
@@ -313,8 +313,8 @@ mod test {
 
     #[test]
     fn test_gen_field_array() {
-        assert_eq!(test_gen!(&mut [0, 0, 0, 0],       gen_field_array, &FieldArray::default()),                      Ok((vec![0, 0, 0, 0],         4)));
-        assert_eq!(test_gen!(&mut [0, 0, 0, 0, 0, 0], gen_field_array, &FieldArray(vec![AMQPValue::Boolean(true)])), Ok((vec![0, 0, 0, 2, 116, 1], 6)));
+        assert_eq!(test_gen!(&mut [0, 0, 0, 0],       gen_field_array, &FieldArray::default()),                 Ok((vec![0, 0, 0, 0],         4)));
+        assert_eq!(test_gen!(&mut [0, 0, 0, 0, 0, 0], gen_field_array, &vec![AMQPValue::Boolean(true)].into()), Ok((vec![0, 0, 0, 2, 116, 1], 6)));
     }
 
     #[test]
@@ -326,16 +326,16 @@ mod test {
     #[test]
     fn test_gen_field_table() {
         let mut table = FieldTable::default();
-        table.0.insert("test".into(),  AMQPValue::Float(42.42));
-        table.0.insert("test2".into(), AMQPValue::Boolean(false));
+        table.insert("test".into(),  AMQPValue::Float(42.42));
+        table.insert("test2".into(), AMQPValue::Boolean(false));
         assert_eq!(test_gen!(&mut [0, 0, 0, 0],                                                       gen_field_table, &FieldTable::default()), Ok((vec![0, 0, 0, 0],                                                                                  4)));
         assert_eq!(test_gen!(&mut [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], gen_field_table, &table),                 Ok((vec![0, 0, 0, 18, 4, 116, 101, 115, 116, 102, 66, 41, 174, 20, 5, 116, 101, 115, 116, 50, 116, 0], 22)));
     }
 
     #[test]
     fn test_gen_byte_array() {
-        assert_eq!(test_gen!(&mut [0, 0, 0, 0],             gen_byte_array, &ByteArray::default()),         Ok((vec![0, 0, 0, 0],              4)));
-        assert_eq!(test_gen!(&mut [0, 0, 0, 0, 0, 0, 0, 0], gen_byte_array, &ByteArray(vec![42, 1, 2, 3])), Ok((vec![0, 0, 0, 4, 42, 1, 2, 3], 8)));
+        assert_eq!(test_gen!(&mut [0, 0, 0, 0],             gen_byte_array, &ByteArray::default()),     Ok((vec![0, 0, 0, 0],              4)));
+        assert_eq!(test_gen!(&mut [0, 0, 0, 0, 0, 0, 0, 0], gen_byte_array, &vec![42, 1, 2, 3].into()), Ok((vec![0, 0, 0, 4, 42, 1, 2, 3], 8)));
     }
 
     #[test]

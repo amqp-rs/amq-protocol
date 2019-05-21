@@ -1,7 +1,7 @@
 use crate::value::AMQPValue;
 
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, btree_map},
     fmt,
 };
 
@@ -150,19 +150,19 @@ pub type Void           = ();
 
 /// A String (deprecated)
 #[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
-pub struct ShortString(pub String);
+pub struct ShortString(String);
 /// A String
 #[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
-pub struct LongString(pub String);
+pub struct LongString(String);
 /// An array of AMQPValue
 #[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
-pub struct FieldArray(pub Vec<AMQPValue>);
+pub struct FieldArray(Vec<AMQPValue>);
 /// A Map<String, AMQPValue>
 #[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
-pub struct FieldTable(pub BTreeMap<ShortString, AMQPValue>);
+pub struct FieldTable(BTreeMap<ShortString, AMQPValue>);
 /// An array of bytes (RabbitMQ specific)
 #[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
-pub struct ByteArray(pub Vec<u8>);
+pub struct ByteArray(Vec<u8>);
 
 /// A Decimal value composed of a scale and a value
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -188,6 +188,22 @@ impl<'a> ShortString {
 impl From<&str> for ShortString {
     fn from(s: &str) -> Self {
         Self(s.to_owned())
+    }
+}
+
+impl fmt::Display for ShortString {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl<'a> ShortStringRef<'a> {
+    pub(crate) fn as_bytes(&self) -> &[u8] {
+        self.0.as_bytes()
+    }
+
+    pub(crate) fn len(&self) -> usize {
+        self.0.len()
     }
 }
 
@@ -221,6 +237,22 @@ impl From<&str> for LongString {
     }
 }
 
+impl fmt::Display for LongString {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl<'a> LongStringRef<'a> {
+    pub(crate) fn as_bytes(&self) -> &[u8] {
+        self.0.as_bytes()
+    }
+
+    pub(crate) fn len(&self) -> usize {
+        self.0.len()
+    }
+}
+
 impl Default for LongStringRef<'static> {
     fn default() -> Self {
         Self("")
@@ -233,9 +265,39 @@ impl<'a> From<&'a str> for LongStringRef<'a> {
     }
 }
 
+impl FieldArray {
+    pub(crate) fn as_slice(&self) -> &[AMQPValue] {
+        self.0.as_slice()
+    }
+
+    pub(crate) fn push(&mut self, v: AMQPValue) {
+        self.0.push(v);
+    }
+}
+
 impl From<Vec<AMQPValue>> for FieldArray {
     fn from(v: Vec<AMQPValue>) -> Self {
         Self(v)
+    }
+}
+
+impl FieldTable {
+    /// Insert a new entry in the table
+    pub fn insert(&mut self, k: ShortString, v: AMQPValue) {
+        self.0.insert(k, v);
+    }
+
+    pub(crate) fn iter(&self) -> btree_map::Iter<'_, ShortString, AMQPValue> {
+        self.0.iter()
+    }
+}
+
+impl<'a> IntoIterator for &'a FieldTable {
+    type Item = (&'a ShortString, &'a AMQPValue);
+    type IntoIter = btree_map::Iter<'a, ShortString, AMQPValue>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter()
     }
 }
 
@@ -245,9 +307,25 @@ impl From<BTreeMap<ShortString, AMQPValue>> for FieldTable {
     }
 }
 
+impl ByteArray {
+    pub(crate) fn as_slice(&self) -> &[u8] {
+        self.0.as_slice()
+    }
+
+    pub(crate) fn len(&self) -> usize {
+        self.0.len()
+    }
+}
+
 impl From<Vec<u8>> for ByteArray {
     fn from(v: Vec<u8>) -> Self {
         Self(v)
+    }
+}
+
+impl From<&[u8]> for ByteArray {
+    fn from(v: &[u8]) -> Self {
+        Self(v.to_vec())
     }
 }
 

@@ -141,7 +141,7 @@ impl GenSize for DecimalValue {
 
 impl GenSize for FieldArray {
     fn get_gen_size(&self) -> usize {
-        Length.get_gen_size() + self.0.as_slice().get_gen_size()
+        Length.get_gen_size() + self.as_slice().get_gen_size()
     }
 }
 
@@ -153,13 +153,13 @@ impl GenSize for [AMQPValue] {
 
 impl GenSize for FieldTable {
     fn get_gen_size(&self) -> usize {
-        self.0.iter().fold(Length.get_gen_size(), |acc, (k, v)| acc + k.get_gen_size() + v.get_gen_size())
+        self.iter().fold(Length.get_gen_size(), |acc, (k, v)| acc + k.get_gen_size() + v.get_gen_size())
     }
 }
 
 impl GenSize for ByteArray {
     fn get_gen_size(&self) -> usize {
-        Length.get_gen_size() + self.0.as_slice().get_gen_size()
+        Length.get_gen_size() + self.as_slice().get_gen_size()
     }
 }
 

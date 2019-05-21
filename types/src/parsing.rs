@@ -122,18 +122,18 @@ pub fn parse_decimal_value(i: &[u8]) -> ParserResult<'_, DecimalValue> {
 
 /// Parse a [ShortString](../type.ShortString.html)
 pub fn parse_short_string(i: &[u8]) -> ParserResult<'_, ShortString> {
-    map(map(map_res(flat_map(parse_short_short_uint, take), std::str::from_utf8), ToString::to_string), ShortString)(i)
+    map(map_res(flat_map(parse_short_short_uint, take), std::str::from_utf8), ShortString::from)(i)
 }
 
 /// Parse a [LongString](../type.LongString.html)
 pub fn parse_long_string(i: &[u8]) -> ParserResult<'_, LongString> {
-    map(map(map_res(flat_map(parse_long_uint, take), std::str::from_utf8), ToString::to_string), LongString)(i)
+    map(map_res(flat_map(parse_long_uint, take), std::str::from_utf8), LongString::from)(i)
 }
 
 /// Parse a [FieldArray](../type.FieldArray.html)
 pub fn parse_field_array(i: &[u8]) -> ParserResult<'_, FieldArray> {
     map_parser(flat_map(parse_long_uint, take), all_consuming(fold_many0(complete(parse_value), FieldArray::default(), |mut acc, elem| {
-        acc.0.push(elem);
+        acc.push(elem);
         acc
     })))(i)
 }
@@ -146,14 +146,14 @@ pub fn parse_timestamp(i: &[u8]) -> ParserResult<'_, Timestamp> {
 /// Parse a [FieldTable](../type.FieldTable.html)
 pub fn parse_field_table(i: &[u8]) -> ParserResult<'_, FieldTable> {
     map_parser(flat_map(parse_long_uint, take), all_consuming(fold_many0(complete(pair(parse_short_string, parse_value)), FieldTable::default(), |mut acc, (key, value)| {
-        acc.0.insert(key, value);
+        acc.insert(key, value);
         acc
     })))(i)
 }
 
 /// Parse a [ByteArray](../type.ByteArray.html)
 pub fn parse_byte_array(i: &[u8]) -> ParserResult<'_, ByteArray> {
-    map(flat_map(parse_long_uint, take), |a| ByteArray(a.to_vec()))(i)
+    map(flat_map(parse_long_uint, take), ByteArray::from)(i)
 }
 
 /// Parse the [AMQPFlags](../type.AMQPFlags.html) for which the names are provided
@@ -281,7 +281,7 @@ mod test {
     #[test]
     fn test_parse_field_array() {
         assert_eq!(parse_field_array(&[0, 0, 0, 0]),                                          Ok((EMPTY, FieldArray::default())));
-        assert_eq!(parse_field_array(&[0, 0, 0, 10, 83, 0, 0, 0, 4, 116, 101, 115, 116, 86]), Ok((EMPTY, FieldArray(vec![AMQPValue::LongString("test".into()), AMQPValue::Void]))));
+        assert_eq!(parse_field_array(&[0, 0, 0, 10, 83, 0, 0, 0, 4, 116, 101, 115, 116, 86]), Ok((EMPTY, vec![AMQPValue::LongString("test".into()), AMQPValue::Void].into())));
     }
 
     #[test]
@@ -293,8 +293,8 @@ mod test {
     #[test]
     fn test_parse_field_table() {
         let mut table = FieldTable::default();
-        table.0.insert("test".into(), AMQPValue::LongString("test".into()));
-        table.0.insert("tt".into(),   AMQPValue::Void);
+        table.insert("test".into(), AMQPValue::LongString("test".into()));
+        table.insert("tt".into(),   AMQPValue::Void);
         assert_eq!(parse_field_table(&[0, 0, 0, 0]),                                                                              Ok((EMPTY, FieldTable::default())));
         assert_eq!(parse_field_table(&[0, 0, 0, 18, 4, 116, 101, 115, 116, 83, 0, 0, 0, 4, 116, 101, 115, 116, 2, 116, 116, 86]), Ok((EMPTY, table)));
     }
@@ -302,7 +302,7 @@ mod test {
     #[test]
     fn test_parse_byte_array() {
         assert_eq!(parse_byte_array(&[0, 0, 0, 0]),              Ok((EMPTY, ByteArray::default())));
-        assert_eq!(parse_byte_array(&[0, 0, 0, 4, 42, 1, 2, 3]), Ok((EMPTY, ByteArray(vec![42, 1, 2, 3]))));
+        assert_eq!(parse_byte_array(&[0, 0, 0, 4, 42, 1, 2, 3]), Ok((EMPTY, vec![42, 1, 2, 3].into())));
     }
 
     #[test]

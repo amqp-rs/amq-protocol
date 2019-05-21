@@ -223,12 +223,12 @@ impl HelperDef for AMQPValueRefHelper {
             AMQPValue::Float(v)          => serde_json::to_value(v)?,
             AMQPValue::Double(v)         => serde_json::to_value(v)?,
             AMQPValue::DecimalValue(v)   => serde_json::to_value(v)?,
-            AMQPValue::ShortString(v)    => serde_json::to_value(format!("ShortStringRef(\"{}\")", v.0))?,
-            AMQPValue::LongString(v)     => serde_json::to_value(format!("LongStringRef(\"{}\")", v.0))?,
-            AMQPValue::FieldArray(v)     => serde_json::to_value(v.0)?,
+            AMQPValue::ShortString(v)    => serde_json::to_value(format!("ShortStringRef(\"{}\")", v))?,
+            AMQPValue::LongString(v)     => serde_json::to_value(format!("LongStringRef(\"{}\")", v))?,
+            AMQPValue::FieldArray(v)     => serde_json::to_value(v)?,
             AMQPValue::Timestamp(v)      => serde_json::to_value(v)?,
-            AMQPValue::FieldTable(v)     => serde_json::to_value(v.0)?,
-            AMQPValue::ByteArray(v)      => serde_json::to_value(v.0)?,
+            AMQPValue::FieldTable(v)     => serde_json::to_value(v)?,
+            AMQPValue::ByteArray(v)      => serde_json::to_value(v)?,
             AMQPValue::Void              => JsonValue::Null,
         };
         Ok(Some(ScopedJson::Derived(value)))
