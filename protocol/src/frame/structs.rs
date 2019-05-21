@@ -97,3 +97,25 @@ impl GenSize for AMQPFrame {
         }
     }
 }
+
+#[test]
+fn blah() {
+    let mut client_properties = FieldTable::default();
+    client_properties.insert("product".into(), AMQPValue::LongString("lapin-async".into()));
+    client_properties.insert("version".into(), AMQPValue::LongString("0.19.0-alpha3".into()));
+    client_properties.insert("platform".into(), AMQPValue::LongString("rust".into()));
+
+    let mut capabilities = FieldTable::default();
+    capabilities.insert("publisher_confirms".into(), AMQPValue::Boolean(true));
+    capabilities.insert("exchange_exchange_bindings".into(), AMQPValue::Boolean(true));
+    capabilities.insert("basic.nack".into(), AMQPValue::Boolean(true));
+    capabilities.insert("consumer_cancel_notify".into(), AMQPValue::Boolean(true));
+    capabilities.insert("connection.blocked".into(), AMQPValue::Boolean(true));
+    capabilities.insert("authentication_failure_close".into(), AMQPValue::Boolean(true));
+
+    client_properties.insert("capabilities".into(), AMQPValue::FieldTable(capabilities));
+
+    let method = AMQPFrame::Method(0, AMQPClass::Connection(connection::AMQPMethod::StartOk(connection::StartOk { client_properties, mechanism: ShortString::from("PLAIN"), response: LongString::from("\u{0}guest\u{0}guest"), locale: ShortString::from("en_US") })));
+
+    assert_eq!(method.get_gen_size(), 270);
+}
