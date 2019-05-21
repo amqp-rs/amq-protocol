@@ -129,7 +129,7 @@ impl GenSize for LongString {
 
 impl<'a> GenSize for LongStringRef<'a> {
     fn get_gen_size(&self) -> usize {
-        ShortLength.get_gen_size() + self.0.get_gen_size()
+        Length.get_gen_size() + self.0.get_gen_size()
     }
 }
 
