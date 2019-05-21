@@ -2,7 +2,7 @@ use crate::value::AMQPValue;
 
 use std::{
     collections::{BTreeMap, btree_map},
-    fmt,
+    borrow, fmt, str,
 };
 
 use serde::{Deserialize, Serialize};
@@ -149,10 +149,10 @@ pub type Timestamp      = LongLongUInt;
 pub type Void           = ();
 
 /// A String (deprecated)
-#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
 pub struct ShortString(String);
 /// A String
-#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
 pub struct LongString(String);
 /// An array of AMQPValue
 #[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
@@ -161,11 +161,11 @@ pub struct FieldArray(Vec<AMQPValue>);
 #[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 pub struct FieldTable(BTreeMap<ShortString, AMQPValue>);
 /// An array of bytes (RabbitMQ specific)
-#[derive(Clone, Debug, Default, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct ByteArray(Vec<u8>);
 
 /// A Decimal value composed of a scale and a value
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Deserialize, Serialize)]
 pub struct DecimalValue {
     /// The scale of the value
     pub scale: ShortShortUInt,
@@ -183,11 +183,27 @@ impl<'a> ShortString {
     pub fn as_ref(&'a self) -> ShortStringRef<'a> {
         ShortStringRef(&self.0)
     }
+
+    /// Get a reference to a LongString as &str
+    pub fn as_str(&'a self) -> &'a str {
+        self.0.as_str()
+    }
+
+    /// Splits a string slice by whitespace.
+    pub fn split_whitespace(&'a self) -> str::SplitWhitespace<'a> {
+        self.0.split_whitespace()
+    }
 }
 
 impl From<&str> for ShortString {
     fn from(s: &str) -> Self {
         Self(s.to_owned())
+    }
+}
+
+impl borrow::Borrow<str> for ShortString {
+    fn borrow(&self) -> &str {
+        self.0.borrow()
     }
 }
 
@@ -229,11 +245,22 @@ impl<'a> LongString {
     pub fn as_str(&'a self) -> &'a str {
         self.0.as_str()
     }
+
+    /// Splits a string slice by whitespace.
+    pub fn split_whitespace(&'a self) -> str::SplitWhitespace<'a> {
+        self.0.split_whitespace()
+    }
 }
 
 impl From<&str> for LongString {
     fn from(s: &str) -> Self {
         Self(s.to_owned())
+    }
+}
+
+impl borrow::Borrow<str> for LongString {
+    fn borrow(&self) -> &str {
+        self.0.borrow()
     }
 }
 
@@ -285,6 +312,11 @@ impl FieldTable {
     /// Insert a new entry in the table
     pub fn insert(&mut self, k: ShortString, v: AMQPValue) {
         self.0.insert(k, v);
+    }
+
+    /// Check whether the table contains the given key
+    pub fn contains_key(&self, k: &str) -> bool {
+        self.0.contains_key(k)
     }
 
     pub(crate) fn iter(&self) -> btree_map::Iter<'_, ShortString, AMQPValue> {
