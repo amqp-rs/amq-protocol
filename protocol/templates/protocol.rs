@@ -389,7 +389,6 @@ pub mod {{snake class.name}} {
     }
 
     /// Serialize {{class.name}} properties (Generated)
-    #[clippy::cyclomatic_complexity = "32"]
     pub fn gen_properties<'a>(input: &'a mut [u8], props: &'a AMQPProperties) -> GenResult<'a> {
         let mut input = gen_short_uint(input, props.bitmask())?;
         {{#each class.properties as |property| ~}}
