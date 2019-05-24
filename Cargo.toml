@@ -1,2 +1,2 @@
 [workspace]
-members = [ "codegen", "protocol", "types" ]
+members = [ "codegen", "protocol", "types", "uri" ]

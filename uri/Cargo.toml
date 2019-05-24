@@ -1,0 +1,21 @@
+[package]
+name          = "amq-protocol-uri"
+version       = "2.0.0-rc9" # remember to update html_root_url
+edition       = "2018"
+authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
+description   = "AMQP URI manipulation"
+repository    = "https://github.com/sozu-proxy/amq-protocol"
+documentation = "https://docs.rs/amq-protocol-uri"
+keywords      = ["amqp","rabbitmq","protocol"]
+categories    = ["api-bindings","network-programming"]
+license       = "BSD-2-Clause"
+
+[lib]
+name = "amq_protocol_uri"
+
+[dependencies]
+url = "^1.7"
+
+[badges]
+travis-ci = { repository = "sozu-proxy/amq-protocol" }
+appveyor  = { repository = "Keruspe/amq-protocol" }

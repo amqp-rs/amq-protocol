@@ -21,7 +21,6 @@ path    = "../codegen"
 [dependencies]
 cookie-factory = "=0.3.0-beta2"
 nom            = "=5.0.0-beta1"
-url            = "^1.7"
 
 [dependencies.amq-protocol-codegen]
 version = "=2.0.0-rc9"
@@ -30,6 +29,10 @@ path    = "../codegen"
 [dependencies.amq-protocol-types]
 version = "=2.0.0-rc9"
 path    = "../types"
+
+[dependencies.amq-protocol-uri]
+version = "=2.0.0-rc9"
+path    = "../uri"
 
 [badges]
 travis-ci = { repository = "sozu-proxy/amq-protocol" }
