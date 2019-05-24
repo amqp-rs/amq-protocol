@@ -15,7 +15,9 @@ pub mod frame;
 pub mod protocol;
 /// Utility to handle sasl auth with AMQP server
 pub mod sasl;
+/// Reexport of amq_protocol_tcp
+pub mod tcp;
 /// Reexport of amq_protocol_types
 pub mod types;
-/// AMQP Uri utils
+/// Reexport of amq_protocol_uri
 pub mod uri;

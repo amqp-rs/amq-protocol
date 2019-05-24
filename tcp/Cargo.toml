@@ -1,0 +1,35 @@
+[package]
+name          = "amq-protocol-tcp"
+version       = "2.0.0-rc9" # remember to update html_root_url
+edition       = "2018"
+authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
+description   = "AMQP URI TCP connection handling"
+repository    = "https://github.com/sozu-proxy/amq-protocol"
+documentation = "https://docs.rs/amq-protocol-tcp"
+keywords      = ["amqp","rabbitmq","protocol"]
+categories    = ["api-bindings","network-programming"]
+license       = "BSD-2-Clause"
+
+[lib]
+name = "amq_protocol_tcp"
+
+[features]
+default    = ["amqps"]
+amqps      = ["native-tls"]
+native-tls = ["tcp-stream/native-tls", "trust-dns-resolver/dns-over-native-tls"]
+tokio      = ["tcp-stream/tokio", "trust-dns-resolver/tokio"]
+
+[dependencies]
+trust-dns-resolver = "^0.11"
+
+[dependencies.amq-protocol-uri]
+version = "=2.0.0-rc9"
+path    = "../uri"
+
+[dependencies.tcp-stream]
+version          = "^0.1"
+default-features = false
+
+[badges]
+travis-ci = { repository = "sozu-proxy/amq-protocol" }
+appveyor  = { repository = "Keruspe/amq-protocol" }
