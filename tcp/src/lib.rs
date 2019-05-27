@@ -9,7 +9,6 @@
 
 use amq_protocol_uri::{AMQPScheme, AMQPUri};
 use tcp_stream::{HandshakeError, TcpStream};
-use trust_dns_resolver::Resolver;
 
 use std::{
     io,
@@ -24,7 +23,7 @@ pub trait AMQPUriTcpExt {
 
 impl AMQPUriTcpExt for AMQPUri {
     fn connect<S, F: FnOnce(TcpStream, AMQPUri) -> S>(self, f: F) -> io::Result<S> {
-        if let Some(ipaddr) = Resolver::default()?.lookup_ip(&self.authority.host)?.iter().next() {
+        if let Ok(ipaddr) = format!("{}:{}", self.authority.host, self.authority.port).parse() {
             let stream = TcpStream::connect(&SocketAddr::new(ipaddr, self.authority.port))?;
             match self.scheme {
                 AMQPScheme::AMQP  => Ok(stream),
