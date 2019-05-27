@@ -60,9 +60,11 @@ pub struct AMQPUserInfo {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct AMQPQueryString {
     /// The maximum size of an AMQP Frame
-    pub frame_max: Option<u32>,
+    pub frame_max:   Option<u32>,
+    /// The maximum number of open channels
+    pub channel_max: Option<u16>,
     /// The maximum time between two heartbeats
-    pub heartbeat: Option<u16>,
+    pub heartbeat:   Option<u16>,
 }
 
 fn percent_decode(s: &str) -> Result<String, String> {
@@ -103,6 +105,7 @@ impl FromStr for AMQPUri {
         let port      = url.port().unwrap_or_else(|| scheme.default_port());
         let vhost     = percent_decode(&url.path()[1..])?;
         let frame_max = url.query_pairs().find(|&(ref key, _)| key == "frame_max").map_or(Ok(None), |(_, ref value)| value.parse().map(Some)).map_err(|e: ParseIntError| e.to_string())?;
+        let chan_max  = url.query_pairs().find(|&(ref key, _)| key == "channel_max").map_or(Ok(None), |(_, ref value)| value.parse().map(Some)).map_err(|e: ParseIntError| e.to_string())?;
         let heartbeat = url.query_pairs().find(|&(ref key, _)| key == "heartbeat").map_or(Ok(None), |(_, ref value)| value.parse().map(Some)).map_err(|e: ParseIntError| e.to_string())?;
 
         Ok(AMQPUri {
@@ -118,6 +121,7 @@ impl FromStr for AMQPUri {
             vhost,
             query:     AMQPQueryString {
                 frame_max,
+                channel_max: chan_max,
                 heartbeat,
             },
         })
