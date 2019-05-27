@@ -10,10 +10,7 @@
 use amq_protocol_uri::{AMQPScheme, AMQPUri};
 use tcp_stream::HandshakeError;
 
-use std::{
-    io,
-    net::SocketAddr,
-};
+use std::io;
 
 /// Re-export TcpStream
 pub use tcp_stream::TcpStream;
@@ -26,8 +23,8 @@ pub trait AMQPUriTcpExt {
 
 impl AMQPUriTcpExt for AMQPUri {
     fn connect<S, F: FnOnce(TcpStream, AMQPUri) -> S>(self, f: F) -> io::Result<S> {
-        if let Ok(ipaddr) = format!("{}:{}", self.authority.host, self.authority.port).parse() {
-            let stream = TcpStream::connect(&SocketAddr::new(ipaddr, self.authority.port))?;
+        if let Ok(sockaddr) = format!("{}:{}", self.authority.host, self.authority.port).parse() {
+            let stream = TcpStream::connect(&sockaddr)?;
             match self.scheme {
                 AMQPScheme::AMQP  => Ok(stream),
                 AMQPScheme::AMQPS => stream.into_tls(&self.authority.host).or_else(retry_handshake),
