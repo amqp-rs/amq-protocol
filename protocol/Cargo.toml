@@ -14,6 +14,14 @@ build         = "build.rs"
 [lib]
 name = "amq_protocol"
 
+[features]
+default    = ["amqps"]
+amqps      = ["amq-protocol-tcp/amqps"]
+native-tls = ["amq-protocol-tcp/native-tls"]
+openssl    = ["amq-protocol-tcp/openssl"]
+rustls     = ["amq-protocol-tcp/rustls"]
+tokio      = ["amq-protocol-tcp/tokio"]
+
 [build-dependencies.amq-protocol-codegen]
 version = "=2.0.0-rc13"
 path    = "../codegen"
@@ -23,8 +31,9 @@ cookie-factory = "=0.3.0-beta2"
 nom            = "=5.0.0-beta2"
 
 [dependencies.amq-protocol-tcp]
-version = "=2.0.0-rc13"
-path    = "../tcp"
+version          = "=2.0.0-rc13"
+default-features = false
+path             = "../tcp"
 
 [dependencies.amq-protocol-types]
 version = "=2.0.0-rc13"

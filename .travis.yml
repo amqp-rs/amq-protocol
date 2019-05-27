@@ -20,11 +20,11 @@ matrix:
 # Pest dependency on quote is broken, doesn't build with min version
 #        - rust: nightly
 #          script:
-#                - cargo -Z minimal-versions test --verbose --all
+#                - cargo -Z minimal-versions test --verbose --all --all-features
 
 script:
-    - cargo build --verbose --all
-    - cargo test  --verbose --all
+    - cargo build --verbose --all --all-features
+    - cargo test  --verbose --all --all-features
 
 after_success: |
     if [[ "$TRAVIS_RUST_VERSION" == stable ]]; then
