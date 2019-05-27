@@ -229,6 +229,7 @@ mod test {
         assert_eq!(uri, Ok(AMQPUri {
             query: AMQPQueryString {
                 frame_max: Some(64),
+                channel_max: None,
                 heartbeat: Some(42),
             },
             ..Default::default()

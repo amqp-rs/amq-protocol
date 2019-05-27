@@ -20,7 +20,7 @@ path    = "../codegen"
 
 [dependencies]
 cookie-factory = "=0.3.0-beta2"
-nom            = "=5.0.0-beta1"
+nom            = "=5.0.0-beta2"
 
 [dependencies.amq-protocol-tcp]
 version = "=2.0.0-rc13"
