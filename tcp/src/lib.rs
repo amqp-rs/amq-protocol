@@ -8,12 +8,15 @@
 //! connecting to an AMQP URI
 
 use amq_protocol_uri::{AMQPScheme, AMQPUri};
-use tcp_stream::{HandshakeError, TcpStream};
+use tcp_stream::HandshakeError;
 
 use std::{
     io,
     net::SocketAddr,
 };
+
+/// Re-export TcpStream
+pub use tcp_stream::TcpStream;
 
 /// Trait providing a method to connect to a TcpStream
 pub trait AMQPUriTcpExt {
