@@ -8,7 +8,7 @@
 //! connecting to an AMQP URI
 
 use amq_protocol_uri::{AMQPScheme, AMQPUri};
-use tcp_stream::TcpStream;
+use tcp_stream::{HandshakeError, TcpStream};
 use trust_dns_resolver::Resolver;
 
 use std::{
@@ -28,11 +28,18 @@ impl AMQPUriTcpExt for AMQPUri {
             let stream = TcpStream::connect(&SocketAddr::new(ipaddr, self.authority.port))?;
             match self.scheme {
                 AMQPScheme::AMQP  => Ok(stream),
-                AMQPScheme::AMQPS => stream.into_tls(&self.authority.host),
+                AMQPScheme::AMQPS => stream.into_tls(&self.authority.host).or_else(retry_handshake),
             }.map(|s| f(s, self))
         } else {
             Err(io::Error::new(io::ErrorKind::AddrNotAvailable, format!("cannot resolve {}", &self.authority.host)))
         }
+    }
+}
+
+fn retry_handshake(error: HandshakeError) -> io::Result<TcpStream> {
+    match error {
+        HandshakeError::Failure(io_err) => Err(io_err),
+        HandshakeError::WouldBlock(mid) => mid.handshake().or_else(retry_handshake),
     }
 }
 

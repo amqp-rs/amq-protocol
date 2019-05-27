@@ -17,6 +17,8 @@ name = "amq_protocol_tcp"
 default    = ["amqps"]
 amqps      = ["native-tls"]
 native-tls = ["tcp-stream/native-tls", "trust-dns-resolver/dns-over-native-tls"]
+openssl    = ["tcp-stream/openssl", "trust-dns-resolver/dns-over-openssl"]
+rustls     = ["tcp-stream/rustls", "trust-dns-resolver/dns-over-rustls"]
 tokio      = ["tcp-stream/tokio", "trust-dns-resolver/tokio"]
 
 [dependencies]
@@ -27,7 +29,7 @@ version = "=2.0.0-rc10"
 path    = "../uri"
 
 [dependencies.tcp-stream]
-version          = "^0.1"
+version          = "^0.2"
 default-features = false
 
 [badges]
