@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-tcp"
-version       = "2.0.0-rc14" # remember to update html_root_url
+version       = "2.0.0-rc15" # remember to update html_root_url
 edition       = "2018"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP URI TCP connection handling"
@@ -21,7 +21,7 @@ rustls     = ["tcp-stream/rustls"]
 tokio      = ["tcp-stream/tokio"]
 
 [dependencies.amq-protocol-uri]
-version = "=2.0.0-rc14"
+version = "=2.0.0-rc15"
 path    = "../uri"
 
 [dependencies.tcp-stream]
