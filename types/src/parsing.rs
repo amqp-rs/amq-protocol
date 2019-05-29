@@ -8,6 +8,7 @@ use nom::{
     self,
     bytes::streaming::take,
     combinator::{all_consuming, complete, flat_map, map, map_opt, map_parser, map_res},
+    error::context,
     multi::fold_many0,
     number::streaming::{be_i8, be_u8, be_i16, be_u16, be_i32, be_u32, be_i64, be_u64, be_f32, be_f64},
     sequence::pair,
@@ -29,8 +30,8 @@ pub type ParserError<'a> = nom::Err<VerboseError<&'a [u8]>>;
 pub type ParserResult<'a, T> = Result<(&'a [u8], T), ParserError<'a>>;
 
 /// Parse the [AMQPValue](../type.AMQPValue.html) of the given [AMQPType](../type.AMQPType.html)
-pub fn parse_raw_value(amqp_type: AMQPType) -> impl Fn(&[u8]) -> ParserResult<'_, AMQPValue> {
-    move |i| match amqp_type {
+pub fn parse_raw_value<'a>(amqp_type: AMQPType) -> impl Fn(&'a [u8]) -> ParserResult<'a, AMQPValue> {
+    context("parse_raw_value", move |i| match amqp_type {
         AMQPType::Boolean        => map(parse_boolean,          AMQPValue::Boolean)(i),
         AMQPType::ShortShortInt  => map(parse_short_short_int,  AMQPValue::ShortShortInt)(i),
         AMQPType::ShortShortUInt => map(parse_short_short_uint, AMQPValue::ShortShortUInt)(i),
@@ -51,123 +52,123 @@ pub fn parse_raw_value(amqp_type: AMQPType) -> impl Fn(&[u8]) -> ParserResult<'_
         AMQPType::FieldTable     => map(parse_field_table,      AMQPValue::FieldTable)(i),
         AMQPType::ByteArray      => map(parse_byte_array,       AMQPValue::ByteArray)(i),
         AMQPType::Void           => Ok((i,                      AMQPValue::Void)),
-    }
+    })
 }
 
 /// Parse an [AMQPValue](../type.AMQPValue.html)
 pub fn parse_value(i: &[u8]) -> ParserResult<'_, AMQPValue> {
-    flat_map(parse_type, parse_raw_value)(i)
+    context("parse_value", flat_map(parse_type, parse_raw_value))(i)
 }
 
 /// Parse an [AMQPType](../type.AMQPType.html)
 pub fn parse_type(i: &[u8]) -> ParserResult<'_, AMQPType> {
-    map_opt(be_u8, |t| AMQPType::from_id(t as char))(i)
+    context("parse_type", map_opt(be_u8, |t| AMQPType::from_id(t as char)))(i)
 }
 
 /// Parse an id [(ShortUInt)](../type.ShortUInt.html)
 pub fn parse_id(i: &[u8]) -> ParserResult<'_, ShortUInt> {
-    parse_short_uint(i)
+    context("parse_id", parse_short_uint)(i)
 }
 
 /// Parse a [Boolean](../type.Boolean.html)
 pub fn parse_boolean(i: &[u8]) -> ParserResult<'_, Boolean> {
-    map(be_u8, |b| b != 0)(i)
+    context("parse_boolean", map(be_u8, |b| b != 0))(i)
 }
 
 /// Parse a [ShortShortInt](../type.ShortShortInt.html)
 pub fn parse_short_short_int(i: &[u8]) -> ParserResult<'_, ShortShortInt> {
-    be_i8(i)
+    context("parse_short_short_int", be_i8)(i)
 }
 
 /// Parse a [ShortShortUInt](../type.ShortShortUInt.html)
 pub fn parse_short_short_uint(i: &[u8]) -> ParserResult<'_, ShortShortUInt> {
-    be_u8(i)
+    context("parse_short_short_uint", be_u8)(i)
 }
 
 /// Parse a [ShortInt](../type.ShortInt.html)
 pub fn parse_short_int(i: &[u8]) -> ParserResult<'_, ShortInt> {
-    be_i16(i)
+    context("parse_short_int", be_i16)(i)
 }
 
 /// Parse a [ShortUInt](../type.ShortUInt.html)
 pub fn parse_short_uint(i: &[u8]) -> ParserResult<'_, ShortUInt> {
-    be_u16(i)
+    context("parse_short_uint", be_u16)(i)
 }
 
 /// Parse a [LongInt](../type.LongInt.html)
 pub fn parse_long_int(i: &[u8]) -> ParserResult<'_, LongInt> {
-    be_i32(i)
+    context("parse_long_int", be_i32)(i)
 }
 
 /// Parse a [LongUInt](../type.LongUInt.html)
 pub fn parse_long_uint(i: &[u8]) -> ParserResult<'_, LongUInt> {
-    be_u32(i)
+    context("parse_long_uint", be_u32)(i)
 }
 
 /// Parse a [LongLongInt](../type.LongLongInt.html)
 pub fn parse_long_long_int(i: &[u8]) -> ParserResult<'_, LongLongInt> {
-    be_i64(i)
+    context("parse_long_long_int", be_i64)(i)
 }
 
 /// Parse a [LongLongUInt](../type.LongLongUInt.html)
 pub fn parse_long_long_uint(i: &[u8]) -> ParserResult<'_, LongLongUInt> {
-    be_u64(i)
+    context("parse_long_long_uint", be_u64)(i)
 }
 
 /// Parse a [Float](../type.Float.html)
 pub fn parse_float(i: &[u8]) -> ParserResult<'_, Float> {
-    be_f32(i)
+    context("parse_float", be_f32)(i)
 }
 
 /// Parse a [Double](../type.Double.html)
 pub fn parse_double(i: &[u8]) -> ParserResult<'_, Double> {
-    be_f64(i)
+    context("parse_double", be_f64)(i)
 }
 
 /// Parse a [DecimalValue](../type.DecimalValue.html)
 pub fn parse_decimal_value(i: &[u8]) -> ParserResult<'_, DecimalValue> {
-    flat_map(parse_short_short_uint, |scale| map(parse_long_uint, move |value| DecimalValue { scale, value, }))(i)
+    context("parse_decimal_value", flat_map(parse_short_short_uint, |scale| map(parse_long_uint, move |value| DecimalValue { scale, value, })))(i)
 }
 
 /// Parse a [ShortString](../type.ShortString.html)
 pub fn parse_short_string(i: &[u8]) -> ParserResult<'_, ShortString> {
-    map(map_res(flat_map(parse_short_short_uint, take), std::str::from_utf8), ShortString::from)(i)
+    context("parse_short_string", map(map_res(flat_map(parse_short_short_uint, take), std::str::from_utf8), ShortString::from))(i)
 }
 
 /// Parse a [LongString](../type.LongString.html)
 pub fn parse_long_string(i: &[u8]) -> ParserResult<'_, LongString> {
-    map(map_res(flat_map(parse_long_uint, take), std::str::from_utf8), LongString::from)(i)
+    context("parse_short_string", map(map_res(flat_map(parse_long_uint, take), std::str::from_utf8), LongString::from))(i)
 }
 
 /// Parse a [FieldArray](../type.FieldArray.html)
 pub fn parse_field_array(i: &[u8]) -> ParserResult<'_, FieldArray> {
-    map_parser(flat_map(parse_long_uint, take), all_consuming(fold_many0(complete(parse_value), FieldArray::default(), |mut acc, elem| {
+    context("parse_field_array", map_parser(flat_map(parse_long_uint, take), all_consuming(fold_many0(context("parse_field_array_entry", complete(parse_value)), FieldArray::default(), |mut acc, elem| {
         acc.push(elem);
         acc
-    })))(i)
+    }))))(i)
 }
 
 /// Parse a [Timestamp](../type.Timestamp.html)
 pub fn parse_timestamp(i: &[u8]) -> ParserResult<'_, Timestamp> {
-    parse_long_long_uint(i)
+    context("parse_timestamp", parse_long_long_uint)(i)
 }
 
 /// Parse a [FieldTable](../type.FieldTable.html)
 pub fn parse_field_table(i: &[u8]) -> ParserResult<'_, FieldTable> {
-    map_parser(flat_map(parse_long_uint, take), all_consuming(fold_many0(complete(pair(parse_short_string, parse_value)), FieldTable::default(), |mut acc, (key, value)| {
+    context("parse_field_table", map_parser(flat_map(parse_long_uint, take), all_consuming(fold_many0(context("parse_field_table_entry", complete(pair(parse_short_string, parse_value))), FieldTable::default(), |mut acc, (key, value)| {
         acc.insert(key, value);
         acc
-    })))(i)
+    }))))(i)
 }
 
 /// Parse a [ByteArray](../type.ByteArray.html)
 pub fn parse_byte_array(i: &[u8]) -> ParserResult<'_, ByteArray> {
-    map(flat_map(parse_long_uint, take), ByteArray::from)(i)
+    context("parse_byte_array", map(flat_map(parse_long_uint, take), ByteArray::from))(i)
 }
 
 /// Parse the [AMQPFlags](../type.AMQPFlags.html) for which the names are provided
 pub fn parse_flags<'a, 'b>(i: &'a [u8], names: &'b [&'b str]) -> ParserResult<'a, AMQPFlags> {
-    map(take((names.len() + 7) / 8), |b| AMQPFlags::from_bytes(names, b))(i)
+    context("parse_flags", map(take((names.len() + 7) / 8), |b| AMQPFlags::from_bytes(names, b)))(i)
 }
 
 #[cfg(test)]

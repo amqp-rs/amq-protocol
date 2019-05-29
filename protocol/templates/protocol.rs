@@ -5,7 +5,10 @@ use crate::types::{
     parsing::*,
 };
 
-use nom::combinator::{flat_map, map, map_opt};
+use nom::{
+    combinator::{flat_map, map, map_opt},
+    error::context,
+};
 
 /// Protocol metadata
 pub mod metadata {
@@ -125,12 +128,12 @@ use self::{{snake class.name}}::parse_{{snake class.name}};
 
 /// Parse an AMQP class
 pub fn parse_class(i: &[u8]) -> ParserResult<'_, AMQPClass> {
-    map_opt(flat_map(parse_id, |id| move |i| match id {
+    context("parse_class", map_opt(flat_map(parse_id, |id| move |i| match id {
         {{#each protocol.classes as |class| ~}}
         {{class.id}} => map(map(parse_{{snake class.name false}}, AMQPClass::{{camel class.name}}), Some)(i),
         {{/each ~}}
         _ => Ok((i, None)),
-    }), std::convert::identity)(i)
+    }), std::convert::identity))(i)
 }
 
 /// Serialize an AMQP class
@@ -179,12 +182,12 @@ pub mod {{snake class.name}} {
 
     /// Parse {{class.name}} (Generated)
     pub fn parse_{{snake class.name false}}(i: &[u8]) -> ParserResult<'_, {{snake class.name}}::AMQPMethod> {
-        map_opt(flat_map(parse_id, |id| move |i| match id {
+        context("parse_{{snake class.name false}}", map_opt(flat_map(parse_id, |id| move |i| match id {
             {{#each class.methods as |method| ~}}
-            {{method.id}} => map(map(parse_{{snake method.name false}}, AMQPMethod::{{camel method.name}}), Some)(i),
+            {{method.id}} => context("parse_{{snake method.name false}}", map(map(parse_{{snake method.name false}}, AMQPMethod::{{camel method.name}}), Some))(i),
             {{/each ~}}
             _ => Ok((i, None)),
-        }), std::convert::identity)(i)
+        }), std::convert::identity))(i)
     }
 
     /// Serialize {{class.name}} (Generated)
