@@ -14,8 +14,7 @@ license       = "BSD-2-Clause"
 name = "amq_protocol_tcp"
 
 [features]
-default    = ["amqps"]
-amqps      = ["native-tls"]
+default    = ["native-tls"]
 native-tls = ["tcp-stream/native-tls"]
 openssl    = ["tcp-stream/openssl"]
 rustls     = ["tcp-stream/rustls"]
