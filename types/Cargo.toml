@@ -13,6 +13,9 @@ license       = "BSD-2-Clause"
 [lib]
 name = "amq_protocol_types"
 
+[features]
+verbose-errors = []
+
 [dependencies]
 cookie-factory = "=0.3.0-beta2"
 nom            = "=5.0.0-beta2"
