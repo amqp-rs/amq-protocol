@@ -318,10 +318,6 @@ impl FieldTable {
     pub fn contains_key(&self, k: &str) -> bool {
         self.0.contains_key(k)
     }
-
-    pub(crate) fn iter(&self) -> btree_map::Iter<'_, ShortString, AMQPValue> {
-        self.0.iter()
-    }
 }
 
 impl<'a> IntoIterator for &'a FieldTable {

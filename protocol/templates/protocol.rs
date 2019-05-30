@@ -145,16 +145,6 @@ pub fn gen_class<'a>(input: &'a mut [u8], class: &'a AMQPClass) -> GenResult<'a>
     }
 }
 
-impl GenSize for AMQPClass {
-    fn get_gen_size(&self) -> usize {
-        match self {
-            {{#each protocol.classes as |class| ~}}
-            AMQPClass::{{camel class.name}}(m) => m.get_gen_size(),
-            {{/each ~}}
-        }
-    }
-}
-
 /// The available AMQP classes
 #[derive(Clone, Debug, PartialEq)]
 pub enum AMQPClass {
@@ -198,16 +188,6 @@ pub mod {{snake class.name}} {
                 gen_{{snake method.name false}}(gen_id(input, {{class.id}})?, {{snake method.name}})
             },
             {{/each ~}}
-        }
-    }
-
-    impl GenSize for AMQPMethod {
-        fn get_gen_size(&self) -> usize {
-            2 + match self {
-                {{#each class.methods as |method| ~}}
-                AMQPMethod::{{camel method.name}}(m) => m.get_gen_size(),
-                {{/each ~}}
-            }
         }
     }
 
@@ -309,29 +289,6 @@ pub mod {{snake class.name}} {
         {{/each_argument ~}}
         Ok(input)
     }
-
-    impl GenSize for {{camel method.name}} {
-        fn get_gen_size(&self) -> usize {
-            2
-            {{#each_argument method.arguments as |argument| ~}}
-            {{#unless argument_is_value ~}}
-            + {
-                let mut flags = AMQPFlags::default();
-                {{#each argument.flags as |flag| ~}}
-                flags.add_flag("{{snake flag.name}}".to_string(), {{#if flag.force_default ~}}{{flag.default_value}}{{else}}self.{{snake flag.name}}{{/if ~}});
-                {{/each ~}}
-                flags.get_gen_size()
-            }
-            {{else}}
-            {{#if argument.force_default ~}}
-            + {{gen_size argument.default_value}}
-            {{else}}
-            + self.{{snake argument.name}}.get_gen_size()
-            {{/if ~}}
-            {{/unless ~}}
-            {{/each_argument ~}}
-        }
-    }
     {{/each ~}}
     {{#if class.properties ~}}
     /// {{class.name}} properties (Generated)
@@ -400,18 +357,6 @@ pub mod {{snake class.name}} {
         }
         {{/each ~}}
         Ok(input)
-    }
-
-    impl GenSize for AMQPProperties {
-        fn get_gen_size(&self) -> usize {
-            let mut size = self.bitmask().get_gen_size();
-            {{#each class.properties as |property| ~}}
-            if let Some(prop) = self.{{snake property.name}}{{#if (pass_by_ref property.type) ~}}.as_ref(){{/if ~}} {
-                size += prop.get_gen_size();
-            }
-            {{/each ~}}
-            size
-        }
     }
     {{/if ~}}
 }

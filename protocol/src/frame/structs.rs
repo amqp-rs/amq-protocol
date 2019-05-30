@@ -1,7 +1,6 @@
 use crate::{
     protocol::*,
     types::*,
-    types::generation::{GenSize, Length},
 };
 
 /// Enum representing an AMQP channel
@@ -84,38 +83,4 @@ pub struct AMQPContentHeader {
     pub body_size:  LongLongUInt,
     /// The AMQP properties associated with the content
     pub properties: basic::AMQPProperties,
-}
-
-impl GenSize for AMQPFrame {
-    fn get_gen_size(&self) -> usize {
-        match self {
-            AMQPFrame::ProtocolHeader                       => 4 + metadata::NAME.get_gen_size(),
-            AMQPFrame::Heartbeat(_)                         => 8,
-            AMQPFrame::Method(channel_id, method)           => 2 + Length.get_gen_size() + channel_id.get_gen_size() + method.get_gen_size(),
-            AMQPFrame::Header(channel_id, class_id, header) => 2 + Length.get_gen_size() + channel_id.get_gen_size() + class_id.get_gen_size() + 2 + header.body_size.get_gen_size() + header.properties.get_gen_size(),
-            AMQPFrame::Body(channel_id, data)               => 2 + channel_id.get_gen_size() + 4 + data.get_gen_size(),
-        }
-    }
-}
-
-#[test]
-fn blah() {
-    let mut client_properties = FieldTable::default();
-    client_properties.insert("product".into(), AMQPValue::LongString("lapin-async".into()));
-    client_properties.insert("version".into(), AMQPValue::LongString("0.19.0-alpha3".into()));
-    client_properties.insert("platform".into(), AMQPValue::LongString("rust".into()));
-
-    let mut capabilities = FieldTable::default();
-    capabilities.insert("publisher_confirms".into(), AMQPValue::Boolean(true));
-    capabilities.insert("exchange_exchange_bindings".into(), AMQPValue::Boolean(true));
-    capabilities.insert("basic.nack".into(), AMQPValue::Boolean(true));
-    capabilities.insert("consumer_cancel_notify".into(), AMQPValue::Boolean(true));
-    capabilities.insert("connection.blocked".into(), AMQPValue::Boolean(true));
-    capabilities.insert("authentication_failure_close".into(), AMQPValue::Boolean(true));
-
-    client_properties.insert("capabilities".into(), AMQPValue::FieldTable(capabilities));
-
-    let method = AMQPFrame::Method(0, AMQPClass::Connection(connection::AMQPMethod::StartOk(connection::StartOk { client_properties, mechanism: ShortString::from("PLAIN"), response: LongString::from("\u{0}guest\u{0}guest"), locale: ShortString::from("en_US") })));
-
-    assert_eq!(method.get_gen_size(), 270);
 }

@@ -10,7 +10,6 @@
 //! It implements the list of the different kind of types available, a value holder and
 //! serialization.deserialization facilities.
 
-mod gensize;
 mod types;
 mod value;
 

@@ -14,7 +14,6 @@ use cookie_factory::{length, slice};
 
 /// Serialize a frame in the given buffer
 pub fn gen_frame<'a>(x: &'a mut [u8], frame: &'a AMQPFrame) -> Result<(usize, &'a mut [u8]), GenError> {
-    frame.check_gen_size(x)?;
     length(move |x| match frame {
         AMQPFrame::ProtocolHeader => {
             gen_protocol_header(x)
