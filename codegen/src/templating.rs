@@ -320,6 +320,7 @@ synchronous: {{method.synchronous}}
                             ],
                             name:          "method1".to_string(),
                             synchronous:   true,
+                            content:       false,
                             metadata:      Value::default(),
                             is_reply:      false,
                             ignore_args:   false,

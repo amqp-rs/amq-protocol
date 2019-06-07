@@ -204,6 +204,7 @@ struct _AMQPMethod {
     arguments:   Vec<_AMQPArgument>,
     name:        String,
     synchronous: Option<Boolean>,
+    content:     Option<Boolean>,
 }
 
 impl _AMQPMethod {
@@ -237,6 +238,7 @@ impl _AMQPMethod {
             arguments,
             name:          self.name.clone(),
             synchronous:   self.synchronous.unwrap_or(false),
+            content:       self.content.unwrap_or(false),
             metadata,
             is_reply,
             ignore_args,
@@ -377,6 +379,7 @@ mod test {
                     }],
                     name:        "meth1".to_string(),
                     synchronous: None,
+                    content:     None,
                 }],
                 name:       "class1".to_string(),
                 properties: Some(vec![_AMQPProperty {
@@ -423,6 +426,7 @@ mod test {
                     })],
                     name:          "meth1".to_string(),
                     synchronous:   false,
+                    content:       false,
                     metadata:      Value::default(),
                     is_reply:      false,
                     ignore_args:   false,

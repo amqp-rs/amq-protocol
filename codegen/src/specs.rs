@@ -80,6 +80,8 @@ pub struct AMQPMethod {
     pub name:          String,
     /// Whether this method is synchronous or not
     pub synchronous:   Boolean,
+    /// Whether this method carries some content frames with it
+    pub content:       Boolean,
     /// Extra metadata for code generation
     pub metadata:      Value,
     /// Whether this method is a reply or not
