@@ -224,6 +224,11 @@ impl _AMQPMethod {
                 metadata["state"] = state.clone();
             }
         }
+        if is_reply && metadata.get("confirmation").is_none() {
+            if let Some(confirmation) = class_md.and_then(|c| c.get(&self.name.replace("-ok", ""))).and_then(|m| m.get("metadata")).and_then(|m| m.get("confirmation")) {
+                metadata["confirmation"] = confirmation.clone();
+            }
+        }
         let ignore_args = arguments.iter().all(AMQPArgument::force_default);
         let c2s = !receive_only.map(|receive_only| receive_only.contains(&self.name.as_str())).unwrap_or(false);
         let s2c = !send_only.map(|send_only| send_only.contains(&self.name.as_str())).unwrap_or(false);
