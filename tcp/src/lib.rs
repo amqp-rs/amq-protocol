@@ -23,15 +23,11 @@ pub trait AMQPUriTcpExt {
 
 impl AMQPUriTcpExt for AMQPUri {
     fn connect<S, F: FnOnce(TcpStream, AMQPUri) -> S>(self, f: F) -> io::Result<S> {
-        if let Ok(sockaddr) = format!("{}:{}", self.authority.host, self.authority.port).parse() {
-            let stream = TcpStream::connect(&sockaddr)?;
-            match self.scheme {
-                AMQPScheme::AMQP  => Ok(stream),
-                AMQPScheme::AMQPS => stream.into_tls(&self.authority.host).or_else(retry_handshake),
-            }.map(|s| f(s, self))
-        } else {
-            Err(io::Error::new(io::ErrorKind::AddrNotAvailable, format!("cannot resolve {}", &self.authority.host)))
-        }
+        let stream = TcpStream::connect(format!("{}:{}", self.authority.host, self.authority.port))?;
+        match self.scheme {
+            AMQPScheme::AMQP  => Ok(stream),
+            AMQPScheme::AMQPS => stream.into_tls(&self.authority.host).or_else(retry_handshake),
+        }.map(|s| f(s, self))
     }
 }
 

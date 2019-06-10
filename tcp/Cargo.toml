@@ -25,7 +25,7 @@ version = "=2.0.0-rc16"
 path    = "../uri"
 
 [dependencies.tcp-stream]
-version          = "^0.2"
+version          = "^0.3"
 default-features = false
 
 [badges]
