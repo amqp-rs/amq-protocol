@@ -1,8 +1,11 @@
 use std::fmt;
 
-use crate::types::{
-    AMQPValue, FieldTable,
-    generation::gen_field_table,
+use crate::{
+    types::{
+        AMQPValue, FieldTable,
+        generation::gen_field_table,
+    },
+    uri::AMQPUserInfo,
 };
 
 /// Structure holding the username and passwor for authentication
@@ -58,6 +61,12 @@ impl Credentials {
 impl Default for Credentials {
     fn default() -> Self {
         Self::new("guest".into(), "guest".into())
+    }
+}
+
+impl From<AMQPUserInfo> for Credentials {
+    fn from(user_info: AMQPUserInfo) -> Self {
+        Self { username: user_info.username, password: user_info.password }
     }
 }
 
