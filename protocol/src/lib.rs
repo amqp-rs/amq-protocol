@@ -7,15 +7,16 @@
 //! amq-protocol is a library aiming at providing tools to help
 //! implementing software using AMQP
 
+/// Reexport of amq_protocol_tcp
+pub use amq_protocol_tcp as tcp;
+/// Reexport of amq_protocol_types
+pub use amq_protocol_types as types;
+/// Reexport of amq_protocol_uri
+pub use amq_protocol_uri as uri;
+
 /// AMQP Frame handling utils
 pub mod frame;
 /// The AMQ Protocol implementation (Generated)
 pub mod protocol;
 /// Utility to handle sasl auth with AMQP server
 pub mod sasl;
-/// Reexport of amq_protocol_tcp
-pub mod tcp;
-/// Reexport of amq_protocol_types
-pub mod types;
-/// Reexport of amq_protocol_uri
-pub mod uri;
