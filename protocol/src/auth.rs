@@ -44,7 +44,7 @@ impl Credentials {
     }
 
     fn amqplain_auth_string(&self) -> String {
-        let needed_len = 4 /* FieldTable length */ + 15 /* LOGIN + PASSWORD + 2 * 1 (length) */ + 4 /* length */ + self.username().as_bytes().len() + 4 /* length */ + self.password().as_bytes().len();
+        let needed_len = 4 /* FieldTable length */ + 15 /* LOGIN + PASSWORD + 2 * 1 (length) */ + 5 /* type + length */ + self.username().as_bytes().len() + 5 /* type + length */ + self.password().as_bytes().len();
         let mut buf = vec![0; needed_len];
         let mut table = FieldTable::default();
         table.insert("LOGIN".into(),    AMQPValue::LongString(self.username().into()));
@@ -89,5 +89,15 @@ impl fmt::Display for SASLMechanism {
             SASLMechanism::RabbitCrDemo => "RABBIT-CR-DEMO",
         };
         write!(f, "{}", mechanism)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_amqplain() {
+        assert_eq!(Credentials::default().amqplain_auth_string(), "\u{5}LOGINS\u{0}\u{0}\u{0}\u{5}guest\u{8}PASSWORDS\u{0}\u{0}\u{0}\u{5}guest".to_string());
     }
 }
