@@ -195,9 +195,15 @@ impl<'a> ShortString {
     }
 }
 
+impl From<String> for ShortString {
+    fn from(s: String) -> Self {
+        Self(s)
+    }
+}
+
 impl From<&str> for ShortString {
     fn from(s: &str) -> Self {
-        Self(s.to_owned())
+        s.to_owned().into()
     }
 }
 
@@ -252,9 +258,15 @@ impl<'a> LongString {
     }
 }
 
+impl From<String> for LongString {
+    fn from(s: String) -> Self {
+        Self(s)
+    }
+}
+
 impl From<&str> for LongString {
     fn from(s: &str) -> Self {
-        Self(s.to_owned())
+        s.to_owned().into()
     }
 }
 
