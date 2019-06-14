@@ -14,9 +14,9 @@ pub use amq_protocol_types as types;
 /// Reexport of amq_protocol_uri
 pub use amq_protocol_uri as uri;
 
+/// Utility to handle SASL authentication with AMQP server
+pub mod auth;
 /// AMQP Frame handling utils
 pub mod frame;
 /// The AMQ Protocol implementation (Generated)
 pub mod protocol;
-/// Utility to handle sasl auth with AMQP server
-pub mod sasl;
