@@ -29,6 +29,9 @@ path    = "../uri"
 version          = "^0.4"
 default-features = false
 
+[dependencies]
+mio = '^0.6.14'
+
 [badges]
 travis-ci = { repository = "sozu-proxy/amq-protocol" }
 appveyor  = { repository = "Keruspe/amq-protocol" }

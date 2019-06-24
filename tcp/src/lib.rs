@@ -8,6 +8,7 @@
 //! connecting to an AMQP URI
 
 use amq_protocol_uri::{AMQPScheme, AMQPUri};
+use mio::{Events, Poll, PollOpt, Ready, Token};
 use tcp_stream::HandshakeError;
 
 use std::io;
@@ -26,16 +27,31 @@ impl AMQPUriTcpExt for AMQPUri {
         let stream = TcpStream::connect(format!("{}:{}", self.authority.host, self.authority.port))?;
         match self.scheme {
             AMQPScheme::AMQP  => Ok(stream),
-            AMQPScheme::AMQPS => stream.into_tls(&self.authority.host).or_else(retry_handshake),
+            AMQPScheme::AMQPS => connect_amqps(stream, &self.authority.host),
         }.map(|s| f(s, self))
     }
 }
 
-fn retry_handshake(error: HandshakeError) -> io::Result<TcpStream> {
-    match error {
-        HandshakeError::Failure(io_err) => Err(io_err),
-        HandshakeError::WouldBlock(mid) => mid.handshake().or_else(retry_handshake),
+fn connect_amqps(stream: TcpStream, host: &str) -> io::Result<TcpStream> {
+    let poll = Poll::new()?;
+    let mut events = Events::with_capacity(1024);
+
+    poll.register(&stream, Token(1), Ready::readable() | Ready::writable(), PollOpt::edge())?;
+
+    let mut res = stream.into_tls(host);
+
+    while let Err(error) = res {
+        poll.poll(&mut events, None)?;
+        match error {
+            HandshakeError::Failure(io_err) => return Err(io_err),
+            HandshakeError::WouldBlock(mid) => res = mid.handshake(),
+        };
     }
+
+    let stream = res.unwrap();
+
+    poll.deregister(&stream)?;
+    Ok(stream)
 }
 
 impl AMQPUriTcpExt for &str {
