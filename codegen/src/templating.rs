@@ -4,7 +4,7 @@ use crate::{
 };
 
 use amq_protocol_types::{AMQPType, AMQPValue};
-use handlebars::{self, Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output, Renderable, RenderContext, RenderError, ScopedJson, to_json};
+use handlebars::{self, BlockParams, Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue, Output, Renderable, RenderContext, RenderError, ScopedJson, to_json};
 use serde_json::{self, Value};
 
 use std::{
@@ -162,6 +162,13 @@ impl HelperDef for EachArgumentHelper {
             let local_path_root = value.path_root().map(|p| format!("{}/{}", rc.get_path(), p));
             let arguments : Vec<AMQPArgument> = serde_json::from_value(value.value().clone()).map_err(|_| RenderError::new("Param is not a Vec<AMQPArgument> for helper \"each_argument\""))?;
             let len = arguments.len();
+            let array_path = value.path().map(|p| {
+                if value.is_absolute_path() {
+                    p.to_string()
+                } else {
+                    format!("{}/{}", rc.get_path(), p)
+                }
+            });
             for (index, argument) in arguments.iter().enumerate() {
                 let mut local_rc = rc.derive();
                 if let Some(ref p) = local_path_root {
@@ -169,23 +176,24 @@ impl HelperDef for EachArgumentHelper {
                 }
                 local_rc.set_local_var("@index".to_string(), to_json(&index));
                 local_rc.set_local_var("@last".to_string(), to_json(index == len - 1));
-                if let Some(inner_path) = value.path() {
-                    let new_path = format!("{}/{}.[{}]", local_rc.get_path(), inner_path, index);
-                    local_rc.set_path(new_path.clone());
+                if let Some(inner_path) = array_path.as_ref() {
+                    let new_path = format!("{}/[{}]", inner_path, index);
+                    local_rc.set_path(new_path);
                 }
                 if let Some(block_param) = h.block_param() {
-                    let mut map = HashMap::new();
-                    match *argument {
-                        AMQPArgument::Value(ref v) => {
-                            map.insert(block_param.to_string(), to_json(v));
-                            map.insert("argument_is_value".to_string(), to_json(&true));
+                    let (path, is_value) = match *argument {
+                        AMQPArgument::Value(_) => {
+                            (local_rc.get_path().to_owned() + ".Value", true)
                         },
-                        AMQPArgument::Flags(ref f) => {
-                            map.insert(block_param.to_string(), to_json(f));
-                            map.insert("argument_is_value".to_string(), to_json(&false));
+                        AMQPArgument::Flags(_) => {
+                            (local_rc.get_path().to_owned() + ".Flags", false)
                         },
                     };
-                    local_rc.push_block_context(&map)?;
+
+                    let mut params = BlockParams::new();
+                    params.add_path(block_param, &path)?;
+                    local_rc.set_local_var("argument_is_value".into(), to_json(&is_value));
+                    local_rc.push_block_context(params)?;
                 }
                 t.render(r, ctx, &mut local_rc, out)?;
                 if h.block_param().is_some() {
