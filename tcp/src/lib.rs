@@ -1,6 +1,6 @@
 #![deny(missing_docs)]
 #![warn(rust_2018_idioms)]
-#![doc(html_root_url = "https://docs.rs/amq-protocol-tcp/2.1.0/")]
+#![doc(html_root_url = "https://docs.rs/amq-protocol-tcp/2.1.1/")]
 
 //! # AMQP URI TCP connection handling
 //!
@@ -8,7 +8,7 @@
 //! connecting to an AMQP URI
 
 use amq_protocol_uri::{AMQPScheme, AMQPUri};
-use mio::{Events, Poll, PollOpt, Ready, Token};
+//use mio::{Events, Poll, PollOpt, Ready, Token};
 use tcp_stream::HandshakeError;
 
 use std::io;
