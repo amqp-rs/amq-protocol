@@ -10,6 +10,8 @@ use nom::{
     error::context,
 };
 
+use std::io::Write;
+
 /// Protocol metadata
 pub mod metadata {
     use super::*;
@@ -137,7 +139,7 @@ pub fn parse_class(i: &[u8]) -> ParserResult<'_, AMQPClass> {
 }
 
 /// Serialize an AMQP class
-pub fn gen_class<'a>(input: &'a mut [u8], class: &'a AMQPClass) -> GenResult<'a> {
+pub fn gen_class<'a, W: Write + SkipBuffer<'a>>(input: W, class: &AMQPClass) -> GenResult<W> {
     match *class {
         {{#each protocol.classes as |class| ~}}
         AMQPClass::{{camel class.name}}(ref {{snake class.name}}) => {{snake class.name}}::gen_{{snake class.name false}}(input, {{snake class.name}}),
@@ -181,14 +183,14 @@ pub mod {{snake class.name}} {
     }
 
     /// Serialize {{class.name}} (Generated)
-    pub fn gen_{{snake class.name false}}<'a>(input: &'a mut [u8], method: &'a AMQPMethod) -> GenResult<'a> {
-        match *method {
+    pub fn gen_{{snake class.name false}}<'a, W: Write + SkipBuffer<'a>>(input: W, method: &AMQPMethod) -> GenResult<W> {
+        gen_id(input, {{class.id}}).chain(&|input| match *method {
             {{#each class.methods as |method| ~}}
             AMQPMethod::{{camel method.name}}(ref {{snake method.name}}) => {
-                gen_{{snake method.name false}}(gen_id(input, {{class.id}})?, {{snake method.name}})
+                gen_{{snake method.name false}}(input, {{snake method.name}})
             },
             {{/each ~}}
-        }
+        })
     }
 
     /// The available methods in {{class.name}}
@@ -268,7 +270,7 @@ pub mod {{snake class.name}} {
     }
 
     /// Serialize {{method.name}} (Generated)
-    pub fn gen_{{snake method.name false}}<'a>(input: &'a mut [u8], {{#if method.arguments ~}}{{#if method.ignore_args ~}}_{{/if ~}}method{{else}}_{{/if ~}}: &'a {{camel method.name}}) -> GenResult<'a> {
+    pub fn gen_{{snake method.name false}}<'a, W: Write + SkipBuffer<'a>>(input: W, {{#if method.arguments ~}}{{#if method.ignore_args ~}}_{{/if ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> GenResult<W> {
         {{#each_argument method.arguments as |argument| ~}}
         {{#unless argument_is_value ~}}
         let mut flags = AMQPFlags::default();
@@ -277,17 +279,17 @@ pub mod {{snake class.name}} {
         {{/each ~}}
         {{/unless ~}}
         {{/each_argument ~}}
-        let input = gen_id(input, {{method.id}})?;
+        let res = Ok(gen_id(input, {{method.id}})?);
         {{#each_argument method.arguments as |argument| ~}}
         {{#if argument_is_value ~}}
         {{#if argument.force_default ~}}
         {{/if ~}}
-        let input = gen_{{snake_type argument.type}}(input, {{#if (and (pass_by_ref argument.type) (not (use_str_ref argument.type))) ~}}&{{/if ~}}{{#if argument.force_default ~}}{{amqp_value_ref argument.default_value}}{{else}}method.{{snake argument.name}}{{#if (use_str_ref argument.type) ~}}.as_ref(){{/if ~}}{{/if ~}})?;
+        let res = Ok(res.chain(&|input| gen_{{snake_type argument.type}}(input, {{#if (and (pass_by_ref argument.type) (not (use_str_ref argument.type))) ~}}&{{/if ~}}{{#if argument.force_default ~}}{{amqp_value_ref argument.default_value}}{{else}}method.{{snake argument.name}}{{#if (use_str_ref argument.type) ~}}.as_ref(){{/if ~}}{{/if ~}}))?);
         {{else}}
-        let input = gen_flags(input, &flags)?;
+        let res = Ok(res.chain(&|input| gen_flags(input, &flags))?);
         {{/if ~}}
         {{/each_argument ~}}
-        Ok(input)
+        res
     }
     {{/each ~}}
     {{#if class.properties ~}}
@@ -349,14 +351,14 @@ pub mod {{snake class.name}} {
     }
 
     /// Serialize {{class.name}} properties (Generated)
-    pub fn gen_properties<'a>(input: &'a mut [u8], props: &'a AMQPProperties) -> GenResult<'a> {
-        let mut input = gen_short_uint(input, props.bitmask())?;
+    pub fn gen_properties<'a, W: Write + SkipBuffer<'a>>(input: W, props: &AMQPProperties) -> GenResult<W> {
+        let mut res = Ok(gen_short_uint(input, props.bitmask())?);
         {{#each class.properties as |property| ~}}
         if let Some(prop) = props.{{snake property.name}}{{#if (pass_by_ref property.type) ~}}.as_ref(){{/if ~}} {
-            input = gen_{{snake_type property.type}}(input, prop{{#if (use_str_ref property.type) ~}}.as_ref(){{/if ~}})?;
+            res = Ok(res.chain(&|input| gen_{{snake_type property.type}}(input, prop{{#if (use_str_ref property.type) ~}}.as_ref(){{/if ~}}))?);
         }
         {{/each ~}}
-        Ok(input)
+        res
     }
     {{/if ~}}
 }
