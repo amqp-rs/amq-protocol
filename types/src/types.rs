@@ -173,17 +173,7 @@ pub struct DecimalValue {
     pub value: LongUInt,
 }
 
-/// A Reference pointing to a ShortString
-pub struct ShortStringRef<'a>(pub &'a str);
-/// A Reference pointing to a LongString
-pub struct LongStringRef<'a>(pub &'a str);
-
 impl<'a> ShortString {
-    /// Get a reference to a ShortString
-    pub fn as_ref(&'a self) -> ShortStringRef<'a> {
-        ShortStringRef(&self.0)
-    }
-
     /// Get a reference to a LongString as &str
     pub fn as_str(&'a self) -> &'a str {
         self.0.as_str()
@@ -219,34 +209,7 @@ impl fmt::Display for ShortString {
     }
 }
 
-impl<'a> ShortStringRef<'a> {
-    pub(crate) fn as_bytes(&self) -> &[u8] {
-        self.0.as_bytes()
-    }
-
-    pub(crate) fn len(&self) -> usize {
-        self.0.len()
-    }
-}
-
-impl Default for ShortStringRef<'static> {
-    fn default() -> Self {
-        Self("")
-    }
-}
-
-impl<'a> From<&'a str> for ShortStringRef<'a> {
-    fn from(s: &'a str) -> Self {
-        Self(s)
-    }
-}
-
 impl<'a> LongString {
-    /// Get a reference to a LongString
-    pub fn as_ref(&'a self) -> LongStringRef<'a> {
-        LongStringRef(&self.0)
-    }
-
     /// Get a reference to a LongString as &str
     pub fn as_str(&'a self) -> &'a str {
         self.0.as_str()
@@ -279,28 +242,6 @@ impl borrow::Borrow<str> for LongString {
 impl fmt::Display for LongString {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
-    }
-}
-
-impl<'a> LongStringRef<'a> {
-    pub(crate) fn as_bytes(&self) -> &[u8] {
-        self.0.as_bytes()
-    }
-
-    pub(crate) fn len(&self) -> usize {
-        self.0.len()
-    }
-}
-
-impl Default for LongStringRef<'static> {
-    fn default() -> Self {
-        Self("")
-    }
-}
-
-impl<'a> From<&'a str> for LongStringRef<'a> {
-    fn from(s: &'a str) -> Self {
-        Self(s)
     }
 }
 

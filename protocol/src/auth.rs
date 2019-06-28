@@ -52,7 +52,7 @@ impl Credentials {
         let mut table = FieldTable::default();
         table.insert("LOGIN".into(),    AMQPValue::LongString(self.username().into()));
         table.insert("PASSWORD".into(), AMQPValue::LongString(self.password().into()));
-        gen_field_table(&mut buf[..], &table).expect("miscalculated AMQPLAIN string length");
+        gen_field_table(&table)((&mut buf[..]).into()).expect("miscalculated AMQPLAIN string length");
         // skip the FieldTable length
         String::from_utf8_lossy(&buf.as_slice()[4..]).to_string()
     }

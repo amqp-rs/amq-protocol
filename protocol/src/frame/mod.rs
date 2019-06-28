@@ -7,9 +7,10 @@ pub use self::{
 };
 
 pub use crate::types::{
-    generation::{GenError, GenResult},
+    generation::{BackToTheBuffer, GenError, GenResult, SerializeFn},
     parsing::{ParserError, ParserResult},
 };
+pub use cookie_factory::WriteContext;
 pub use nom::Offset;
 
 /// Serialization utils
