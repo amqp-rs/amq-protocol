@@ -4,6 +4,8 @@ use amq_protocol_types::{
     parsing::parse_value,
 };
 
+use cookie_factory::gen;
+
 #[test]
 fn test_full_integration() {
     let mut table  = FieldTable::default();
@@ -33,7 +35,7 @@ fn test_full_integration() {
     let value              = AMQPValue::FieldTable(table);
     let mut buf: [u8; 199] = [0; 199];
 
-    gen_value(&mut buf[..], &value).unwrap();
+    gen(gen_value(&value), &mut buf[..]).unwrap();
 
     assert_eq!(parse_value(&buf), Ok((&[][..], value)));
 }

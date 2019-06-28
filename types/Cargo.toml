@@ -17,7 +17,8 @@ name = "amq_protocol_types"
 verbose-errors = []
 
 [dependencies]
-cookie-factory = "=0.3.0-beta3"
+#cookie-factory = "=0.3.0-beta3"
+cookie-factory = { git="git://github.com/rust-bakery/cookie-factory" }
 nom            = "^5.0"
 serde_json     = "^1.0"
 
