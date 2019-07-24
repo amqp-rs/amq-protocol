@@ -7,7 +7,7 @@
 //! amq-protocol-uri is a library aiming at providing tools to help
 //! managing AMQP URIs
 
-use url::{percent_encoding, Url};
+use url::Url;
 
 use std::{
     num::ParseIntError,
