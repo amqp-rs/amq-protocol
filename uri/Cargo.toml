@@ -14,7 +14,8 @@ license       = "BSD-2-Clause"
 name = "amq_protocol_uri"
 
 [dependencies]
-url = "^1.7"
+percent-encoding = "^2.0"
+url              = "^2.0"
 
 [badges]
 travis-ci = { repository = "sozu-proxy/amq-protocol" }
