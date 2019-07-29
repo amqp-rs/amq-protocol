@@ -305,11 +305,13 @@ impl<'a> From<&'a str> for LongStringRef<'a> {
 }
 
 impl FieldArray {
-    pub(crate) fn as_slice(&self) -> &[AMQPValue] {
+    /// Get the inner values as a slice
+    pub fn as_slice(&self) -> &[AMQPValue] {
         self.0.as_slice()
     }
 
-    pub(crate) fn push(&mut self, v: AMQPValue) {
+    /// Add an item to the array
+    pub fn push(&mut self, v: AMQPValue) {
         self.0.push(v);
     }
 }
@@ -353,11 +355,13 @@ impl From<BTreeMap<ShortString, AMQPValue>> for FieldTable {
 }
 
 impl ByteArray {
-    pub(crate) fn as_slice(&self) -> &[u8] {
+    /// Get the inner bytes array as slice
+    pub fn as_slice(&self) -> &[u8] {
         self.0.as_slice()
     }
 
-    pub(crate) fn len(&self) -> usize {
+    /// Get the length of the inner bytes array
+    pub fn len(&self) -> usize {
         self.0.len()
     }
 }
