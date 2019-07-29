@@ -330,6 +330,11 @@ impl FieldTable {
     pub fn contains_key(&self, k: &str) -> bool {
         self.0.contains_key(k)
     }
+
+    /// Access the inner BTreeMap to perform lookups
+    pub fn inner(&self) -> &BTreeMap<ShortString, AMQPValue> {
+        &self.0
+    }
 }
 
 impl<'a> IntoIterator for &'a FieldTable {
