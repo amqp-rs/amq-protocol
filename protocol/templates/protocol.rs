@@ -139,10 +139,10 @@ pub fn parse_class(i: &[u8]) -> ParserResult<'_, AMQPClass> {
 }
 
 /// Serialize an AMQP class
-pub fn gen_class<'a, W: Write + SkipBuffer<'a>>(input: W, class: &AMQPClass) -> GenResult<W> {
-    match *class {
+pub fn gen_class<'a, W: Write + BackToTheBuffer + 'a>(class: &'a AMQPClass) -> impl SerializeFn<W> + 'a {
+    move |input| match *class {
         {{#each protocol.classes as |class| ~}}
-        AMQPClass::{{camel class.name}}(ref {{snake class.name}}) => {{snake class.name}}::gen_{{snake class.name false}}(input, {{snake class.name}}),
+        AMQPClass::{{camel class.name}}(ref {{snake class.name}}) => {{snake class.name}}::gen_{{snake class.name false}}({{snake class.name}})(input),
         {{/each ~}}
     }
 }
@@ -183,14 +183,17 @@ pub mod {{snake class.name}} {
     }
 
     /// Serialize {{class.name}} (Generated)
-    pub fn gen_{{snake class.name false}}<'a, W: Write + SkipBuffer<'a>>(input: W, method: &AMQPMethod) -> GenResult<W> {
-        gen_id(input, {{class.id}}).chain(&|input| match *method {
-            {{#each class.methods as |method| ~}}
-            AMQPMethod::{{camel method.name}}(ref {{snake method.name}}) => {
-                gen_{{snake method.name false}}(input, {{snake method.name}})
-            },
-            {{/each ~}}
-        })
+    pub fn gen_{{snake class.name false}}<'a, W: Write + BackToTheBuffer + 'a>(method: &'a AMQPMethod) -> impl SerializeFn<W> + 'a {
+        cookie_factory::tuple((
+            gen_id({{class.id}}),
+            move |input| match *method {
+                {{#each class.methods as |method| ~}}
+                AMQPMethod::{{camel method.name}}(ref {{snake method.name}}) => {
+                    gen_{{snake method.name false}}({{snake method.name}})(input)
+                },
+                {{/each ~}}
+            }
+        ))
     }
 
     /// The available methods in {{class.name}}
@@ -270,26 +273,28 @@ pub mod {{snake class.name}} {
     }
 
     /// Serialize {{method.name}} (Generated)
-    pub fn gen_{{snake method.name false}}<'a, W: Write + SkipBuffer<'a>>(input: W, {{#if method.arguments ~}}{{#if method.ignore_args ~}}_{{/if ~}}method{{else}}_{{/if ~}}: &{{camel method.name}}) -> GenResult<W> {
-        {{#each_argument method.arguments as |argument| ~}}
-        {{#unless argument_is_value ~}}
-        let mut flags = AMQPFlags::default();
-        {{#each argument.flags as |flag| ~}}
-        flags.add_flag("{{snake flag.name}}".to_string(), {{#if flag.force_default ~}}{{flag.default_value}}{{else}}method.{{snake flag.name}}{{/if ~}});
-        {{/each ~}}
-        {{/unless ~}}
-        {{/each_argument ~}}
-        let res = Ok(gen_id(input, {{method.id}})?);
-        {{#each_argument method.arguments as |argument| ~}}
-        {{#if argument_is_value ~}}
-        {{#if argument.force_default ~}}
-        {{/if ~}}
-        let res = Ok(res.chain(&|input| gen_{{snake_type argument.type}}(input, {{#if (and (pass_by_ref argument.type) (not (use_str_ref argument.type))) ~}}&{{/if ~}}{{#if argument.force_default ~}}{{amqp_value_ref argument.default_value}}{{else}}method.{{snake argument.name}}{{#if (use_str_ref argument.type) ~}}.as_ref(){{/if ~}}{{/if ~}}))?);
-        {{else}}
-        let res = Ok(res.chain(&|input| gen_flags(input, &flags))?);
-        {{/if ~}}
-        {{/each_argument ~}}
-        res
+    pub fn gen_{{snake method.name false}}<'a, W: Write + BackToTheBuffer + 'a>({{#if method.arguments ~}}{{#if method.ignore_args ~}}_{{/if ~}}method{{else}}_{{/if ~}}: &'a {{camel method.name}}) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            {{#each_argument method.arguments as |argument| ~}}
+            {{#unless argument_is_value ~}}
+            let mut flags = AMQPFlags::default();
+            {{#each argument.flags as |flag| ~}}
+            flags.add_flag("{{snake flag.name}}".to_string(), {{#if flag.force_default ~}}{{flag.default_value}}{{else}}method.{{snake flag.name}}{{/if ~}});
+            {{/each ~}}
+            {{/unless ~}}
+            {{/each_argument ~}}
+            input = gen_id({{method.id}})(input)?;
+            {{#each_argument method.arguments as |argument| ~}}
+            {{#if argument_is_value ~}}
+            {{#if argument.force_default ~}}
+            {{/if ~}}
+            input = gen_{{snake_type argument.type}}({{#if (and (pass_by_ref argument.type) (not (use_str_ref argument.type))) ~}}&{{/if ~}}{{#if argument.force_default ~}}{{amqp_value_ref argument.default_value}}{{else}}method.{{snake argument.name}}{{#if (use_str_ref argument.type) ~}}.as_str(){{/if ~}}{{/if ~}})(input)?;
+            {{else}}
+            input = gen_flags(&flags)(input)?;
+            {{/if ~}}
+            {{/each_argument ~}}
+            Ok(input)
+        }
     }
     {{/each ~}}
     {{#if class.properties ~}}
@@ -351,14 +356,18 @@ pub mod {{snake class.name}} {
     }
 
     /// Serialize {{class.name}} properties (Generated)
-    pub fn gen_properties<'a, W: Write + SkipBuffer<'a>>(input: W, props: &AMQPProperties) -> GenResult<W> {
-        let mut res = Ok(gen_short_uint(input, props.bitmask())?);
-        {{#each class.properties as |property| ~}}
-        if let Some(prop) = props.{{snake property.name}}{{#if (pass_by_ref property.type) ~}}.as_ref(){{/if ~}} {
-            res = Ok(res.chain(&|input| gen_{{snake_type property.type}}(input, prop{{#if (use_str_ref property.type) ~}}.as_ref(){{/if ~}}))?);
-        }
-        {{/each ~}}
-        res
+    pub fn gen_properties<'a, W: Write + BackToTheBuffer + 'a>(props: &'a AMQPProperties) -> impl SerializeFn<W> + 'a {
+        cookie_factory::tuple((
+            gen_short_uint(props.bitmask()),
+            move |mut input| {
+                {{#each class.properties as |property| ~}}
+                if let Some(prop) = props.{{snake property.name}}{{#if (pass_by_ref property.type) ~}}.as_ref(){{/if ~}} {
+                    input = gen_{{snake_type property.type}}(prop{{#if (use_str_ref property.type) ~}}.as_str(){{/if ~}})(input)?;
+                }
+                {{/each ~}}
+                Ok(input)
+            }
+        ))
     }
     {{/if ~}}
 }
