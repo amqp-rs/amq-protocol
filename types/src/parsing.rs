@@ -127,7 +127,7 @@ pub fn parse_double(i: &[u8]) -> ParserResult<'_, Double> {
 
 /// Parse a [DecimalValue](../type.DecimalValue.html)
 pub fn parse_decimal_value(i: &[u8]) -> ParserResult<'_, DecimalValue> {
-    context("parse_decimal_value", flat_map(parse_short_short_uint, |scale| map(parse_long_uint, move |value| DecimalValue { scale, value, })))(i)
+    context("parse_decimal_value", map(pair(parse_short_short_uint, parse_long_uint), |(scale, value)| DecimalValue { scale, value, }))(i)
 }
 
 /// Parse a [ShortString](../type.ShortString.html)
