@@ -6,7 +6,7 @@ authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications - codegen"
 repository    = "https://github.com/sozu-proxy/amq-protocol"
 documentation = "https://docs.rs/amq-protocol-codegen"
-keywords      = ["amqp","rabbitmq","protocol","nom"]
+keywords      = ["amqp","rabbitmq","protocol"]
 categories    = ["api-bindings","network-programming"]
 license       = "BSD-2-Clause"
 
