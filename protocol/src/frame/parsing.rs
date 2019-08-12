@@ -21,7 +21,7 @@ pub fn parse_channel(i: &[u8]) -> ParserResult<'_, AMQPChannel> {
 
 /// Parse the protocol header
 pub fn parse_protocol_header(i: &[u8]) -> ParserResult<'_, ()> {
-    context("parse_protocol_header", map(tuple((tag(metadata::NAME.as_bytes()), tag(&[0]), tag(&[metadata::MAJOR_VERSION, metadata::MINOR_VERSION, metadata::REVISION]))), |_| ()))(i)
+    context("parse_protocol_header", map(pair(tag(metadata::NAME.as_bytes()), tag(&[0, metadata::MAJOR_VERSION, metadata::MINOR_VERSION, metadata::REVISION])), |_| ()))(i)
 }
 
 /// Parse the frame type

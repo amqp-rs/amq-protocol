@@ -10,7 +10,7 @@ use crate::{
     },
 };
 
-use cookie_factory::{slice, tuple};
+use cookie_factory::{pair, slice, tuple};
 
 use std::io::Write;
 
@@ -36,7 +36,7 @@ pub fn gen_frame<'a, W: Write + BackToTheBuffer + 'a>(frame: &'a AMQPFrame) -> i
 }
 
 fn gen_protocol_header<W: Write>() -> impl SerializeFn<W> {
-    tuple((slice(metadata::NAME.as_bytes()), slice(&[0, metadata::MAJOR_VERSION, metadata::MINOR_VERSION, metadata::REVISION])))
+    pair(slice(metadata::NAME.as_bytes()), slice(&[0, metadata::MAJOR_VERSION, metadata::MINOR_VERSION, metadata::REVISION]))
 }
 
 fn gen_heartbeat_frame<W: Write>() -> impl SerializeFn<W> {
