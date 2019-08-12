@@ -11,6 +11,7 @@ use nom::{
     bytes::streaming::{tag, take},
     combinator::{all_consuming, flat_map, map, map_opt, map_res},
     error::context,
+    sequence::{pair, tuple},
 };
 
 /// Parse a channel id
@@ -20,7 +21,7 @@ pub fn parse_channel(i: &[u8]) -> ParserResult<'_, AMQPChannel> {
 
 /// Parse the protocol header
 pub fn parse_protocol_header(i: &[u8]) -> ParserResult<'_, ()> {
-    context("parse_protocol_header", map(flat_map(tag(metadata::NAME.as_bytes()), |_| flat_map(tag(&[0]), |_| tag(&[metadata::MAJOR_VERSION, metadata::MINOR_VERSION, metadata::REVISION]))), |_| ()))(i)
+    context("parse_protocol_header", map(tuple((tag(metadata::NAME.as_bytes()), tag(&[0]), tag(&[metadata::MAJOR_VERSION, metadata::MINOR_VERSION, metadata::REVISION]))), |_| ()))(i)
 }
 
 /// Parse the frame type
@@ -46,10 +47,10 @@ pub fn parse_frame(i: &[u8]) -> ParserResult<'_, AMQPFrame> {
 
 /// Parse a raw AMQP frame
 pub fn parse_raw_frame(i: &[u8]) -> ParserResult<'_, AMQPRawFrame<'_>> {
-    context("parse_raw_frame", flat_map(parse_frame_type, |frame_type| flat_map(parse_id, move |channel_id| flat_map(parse_long_uint, move |size| flat_map(take(size), move |payload| map(tag(&[constants::FRAME_END]), move |_| AMQPRawFrame { frame_type, channel_id, size, payload }))))))(i)
+    context("parse_raw_frame", flat_map(tuple((parse_frame_type, parse_id, parse_long_uint)), move |(frame_type, channel_id, size)| map(pair(take(size), tag(&[constants::FRAME_END])), move |(payload, _)| AMQPRawFrame { frame_type, channel_id, size, payload })))(i)
 }
 
 /// Parse a content header frame
 pub fn parse_content_header(i: &[u8]) -> ParserResult<'_, AMQPContentHeader> {
-    context("parse_content_header", flat_map(parse_id, |class_id| flat_map(parse_short_uint, move |weight| flat_map(parse_long_long_uint, move |body_size| map(context("parse_propertes", parse_properties), move |properties| AMQPContentHeader { class_id, weight, body_size, properties })))))(i)
+    context("parse_content_header", map(tuple((parse_id, parse_short_uint, parse_long_long_uint, context("parse_propertes", parse_properties))), |(class_id, weight, body_size, properties)| AMQPContentHeader { class_id, weight, body_size, properties }))(i)
 }
