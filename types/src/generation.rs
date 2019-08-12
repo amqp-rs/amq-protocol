@@ -7,7 +7,7 @@ use crate::{
     value::*,
 };
 
-use cookie_factory::{back_to_the_buffer, be_f32, be_f64, be_i8, be_i16, be_i32, be_i64, be_u8, be_u16, be_u32, be_u64, many_ref, slice, tuple};
+use cookie_factory::{back_to_the_buffer, be_f32, be_f64, be_i8, be_i16, be_i32, be_i64, be_u8, be_u16, be_u32, be_u64, many_ref, pair, slice};
 
 use std::io::Write;
 
@@ -50,7 +50,7 @@ pub fn gen_raw_value<'a, W: Write + BackToTheBuffer + 'a>(v: &'a AMQPValue) -> i
 
 /// Generate the [AMQPValue](../type.AMQPValue.html) preceded with its [AMQPType](../type.AMQPType.html) in the given buffer (x)
 pub fn gen_value<'a, W: Write + BackToTheBuffer + 'a>(v: &'a AMQPValue) -> impl SerializeFn<W> + 'a {
-    tuple((gen_type(v.get_type()), gen_raw_value(v)))
+    pair(gen_type(v.get_type()), gen_raw_value(v))
 }
 
 /// Generate the [AMQPType](../type.AMQPType.html) in the given buffer (x)
@@ -120,17 +120,17 @@ pub fn gen_double<'a, W: Write>(d: Double) -> impl SerializeFn<W> {
 
 /// Generate the [DecimalValue](../type.DecimalValue.html) in the given buffer (x)
 pub fn gen_decimal_value<'a, W: Write>(d: DecimalValue) -> impl SerializeFn<W> {
-    tuple((gen_short_short_uint(d.scale), gen_long_uint(d.value)))
+    pair(gen_short_short_uint(d.scale), gen_long_uint(d.value))
 }
 
 /// Generate the [ShortString](../type.ShortString.html) in the given buffer (x)
 pub fn gen_short_string<'a, W: Write + 'a>(s: &'a str) -> impl SerializeFn<W> + 'a {
-    tuple((gen_short_short_uint(s.len() as ShortShortUInt), slice(s.as_bytes())))
+    pair(gen_short_short_uint(s.len() as ShortShortUInt), slice(s.as_bytes()))
 }
 
 /// Generate the [LongString](../type.LongString.html) in the given buffer (x)
 pub fn gen_long_string<'a, W: Write + 'a>(s: &'a str) -> impl SerializeFn<W> + 'a {
-    tuple((gen_long_uint(s.len() as LongUInt), slice(s.as_bytes())))
+    pair(gen_long_uint(s.len() as LongUInt), slice(s.as_bytes()))
 }
 
 /// Generate the [FieldArray](../type.FieldArray.html) in the given buffer (x)
@@ -149,12 +149,12 @@ pub fn gen_field_table<'a, W: Write + BackToTheBuffer + 'a>(t: &'a FieldTable) -
 }
 
 fn gen_field_entry<'a, W: Write + BackToTheBuffer + 'a>(e: (&'a ShortString, &'a AMQPValue)) -> impl SerializeFn<W> + 'a {
-    tuple((gen_short_string(e.0.as_str()), gen_value(&e.1)))
+    pair(gen_short_string(e.0.as_str()), gen_value(&e.1))
 }
 
 /// Generate the [BiteArray](../type.ByteArray.html) in the given buffer (x)
 pub fn gen_byte_array<'a, W: Write + 'a>(a: &'a ByteArray) -> impl SerializeFn<W> + 'a {
-    tuple((gen_long_uint(a.len() as LongUInt), slice(a.as_slice())))
+    pair(gen_long_uint(a.len() as LongUInt), slice(a.as_slice()))
 }
 
 /// Generate the [AMQPFlags](../type.AMQPFlags.html) in the given buffer (x)
