@@ -1,8 +1,9 @@
 use crate::value::AMQPValue;
 
 use std::{
-    collections::{BTreeMap, btree_map},
-    borrow, fmt, str,
+    borrow,
+    collections::{btree_map, BTreeMap},
+    fmt, str,
 };
 
 use serde::{Deserialize, Serialize};
@@ -61,14 +62,12 @@ impl AMQPType {
             'b' => Some(AMQPType::ShortShortInt),
             'B' => Some(AMQPType::ShortShortUInt),
             /* Specs says 'U', RabbitMQ says 's' (which means ShortString in specs) */
-            's' |
-            'U' => Some(AMQPType::ShortInt),
+            's' | 'U' => Some(AMQPType::ShortInt),
             'u' => Some(AMQPType::ShortUInt),
             'I' => Some(AMQPType::LongInt),
             'i' => Some(AMQPType::LongUInt),
             /* RabbitMQ treats both 'l' and 'L' as LongLongInt and ignores LongLongUInt */
-            'L' |
-            'l' => Some(AMQPType::LongLongInt),
+            'L' | 'l' => Some(AMQPType::LongLongInt),
             'f' => Some(AMQPType::Float),
             'd' => Some(AMQPType::Double),
             'D' => Some(AMQPType::DecimalValue),
@@ -78,7 +77,7 @@ impl AMQPType {
             'F' => Some(AMQPType::FieldTable),
             'x' => Some(AMQPType::ByteArray),
             'V' => Some(AMQPType::Void),
-            _   => None,
+            _ => None,
         }
     }
 
@@ -89,28 +88,27 @@ impl AMQPType {
     /// LongLongUInt is supposed to be 'L' but we return 'l' as LongLongInt
     pub fn get_id(self) -> char {
         match self {
-            AMQPType::Boolean        => 't',
-            AMQPType::ShortShortInt  => 'b',
+            AMQPType::Boolean => 't',
+            AMQPType::ShortShortInt => 'b',
             AMQPType::ShortShortUInt => 'B',
             /* Specs says 'U', RabbitMQ says 's' (which means ShortString in specs) */
-            AMQPType::ShortInt       => 's',
-            AMQPType::ShortUInt      => 'u',
-            AMQPType::LongInt        => 'I',
-            AMQPType::LongUInt       => 'i',
+            AMQPType::ShortInt => 's',
+            AMQPType::ShortUInt => 'u',
+            AMQPType::LongInt => 'I',
+            AMQPType::LongUInt => 'i',
             /* RabbitMQ treats both 'l' and 'L' as LongLongInt and ignores LongLongUInt */
-            AMQPType::LongLongInt    |
-            AMQPType::LongLongUInt   => 'l',
-            AMQPType::Float          => 'f',
-            AMQPType::Double         => 'd',
-            AMQPType::DecimalValue   => 'D',
+            AMQPType::LongLongInt | AMQPType::LongLongUInt => 'l',
+            AMQPType::Float => 'f',
+            AMQPType::Double => 'd',
+            AMQPType::DecimalValue => 'D',
             /* ShortString only exists for internal usage, we shouldn't ever have to use this */
-            AMQPType::ShortString    => '_',
-            AMQPType::LongString     => 'S',
-            AMQPType::FieldArray     => 'A',
-            AMQPType::Timestamp      => 'T',
-            AMQPType::FieldTable     => 'F',
-            AMQPType::ByteArray      => 'x',
-            AMQPType::Void           => 'V',
+            AMQPType::ShortString => '_',
+            AMQPType::LongString => 'S',
+            AMQPType::FieldArray => 'A',
+            AMQPType::Timestamp => 'T',
+            AMQPType::FieldTable => 'F',
+            AMQPType::ByteArray => 'x',
+            AMQPType::Void => 'V',
         }
     }
 }
@@ -122,31 +120,31 @@ impl fmt::Display for AMQPType {
 }
 
 /// A bool
-pub type Boolean        = bool;
+pub type Boolean = bool;
 /// An i8
-pub type ShortShortInt  = i8;
+pub type ShortShortInt = i8;
 /// A u8
 pub type ShortShortUInt = u8;
 /// An i16
-pub type ShortInt       = i16;
+pub type ShortInt = i16;
 /// A u16
-pub type ShortUInt      = u16;
+pub type ShortUInt = u16;
 /// An i32
-pub type LongInt        = i32;
+pub type LongInt = i32;
 /// A u32
-pub type LongUInt       = u32;
+pub type LongUInt = u32;
 /// An i64
-pub type LongLongInt    = i64;
+pub type LongLongInt = i64;
 /// A u64
-pub type LongLongUInt   = u64;
+pub type LongLongUInt = u64;
 /// A f32
-pub type Float          = f32;
+pub type Float = f32;
 /// A f64
-pub type Double         = f64;
+pub type Double = f64;
 /// A timestamp (u32)
-pub type Timestamp      = LongLongUInt;
+pub type Timestamp = LongLongUInt;
 /// No value
-pub type Void           = ();
+pub type Void = ();
 
 /// A String (deprecated)
 #[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
@@ -335,14 +333,14 @@ mod test {
 
     #[test]
     fn test_type_get_id() {
-        assert_eq!(AMQPType::LongLongInt.get_id(),  'l');
+        assert_eq!(AMQPType::LongLongInt.get_id(), 'l');
         assert_eq!(AMQPType::LongLongUInt.get_id(), 'l');
-        assert_eq!(AMQPType::ShortString.get_id(),  '_');
+        assert_eq!(AMQPType::ShortString.get_id(), '_');
     }
 
     #[test]
     fn test_type_to_string() {
         assert_eq!(AMQPType::Boolean.to_string(), "Boolean");
-        assert_eq!(AMQPType::Void.to_string(),    "Void");
+        assert_eq!(AMQPType::Void.to_string(), "Void");
     }
 }

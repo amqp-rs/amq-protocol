@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 /// A struct representing AMQP boolean flags for RPC
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-pub struct AMQPFlags{
+pub struct AMQPFlags {
     flags: Vec<(String, Boolean)>,
 }
 
@@ -21,34 +21,38 @@ impl AMQPFlags {
 
     /// Get the AMQPFlags serialized for AMQP RPC
     pub fn get_bytes(&self) -> Vec<u8> {
-        self.flags.chunks(8).map(|v| {
-            v.iter().enumerate().map(|(idx, (_, b))| {
-                if *b { 1 << idx } else { 0 }
-            }).sum()
-        }).collect()
+        self.flags
+            .chunks(8)
+            .map(|v| {
+                v.iter()
+                    .enumerate()
+                    .map(|(idx, (_, b))| if *b { 1 << idx } else { 0 })
+                    .sum()
+            })
+            .collect()
     }
 
     /// Initialize AMQPFlags from AMQP RPC serialization
     pub fn from_bytes(names: &[&str], bytes: &[u8]) -> AMQPFlags {
-        let flags = names.iter().map(ToString::to_string).zip(bytes.iter().flat_map(|b| {
-            let mut v = Vec::new();
-            for s in 0..8 {
-                v.push(((b & (1 << s)) >> s) == 1)
-            }
-            v
-        })).collect();
+        let flags = names
+            .iter()
+            .map(ToString::to_string)
+            .zip(bytes.iter().flat_map(|b| {
+                let mut v = Vec::new();
+                for s in 0..8 {
+                    v.push(((b & (1 << s)) >> s) == 1)
+                }
+                v
+            }))
+            .collect();
 
-        AMQPFlags {
-            flags,
-        }
+        AMQPFlags { flags }
     }
 }
 
 impl Default for AMQPFlags {
     fn default() -> AMQPFlags {
-        AMQPFlags {
-            flags: Vec::new(),
-        }
+        AMQPFlags { flags: Vec::new() }
     }
 }
 

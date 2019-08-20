@@ -1,10 +1,6 @@
 mod structs;
 
-pub use self::{
-    generation::gen_frame,
-    parsing::parse_frame,
-    structs::*,
-};
+pub use self::{generation::gen_frame, parsing::parse_frame, structs::*};
 
 pub use crate::types::{
     generation::{BackToTheBuffer, GenError, GenResult, SerializeFn},

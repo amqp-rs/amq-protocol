@@ -13,10 +13,7 @@
 mod types;
 mod value;
 
-pub use crate::{
-    types::*,
-    value::*,
-};
+pub use crate::{types::*, value::*};
 
 /// Helpers to handle AMQP flags.
 pub mod flags;

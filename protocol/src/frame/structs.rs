@@ -1,7 +1,4 @@
-use crate::{
-    protocol::*,
-    types::*,
-};
+use crate::{protocol::*, types::*};
 
 /// Enum representing an AMQP channel
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -25,7 +22,7 @@ impl AMQPChannel {
 impl From<ShortUInt> for AMQPChannel {
     fn from(id: ShortUInt) -> AMQPChannel {
         match id {
-            0  => AMQPChannel::Global,
+            0 => AMQPChannel::Global,
             id => AMQPChannel::Id(id),
         }
     }
@@ -41,7 +38,7 @@ pub enum AMQPFrameType {
     /// Content body
     Body,
     /// Heartbeat frame
-    Heartbeat
+    Heartbeat,
 }
 
 /// The different possible frames
@@ -56,7 +53,7 @@ pub enum AMQPFrame {
     /// Content body
     Body(ShortUInt, Vec<u8>),
     /// Heartbeat frame
-    Heartbeat(ShortUInt)
+    Heartbeat(ShortUInt),
 }
 
 /// Raw AMQP Frame
@@ -67,20 +64,20 @@ pub struct AMQPRawFrame<'a> {
     /// The id this frame was received on
     pub channel_id: ShortUInt,
     /// The size of the frame
-    pub size:       LongUInt,
+    pub size: LongUInt,
     /// The paylaod of the frame
-    pub payload:    &'a [u8],
+    pub payload: &'a [u8],
 }
 
 /// Contente header
 #[derive(Clone, Debug, PartialEq)]
 pub struct AMQPContentHeader {
     /// The class of content
-    pub class_id:   ShortUInt,
+    pub class_id: ShortUInt,
     /// The weight of the content
-    pub weight:     ShortUInt,
+    pub weight: ShortUInt,
     /// The size of the content's body
-    pub body_size:  LongLongUInt,
+    pub body_size: LongLongUInt,
     /// The AMQP properties associated with the content
     pub properties: basic::AMQPProperties,
 }
