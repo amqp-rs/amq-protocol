@@ -19,7 +19,7 @@ pub use tcp_stream::{Identity, TcpStream};
 /// Trait providing a method to connect to a TcpStream
 pub trait AMQPUriTcpExt {
     /// connect to a TcpStream
-    fn connect<S, F: FnOnce(TcpStream, AMQPUri) -> S>(self, f: F) -> io::Result<S>
+    fn connect<S, F: FnOnce(TcpStream, AMQPUri, Option<(Poll, Token)>) -> S>(self, f: F) -> io::Result<S>
     where
         Self: Sized,
     {
@@ -27,7 +27,7 @@ pub trait AMQPUriTcpExt {
     }
     /// connect to a TcpStream, registering it to the given Poll with the given Token to handle the
     /// handshake process. You should reregister it afterwards to better fit your needs
-    fn connect_full<S, F: FnOnce(TcpStream, AMQPUri) -> S>(
+    fn connect_full<S, F: FnOnce(TcpStream, AMQPUri, Option<(Poll, Token)>) -> S>(
         self,
         f: F,
         poll: Option<(Poll, Token)>,
@@ -36,7 +36,7 @@ pub trait AMQPUriTcpExt {
 }
 
 impl AMQPUriTcpExt for AMQPUri {
-    fn connect_full<S, F: FnOnce(TcpStream, AMQPUri) -> S>(
+    fn connect_full<S, F: FnOnce(TcpStream, AMQPUri, Option<(Poll, Token)>) -> S>(
         self,
         f: F,
         poll: Option<(Poll, Token)>,
@@ -49,16 +49,16 @@ impl AMQPUriTcpExt for AMQPUri {
             poll.register(
                 &stream,
                 *token,
-                Ready::readable() | Ready::writable(),
+                Ready::all(),
                 PollOpt::edge(),
             )?;
         }
 
         match self.scheme {
-            AMQPScheme::AMQP => Ok(stream),
+            AMQPScheme::AMQP => Ok((stream, poll)),
             AMQPScheme::AMQPS => connect_amqps(stream, &self.authority.host, poll, identity),
         }
-        .map(|s| f(s, self))
+        .map(|(s, poll)| f(s, self, poll))
     }
 }
 
@@ -67,7 +67,7 @@ fn connect_amqps(
     host: &str,
     poll: Option<(Poll, Token)>,
     identity: Option<Identity<'_, '_>>,
-) -> io::Result<TcpStream> {
+) -> io::Result<(TcpStream, Option<(Poll, Token)>)> {
     let mut events = Events::with_capacity(1024);
     let mut res = stream.into_tls(host, identity);
 
@@ -81,11 +81,11 @@ fn connect_amqps(
         };
     }
 
-    Ok(res.unwrap())
+    Ok((res.unwrap(), poll))
 }
 
 impl AMQPUriTcpExt for &str {
-    fn connect_full<S, F: FnOnce(TcpStream, AMQPUri) -> S>(
+    fn connect_full<S, F: FnOnce(TcpStream, AMQPUri, Option<(Poll, Token)>) -> S>(
         self,
         f: F,
         poll: Option<(Poll, Token)>,
