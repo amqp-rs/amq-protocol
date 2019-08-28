@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol"
-version       = "3.0.0-beta.1" # remember to update html_root_url
+version       = "3.0.0-beta.2" # remember to update html_root_url
 edition       = "2018"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications"
@@ -23,7 +23,7 @@ tokio          = ["amq-protocol-tcp/tokio"]
 verbose-errors = ["amq-protocol-types/verbose-errors"]
 
 [build-dependencies.amq-protocol-codegen]
-version = "=3.0.0-beta.1"
+version = "=3.0.0-beta.2"
 path    = "../codegen"
 
 [dependencies]
@@ -31,16 +31,16 @@ cookie-factory = "=0.3.0-beta5"
 nom            = "^5.0"
 
 [dependencies.amq-protocol-tcp]
-version          = "=3.0.0-beta.1"
+version          = "=3.0.0-beta.2"
 default-features = false
 path             = "../tcp"
 
 [dependencies.amq-protocol-types]
-version = "=3.0.0-beta.1"
+version = "=3.0.0-beta.2"
 path    = "../types"
 
 [dependencies.amq-protocol-uri]
-version = "=3.0.0-beta.1"
+version = "=3.0.0-beta.2"
 path    = "../uri"
 
 [badges]
