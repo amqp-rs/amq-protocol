@@ -33,15 +33,9 @@ impl AMQPUriTcpExt for AMQPUri {
 }
 
 fn connect_amqps(stream: TcpStream, host: &str) -> io::Result<TcpStream> {
-    let poll = Poll::new()?;
-    let mut events = Events::with_capacity(1024);
-
-    poll.register(&stream, Token(1), Ready::readable() | Ready::writable(), PollOpt::edge())?;
-
     let mut res = stream.into_tls(host);
 
     while let Err(error) = res {
-        poll.poll(&mut events, None)?;
         match error {
             HandshakeError::Failure(io_err) => return Err(io_err),
             HandshakeError::WouldBlock(mid) => res = mid.handshake(),
@@ -50,7 +44,6 @@ fn connect_amqps(stream: TcpStream, host: &str) -> io::Result<TcpStream> {
 
     let stream = res.unwrap();
 
-    poll.deregister(&stream)?;
     Ok(stream)
 }
 
