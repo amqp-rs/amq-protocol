@@ -27,7 +27,7 @@ version = "=3.0.0-beta.2"
 path    = "../codegen"
 
 [dependencies]
-cookie-factory = "=0.3.0-beta5"
+cookie-factory = "^0.3"
 nom            = "^5.0"
 
 [dependencies.amq-protocol-tcp]

@@ -19,7 +19,10 @@ pub use tcp_stream::{Identity, TcpStream};
 /// Trait providing a method to connect to a TcpStream
 pub trait AMQPUriTcpExt {
     /// connect to a TcpStream
-    fn connect<S, F: FnOnce(TcpStream, AMQPUri, Option<(Poll, Token)>) -> S>(self, f: F) -> io::Result<S>
+    fn connect<S, F: FnOnce(TcpStream, AMQPUri, Option<(Poll, Token)>) -> S>(
+        self,
+        f: F,
+    ) -> io::Result<S>
     where
         Self: Sized,
     {
@@ -46,12 +49,7 @@ impl AMQPUriTcpExt for AMQPUri {
             TcpStream::connect(format!("{}:{}", self.authority.host, self.authority.port))?;
 
         if let Some((poll, token)) = poll.as_ref() {
-            poll.register(
-                &stream,
-                *token,
-                Ready::all(),
-                PollOpt::edge(),
-            )?;
+            poll.register(&stream, *token, Ready::all(), PollOpt::edge())?;
         }
 
         match self.scheme {

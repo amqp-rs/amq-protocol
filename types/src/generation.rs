@@ -2,12 +2,12 @@
 pub use cookie_factory::{BackToTheBuffer, GenError, GenResult, SerializeFn};
 
 use crate::{flags::*, types::*, value::*};
-
 use cookie_factory::{
-    back_to_the_buffer, be_f32, be_f64, be_i16, be_i32, be_i64, be_i8, be_u16, be_u32, be_u64,
-    be_u8, many_ref, pair, slice,
+    bytes::{be_f32, be_f64, be_i16, be_i32, be_i64, be_i8, be_u16, be_u32, be_u64, be_u8},
+    combinator::{back_to_the_buffer, slice},
+    multi::many_ref,
+    sequence::pair,
 };
-
 use std::io::Write;
 
 /// Apply a generator and serialize its length at the beginning of buffer

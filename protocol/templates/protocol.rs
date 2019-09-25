@@ -184,7 +184,7 @@ pub mod {{snake class.name}} {
 
     /// Serialize {{class.name}} (Generated)
     pub fn gen_{{snake class.name false}}<'a, W: Write + BackToTheBuffer + 'a>(method: &'a AMQPMethod) -> impl SerializeFn<W> + 'a {
-        cookie_factory::pair(
+        cookie_factory::sequence::pair(
             gen_id({{class.id}}),
             move |input| match *method {
                 {{#each class.methods as |method| ~}}
@@ -357,7 +357,7 @@ pub mod {{snake class.name}} {
 
     /// Serialize {{class.name}} properties (Generated)
     pub fn gen_properties<'a, W: Write + BackToTheBuffer + 'a>(props: &'a AMQPProperties) -> impl SerializeFn<W> + 'a {
-        cookie_factory::pair(
+        cookie_factory::sequence::pair(
             gen_short_uint(props.bitmask()),
             move |mut input| {
                 {{#each class.properties as |property| ~}}

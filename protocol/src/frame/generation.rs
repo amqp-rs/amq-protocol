@@ -3,9 +3,10 @@ use crate::{
     protocol::{basic::gen_properties, *},
     types::{generation::*, *},
 };
-
-use cookie_factory::{pair, slice, tuple};
-
+use cookie_factory::{
+    combinator::slice,
+    sequence::{pair, tuple},
+};
 use std::io::Write;
 
 /// Serialize a frame in the given buffer
