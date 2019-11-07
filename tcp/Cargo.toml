@@ -18,7 +18,6 @@ default    = ["native-tls"]
 native-tls = ["tcp-stream/native-tls"]
 openssl    = ["tcp-stream/openssl"]
 rustls     = ["tcp-stream/rustls"]
-tokio      = ["tcp-stream/tokio"]
 vendored   = ["tcp-stream/vendored"]
 
 [dependencies.amq-protocol-uri]
@@ -26,7 +25,7 @@ version = "=3.0.0"
 path    = "../uri"
 
 [dependencies.tcp-stream]
-version          = "^0.7"
+version          = "^0.8"
 default-features = false
 
 [dependencies]

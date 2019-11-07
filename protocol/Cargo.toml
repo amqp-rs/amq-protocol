@@ -19,7 +19,6 @@ default        = ["native-tls"]
 native-tls     = ["amq-protocol-tcp/native-tls"]
 openssl        = ["amq-protocol-tcp/openssl"]
 rustls         = ["amq-protocol-tcp/rustls"]
-tokio          = ["amq-protocol-tcp/tokio"]
 verbose-errors = ["amq-protocol-types/verbose-errors"]
 
 [build-dependencies.amq-protocol-codegen]
