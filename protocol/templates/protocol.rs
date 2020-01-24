@@ -210,7 +210,7 @@ pub mod {{snake class.name}} {
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct {{camel method.name}} {
         {{#each_argument method.arguments as |argument| ~}}
-        {{#if argument_is_value ~}}
+        {{#if @argument_is_value ~}}
         {{#unless argument.force_default ~}}
         /// {{argument.name}} (Generated)
         pub {{snake argument.name}}: {{argument.type}},
@@ -243,7 +243,7 @@ pub mod {{snake class.name}} {
     /// Parse {{method.name}} (Generated)
     pub fn parse_{{snake method.name false}}(i: &[u8]) -> ParserResult<'_, {{camel method.name}}> {
         {{#each_argument method.arguments as |argument| ~}}
-        {{#if argument_is_value ~}}
+        {{#if @argument_is_value ~}}
         let (i, {{#if argument.force_default ~}}_{{else}}{{snake argument.name}}{{/if ~}}) = parse_{{snake_type argument.type}}(i)?;
         {{else}}
         let (i, {{#if argument.ignore_flags ~}}_{{else}}flags{{/if ~}}) = parse_flags(i, &[
@@ -255,7 +255,7 @@ pub mod {{snake class.name}} {
         {{/each_argument ~}}
         Ok((i, {{camel method.name}} {
             {{#each_argument method.arguments as |argument| ~}}
-            {{#if argument_is_value ~}}
+            {{#if @argument_is_value ~}}
             {{#unless argument.force_default ~}}
             {{snake argument.name}},
             {{/unless ~}}
@@ -276,7 +276,7 @@ pub mod {{snake class.name}} {
     pub fn gen_{{snake method.name false}}<'a, W: Write + BackToTheBuffer + 'a>({{#if method.arguments ~}}{{#if method.ignore_args ~}}_{{/if ~}}method{{else}}_{{/if ~}}: &'a {{camel method.name}}) -> impl SerializeFn<W> + 'a {
         move |mut input| {
             {{#each_argument method.arguments as |argument| ~}}
-            {{#unless argument_is_value ~}}
+            {{#unless @argument_is_value ~}}
             let mut flags = AMQPFlags::default();
             {{#each argument.flags as |flag| ~}}
             flags.add_flag("{{snake flag.name}}".to_string(), {{#if flag.force_default ~}}{{flag.default_value}}{{else}}method.{{snake flag.name}}{{/if ~}});
@@ -285,7 +285,7 @@ pub mod {{snake class.name}} {
             {{/each_argument ~}}
             input = gen_id({{method.id}})(input)?;
             {{#each_argument method.arguments as |argument| ~}}
-            {{#if argument_is_value ~}}
+            {{#if @argument_is_value ~}}
             {{#if argument.force_default ~}}
             {{/if ~}}
             input = gen_{{snake_type argument.type}}({{#if (and (pass_by_ref argument.type) (not (use_str_ref argument.type))) ~}}&{{/if ~}}{{#if argument.force_default ~}}{{amqp_value_ref argument.default_value}}{{else}}method.{{snake argument.name}}{{#if (use_str_ref argument.type) ~}}.as_str(){{/if ~}}{{/if ~}})(input)?;
