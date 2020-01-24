@@ -2,7 +2,7 @@ use crate::{specs::*, util::*};
 
 use amq_protocol_types::{AMQPType, AMQPValue};
 use handlebars::{
-    self, to_json, BlockParams, Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue,
+    self, to_json, BlockContext, BlockParams, Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue,
     Output, RenderContext, RenderError, Renderable, ScopedJson,
 };
 use serde_json::{self, Value};
@@ -10,7 +10,7 @@ use serde_json::{self, Value};
 use std::{collections::HashMap, fs::File, io::Write, path::Path};
 
 /// Type alias to avoid making our users explicitely depend on an extra dependency
-pub type CodeGenerator = Handlebars;
+pub type CodeGenerator<'a> = Handlebars<'a>;
 
 /// Our extension for better integration with Handlebars
 pub trait HandlebarsAMQPExtension {
@@ -40,8 +40,8 @@ pub trait HandlebarsAMQPExtension {
     );
 }
 
-impl HandlebarsAMQPExtension for CodeGenerator {
-    fn register_amqp_helpers(mut self) -> CodeGenerator {
+impl<'a> HandlebarsAMQPExtension for CodeGenerator<'a> {
+    fn register_amqp_helpers(mut self) -> CodeGenerator<'a> {
         self.register_escape_fn(handlebars::no_escape);
         self.register_helper("camel", Box::new(CamelHelper));
         self.register_helper("snake", Box::new(SnakeHelper));
@@ -100,9 +100,9 @@ impl HelperDef for CamelHelper {
     fn call<'reg: 'rc, 'rc>(
         &self,
         h: &Helper<'reg, 'rc>,
-        _: &'reg Handlebars,
+        _: &'reg Handlebars<'_>,
         _: &'rc Context,
-        _: &mut RenderContext<'reg>,
+        _: &mut RenderContext<'reg, 'rc>,
         out: &mut dyn Output,
     ) -> HelperResult {
         let value = h
@@ -123,9 +123,9 @@ impl HelperDef for SnakeHelper {
     fn call<'reg: 'rc, 'rc>(
         &self,
         h: &Helper<'reg, 'rc>,
-        _: &'reg Handlebars,
+        _: &'reg Handlebars<'_>,
         _: &'rc Context,
-        _: &mut RenderContext<'reg>,
+        _: &mut RenderContext<'reg, 'rc>,
         out: &mut dyn Output,
     ) -> HelperResult {
         let value = h
@@ -150,9 +150,9 @@ impl HelperDef for SnakeTypeHelper {
     fn call<'reg: 'rc, 'rc>(
         &self,
         h: &Helper<'reg, 'rc>,
-        _: &'reg Handlebars,
+        _: &'reg Handlebars<'_>,
         _: &'rc Context,
-        _: &mut RenderContext<'reg>,
+        _: &mut RenderContext<'reg, 'rc>,
         out: &mut dyn Output,
     ) -> HelperResult {
         let value = h
@@ -171,9 +171,9 @@ impl HelperDef for SanitizeNameHelper {
     fn call<'reg: 'rc, 'rc>(
         &self,
         h: &Helper<'reg, 'rc>,
-        _: &'reg Handlebars,
+        _: &'reg Handlebars<'_>,
         _: &'rc Context,
-        _: &mut RenderContext<'reg>,
+        _: &mut RenderContext<'reg, 'rc>,
         out: &mut dyn Output,
     ) -> HelperResult {
         let value = h
@@ -193,9 +193,9 @@ impl HelperDef for PassByRefHelper {
     fn call_inner<'reg: 'rc, 'rc>(
         &self,
         h: &Helper<'reg, 'rc>,
-        _: &'reg Handlebars,
+        _: &'reg Handlebars<'_>,
         _: &'rc Context,
-        _: &mut RenderContext<'reg>,
+        _: &mut RenderContext<'reg, 'rc>,
     ) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
         let value = h
             .param(0)
@@ -220,9 +220,9 @@ impl HelperDef for UseStrRefHelper {
     fn call_inner<'reg: 'rc, 'rc>(
         &self,
         h: &Helper<'reg, 'rc>,
-        _: &'reg Handlebars,
+        _: &'reg Handlebars<'_>,
         _: &'rc Context,
-        _: &mut RenderContext<'reg>,
+        _: &mut RenderContext<'reg, 'rc>,
     ) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
         let value = h
             .param(0)
@@ -242,9 +242,9 @@ impl HelperDef for MethodHasFlagHelper {
     fn call_inner<'reg: 'rc, 'rc>(
         &self,
         h: &Helper<'reg, 'rc>,
-        _: &'reg Handlebars,
+        _: &'reg Handlebars<'_>,
         _: &'rc Context,
-        _: &mut RenderContext<'reg>,
+        _: &mut RenderContext<'reg, 'rc>,
     ) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
         let arg0 = h.param(0).ok_or_else(|| {
             RenderError::new("First param not found for helper \"method_has_flag\"")
@@ -272,9 +272,9 @@ impl HelperDef for EachArgumentHelper {
     fn call<'reg: 'rc, 'rc>(
         &self,
         h: &Helper<'reg, 'rc>,
-        r: &'reg Handlebars,
+        r: &'reg Handlebars<'_>,
         ctx: &'rc Context,
-        rc: &mut RenderContext<'reg>,
+        rc: &mut RenderContext<'reg, 'rc>,
         out: &mut dyn Output,
     ) -> HelperResult {
         let value = h
@@ -282,10 +282,11 @@ impl HelperDef for EachArgumentHelper {
             .ok_or_else(|| RenderError::new("Param not found for helper \"each_argument\""))?;
 
         if let Some(t) = h.template() {
-            rc.promote_local_vars();
-            let local_path_root = value
-                .path_root()
-                .map(|p| format!("{}/{}", rc.get_path(), p));
+            let mut block_context = BlockContext::new();
+            if let Some(path) = value.context_path() {
+                *block_context.base_path_mut() = path.to_vec();
+            }
+            rc.push_block(block_context);
             let arguments: Vec<AMQPArgument> = serde_json::from_value(value.value().clone())
                 .map_err(|_| {
                     RenderError::new(
@@ -293,46 +294,35 @@ impl HelperDef for EachArgumentHelper {
                     )
                 })?;
             let len = arguments.len();
-            let array_path = value.path().map(|p| {
-                if value.is_absolute_path() {
-                    p.to_string()
-                } else {
-                    format!("{}/{}", rc.get_path(), p)
-                }
-            });
+            let array_path = value.context_path();
             for (index, argument) in arguments.iter().enumerate() {
-                let mut local_rc = rc.derive();
-                if let Some(ref p) = local_path_root {
-                    local_rc.push_local_path_root(p.clone());
-                }
-                local_rc.set_local_var("@index".to_string(), to_json(&index));
-                local_rc.set_local_var("@last".to_string(), to_json(index == len - 1));
-                if let Some(inner_path) = array_path.as_ref() {
-                    let new_path = format!("{}/[{}]", inner_path, index);
-                    local_rc.set_path(new_path);
-                }
-                if let Some(block_param) = h.block_param() {
+                if let Some(ref mut block) = rc.block_mut() {
                     let (path, is_value) = match *argument {
-                        AMQPArgument::Value(_) => (local_rc.get_path().to_owned() + ".Value", true),
-                        AMQPArgument::Flags(_) => {
-                            (local_rc.get_path().to_owned() + ".Flags", false)
-                        }
+                        AMQPArgument::Value(_) => ("Value".to_owned(), true),
+                        AMQPArgument::Flags(_) => ("Flags".to_owned(), false),
                     };
-
-                    let mut params = BlockParams::new();
-                    params.add_path(block_param, &path)?;
-                    local_rc.set_local_var("argument_is_value".into(), to_json(&is_value));
-                    local_rc.push_block_context(params)?;
+                    block.set_local_var("@index".to_string(), to_json(&index));
+                    block.set_local_var("@last".to_string(), to_json(index == len - 1));
+                    block.set_local_var("@argument_is_value".to_string(), to_json(&is_value));
+                    if let Some(ref p) = array_path {
+                        if index == 0 {
+                            let mut path = Vec::with_capacity(p.len() + 1);
+                            path.extend_from_slice(p);
+                            path.push(index.to_string());
+                            *block.base_path_mut() = path;
+                        } else if let Some(ptr) = block.base_path_mut().last_mut() {
+                            *ptr = index.to_string();
+                        }
+                    }
+                    if let Some(block_param) = h.block_param() {
+                        let mut params = BlockParams::new();
+                        params.add_path(block_param, vec![path])?;
+                        block.set_block_params(params);
+                    }
                 }
-                t.render(r, ctx, &mut local_rc, out)?;
-                if h.block_param().is_some() {
-                    local_rc.pop_block_context();
-                }
-                if local_path_root.is_some() {
-                    local_rc.pop_local_path_root();
-                }
+                t.render(r, ctx, rc, out)?;
             }
-            rc.demote_local_vars();
+            rc.pop_block();
         }
         Ok(())
     }
@@ -344,9 +334,9 @@ impl HelperDef for AMQPValueRefHelper {
     fn call_inner<'reg: 'rc, 'rc>(
         &self,
         h: &Helper<'reg, 'rc>,
-        _: &'reg Handlebars,
+        _: &'reg Handlebars<'_>,
         _: &'rc Context,
-        _: &mut RenderContext<'reg>,
+        _: &mut RenderContext<'reg, 'rc>,
     ) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
         let arg = h
             .param(0)
@@ -402,7 +392,7 @@ port {{protocol.port}}
 {{method.id}} - {{method.name}}
 synchronous: {{method.synchronous}}
 {{#each_argument method.arguments as |argument| ~}}
-{{#if argument_is_value ~}}
+{{#if @argument_is_value ~}}
 {{argument.name}}({{argument.domain}}): {{argument.type}}
 {{else}}
 {{#each argument.flags as |flag| ~}}
