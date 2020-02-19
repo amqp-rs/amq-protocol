@@ -107,7 +107,7 @@ impl FromStr for AMQPUri {
             .domain()
             .map_or(Ok(default.authority.host), percent_decode)?;
         let port = url.port().unwrap_or_else(|| scheme.default_port());
-        let vhost = percent_decode(&url.path()[1..])?;
+        let vhost = percent_decode(&url.path().get(1..).unwrap_or_default())?;
         let frame_max = url
             .query_pairs()
             .find(|&(ref key, _)| key == "frame_max")
@@ -179,6 +179,18 @@ impl Default for AMQPUserInfo {
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn test_parse_amqp_no_path() {
+        let uri = "amqp://localhost".parse();
+        assert_eq!(
+            uri,
+            Ok(AMQPUri {
+                vhost: "".to_string(),
+                ..Default::default()
+            })
+        );
+    }
 
     #[test]
     fn test_parse_amqp() {
