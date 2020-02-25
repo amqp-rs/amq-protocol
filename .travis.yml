@@ -11,7 +11,7 @@ cache: cargo
 
 matrix:
     include:
-        - rust: 1.33.0
+        - rust: 1.36.0
         - rust: stable
         - rust: beta
         - rust: nightly
