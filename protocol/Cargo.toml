@@ -15,11 +15,12 @@ build         = "build.rs"
 name = "amq_protocol"
 
 [features]
-default        = ["native-tls"]
-native-tls     = ["amq-protocol-tcp/native-tls"]
-openssl        = ["amq-protocol-tcp/openssl"]
-rustls         = ["amq-protocol-tcp/rustls"]
-verbose-errors = ["amq-protocol-types/verbose-errors"]
+default             = ["native-tls"]
+native-tls          = ["amq-protocol-tcp/native-tls"]
+openssl             = ["amq-protocol-tcp/openssl"]
+rustls              = ["amq-protocol-tcp/rustls"]
+rustls-native-certs = ["amq-protocol-tcp/rustls-native-certs"]
+verbose-errors      = ["amq-protocol-types/verbose-errors"]
 
 [build-dependencies.amq-protocol-codegen]
 version = "=4.0.0"
