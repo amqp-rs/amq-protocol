@@ -109,6 +109,108 @@ impl AMQPValue {
     }
 }
 
+impl From<Boolean> for AMQPValue {
+    fn from(v: Boolean) -> Self {
+        AMQPValue::Boolean(v)
+    }
+}
+
+impl From<ShortShortInt> for AMQPValue {
+    fn from(v: ShortShortInt) -> Self {
+        AMQPValue::ShortShortInt(v)
+    }
+}
+
+impl From<ShortShortUInt> for AMQPValue {
+    fn from(v: ShortShortUInt) -> Self {
+        AMQPValue::ShortShortUInt(v)
+    }
+}
+
+impl From<ShortInt> for AMQPValue {
+    fn from(v: ShortInt) -> Self {
+        AMQPValue::ShortInt(v)
+    }
+}
+
+impl From<ShortUInt> for AMQPValue {
+    fn from(v: ShortUInt) -> Self {
+        AMQPValue::ShortUInt(v)
+    }
+}
+
+impl From<LongInt> for AMQPValue {
+    fn from(v: LongInt) -> Self {
+        AMQPValue::LongInt(v)
+    }
+}
+
+impl From<LongUInt> for AMQPValue {
+    fn from(v: LongUInt) -> Self {
+        AMQPValue::LongUInt(v)
+    }
+}
+
+impl From<LongLongInt> for AMQPValue {
+    fn from(v: LongLongInt) -> Self {
+        AMQPValue::LongLongInt(v)
+    }
+}
+
+impl From<Float> for AMQPValue {
+    fn from(v: Float) -> Self {
+        AMQPValue::Float(v)
+    }
+}
+
+impl From<Double> for AMQPValue {
+    fn from(v: Double) -> Self {
+        AMQPValue::Double(v)
+    }
+}
+
+impl From<DecimalValue> for AMQPValue {
+    fn from(v: DecimalValue) -> Self {
+        AMQPValue::DecimalValue(v)
+    }
+}
+
+impl From<ShortString> for AMQPValue {
+    fn from(v: ShortString) -> Self {
+        AMQPValue::ShortString(v)
+    }
+}
+
+impl From<LongString> for AMQPValue {
+    fn from(v: LongString) -> Self {
+        AMQPValue::LongString(v)
+    }
+}
+
+impl From<FieldArray> for AMQPValue {
+    fn from(v: FieldArray) -> Self {
+        AMQPValue::FieldArray(v)
+    }
+}
+
+impl From<Timestamp> for AMQPValue {
+    fn from(v: Timestamp) -> Self {
+        AMQPValue::Timestamp(v)
+    }
+}
+
+impl From<FieldTable> for AMQPValue {
+    fn from(v: FieldTable) -> Self {
+        AMQPValue::FieldTable(v)
+    }
+}
+
+impl From<ByteArray> for AMQPValue {
+    fn from(v: ByteArray) -> Self {
+        AMQPValue::ByteArray(v)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
