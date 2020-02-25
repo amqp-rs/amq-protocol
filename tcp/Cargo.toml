@@ -14,18 +14,19 @@ license       = "BSD-2-Clause"
 name = "amq_protocol_tcp"
 
 [features]
-default    = ["native-tls"]
-native-tls = ["tcp-stream/native-tls"]
-openssl    = ["tcp-stream/openssl"]
-rustls     = ["tcp-stream/rustls"]
-vendored   = ["tcp-stream/vendored"]
+default             = ["native-tls"]
+native-tls          = ["tcp-stream/native-tls"]
+openssl             = ["tcp-stream/openssl"]
+rustls              = ["tcp-stream/rustls"]
+rustls-native-certs = ["tcp-stream/rustls-native-certs"]
+vendored            = ["tcp-stream/vendored"]
 
 [dependencies.amq-protocol-uri]
 version = "=4.0.0"
 path    = "../uri"
 
 [dependencies.tcp-stream]
-version          = "^0.9"
+version          = "^0.9.1"
 default-features = false
 
 [dependencies]
