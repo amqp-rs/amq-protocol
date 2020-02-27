@@ -10,7 +10,7 @@ use nom::{
     error::context,
 };
 
-use std::io::Write;
+use std::{error, fmt, io::Write};
 
 /// Protocol metadata
 pub mod metadata {
@@ -64,6 +64,17 @@ impl AMQPError {
     }
 }
 
+impl fmt::Display for AMQPError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            AMQPError::Soft(err) => write!(f, "AMQP soft error: {}", err),
+            AMQPError::Hard(err) => write!(f, "AMQP hard error: {}", err),
+        }
+    }
+}
+
+impl error::Error for AMQPError {}
+
 /// The available soft AMQP errors
 #[derive(Clone, Debug, PartialEq)]
 pub enum AMQPSoftError {
@@ -94,6 +105,18 @@ impl AMQPSoftError {
     }
 }
 
+impl fmt::Display for AMQPSoftError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            {{#each protocol.soft_errors as |constant| ~}}
+            AMQPSoftError::{{camel constant.name}} => write!(f, "{{{constant.name}}}"),
+            {{/each ~}}
+        }
+    }
+}
+
+impl error::Error for AMQPSoftError {}
+
 /// The available hard AMQP errors
 #[derive(Clone, Debug, PartialEq)]
 pub enum AMQPHardError {
@@ -123,6 +146,18 @@ impl AMQPHardError {
         }
     }
 }
+
+impl fmt::Display for AMQPHardError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            {{#each protocol.hard_errors as |constant| ~}}
+            AMQPHardError::{{camel constant.name}} => write!(f, "{{{constant.name}}}"),
+            {{/each ~}}
+        }
+    }
+}
+
+impl error::Error for AMQPHardError {}
 
 {{#each protocol.classes as |class| ~}}
 use self::{{snake class.name}}::parse_{{snake class.name}};
