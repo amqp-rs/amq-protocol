@@ -2,8 +2,8 @@ use crate::{specs::*, util::*};
 
 use amq_protocol_types::{AMQPType, AMQPValue};
 use handlebars::{
-    self, to_json, BlockContext, BlockParams, Context, Handlebars, Helper, HelperDef, HelperResult, JsonValue,
-    Output, RenderContext, RenderError, Renderable, ScopedJson,
+    self, to_json, BlockContext, BlockParams, Context, Handlebars, Helper, HelperDef, HelperResult,
+    JsonValue, Output, RenderContext, RenderError, Renderable, ScopedJson,
 };
 use serde_json::{self, Value};
 
