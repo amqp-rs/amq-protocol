@@ -115,8 +115,6 @@ impl fmt::Display for AMQPSoftError {
     }
 }
 
-impl error::Error for AMQPSoftError {}
-
 /// The available hard AMQP errors
 #[derive(Clone, Debug, PartialEq)]
 pub enum AMQPHardError {
@@ -156,8 +154,6 @@ impl fmt::Display for AMQPHardError {
         }
     }
 }
-
-impl error::Error for AMQPHardError {}
 
 {{#each protocol.classes as |class| ~}}
 use self::{{snake class.name}}::parse_{{snake class.name}};
