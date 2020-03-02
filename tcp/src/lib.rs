@@ -8,7 +8,7 @@
 //! connecting to an AMQP URI
 
 use amq_protocol_uri::{AMQPScheme, AMQPUri};
-use mio::{Events, Poll, PollOpt, Ready, Token};
+use mio::{Events, Interest, Poll, Token};
 use tcp_stream::HandshakeError;
 
 use std::io;
@@ -45,11 +45,15 @@ impl AMQPUriTcpExt for AMQPUri {
         poll: Option<(Poll, Token)>,
         identity: Option<Identity<'_, '_>>,
     ) -> io::Result<S> {
-        let stream =
+        let mut stream =
             TcpStream::connect(format!("{}:{}", self.authority.host, self.authority.port))?;
 
         if let Some((poll, token)) = poll.as_ref() {
-            poll.register(&stream, *token, Ready::all(), PollOpt::edge())?;
+            poll.registry().register(
+                &mut stream,
+                *token,
+                Interest::READABLE | Interest::WRITABLE,
+            )?;
         }
 
         match self.scheme {
@@ -63,14 +67,14 @@ impl AMQPUriTcpExt for AMQPUri {
 fn connect_amqps(
     stream: TcpStream,
     host: &str,
-    poll: Option<(Poll, Token)>,
+    mut poll: Option<(Poll, Token)>,
     identity: Option<Identity<'_, '_>>,
 ) -> io::Result<(TcpStream, Option<(Poll, Token)>)> {
     let mut events = Events::with_capacity(1024);
     let mut res = stream.into_tls(host, identity);
 
     while let Err(error) = res {
-        if let Some((poll, _)) = poll.as_ref() {
+        if let Some((poll, _)) = poll.as_mut() {
             poll.poll(&mut events, None)?;
         }
         match error {

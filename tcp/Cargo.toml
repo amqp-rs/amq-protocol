@@ -25,12 +25,13 @@ vendored            = ["tcp-stream/vendored"]
 version = "=4.2.0"
 path    = "../uri"
 
-[dependencies.tcp-stream]
-version          = "^0.9.1"
-default-features = false
+[dependencies.mio]
+version  = "^0.7"
+features = ["os-poll"]
 
-[dependencies]
-mio = '^0.6.14'
+[dependencies.tcp-stream]
+version          = "^0.10"
+default-features = false
 
 [badges]
 travis-ci = { repository = "sozu-proxy/amq-protocol" }
