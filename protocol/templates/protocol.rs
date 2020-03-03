@@ -10,7 +10,7 @@ use nom::{
     error::context,
 };
 
-use std::{error, fmt, io::Write};
+use std::{convert::TryFrom, error, fmt, io::Write};
 
 /// Protocol metadata
 pub mod metadata {
@@ -44,12 +44,13 @@ pub mod constants {
 #[derive(Clone, Debug, PartialEq)]
 pub struct AMQPError {
     kind: AMQPErrorKind,
+    message: ShortString,
 }
 
 impl AMQPError {
     /// Get the error corresponding to an id
-    pub fn from_id(id: ShortUInt) -> Option<Self> {
-        AMQPErrorKind::from_id(id).map(|kind| Self { kind })
+    pub fn from_id(id: ShortUInt, message: ShortString) -> Option<Self> {
+        AMQPErrorKind::from_id(id).map(|kind| Self { kind, message })
     }
 
     /// Get the kind of error
@@ -58,9 +59,25 @@ impl AMQPError {
     }
 }
 
+impl TryFrom<channel::Close> for AMQPError {
+    type Error = String;
+
+    fn try_from(method: channel::Close) -> Result<Self, Self::Error> {
+        Self::from_id(method.reply_code, method.reply_text.clone()).ok_or_else(|| format!("Couldn't convert method to error: {:?}", method))
+    }
+}
+
+impl TryFrom<connection::Close> for AMQPError {
+    type Error = String;
+
+    fn try_from(method: connection::Close) -> Result<Self, Self::Error> {
+        Self::from_id(method.reply_code, method.reply_text.clone()).ok_or_else(|| format!("Couldn't convert method to error: {:?}", method))
+    }
+}
+
 impl fmt::Display for AMQPError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self.kind)
+        write!(f, "{}: {}", self.kind, self.message)
     }
 }
 
