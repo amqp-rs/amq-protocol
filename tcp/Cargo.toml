@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-tcp"
-version       = "5.0.0-beta.1" # remember to update html_root_url
+version       = "5.0.0-beta.2" # remember to update html_root_url
 edition       = "2018"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP URI TCP connection handling"
@@ -14,15 +14,16 @@ license       = "BSD-2-Clause"
 name = "amq_protocol_tcp"
 
 [features]
-default             = ["native-tls"]
-native-tls          = ["tcp-stream/native-tls"]
-openssl             = ["tcp-stream/openssl"]
-rustls              = ["tcp-stream/rustls"]
-rustls-native-certs = ["tcp-stream/rustls-native-certs"]
-vendored            = ["tcp-stream/vendored"]
+default                   = ["native-tls"]
+native-tls                = ["tcp-stream/native-tls"]
+openssl                   = ["tcp-stream/openssl"]
+rustls                    = ["rustls-native-certs"]
+rustls-native-certs       = ["tcp-stream/rustls-native-certs"]
+rustls-webpki-roots-certs = ["tcp-stream/rustls-webpki-roots-certs"]
+vendored                  = ["tcp-stream/vendored"]
 
 [dependencies.amq-protocol-uri]
-version = "=5.0.0-beta.1"
+version = "=5.0.0-beta.2"
 path    = "../uri"
 
 [dependencies.mio]
