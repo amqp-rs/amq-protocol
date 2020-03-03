@@ -42,38 +42,62 @@ pub mod constants {
 
 /// An AMQP Error
 #[derive(Clone, Debug, PartialEq)]
-pub enum AMQPError {
+pub struct AMQPError {
+    kind: AMQPErrorKind,
+}
+
+impl AMQPError {
+    /// Get the error corresponding to an id
+    pub fn from_id(id: ShortUInt) -> Option<Self> {
+        AMQPErrorKind::from_id(id).map(|kind| Self { kind })
+    }
+
+    /// Get the kind of error
+    pub fn kind(&self) -> &AMQPErrorKind {
+        &self.kind
+    }
+}
+
+impl fmt::Display for AMQPError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.kind)
+    }
+}
+
+impl error::Error for AMQPError {}
+
+/// The kind of AMQP Error
+#[derive(Clone, Debug, PartialEq)]
+pub enum AMQPErrorKind {
     /// A soft AMQP error
     Soft(AMQPSoftError),
     /// A hard AMQP error
     Hard(AMQPHardError),
 }
 
-impl AMQPError {
+impl AMQPErrorKind {
     /// Get the id of the error
     pub fn get_id(&self) -> ShortUInt {
         match *self {
-            AMQPError::Soft(ref s) => s.get_id(),
-            AMQPError::Hard(ref h) => h.get_id(),
+            AMQPErrorKind::Soft(ref s) => s.get_id(),
+            AMQPErrorKind::Hard(ref h) => h.get_id(),
         }
     }
 
-    /// Get the error corresponding to an id
-    pub fn from_id(id: ShortUInt) -> Option<AMQPError> {
-        AMQPSoftError::from_id(id).map(AMQPError::Soft).or_else(|| AMQPHardError::from_id(id).map(AMQPError::Hard))
+    /// Get the error kind corresponding to an id
+    pub fn from_id(id: ShortUInt) -> Option<Self> {
+        AMQPSoftError::from_id(id).map(AMQPErrorKind::Soft).or_else(|| AMQPHardError::from_id(id).map(AMQPErrorKind::Hard))
     }
 }
 
-impl fmt::Display for AMQPError {
+impl fmt::Display for AMQPErrorKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            AMQPError::Soft(err) => write!(f, "AMQP soft error: {}", err),
-            AMQPError::Hard(err) => write!(f, "AMQP hard error: {}", err),
+            AMQPErrorKind::Soft(err) => write!(f, "AMQP soft error: {}", err),
+            AMQPErrorKind::Hard(err) => write!(f, "AMQP hard error: {}", err),
         }
     }
 }
-
-impl error::Error for AMQPError {}
 
 /// The available soft AMQP errors
 #[derive(Clone, Debug, PartialEq)]
