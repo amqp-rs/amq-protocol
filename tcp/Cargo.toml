@@ -34,6 +34,9 @@ features = ["os-poll"]
 version          = "^0.10"
 default-features = false
 
+[dependencies]
+log = "^0.4"
+
 [badges]
 travis-ci = { repository = "sozu-proxy/amq-protocol" }
 appveyor  = { repository = "Keruspe/amq-protocol" }

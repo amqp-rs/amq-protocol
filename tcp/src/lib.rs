@@ -8,6 +8,7 @@
 //! connecting to an AMQP URI
 
 use amq_protocol_uri::{AMQPScheme, AMQPUri};
+use log::{trace, warn};
 use mio::{Events, Interest, Poll, Token};
 use tcp_stream::HandshakeError;
 
@@ -45,10 +46,12 @@ impl AMQPUriTcpExt for AMQPUri {
         poll: Option<(Poll, Token)>,
         identity: Option<Identity<'_, '_>>,
     ) -> io::Result<S> {
-        let mut stream =
-            TcpStream::connect(format!("{}:{}", self.authority.host, self.authority.port))?;
+        let uri = format!("{}:{}", self.authority.host, self.authority.port);
+        trace!("Connecting to {}", uri);
+        let mut stream = TcpStream::connect(uri)?;
 
         if let Some((poll, token)) = poll.as_ref() {
+            trace!("Registering for mio events");
             poll.registry().register(
                 &mut stream,
                 *token,
@@ -70,19 +73,26 @@ fn connect_amqps(
     mut poll: Option<(Poll, Token)>,
     identity: Option<Identity<'_, '_>>,
 ) -> io::Result<(TcpStream, Option<(Poll, Token)>)> {
+    trace!("Enabling TLS");
     let mut events = Events::with_capacity(1024);
     let mut res = stream.into_tls(host, identity);
 
     while let Err(error) = res {
-        if let Some((poll, _)) = poll.as_mut() {
-            poll.poll(&mut events, None)?;
-        }
+        warn!("Got error when enabling TLS: {:?}", error);
         match error {
             HandshakeError::Failure(io_err) => return Err(io_err),
-            HandshakeError::WouldBlock(mid) => res = mid.handshake(),
+            HandshakeError::WouldBlock(mid) => {
+                if let Some((poll, _)) = poll.as_mut() {
+                    trace!("Waiting for mio events");
+                    poll.poll(&mut events, None)?;
+                }
+                trace!("Retrying TLS");
+                res = mid.handshake()
+            }
         };
     }
 
+    trace!("TLS enabled");
     Ok((res.unwrap(), poll))
 }
 
