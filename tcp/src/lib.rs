@@ -70,12 +70,14 @@ fn connect_amqps(
     let mut res = stream.into_tls(host, identity);
 
     while let Err(error) = res {
-        if let Some((poll, _)) = poll.as_ref() {
-            poll.poll(&mut events, None)?;
-        }
         match error {
             HandshakeError::Failure(io_err) => return Err(io_err),
-            HandshakeError::WouldBlock(mid) => res = mid.handshake(),
+            HandshakeError::WouldBlock(mid) => {
+                if let Some((poll, _)) = poll.as_ref() {
+                    poll.poll(&mut events, None)?;
+                }
+                res = mid.handshake()
+            }
         };
     }
 
