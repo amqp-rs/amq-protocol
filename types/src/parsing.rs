@@ -11,6 +11,7 @@ use nom::{
     },
     sequence::pair,
 };
+use std::{error, fmt};
 
 /// Struct holding the errors stack
 #[derive(Clone, Debug, PartialEq)]
@@ -59,6 +60,21 @@ impl<I> ParseError<I> for ParserErrors {
         other
     }
 }
+
+impl fmt::Display for ParserErrors {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Parser error: {:?}", self.error)?;
+        if let Some(errors) = self.errors.as_ref() {
+            for error in errors {
+                writeln!(f, "")?;
+                write!(f, "\tat {:?}", error)?;
+            }
+        }
+        Ok(())
+    }
+}
+
+impl error::Error for ParserErrors {}
 
 /// Error returned by parsers
 pub type ParserError = nom::Err<ParserErrors>;
