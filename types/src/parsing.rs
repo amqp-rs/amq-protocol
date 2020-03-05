@@ -4,7 +4,7 @@ use nom::{
     self,
     bytes::streaming::take,
     combinator::{all_consuming, complete, flat_map, map, map_opt, map_parser, map_res},
-    error::context,
+    error::{context, ErrorKind, ParseError, VerboseErrorKind},
     multi::fold_many0,
     number::streaming::{
         be_f32, be_f64, be_i16, be_i32, be_i64, be_i8, be_u16, be_u32, be_u64, be_u8,
@@ -12,20 +12,58 @@ use nom::{
     sequence::pair,
 };
 
-#[cfg(not(feature = "verbose-errors"))]
-use nom::error::ErrorKind;
-#[cfg(feature = "verbose-errors")]
-use nom::error::VerboseError;
+/// Struct holding the errors stack
+#[derive(Clone, Debug, PartialEq)]
+pub struct ParserErrors {
+    error: VerboseErrorKind,
+    errors: Option<Vec<VerboseErrorKind>>,
+}
 
-#[cfg(not(feature = "verbose-errors"))]
-/// Error returned by parsers
-pub type ParserError<'a> = nom::Err<(&'a [u8], ErrorKind)>;
-#[cfg(feature = "verbose-errors")]
-/// Error returned by parsers
-pub type ParserError<'a> = nom::Err<VerboseError<&'a [u8]>>;
+impl ParserErrors {
+    #[cfg(not(feature = "verbose-errors"))]
+    fn init_errors() -> Option<Vec<VerboseErrorKind>> {
+        None
+    }
+    #[cfg(feature = "verbose-errors")]
+    fn init_errors() -> Option<Vec<VerboseErrorKind>> {
+        Some(Vec::new())
+    }
+}
 
+impl<I> ParseError<I> for ParserErrors {
+    fn from_error_kind(_input: I, kind: ErrorKind) -> Self {
+        Self {
+            error: VerboseErrorKind::Nom(kind),
+            errors: Self::init_errors(),
+        }
+    }
+
+    fn append(_input: I, kind: ErrorKind, mut other: Self) -> Self {
+        if let Some(errors) = other.errors.as_mut() {
+            errors.push(VerboseErrorKind::Nom(kind));
+        }
+        other
+    }
+
+    fn from_char(_input: I, c: char) -> Self {
+        Self {
+            error: VerboseErrorKind::Char(c),
+            errors: Self::init_errors(),
+        }
+    }
+
+    fn add_context(_input: I, ctx: &'static str, mut other: Self) -> Self {
+        if let Some(errors) = other.errors.as_mut() {
+            errors.push(VerboseErrorKind::Context(ctx));
+        }
+        other
+    }
+}
+
+/// Error returned by parsers
+pub type ParserError = nom::Err<ParserErrors>;
 /// Return type of parsers
-pub type ParserResult<'a, T> = Result<(&'a [u8], T), ParserError<'a>>;
+pub type ParserResult<'a, T> = Result<(&'a [u8], T), ParserError>;
 
 /// Parse the [AMQPValue](../type.AMQPValue.html) of the given [AMQPType](../type.AMQPType.html)
 pub fn parse_raw_value<'a>(
