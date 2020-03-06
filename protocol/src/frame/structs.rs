@@ -56,6 +56,17 @@ pub enum AMQPFrame {
     Heartbeat(ShortUInt),
 }
 
+impl AMQPFrame {
+    /// Return whether this frame is an AMQPFrame::Header or not
+    pub fn is_header(&self) -> bool {
+        if let AMQPFrame::Header(..) = self {
+            true
+        } else {
+            false
+        }
+    }
+}
+
 /// Raw AMQP Frame
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct AMQPRawFrame<'a> {
