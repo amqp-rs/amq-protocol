@@ -18,8 +18,11 @@ verbose-errors = []
 
 [dependencies]
 cookie-factory = "^0.3"
-nom            = "^5.0"
 serde_json     = "^1.0"
+
+[dependencies.nom]
+version  = "^5.0"
+features = ["std"]
 
 [dependencies.serde]
 version  = "^1.0"
