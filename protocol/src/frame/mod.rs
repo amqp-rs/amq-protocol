@@ -7,7 +7,6 @@ pub use crate::types::{
     parsing::{ParserError, ParserResult},
 };
 pub use cookie_factory::WriteContext;
-pub use nom::Offset;
 
 /// Serialization utils
 pub mod generation;
