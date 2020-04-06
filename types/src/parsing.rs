@@ -207,7 +207,7 @@ pub fn parse_short_string(i: &[u8]) -> ParserResult<'_, ShortString> {
 /// Parse a [LongString](../type.LongString.html)
 pub fn parse_long_string(i: &[u8]) -> ParserResult<'_, LongString> {
     context(
-        "parse_short_string",
+        "parse_long_string",
         map(
             map_res(flat_map(parse_long_uint, take), std::str::from_utf8),
             LongString::from,
