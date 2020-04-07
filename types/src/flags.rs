@@ -33,11 +33,11 @@ impl AMQPFlags {
     }
 
     /// Initialize AMQPFlags from AMQP RPC serialization
-    pub fn from_bytes(names: &[&str], bytes: &[u8]) -> AMQPFlags {
+    pub fn from_bytes<I: nom::InputIter<Item = u8>>(names: &[&str], bytes: I) -> AMQPFlags {
         let flags = names
             .iter()
             .map(ToString::to_string)
-            .zip(bytes.iter().flat_map(|b| {
+            .zip(bytes.iter_elements().flat_map(|b| {
                 let mut v = Vec::new();
                 for s in 0..8 {
                     v.push(((b & (1 << s)) >> s) == 1)

@@ -201,7 +201,7 @@ use self::{{snake class.name}}::parse_{{snake class.name}};
 {{/each ~}}
 
 /// Parse an AMQP class
-pub fn parse_class(i: &[u8]) -> ParserResult<'_, AMQPClass> {
+pub fn parse_class<I: ParsableInput>(i: I) -> ParserResult<I, AMQPClass> {
     context("parse_class", map_opt(flat_map(parse_id, |id| move |i| match id {
         {{#each protocol.classes as |class| ~}}
         {{class.id}} => map(map(parse_{{snake class.name false}}, AMQPClass::{{camel class.name}}), Some)(i),
@@ -245,7 +245,7 @@ pub mod {{snake class.name}} {
     use super::*;
 
     /// Parse {{class.name}} (Generated)
-    pub fn parse_{{snake class.name false}}(i: &[u8]) -> ParserResult<'_, {{snake class.name}}::AMQPMethod> {
+    pub fn parse_{{snake class.name false}}<I: ParsableInput>(i: I) -> ParserResult<I, {{snake class.name}}::AMQPMethod> {
         context("parse_{{snake class.name false}}", map_opt(flat_map(parse_id, |id| move |i| match id {
             {{#each class.methods as |method| ~}}
             {{method.id}} => context("parse_{{snake method.name false}}", map(map(parse_{{snake method.name false}}, AMQPMethod::{{camel method.name}}), Some))(i),
@@ -313,7 +313,7 @@ pub mod {{snake class.name}} {
     }
 
     /// Parse {{method.name}} (Generated)
-    pub fn parse_{{snake method.name false}}(i: &[u8]) -> ParserResult<'_, {{camel method.name}}> {
+    pub fn parse_{{snake method.name false}}<I: ParsableInput>(i: I) -> ParserResult<I, {{camel method.name}}> {
         {{#each_argument method.arguments as |argument| ~}}
         {{#if @argument_is_value ~}}
         let (i, {{#if argument.force_default ~}}_{{else}}{{snake argument.name}}{{/if ~}}) = parse_{{snake_type argument.type}}(i)?;
@@ -415,7 +415,7 @@ pub mod {{snake class.name}} {
 
     /// Parse {{class.name}} properties (Generated)
     #[allow(clippy::identity_op)]
-    pub fn parse_properties(i: &[u8]) -> ParserResult<'_, AMQPProperties> {
+    pub fn parse_properties<I: ParsableInput>(i: I) -> ParserResult<I, AMQPProperties> {
         let (i, flags) = parse_short_uint(i)?;
         {{#each class.properties as |property| ~}}
         let (i, {{snake property.name}}) = if flags & (1 << (15 - {{@index}})) != 0 { map(parse_{{snake_type property.type}}, Some)(i)? } else { (i, None) };

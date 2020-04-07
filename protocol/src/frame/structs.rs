@@ -69,15 +69,13 @@ impl AMQPFrame {
 
 /// Raw AMQP Frame
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct AMQPRawFrame<'a> {
+pub struct AMQPRawFrame<I: parsing::ParsableInput> {
     /// The type of frame
     pub frame_type: AMQPFrameType,
     /// The id this frame was received on
     pub channel_id: ShortUInt,
-    /// The size of the frame
-    pub size: LongUInt,
     /// The paylaod of the frame
-    pub payload: &'a [u8],
+    pub payload: I,
 }
 
 /// Contente header

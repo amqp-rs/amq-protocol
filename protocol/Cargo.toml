@@ -29,7 +29,6 @@ path    = "../codegen"
 
 [dependencies]
 cookie-factory = "^0.3"
-nom            = "^5.0"
 
 [dependencies.amq-protocol-tcp]
 version          = "=5.1.0"
@@ -43,6 +42,11 @@ path    = "../types"
 [dependencies.amq-protocol-uri]
 version = "=5.1.0"
 path    = "../uri"
+
+[dependencies.nom]
+version  = "^5.0"
+git = "git://github.com/Geal/nom"
+features = ["std"]
 
 [badges]
 travis-ci = { repository = "sozu-proxy/amq-protocol" }
