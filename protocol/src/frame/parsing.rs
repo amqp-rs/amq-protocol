@@ -12,12 +12,12 @@ use nom::{
 };
 
 /// Parse a channel id
-pub fn parse_channel(i: &[u8]) -> ParserResult<'_, AMQPChannel> {
+pub fn parse_channel<I: ParsableInput>(i: I) -> ParserResult<I, AMQPChannel> {
     context("parse_channel", map(parse_id, From::from))(i)
 }
 
 /// Parse the protocol header
-pub fn parse_protocol_header(i: &[u8]) -> ParserResult<'_, ()> {
+pub fn parse_protocol_header<I: ParsableInput>(i: I) -> ParserResult<I, ()> {
     context(
         "parse_protocol_header",
         map(
@@ -28,7 +28,7 @@ pub fn parse_protocol_header(i: &[u8]) -> ParserResult<'_, ()> {
                     metadata::MAJOR_VERSION,
                     metadata::MINOR_VERSION,
                     metadata::REVISION,
-                ]),
+                ][..]),
             ),
             |_| (),
         ),
@@ -36,7 +36,7 @@ pub fn parse_protocol_header(i: &[u8]) -> ParserResult<'_, ()> {
 }
 
 /// Parse the frame type
-pub fn parse_frame_type(i: &[u8]) -> ParserResult<'_, AMQPFrameType> {
+pub fn parse_frame_type<I: ParsableInput>(i: I) -> ParserResult<I, AMQPFrameType> {
     context(
         "parse_frame_type",
         map_opt(parse_short_short_uint, |method| match method {
@@ -50,33 +50,42 @@ pub fn parse_frame_type(i: &[u8]) -> ParserResult<'_, AMQPFrameType> {
 }
 
 /// Parse a full AMQP Frame (with contents)
-pub fn parse_frame(i: &[u8]) -> ParserResult<'_, AMQPFrame> {
+pub fn parse_frame<I: ParsableInput>(i: I) -> ParserResult<I, AMQPFrame> {
     context(
         "parse_frame",
-        map_res(parse_raw_frame, |raw| match raw.frame_type {
-            AMQPFrameType::Method => all_consuming(parse_class)(raw.payload)
-                .map(|(_, m)| AMQPFrame::Method(raw.channel_id, m)),
-            AMQPFrameType::Header => all_consuming(parse_content_header)(raw.payload)
-                .map(|(_, h)| AMQPFrame::Header(raw.channel_id, h.class_id, Box::new(h))),
-            AMQPFrameType::Body => Ok(AMQPFrame::Body(raw.channel_id, Vec::from(raw.payload))),
-            AMQPFrameType::Heartbeat => Ok(AMQPFrame::Heartbeat(raw.channel_id)),
-        }),
+        map_res(
+            parse_raw_frame,
+            |AMQPRawFrame {
+                 channel_id,
+                 frame_type,
+                 payload,
+             }: AMQPRawFrame<I>| match frame_type {
+                AMQPFrameType::Method => all_consuming(parse_class)(payload)
+                    .map(|(_, m)| AMQPFrame::Method(channel_id, m)),
+                AMQPFrameType::Header => all_consuming(parse_content_header)(payload)
+                    .map(|(_, h)| AMQPFrame::Header(channel_id, h.class_id, Box::new(h))),
+                AMQPFrameType::Body => Ok(AMQPFrame::Body(
+                    channel_id,
+                    payload.iter_elements().collect(),
+                )),
+                AMQPFrameType::Heartbeat => Ok(AMQPFrame::Heartbeat(channel_id)),
+            },
+        ),
     )(i)
 }
 
 /// Parse a raw AMQP frame
-pub fn parse_raw_frame(i: &[u8]) -> ParserResult<'_, AMQPRawFrame<'_>> {
+pub fn parse_raw_frame<I: ParsableInput>(i: I) -> ParserResult<I, AMQPRawFrame<I>> {
     context(
         "parse_raw_frame",
         flat_map(
             tuple((parse_frame_type, parse_id, parse_long_uint)),
             move |(frame_type, channel_id, size)| {
                 map(
-                    pair(take(size), tag(&[constants::FRAME_END])),
+                    pair(take(size), tag(&[constants::FRAME_END][..])),
                     move |(payload, _)| AMQPRawFrame {
                         frame_type,
                         channel_id,
-                        size,
                         payload,
                     },
                 )
@@ -86,7 +95,7 @@ pub fn parse_raw_frame(i: &[u8]) -> ParserResult<'_, AMQPRawFrame<'_>> {
 }
 
 /// Parse a content header frame
-pub fn parse_content_header(i: &[u8]) -> ParserResult<'_, AMQPContentHeader> {
+pub fn parse_content_header<I: ParsableInput>(i: I) -> ParserResult<I, AMQPContentHeader> {
     context(
         "parse_content_header",
         map(

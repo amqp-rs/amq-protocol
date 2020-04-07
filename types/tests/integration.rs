@@ -32,7 +32,7 @@ fn test_full_integration() {
     table.insert("gggg".into(), AMQPValue::LongLongInt(-9999));
     table.insert(
         "hhhh".into(),
-        AMQPValue::ByteArray(vec![42, 1, 2, 3].into()),
+        AMQPValue::ByteArray(vec![42u8, 1u8, 2u8, 3u8].into()),
     );
     table.insert("iiii".into(), AMQPValue::Float(42.3));
     table.insert("tabl".into(), AMQPValue::FieldTable(table2));
@@ -45,5 +45,5 @@ fn test_full_integration() {
 
     gen(gen_value(&value), &mut buf[..]).unwrap();
 
-    assert_eq!(parse_value(&buf), Ok((&[][..], value)));
+    assert_eq!(parse_value(&buf[..]), Ok((&[][..], value)));
 }
