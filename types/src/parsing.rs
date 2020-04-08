@@ -3,7 +3,7 @@ use nom::{
     self,
     bytes::streaming::take,
     combinator::{all_consuming, complete, flat_map, map, map_opt, map_parser, map_res},
-    error::{context, ErrorKind, ParseError, VerboseErrorKind},
+    error::{context, ContextError, ErrorKind, ParseError, VerboseErrorKind},
     multi::fold_many0,
     number::streaming::{
         be_f32, be_f64, be_i16, be_i32, be_i64, be_i8, be_u16, be_u32, be_u64, be_u8,
@@ -52,7 +52,9 @@ impl<I> ParseError<I> for ParserErrors {
             errors: Self::init_errors(),
         }
     }
+}
 
+impl<I> ContextError<I> for ParserErrors {
     fn add_context(_input: I, ctx: &'static str, mut other: Self) -> Self {
         if let Some(errors) = other.errors.as_mut() {
             errors.push(VerboseErrorKind::Context(ctx));
