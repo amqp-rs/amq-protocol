@@ -1,3 +1,15 @@
+use crate::types::{
+    flags::*,
+    generation::*,
+    parsing::{traits::ParsableInput, *},
+    *,
+};
+use nom::{
+    combinator::{flat_map, map, map_opt},
+    error::context,
+};
+use std::{convert::TryFrom, error, fmt, io::Write};
+
 include!(concat!(env!("OUT_DIR"), "/protocol.rs"));
 
 /// Type alias for AMQP BasicProperties

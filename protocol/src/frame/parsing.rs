@@ -1,15 +1,17 @@
+/// Traits required for parsing
+pub use crate::types::parsing::traits;
 use crate::{
     frame::*,
     protocol::{basic::parse_properties, *},
     types::parsing::*,
 };
-
 use nom::{
     bytes::streaming::{tag, take},
     combinator::{all_consuming, flat_map, map, map_opt, map_res},
     error::context,
     sequence::{pair, tuple},
 };
+use traits::ParsableInput;
 
 /// Parse a channel id
 pub fn parse_channel<I: ParsableInput>(i: I) -> ParserResult<I, AMQPChannel> {

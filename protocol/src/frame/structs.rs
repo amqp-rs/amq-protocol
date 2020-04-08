@@ -1,4 +1,4 @@
-use crate::{protocol::*, types::*};
+use crate::{frame::parsing::traits::ParsableInput, protocol::*, types::*};
 
 /// Enum representing an AMQP channel
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -69,7 +69,7 @@ impl AMQPFrame {
 
 /// Raw AMQP Frame
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub struct AMQPRawFrame<I: parsing::ParsableInput> {
+pub struct AMQPRawFrame<I: ParsableInput> {
     /// The type of frame
     pub frame_type: AMQPFrameType,
     /// The id this frame was received on
