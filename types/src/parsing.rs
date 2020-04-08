@@ -1,5 +1,4 @@
 use crate::{flags::*, types::*, value::*};
-
 use nom::{
     self,
     bytes::streaming::take,
@@ -12,30 +11,7 @@ use nom::{
     sequence::pair,
 };
 use std::{error, fmt};
-
-/// Trait used to ensure we can properly parse input
-pub trait ParsableInput:
-    nom::Slice<std::ops::RangeFrom<usize>>
-    + nom::InputIter<Item = u8>
-    + nom::InputLength
-    + nom::InputTake
-    + nom::Compare<&'static [u8]>
-    + Clone
-    + PartialEq
-{
-}
-
-impl<
-        T: nom::Slice<std::ops::RangeFrom<usize>>
-            + nom::InputIter<Item = u8>
-            + nom::InputLength
-            + nom::InputTake
-            + nom::Compare<&'static [u8]>
-            + Clone
-            + PartialEq,
-    > ParsableInput for T
-{
-}
+use traits::*;
 
 /// Struct holding the errors stack
 #[derive(Clone, Debug, PartialEq)]
@@ -307,6 +283,36 @@ pub fn parse_flags<I: ParsableInput>(i: I, names: &[&str]) -> ParserResult<I, AM
             AMQPFlags::from_bytes(names, b)
         }),
     )(i)
+}
+
+/// Traits required for parsing
+pub mod traits {
+    /// Reexport nom traits required for parsing
+    pub use nom::{Compare, InputIter, InputLength, InputTake, Slice, UnspecializedInput};
+
+    /// Trait used to ensure we can properly parse input
+    pub trait ParsableInput:
+        Clone
+        + Compare<&'static [u8]>
+        + InputIter<Item = u8>
+        + InputLength
+        + InputTake
+        + Slice<std::ops::RangeFrom<usize>>
+        + PartialEq
+    {
+    }
+
+    impl<
+            T: Clone
+                + Compare<&'static [u8]>
+                + InputIter<Item = u8>
+                + InputLength
+                + InputTake
+                + PartialEq
+                + Slice<std::ops::RangeFrom<usize>>,
+        > ParsableInput for T
+    {
+    }
 }
 
 #[cfg(test)]

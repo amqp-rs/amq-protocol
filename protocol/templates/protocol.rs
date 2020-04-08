@@ -1,17 +1,3 @@
-use crate::types::{
-    *,
-    flags::*,
-    generation::*,
-    parsing::*,
-};
-
-use nom::{
-    combinator::{flat_map, map, map_opt},
-    error::context,
-};
-
-use std::{convert::TryFrom, error, fmt, io::Write};
-
 /// Protocol metadata
 pub mod metadata {
     use super::*;
