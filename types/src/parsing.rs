@@ -86,7 +86,7 @@ pub type ParserResult<I, T> = Result<(I, T), ParserError>;
 /// Parse the [AMQPValue](../type.AMQPValue.html) of the given [AMQPType](../type.AMQPType.html)
 pub fn parse_raw_value<I: ParsableInput>(
     amqp_type: AMQPType,
-) -> impl Fn(I) -> ParserResult<I, AMQPValue> {
+) -> impl FnMut(I) -> ParserResult<I, AMQPValue> {
     context("parse_raw_value", move |i| match amqp_type {
         AMQPType::Boolean => map(parse_boolean, AMQPValue::Boolean)(i),
         AMQPType::ShortShortInt => map(parse_short_short_int, AMQPValue::ShortShortInt)(i),
