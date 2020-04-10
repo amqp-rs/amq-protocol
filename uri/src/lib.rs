@@ -33,6 +33,18 @@ pub enum AMQPScheme {
     AMQPS,
 }
 
+impl FromStr for AMQPScheme {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "amqp" => Ok(AMQPScheme::AMQP),
+            "amqps" => Ok(AMQPScheme::AMQPS),
+            s => Err(format!("Invalid AMQP scheme: {}", s)),
+        }
+    }
+}
+
 /// The connection information
 #[derive(Clone, Debug, PartialEq)]
 pub struct AMQPAuthority {
@@ -62,6 +74,11 @@ pub struct AMQPQueryString {
     pub channel_max: Option<u16>,
     /// The maximum time between two heartbeats
     pub heartbeat: Option<u16>,
+    /// The SASL mechanism used for authentication
+    pub auth_mechanism: Option<SASLMechanism>,
+    // Fields available in erlang implementation for SSL settings:
+    // cacertfile, certfile, keyfile, verify, fail_if_no_peer_cert, password,
+    // server_name_indication, depth
 }
 
 /// The SASL mechanisms supported by RabbbitMQ
@@ -85,13 +102,26 @@ impl Default for SASLMechanism {
 
 impl fmt::Display for SASLMechanism {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mechanism = match self {
+        f.write_str(match self {
             SASLMechanism::AMQPlain => "AMQPLAIN",
             SASLMechanism::External => "EXTERNAL",
             SASLMechanism::Plain => "PLAIN",
             SASLMechanism::RabbitCrDemo => "RABBIT-CR-DEMO",
-        };
-        write!(f, "{}", mechanism)
+        })
+    }
+}
+
+impl FromStr for SASLMechanism {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "amqplain" => Ok(SASLMechanism::AMQPlain),
+            "external" => Ok(SASLMechanism::External),
+            "plain" => Ok(SASLMechanism::Plain),
+            "rabbit-cr-demo" => Ok(SASLMechanism::RabbitCrDemo),
+            s => Err(format!("Invalid SASL mechanism: {}", s)),
+        }
     }
 }
 
@@ -113,6 +143,16 @@ impl Default for AMQPUri {
     }
 }
 
+fn int_queryparam<T: FromStr<Err = ParseIntError>>(
+    url: &Url,
+    param: &str,
+) -> Result<Option<T>, String> {
+    url.query_pairs()
+        .find(|&(ref key, _)| key == param)
+        .map_or(Ok(None), |(_, ref value)| value.parse::<T>().map(Some))
+        .map_err(|e: ParseIntError| e.to_string())
+}
+
 impl FromStr for AMQPUri {
     type Err = String;
 
@@ -122,11 +162,7 @@ impl FromStr for AMQPUri {
             return Err(format!("Invalid URL: '{}'", s));
         }
         let default = AMQPUri::default();
-        let scheme = match url.scheme() {
-            "amqp" => AMQPScheme::AMQP,
-            "amqps" => AMQPScheme::AMQPS,
-            scheme => return Err(format!("Invalid scheme: '{}'", scheme)),
-        };
+        let scheme = url.scheme().parse::<AMQPScheme>()?;
         let username = match url.username() {
             "" => default.authority.userinfo.username,
             username => percent_decode(username)?,
@@ -139,21 +175,13 @@ impl FromStr for AMQPUri {
             .map_or(Ok(default.authority.host), percent_decode)?;
         let port = url.port().unwrap_or_else(|| scheme.default_port());
         let vhost = percent_decode(&url.path().get(1..).unwrap_or("/"))?;
-        let frame_max = url
+        let frame_max = int_queryparam(&url, "frame_max")?;
+        let channel_max = int_queryparam(&url, "channel_max")?;
+        let heartbeat = int_queryparam(&url, "heartbeat")?;
+        let auth_mechanism = url
             .query_pairs()
-            .find(|&(ref key, _)| key == "frame_max")
-            .map_or(Ok(None), |(_, ref value)| value.parse().map(Some))
-            .map_err(|e: ParseIntError| e.to_string())?;
-        let chan_max = url
-            .query_pairs()
-            .find(|&(ref key, _)| key == "channel_max")
-            .map_or(Ok(None), |(_, ref value)| value.parse().map(Some))
-            .map_err(|e: ParseIntError| e.to_string())?;
-        let heartbeat = url
-            .query_pairs()
-            .find(|&(ref key, _)| key == "heartbeat")
-            .map_or(Ok(None), |(_, ref value)| value.parse().map(Some))
-            .map_err(|e: ParseIntError| e.to_string())?;
+            .find(|&(ref key, _)| key == "auth_mechanism")
+            .map_or(Ok(None), |(_, ref value)| value.parse().map(Some))?;
 
         Ok(AMQPUri {
             scheme,
@@ -165,8 +193,9 @@ impl FromStr for AMQPUri {
             vhost,
             query: AMQPQueryString {
                 frame_max,
-                channel_max: chan_max,
+                channel_max,
                 heartbeat,
+                auth_mechanism,
             },
         })
     }
