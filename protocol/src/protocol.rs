@@ -37,13 +37,24 @@ impl AMQPError {
     pub fn kind(&self) -> &AMQPErrorKind {
         &self.kind
     }
+
+    /// Get the id of the error
+    pub fn get_id(&self) -> ShortUInt {
+        self.kind.get_id()
+    }
+
+    /// Get the message of the error
+    pub fn get_message(&self) -> &ShortString {
+        &self.message
+    }
 }
 
 impl TryFrom<channel::Close> for AMQPError {
     type Error = String;
 
     fn try_from(method: channel::Close) -> Result<Self, Self::Error> {
-        Self::from_id(method.reply_code, method.reply_text.clone()).ok_or_else(|| format!("Couldn't convert method to error: {:?}", method))
+        Self::from_id(method.reply_code, method.reply_text.clone())
+            .ok_or_else(|| format!("Couldn't convert method to error: {:?}", method))
     }
 }
 
@@ -51,7 +62,8 @@ impl TryFrom<connection::Close> for AMQPError {
     type Error = String;
 
     fn try_from(method: connection::Close) -> Result<Self, Self::Error> {
-        Self::from_id(method.reply_code, method.reply_text.clone()).ok_or_else(|| format!("Couldn't convert method to error: {:?}", method))
+        Self::from_id(method.reply_code, method.reply_text.clone())
+            .ok_or_else(|| format!("Couldn't convert method to error: {:?}", method))
     }
 }
 
@@ -83,7 +95,9 @@ impl AMQPErrorKind {
 
     /// Get the error kind corresponding to an id
     pub fn from_id(id: ShortUInt) -> Option<Self> {
-        AMQPSoftError::from_id(id).map(AMQPErrorKind::Soft).or_else(|| AMQPHardError::from_id(id).map(AMQPErrorKind::Hard))
+        AMQPSoftError::from_id(id)
+            .map(AMQPErrorKind::Soft)
+            .or_else(|| AMQPHardError::from_id(id).map(AMQPErrorKind::Hard))
     }
 }
 
