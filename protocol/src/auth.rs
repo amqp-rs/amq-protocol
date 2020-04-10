@@ -1,5 +1,4 @@
-use std::fmt;
-
+pub use crate::uri::SASLMechanism;
 use crate::{
     types::{generation::gen_field_table, AMQPValue, FieldTable},
     uri::AMQPUserInfo,
@@ -74,37 +73,6 @@ impl From<AMQPUserInfo> for Credentials {
             username: user_info.username,
             password: user_info.password,
         }
-    }
-}
-
-/// The SASL mechanisms supported by RabbbitMQ
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum SASLMechanism {
-    /// This is a legacy mehcanism kept for backward compatibility
-    AMQPlain,
-    /// Delegate all authentication to the transport instead of the RabbitMQ server
-    External,
-    /// Default plain login, this should be supported everywhere
-    Plain,
-    /// A demo of RabbitMQ SecureOk machanism, offers the same level of security as Plain
-    RabbitCrDemo,
-}
-
-impl Default for SASLMechanism {
-    fn default() -> Self {
-        SASLMechanism::Plain
-    }
-}
-
-impl fmt::Display for SASLMechanism {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mechanism = match self {
-            SASLMechanism::AMQPlain => "AMQPLAIN",
-            SASLMechanism::External => "EXTERNAL",
-            SASLMechanism::Plain => "PLAIN",
-            SASLMechanism::RabbitCrDemo => "RABBIT-CR-DEMO",
-        };
-        write!(f, "{}", mechanism)
     }
 }
 
