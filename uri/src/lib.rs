@@ -9,7 +9,7 @@
 
 use url::Url;
 
-use std::{num::ParseIntError, str::FromStr};
+use std::{fmt, num::ParseIntError, str::FromStr};
 
 /// An AMQP Uri
 #[derive(Clone, Debug, PartialEq)]
@@ -62,6 +62,37 @@ pub struct AMQPQueryString {
     pub channel_max: Option<u16>,
     /// The maximum time between two heartbeats
     pub heartbeat: Option<u16>,
+}
+
+/// The SASL mechanisms supported by RabbbitMQ
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SASLMechanism {
+    /// This is a legacy mehcanism kept for backward compatibility
+    AMQPlain,
+    /// Delegate all authentication to the transport instead of the RabbitMQ server
+    External,
+    /// Default plain login, this should be supported everywhere
+    Plain,
+    /// A demo of RabbitMQ SecureOk machanism, offers the same level of security as Plain
+    RabbitCrDemo,
+}
+
+impl Default for SASLMechanism {
+    fn default() -> Self {
+        SASLMechanism::Plain
+    }
+}
+
+impl fmt::Display for SASLMechanism {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mechanism = match self {
+            SASLMechanism::AMQPlain => "AMQPLAIN",
+            SASLMechanism::External => "EXTERNAL",
+            SASLMechanism::Plain => "PLAIN",
+            SASLMechanism::RabbitCrDemo => "RABBIT-CR-DEMO",
+        };
+        write!(f, "{}", mechanism)
+    }
 }
 
 fn percent_decode(s: &str) -> Result<String, String> {
