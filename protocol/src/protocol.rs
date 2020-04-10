@@ -23,6 +23,11 @@ pub struct AMQPError {
 }
 
 impl AMQPError {
+    /// Create a new error
+    pub fn new(kind: AMQPErrorKind, message: ShortString) -> Self {
+        Self { kind, message }
+    }
+
     /// Get the error corresponding to an id
     pub fn from_id(id: ShortUInt, message: ShortString) -> Option<Self> {
         AMQPErrorKind::from_id(id).map(|kind| Self { kind, message })
@@ -88,6 +93,18 @@ impl fmt::Display for AMQPErrorKind {
             AMQPErrorKind::Soft(err) => write!(f, "AMQP soft error: {}", err),
             AMQPErrorKind::Hard(err) => write!(f, "AMQP hard error: {}", err),
         }
+    }
+}
+
+impl From<AMQPSoftError> for AMQPErrorKind {
+    fn from(error: AMQPSoftError) -> Self {
+        Self::Soft(error)
+    }
+}
+
+impl From<AMQPHardError> for AMQPErrorKind {
+    fn from(error: AMQPHardError) -> Self {
+        Self::Hard(error)
     }
 }
 
