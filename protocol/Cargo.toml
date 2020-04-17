@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol"
-version       = "6.0.0-alpha1" # remember to update html_root_url
+version       = "6.0.0-alpha2" # remember to update html_root_url
 edition       = "2018"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications"
@@ -24,23 +24,23 @@ rustls-webpki-roots-certs = ["amq-protocol-tcp/rustls-webpki-roots-certs"]
 verbose-errors            = ["amq-protocol-types/verbose-errors"]
 
 [build-dependencies.amq-protocol-codegen]
-version = "=6.0.0-alpha1"
+version = "=6.0.0-alpha2"
 path    = "../codegen"
 
 [dependencies]
 cookie-factory = "^0.3"
 
 [dependencies.amq-protocol-tcp]
-version          = "=6.0.0-alpha1"
+version          = "=6.0.0-alpha2"
 default-features = false
 path             = "../tcp"
 
 [dependencies.amq-protocol-types]
-version = "=6.0.0-alpha1"
+version = "=6.0.0-alpha2"
 path    = "../types"
 
 [dependencies.amq-protocol-uri]
-version = "=6.0.0-alpha1"
+version = "=6.0.0-alpha2"
 path    = "../uri"
 
 [dependencies.nom]
