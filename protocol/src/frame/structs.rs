@@ -1,4 +1,5 @@
 use crate::{frame::parsing::traits::ParsableInput, protocol::*, types::*};
+use std::fmt;
 
 /// Enum representing an AMQP channel
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -63,6 +64,18 @@ impl AMQPFrame {
             true
         } else {
             false
+        }
+    }
+}
+
+impl fmt::Display for AMQPFrame {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            AMQPFrame::ProtocolHeader => f.write_str("AMQPFrame::ProtocolHeader"),
+            AMQPFrame::Method(_, klass) => f.write_fmt(format_args!("AMQPFrame::Method({:?})", klass)),
+            AMQPFrame::Header(..) => f.write_str("AMQPFrame::Header"),
+            AMQPFrame::Body(..) => f.write_str("AMQPFrame::Body"),
+            AMQPFrame::Heartbeat(_) => f.write_str("AMQPFrame::Heartbeat"),
         }
     }
 }
