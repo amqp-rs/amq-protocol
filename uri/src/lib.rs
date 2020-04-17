@@ -321,6 +321,7 @@ mod test {
                     frame_max: Some(64),
                     channel_max: None,
                     heartbeat: Some(42),
+                    auth_mechanism: None,
                 },
                 ..Default::default()
             })
@@ -342,6 +343,6 @@ mod test {
     #[test]
     fn test_invalid_scheme() {
         let uri: Result<AMQPUri, String> = "http://localhost/".parse();
-        assert_eq!(uri, Err("Invalid scheme: 'http'".to_string()));
+        assert_eq!(uri, Err("Invalid AMQP scheme: http".to_string()));
     }
 }
