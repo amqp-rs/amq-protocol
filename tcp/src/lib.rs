@@ -8,7 +8,7 @@
 //! connecting to an AMQP URI
 
 use amq_protocol_uri::{AMQPScheme, AMQPUri};
-use log::{debug, trace};
+use log::trace;
 use mio::{Events, Interest, Poll, Token};
 use tcp_stream::HandshakeError;
 
@@ -78,7 +78,7 @@ fn connect_amqps(
     let mut res = stream.into_tls(host, identity);
 
     while let Err(error) = res {
-        debug!("Got error when enabling TLS: {:?}", error);
+        trace!("Got error when enabling TLS: {:?}", error);
         match error {
             HandshakeError::Failure(io_err) => return Err(io_err),
             HandshakeError::WouldBlock(mid) => {
