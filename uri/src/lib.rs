@@ -76,21 +76,21 @@ pub struct AMQPQueryString {
     pub heartbeat: Option<u16>,
     /// The SASL mechanism used for authentication
     pub auth_mechanism: Option<SASLMechanism>,
-    // Fields available in erlang implementation for SSL settings:
+    // Fields available in Erlang implementation for SSL settings:
     // cacertfile, certfile, keyfile, verify, fail_if_no_peer_cert, password,
     // server_name_indication, depth
 }
 
-/// The SASL mechanisms supported by RabbbitMQ
+/// The SASL mechanisms supported by RabbitMQ
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum SASLMechanism {
-    /// This is a legacy mehcanism kept for backward compatibility
+    /// This is a legacy mechanism kept for backward compatibility
     AMQPlain,
     /// Delegate all authentication to the transport instead of the RabbitMQ server
     External,
     /// Default plain login, this should be supported everywhere
     Plain,
-    /// A demo of RabbitMQ SecureOk machanism, offers the same level of security as Plain
+    /// A demo of RabbitMQ SecureOk mechanism, offers the same level of security as Plain
     RabbitCrDemo,
 }
 

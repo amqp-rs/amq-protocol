@@ -96,7 +96,7 @@ pub fn parse_raw_value<I: ParsableInput>(
         AMQPType::LongInt => map(parse_long_int, AMQPValue::LongInt)(i),
         AMQPType::LongUInt => map(parse_long_uint, AMQPValue::LongUInt)(i),
         AMQPType::LongLongInt => map(parse_long_long_int, AMQPValue::LongLongInt)(i),
-        /* Rabbitmq treats LongLongUInt as a LongLongInt hence expose it as such */
+        /* RabbitMQ treats LongLongUInt as a LongLongInt hence expose it as such */
         AMQPType::LongLongUInt => map(parse_long_long_int, AMQPValue::LongLongInt)(i),
         AMQPType::Float => map(parse_float, AMQPValue::Float)(i),
         AMQPType::Double => map(parse_double, AMQPValue::Double)(i),

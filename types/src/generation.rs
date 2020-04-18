@@ -165,7 +165,7 @@ fn gen_field_entry<'a, W: Write + BackToTheBuffer + 'a>(
     pair(gen_short_string(e.0.as_str()), gen_value(&e.1))
 }
 
-/// Generate the [BiteArray](../type.ByteArray.html) in the given buffer (x)
+/// Generate the [ByteArray](../type.ByteArray.html) in the given buffer (x)
 pub fn gen_byte_array<'a, W: Write + 'a>(a: &'a ByteArray) -> impl SerializeFn<W> + 'a {
     pair(gen_long_uint(a.len() as LongUInt), slice(a.as_slice()))
 }
