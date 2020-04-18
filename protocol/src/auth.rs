@@ -4,7 +4,7 @@ use crate::{
     uri::AMQPUserInfo,
 };
 
-/// Structure holding the username and passwor for authentication
+/// Structure holding the username and password for authentication
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Credentials {
     username: String,

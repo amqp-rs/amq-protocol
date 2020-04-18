@@ -314,7 +314,7 @@ pub mod {{snake class.name}} {
         }
         {{/each ~}}
 
-        /// Get the bitpask for serialization (Generated)
+        /// Get the bitmask for serialization (Generated)
         #[allow(clippy::identity_op)]
         pub fn bitmask(&self) -> ShortUInt {
             {{#each class.properties as |property| ~}}

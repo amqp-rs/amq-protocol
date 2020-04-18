@@ -38,7 +38,7 @@ pub enum AMQPValue {
     Timestamp(Timestamp),
     /// A Map<String, AMQPValue>
     FieldTable(FieldTable),
-    /// An array of bytes (RabbitMQ speicific)
+    /// An array of bytes (RabbitMQ specific)
     ByteArray(ByteArray),
     /// No value
     Void,

@@ -87,7 +87,7 @@ pub struct AMQPRawFrame<I: ParsableInput> {
     pub frame_type: AMQPFrameType,
     /// The id this frame was received on
     pub channel_id: ShortUInt,
-    /// The paylaod of the frame
+    /// The payload of the frame
     pub payload: I,
 }
 

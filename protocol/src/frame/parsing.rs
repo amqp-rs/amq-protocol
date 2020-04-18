@@ -105,7 +105,7 @@ pub fn parse_content_header<I: ParsableInput>(i: I) -> ParserResult<I, AMQPConte
                 parse_id,
                 parse_short_uint,
                 parse_long_long_uint,
-                context("parse_propertes", parse_properties),
+                context("parse_properties", parse_properties),
             )),
             |(class_id, weight, body_size, properties)| AMQPContentHeader {
                 class_id,

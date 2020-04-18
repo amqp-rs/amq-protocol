@@ -9,12 +9,12 @@ use serde_json::{self, Value};
 
 use std::{collections::HashMap, fs::File, io::Write, path::Path};
 
-/// Type alias to avoid making our users explicitely depend on an extra dependency
+/// Type alias to avoid making our users explicitly depend on an extra dependency
 pub type CodeGenerator<'a> = Handlebars<'a>;
 
 /// Our extension for better integration with Handlebars
 pub trait HandlebarsAMQPExtension {
-    /// Register the various standrad helpers we'll need for AMQP codegen
+    /// Register the various standard helpers we'll need for AMQP codegen
     fn register_amqp_helpers(self) -> Self;
     /// Generate code using the standard representation of specs and the given template, using the
     /// given name for the variable holding the [protocol definition](../specs.AMQProtocolDefinition.html).
@@ -29,7 +29,7 @@ pub trait HandlebarsAMQPExtension {
     }
     /// Generate code using the standard representation of specs and the given template, using the
     /// given name for the variable holding the [protocol definition](../specs.AMQProtocolDefinition.html),
-    /// and also passing data to the templte.
+    /// and also passing data to the template.
     fn simple_codegen_with_data(
         out_dir: &str,
         target: &str,
