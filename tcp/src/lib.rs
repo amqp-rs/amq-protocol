@@ -19,10 +19,13 @@ use tcp_stream::{
 /// Re-export TcpStream
 pub use tcp_stream::{Identity, TcpStream};
 
+/// Type holding the result or handshake state
+pub type HandshakeResult<S, F> = Result<S, HandshakeError<S, F>>;
+
 /// Trait providing a method to connect to a TcpStream
 pub trait AMQPUriTcpExt {
     /// connect to a TcpStream
-    fn connect<S, F: FnOnce(TcpStream, AMQPUri) -> S>(self, f: F) -> Result<S, HandshakeError<S, F>>
+    fn connect<S, F: FnOnce(TcpStream, AMQPUri) -> S>(self, f: F) -> HandshakeResult<S, F>
     where
         Self: Sized,
     {
@@ -34,7 +37,7 @@ pub trait AMQPUriTcpExt {
         self,
         f: F,
         identity: Option<Identity<'_, '_>>,
-    ) -> Result<S, HandshakeError<S, F>>;
+    ) -> HandshakeResult<S, F>;
 }
 
 impl AMQPUriTcpExt for AMQPUri {
@@ -62,7 +65,7 @@ impl AMQPUriTcpExt for &str {
         self,
         f: F,
         identity: Option<Identity<'_, '_>>,
-    ) -> Result<S, HandshakeError<S, F>> {
+    ) -> HandshakeResult<S, F> {
         self.parse::<AMQPUri>()
             .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?
             .connect_full(f, identity)
@@ -88,7 +91,7 @@ impl<S, F: FnOnce(TcpStream, AMQPUri) -> S> MidHandshakeTlsStream<S, F> {
     }
 
     /// Retry the handshake
-    pub fn handshake(self) -> Result<S, HandshakeError<S, F>> {
+    pub fn handshake(self) -> HandshakeResult<S, F> {
         let MidHandshakeTlsStream(mid, f, uri) = self;
         match mid.handshake() {
             Ok(s) => Ok(f(s, uri)),
