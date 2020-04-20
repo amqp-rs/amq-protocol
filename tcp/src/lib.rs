@@ -9,15 +9,14 @@
 
 use amq_protocol_uri::{AMQPScheme, AMQPUri};
 use log::trace;
-use std::io;
 
 /// Re-export TcpStream
-pub use tcp_stream::{HandshakeError, Identity, TcpStream};
+pub use tcp_stream::{HandshakeResult, Identity, TcpStream};
 
 /// Trait providing a method to connect to a TcpStream
 pub trait AMQPUriTcpExt {
     /// connect to a TcpStream
-    fn connect(self) -> Result<(TcpStream, AMQPUri), HandshakeError>
+    fn connect(&self) -> HandshakeResult
     where
         Self: Sized,
     {
@@ -26,16 +25,16 @@ pub trait AMQPUriTcpExt {
 
     /// connect to a TcpStream with the given identity
     fn connect_with_identity(
-        self,
+        &self,
         identity: Option<Identity<'_, '_>>,
-    ) -> Result<(TcpStream, AMQPUri), HandshakeError>;
+    ) -> HandshakeResult;
 }
 
 impl AMQPUriTcpExt for AMQPUri {
     fn connect_with_identity(
-        self,
+        &self,
         identity: Option<Identity<'_, '_>>,
-    ) -> Result<(TcpStream, AMQPUri), HandshakeError> {
+    ) -> HandshakeResult {
         let uri = format!("{}:{}", self.authority.host, self.authority.port);
         trace!("Connecting to {}", uri);
         let stream = TcpStream::connect(uri)?;
@@ -44,17 +43,5 @@ impl AMQPUriTcpExt for AMQPUri {
             AMQPScheme::AMQP => Ok(stream),
             AMQPScheme::AMQPS => stream.into_tls(&self.authority.host, identity),
         }
-        .map(|s| (s, self))
-    }
-}
-
-impl AMQPUriTcpExt for &str {
-    fn connect_with_identity(
-        self,
-        identity: Option<Identity<'_, '_>>,
-    ) -> Result<(TcpStream, AMQPUri), HandshakeError> {
-        self.parse::<AMQPUri>()
-            .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?
-            .connect_with_identity(identity)
     }
 }
