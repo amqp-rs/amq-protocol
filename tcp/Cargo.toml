@@ -26,12 +26,8 @@ vendored                  = ["tcp-stream/vendored"]
 version = "=6.0.0-alpha4"
 path    = "../uri"
 
-[dependencies.mio]
-version          = "^0.7"
-default-features = false
-
 [dependencies.tcp-stream]
-version          = "^0.10.5"
+version          = "^0.10.6"
 default-features = false
 
 [dependencies]
