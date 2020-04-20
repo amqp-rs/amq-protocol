@@ -1,6 +1,6 @@
 #![deny(missing_docs)]
 #![warn(rust_2018_idioms)]
-#![doc(html_root_url = "https://docs.rs/amq-protocol-tcp/6.0.0-alpha5/")]
+#![doc(html_root_url = "https://docs.rs/amq-protocol-tcp/6.0.0-alpha6/")]
 
 //! # AMQP URI TCP connection handling
 //!
@@ -24,17 +24,11 @@ pub trait AMQPUriTcpExt {
     }
 
     /// connect to a TcpStream with the given identity
-    fn connect_with_identity(
-        &self,
-        identity: Option<Identity<'_, '_>>,
-    ) -> HandshakeResult;
+    fn connect_with_identity(&self, identity: Option<Identity<'_, '_>>) -> HandshakeResult;
 }
 
 impl AMQPUriTcpExt for AMQPUri {
-    fn connect_with_identity(
-        &self,
-        identity: Option<Identity<'_, '_>>,
-    ) -> HandshakeResult {
+    fn connect_with_identity(&self, identity: Option<Identity<'_, '_>>) -> HandshakeResult {
         let uri = format!("{}:{}", self.authority.host, self.authority.port);
         trace!("Connecting to {}", uri);
         let stream = TcpStream::connect(uri)?;

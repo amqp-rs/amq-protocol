@@ -303,7 +303,7 @@ impl ByteArray {
     pub fn len(&self) -> usize {
         self.0.len()
     }
-    
+
     /// Check whether the ByteArray is empty
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
