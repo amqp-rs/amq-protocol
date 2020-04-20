@@ -27,7 +27,7 @@ version = "=6.0.0-beta1"
 path    = "../uri"
 
 [dependencies.tcp-stream]
-version          = "^0.10.6"
+version          = "^0.10.7"
 default-features = false
 
 [dependencies]
