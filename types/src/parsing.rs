@@ -68,7 +68,7 @@ impl fmt::Display for ParserErrors {
         write!(f, "Parser error: {:?}", self.error)?;
         if let Some(errors) = self.errors.as_ref() {
             for error in errors {
-                writeln!(f, "")?;
+                writeln!(f)?;
                 write!(f, "\tat {:?}", error)?;
             }
         }

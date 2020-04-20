@@ -58,72 +58,72 @@ pub fn gen_value<'a, W: Write + BackToTheBuffer + 'a>(
 }
 
 /// Generate the [AMQPType](../type.AMQPType.html) in the given buffer (x)
-pub fn gen_type<'a, W: Write>(t: AMQPType) -> impl SerializeFn<W> {
+pub fn gen_type<W: Write>(t: AMQPType) -> impl SerializeFn<W> {
     gen_short_short_uint(t.get_id() as ShortShortUInt)
 }
 
 /// Generate the id ([ShortUInt](../type.ShortUInt.html)) in the given buffer (x)
-pub fn gen_id<'a, W: Write>(id: ShortUInt) -> impl SerializeFn<W> {
+pub fn gen_id<W: Write>(id: ShortUInt) -> impl SerializeFn<W> {
     gen_short_uint(id)
 }
 
 /// Generate the [Boolean](../type.Boolean.html) in the given buffer (x)
-pub fn gen_boolean<'a, W: Write>(b: Boolean) -> impl SerializeFn<W> {
+pub fn gen_boolean<W: Write>(b: Boolean) -> impl SerializeFn<W> {
     gen_short_short_uint(if b { 1 } else { 0 })
 }
 
 /// Generate the [ShortShortInt](../type.ShortShortInt.html) in the given buffer (x)
-pub fn gen_short_short_int<'a, W: Write>(i: ShortShortInt) -> impl SerializeFn<W> {
+pub fn gen_short_short_int<W: Write>(i: ShortShortInt) -> impl SerializeFn<W> {
     be_i8(i)
 }
 
 /// Generate the [ShortShortUInt](../type.ShortShortUInt.html) in the given buffer (x)
-pub fn gen_short_short_uint<'a, W: Write>(u: ShortShortUInt) -> impl SerializeFn<W> {
+pub fn gen_short_short_uint<W: Write>(u: ShortShortUInt) -> impl SerializeFn<W> {
     be_u8(u)
 }
 
 /// Generate the [ShortInt](../type.ShortInt.html) in the given buffer (x)
-pub fn gen_short_int<'a, W: Write>(i: ShortInt) -> impl SerializeFn<W> {
+pub fn gen_short_int<W: Write>(i: ShortInt) -> impl SerializeFn<W> {
     be_i16(i)
 }
 
 /// Generate the [ShortUInt](../type.ShortUInt.html) in the given buffer (x)
-pub fn gen_short_uint<'a, W: Write>(u: ShortUInt) -> impl SerializeFn<W> {
+pub fn gen_short_uint<W: Write>(u: ShortUInt) -> impl SerializeFn<W> {
     be_u16(u)
 }
 
 /// Generate the [LongInt](../type.LongInt.html) in the given buffer (x)
-pub fn gen_long_int<'a, W: Write>(i: LongInt) -> impl SerializeFn<W> {
+pub fn gen_long_int<W: Write>(i: LongInt) -> impl SerializeFn<W> {
     be_i32(i)
 }
 
 /// Generate the [LongUInt](../type.LongUInt.html) in the given buffer (x)
-pub fn gen_long_uint<'a, W: Write>(u: LongUInt) -> impl SerializeFn<W> {
+pub fn gen_long_uint<W: Write>(u: LongUInt) -> impl SerializeFn<W> {
     be_u32(u)
 }
 
 /// Generate the [LongLongInt](../type.LongLongInt.html) in the given buffer (x)
-pub fn gen_long_long_int<'a, W: Write>(i: LongLongInt) -> impl SerializeFn<W> {
+pub fn gen_long_long_int<W: Write>(i: LongLongInt) -> impl SerializeFn<W> {
     be_i64(i)
 }
 
 /// Generate the [LongLongUInt](../type.LongLongUInt.html) in the given buffer (x)
-pub fn gen_long_long_uint<'a, W: Write>(u: LongLongUInt) -> impl SerializeFn<W> {
+pub fn gen_long_long_uint<W: Write>(u: LongLongUInt) -> impl SerializeFn<W> {
     be_u64(u)
 }
 
 /// Generate the [Float](../type.Float.html) in the given buffer (x)
-pub fn gen_float<'a, W: Write>(f: Float) -> impl SerializeFn<W> {
+pub fn gen_float<W: Write>(f: Float) -> impl SerializeFn<W> {
     be_f32(f)
 }
 
 /// Generate the [Double](../type.Double.html) in the given buffer (x)
-pub fn gen_double<'a, W: Write>(d: Double) -> impl SerializeFn<W> {
+pub fn gen_double<W: Write>(d: Double) -> impl SerializeFn<W> {
     be_f64(d)
 }
 
 /// Generate the [DecimalValue](../type.DecimalValue.html) in the given buffer (x)
-pub fn gen_decimal_value<'a, W: Write>(d: DecimalValue) -> impl SerializeFn<W> {
+pub fn gen_decimal_value<W: Write>(d: DecimalValue) -> impl SerializeFn<W> {
     pair(gen_short_short_uint(d.scale), gen_long_uint(d.value))
 }
 
@@ -148,7 +148,7 @@ pub fn gen_field_array<'a, W: Write + BackToTheBuffer + 'a>(
 }
 
 /// Generate the [Timestamp](../type.Timestamp.html) in the given buffer (x)
-pub fn gen_timestamp<'a, W: Write>(t: Timestamp) -> impl SerializeFn<W> {
+pub fn gen_timestamp<W: Write>(t: Timestamp) -> impl SerializeFn<W> {
     gen_long_long_uint(t)
 }
 
@@ -156,7 +156,7 @@ pub fn gen_timestamp<'a, W: Write>(t: Timestamp) -> impl SerializeFn<W> {
 pub fn gen_field_table<'a, W: Write + BackToTheBuffer + 'a>(
     t: &'a FieldTable,
 ) -> impl SerializeFn<W> + 'a {
-    gen_with_len(many_ref(t, move |entry| gen_field_entry(entry)))
+    gen_with_len(many_ref(t, gen_field_entry))
 }
 
 fn gen_field_entry<'a, W: Write + BackToTheBuffer + 'a>(
