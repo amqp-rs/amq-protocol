@@ -13,6 +13,15 @@ use log::trace;
 /// Re-export TcpStream
 pub use tcp_stream::{HandshakeError, HandshakeResult, Identity, MidHandshakeTlsStream, TcpStream};
 
+#[cfg(feature = "native-tls")]
+pub use tcp_stream::NativeTlsConnector;
+
+#[cfg(feature = "openssl")]
+pub use tcp_stream::OpenSslConnector;
+
+#[cfg(feature = "rustls-connector")]
+pub use tcp_stream::RustlsConnector;
+
 /// Trait providing a method to connect to a TcpStream
 pub trait AMQPUriTcpExt {
     /// connect to a TcpStream
