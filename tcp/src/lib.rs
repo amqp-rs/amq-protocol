@@ -11,7 +11,7 @@ use amq_protocol_uri::{AMQPScheme, AMQPUri};
 use log::trace;
 
 /// Re-export TcpStream
-pub use tcp_stream::{HandshakeError, HandshakeResult, Identity, TcpStream};
+pub use tcp_stream::{HandshakeError, HandshakeResult, Identity, MidHandshakeTlsStream, TcpStream};
 
 /// Trait providing a method to connect to a TcpStream
 pub trait AMQPUriTcpExt {
