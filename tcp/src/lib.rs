@@ -1,6 +1,6 @@
 #![deny(missing_docs)]
 #![warn(rust_2018_idioms)]
-#![doc(html_root_url = "https://docs.rs/amq-protocol-tcp/6.0.0-beta1/")]
+#![doc(html_root_url = "https://docs.rs/amq-protocol-tcp/6.0.0-beta2/")]
 
 //! # AMQP URI TCP connection handling
 //!
