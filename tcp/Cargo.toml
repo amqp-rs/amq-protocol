@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-tcp"
-version       = "6.0.0-beta2" # remember to update html_root_url
+version       = "6.0.0-beta3" # remember to update html_root_url
 edition       = "2018"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP URI TCP connection handling"
@@ -24,7 +24,7 @@ rustls-connector          = ["tcp-stream/rustls-connector"]
 vendored                  = ["tcp-stream/vendored"]
 
 [dependencies.amq-protocol-uri]
-version = "=6.0.0-beta2"
+version = "=6.0.0-beta3"
 path    = "../uri"
 
 [dependencies.tcp-stream]
