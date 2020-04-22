@@ -9,7 +9,10 @@
 
 use amq_protocol_uri::{AMQPScheme, AMQPUri};
 use log::trace;
-use std::ops::{Deref, DerefMut};
+use std::{
+    mem::ManuallyDrop,
+    ops::{Deref, DerefMut},
+};
 
 /// Re-export TcpStream
 pub use tcp_stream::{HandshakeError, HandshakeResult, Identity, MidHandshakeTlsStream, TcpStream};
@@ -22,8 +25,6 @@ pub use tcp_stream::OpenSslConnector;
 
 #[cfg(feature = "rustls-connector")]
 pub use tcp_stream::RustlsConnector;
-
-pub use crate::sys::TcpStreamWrapper;
 
 /// Trait providing a method to connect to a TcpStream
 pub trait AMQPUriTcpExt {
@@ -52,78 +53,55 @@ impl AMQPUriTcpExt for AMQPUri {
     }
 }
 
+/// Unsafe wrapper "Cloning" the TcpStream but not closing it on drop.
+pub struct TcpStreamWrapper(ManuallyDrop<TcpStream>);
+
 impl Deref for TcpStreamWrapper {
     type Target = TcpStream;
 
     fn deref(&self) -> &Self::Target {
-        &*self.inner
+        &*self.0
     }
 }
 
 impl DerefMut for TcpStreamWrapper {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut *self.inner
+        &mut *self.0
     }
 }
 
 #[cfg(unix)]
 mod sys {
-    use crate::TcpStream;
+    use crate::{TcpStream, TcpStreamWrapper};
     use std::{
         mem::ManuallyDrop,
-        os::unix::io::{AsRawFd, FromRawFd, RawFd},
+        os::unix::io::{AsRawFd, FromRawFd},
     };
-
-    /// Unsafe wrapper "Cloning" the TcpStream but not closing it on drop.
-    pub struct TcpStreamWrapper {
-        fd: RawFd,
-        pub(crate) inner: ManuallyDrop<TcpStream>,
-    }
 
     impl TcpStreamWrapper {
         /// Clone the TcpStream. Original one needs to last at least for the same lifetime.
         pub unsafe fn new(socket: &TcpStream) -> Self {
-            Self {
-                fd: socket.as_raw_fd(),
-                inner: ManuallyDrop::new(TcpStream::from_raw_fd(socket.as_raw_fd())),
-            }
-        }
-    }
-
-    impl AsRawFd for TcpStreamWrapper {
-        fn as_raw_fd(&self) -> RawFd {
-            self.fd
+            Self(ManuallyDrop::new(TcpStream::from_raw_fd(
+                socket.as_raw_fd(),
+            )))
         }
     }
 }
 
 #[cfg(windows)]
 mod sys {
-    use crate::TcpStream;
+    use crate::{TcpStream, TcpStreamWrapper};
     use std::{
         mem::ManuallyDrop,
-        os::windows::io::{AsRawSocket, FromRawSocket, RawSocket},
+        os::windows::io::{AsRawSocket, FromRawSocket},
     };
-
-    /// Unsafe wrapper "Cloning" the TcpStream but not closing it on drop.
-    pub struct TcpStreamWrapper {
-        socket: RawSocket,
-        pub(crate) inner: ManuallyDrop<TcpStream>,
-    }
 
     impl TcpStreamWrapper {
         /// Clone the TcpStream. Original one needs to last at least for the same lifetime.
         pub unsafe fn new(socket: &TcpStream) -> Self {
-            Self {
-                socket: socket.as_raw_socket(),
-                inner: ManuallyDrop::new(TcpStream::from_raw_socket(socket.as_raw_socket())),
-            }
-        }
-    }
-
-    impl AsRawSocket for TcpStreamWrapper {
-        fn as_raw_socket(&self) -> RawSocket {
-            self.socket
+            Self(ManuallyDrop::new(TcpStream::from_raw_socket(
+                socket.as_raw_socket(),
+            )))
         }
     }
 }
