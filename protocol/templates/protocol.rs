@@ -147,6 +147,17 @@ impl AMQPClass {
             {{/each ~}}
         }
     }
+
+    /// Get the AMQP method id (Generated)
+    pub fn get_amqp_method_id(&self) -> u16 {
+        match self {
+            {{#each protocol.classes as |class| ~}}
+            {{#each class.methods as |method| ~}}
+            AMQPClass::{{camel class.name}}({{snake class.name}}::AMQPMethod::{{camel method.name}}(_)) => {{method.id}},
+            {{/each ~}}
+            {{/each ~}}
+        }
+    }
 }
 
 {{#each protocol.classes as |class|}}
