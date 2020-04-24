@@ -21,6 +21,7 @@ openssl                   = ["amq-protocol-tcp/openssl"]
 rustls                    = ["amq-protocol-tcp/rustls"]
 rustls-native-certs       = ["amq-protocol-tcp/rustls-native-certs"]
 rustls-webpki-roots-certs = ["amq-protocol-tcp/rustls-webpki-roots-certs"]
+vendored-openssl          = ["amq-protocol-tcp/vendored-openssl"]
 verbose-errors            = ["amq-protocol-types/verbose-errors"]
 
 [build-dependencies.amq-protocol-codegen]
