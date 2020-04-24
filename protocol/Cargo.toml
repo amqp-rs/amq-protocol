@@ -28,9 +28,6 @@ verbose-errors            = ["amq-protocol-types/verbose-errors"]
 version = "=6.0.0-beta4"
 path    = "../codegen"
 
-[dependencies]
-cookie-factory = "^0.3"
-
 [dependencies.amq-protocol-tcp]
 version          = "=6.0.0-beta4"
 default-features = false
@@ -43,6 +40,10 @@ path    = "../types"
 [dependencies.amq-protocol-uri]
 version = "=6.0.0-beta4"
 path    = "../uri"
+
+[dependencies.cookie-factory]
+version  = "^0.3"
+features = ["std"]
 
 [dependencies.nom]
 version  = "=6.0.0-alpha1"
