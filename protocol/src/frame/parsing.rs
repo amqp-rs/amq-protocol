@@ -19,20 +19,22 @@ pub fn parse_channel<I: ParsableInput>(i: I) -> ParserResult<I, AMQPChannel> {
 }
 
 /// Parse the protocol header
-pub fn parse_protocol_header<I: ParsableInput>(i: I) -> ParserResult<I, ()> {
+pub fn parse_protocol_header<I: ParsableInput>(i: I) -> ParserResult<I, ProtocolVersion> {
     context(
         "parse_protocol_header",
         map(
-            pair(
+            tuple((
                 tag(metadata::NAME.as_bytes()),
-                tag(&[
-                    0,
-                    metadata::MAJOR_VERSION,
-                    metadata::MINOR_VERSION,
-                    metadata::REVISION,
-                ][..]),
-            ),
-            |_| (),
+                tag(&[0][..]),
+                parse_short_short_uint,
+                parse_short_short_uint,
+                parse_short_short_uint,
+            )),
+            |(_, _, major, minor, revision)| ProtocolVersion {
+                major,
+                minor,
+                revision,
+            },
         ),
     )(i)
 }
