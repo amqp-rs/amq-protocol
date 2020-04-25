@@ -3,10 +3,7 @@ use crate::{
     protocol::{basic::gen_properties, *},
     types::{generation::*, *},
 };
-use cookie_factory::{
-    combinator::slice,
-    sequence::tuple,
-};
+use cookie_factory::{combinator::slice, sequence::tuple};
 use std::io::Write;
 
 /// Serialize a frame in the given buffer
@@ -15,7 +12,7 @@ pub fn gen_frame<'a, W: Write + BackToTheBuffer + 'a>(
 ) -> impl SerializeFn<W> + 'a {
     move |x| match frame {
         AMQPFrame::ProtocolHeader(version) => gen_protocol_header(version)(x),
-        AMQPFrame::Heartbeat(_) => gen_heartbeat_frame()(x),
+        AMQPFrame::Heartbeat(channel_id) => gen_heartbeat_frame(*channel_id)(x),
         AMQPFrame::Method(channel_id, method) => gen_method_frame(*channel_id, method)(x),
         AMQPFrame::Header(channel_id, class_id, header) => {
             gen_content_header_frame(*channel_id, *class_id, header.body_size, &header.properties)(
@@ -30,7 +27,7 @@ fn gen_protocol_header<W: Write>(version: &ProtocolVersion) -> impl SerializeFn<
     tuple((
         slice(metadata::NAME.as_bytes()),
         gen_short_short_uint(0),
-        gen_protocol_version(version)
+        gen_protocol_version(version),
     ))
 }
 
@@ -42,17 +39,13 @@ fn gen_protocol_version<W: Write>(version: &ProtocolVersion) -> impl SerializeFn
     ))
 }
 
-fn gen_heartbeat_frame<W: Write>() -> impl SerializeFn<W> {
-    slice(&[
-        constants::FRAME_HEARTBEAT,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        constants::FRAME_END,
-    ])
+fn gen_heartbeat_frame<W: Write>(channel_id: ShortUInt) -> impl SerializeFn<W> {
+    tuple((
+        gen_short_short_uint(constants::FRAME_HEARTBEAT),
+        gen_id(channel_id),
+        gen_long_uint(0),
+        gen_short_short_uint(constants::FRAME_END),
+    ))
 }
 
 fn gen_method_frame<'a, W: Write + BackToTheBuffer + 'a>(
