@@ -6,6 +6,7 @@ use crate::{
     types::parsing::*,
 };
 use nom::{
+    branch::alt,
     bytes::streaming::{tag, take},
     combinator::{all_consuming, flat_map, map, map_opt, map_res},
     error::context,
@@ -57,24 +58,27 @@ pub fn parse_frame_type<I: ParsableInput>(i: I) -> ParserResult<I, AMQPFrameType
 pub fn parse_frame<I: ParsableInput>(i: I) -> ParserResult<I, AMQPFrame> {
     context(
         "parse_frame",
-        map_res(
-            parse_raw_frame,
-            |AMQPRawFrame {
-                 channel_id,
-                 frame_type,
-                 payload,
-             }: AMQPRawFrame<I>| match frame_type {
-                AMQPFrameType::Method => all_consuming(parse_class)(payload)
-                    .map(|(_, m)| AMQPFrame::Method(channel_id, m)),
-                AMQPFrameType::Header => all_consuming(parse_content_header)(payload)
-                    .map(|(_, h)| AMQPFrame::Header(channel_id, h.class_id, Box::new(h))),
-                AMQPFrameType::Body => Ok(AMQPFrame::Body(
-                    channel_id,
-                    payload.iter_elements().collect(),
-                )),
-                AMQPFrameType::Heartbeat => Ok(AMQPFrame::Heartbeat(channel_id)),
-            },
-        ),
+        alt((
+            map_res(
+                parse_raw_frame,
+                |AMQPRawFrame {
+                     channel_id,
+                     frame_type,
+                     payload,
+                 }: AMQPRawFrame<I>| match frame_type {
+                    AMQPFrameType::Method => all_consuming(parse_class)(payload)
+                        .map(|(_, m)| AMQPFrame::Method(channel_id, m)),
+                    AMQPFrameType::Header => all_consuming(parse_content_header)(payload)
+                        .map(|(_, h)| AMQPFrame::Header(channel_id, h.class_id, Box::new(h))),
+                    AMQPFrameType::Body => Ok(AMQPFrame::Body(
+                        channel_id,
+                        payload.iter_elements().collect(),
+                    )),
+                    AMQPFrameType::Heartbeat => Ok(AMQPFrame::Heartbeat(channel_id)),
+                },
+            ),
+            map(parse_protocol_header, AMQPFrame::ProtocolHeader),
+        )),
     )(i)
 }
 
@@ -117,4 +121,19 @@ pub fn parse_content_header<I: ParsableInput>(i: I) -> ParserResult<I, AMQPConte
             },
         ),
     )(i)
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_protocol_header() {
+        assert_eq!(parse_frame(&['A' as u8, 'M' as u8, 'Q' as u8, 'P' as u8, 0, 0, 9, 1][..]), Ok((&[][..], AMQPFrame::ProtocolHeader(ProtocolVersion::amqp_0_9_1()))));
+    }
+
+    #[test]
+    fn test_heartbeat() {
+        assert_eq!(parse_frame(&[8, 0, 1, 0, 0, 0, 0, 206][..]), Ok((&[][..], AMQPFrame::Heartbeat(1))));
+    }
 }
