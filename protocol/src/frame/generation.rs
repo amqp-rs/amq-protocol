@@ -1,11 +1,11 @@
 use crate::{
-    frame::AMQPFrame,
+    frame::{AMQPFrame, ProtocolVersion},
     protocol::{basic::gen_properties, *},
     types::{generation::*, *},
 };
 use cookie_factory::{
     combinator::slice,
-    sequence::{pair, tuple},
+    sequence::tuple,
 };
 use std::io::Write;
 
@@ -14,7 +14,7 @@ pub fn gen_frame<'a, W: Write + BackToTheBuffer + 'a>(
     frame: &'a AMQPFrame,
 ) -> impl SerializeFn<W> + 'a {
     move |x| match frame {
-        AMQPFrame::ProtocolHeader => gen_protocol_header()(x),
+        AMQPFrame::ProtocolHeader(version) => gen_protocol_header(version)(x),
         AMQPFrame::Heartbeat(_) => gen_heartbeat_frame()(x),
         AMQPFrame::Method(channel_id, method) => gen_method_frame(*channel_id, method)(x),
         AMQPFrame::Header(channel_id, class_id, header) => {
@@ -26,16 +26,20 @@ pub fn gen_frame<'a, W: Write + BackToTheBuffer + 'a>(
     }
 }
 
-fn gen_protocol_header<W: Write>() -> impl SerializeFn<W> {
-    pair(
+fn gen_protocol_header<W: Write>(version: &ProtocolVersion) -> impl SerializeFn<W> {
+    tuple((
         slice(metadata::NAME.as_bytes()),
-        slice(&[
-            0,
-            metadata::MAJOR_VERSION,
-            metadata::MINOR_VERSION,
-            metadata::REVISION,
-        ]),
-    )
+        gen_short_short_uint(0),
+        gen_protocol_version(version)
+    ))
+}
+
+fn gen_protocol_version<W: Write>(version: &ProtocolVersion) -> impl SerializeFn<W> {
+    tuple((
+        gen_short_short_uint(version.major),
+        gen_short_short_uint(version.minor),
+        gen_short_short_uint(version.revision),
+    ))
 }
 
 fn gen_heartbeat_frame<W: Write>() -> impl SerializeFn<W> {

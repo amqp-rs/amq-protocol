@@ -46,7 +46,7 @@ pub enum AMQPFrameType {
 #[derive(Clone, Debug, PartialEq)]
 pub enum AMQPFrame {
     /// Protocol header frame
-    ProtocolHeader,
+    ProtocolHeader(ProtocolVersion),
     /// Method call
     Method(ShortUInt, AMQPClass),
     /// Content header
@@ -71,7 +71,9 @@ impl AMQPFrame {
 impl fmt::Display for AMQPFrame {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            AMQPFrame::ProtocolHeader => f.write_str("AMQPFrame::ProtocolHeader"),
+            AMQPFrame::ProtocolHeader(version) => {
+                f.write_fmt(format_args!("AMQPFrame::ProtocolHeader({})", version))
+            }
             AMQPFrame::Method(_, klass) => {
                 f.write_fmt(format_args!("AMQPFrame::Method({:?})", klass))
             }
@@ -79,6 +81,37 @@ impl fmt::Display for AMQPFrame {
             AMQPFrame::Body(..) => f.write_str("AMQPFrame::Body"),
             AMQPFrame::Heartbeat(_) => f.write_str("AMQPFrame::Heartbeat"),
         }
+    }
+}
+
+/// Protocol version used
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ProtocolVersion {
+    /// Major version of the protocol
+    pub major: u8,
+    /// Minor version of the protocol
+    pub minor: u8,
+    /// Revision of the protocol
+    pub revision: u8,
+}
+
+impl ProtocolVersion {
+    /// AMQP 0.9.1
+    pub fn amqp_0_9_1() -> Self {
+        Self {
+            major: metadata::MAJOR_VERSION,
+            minor: metadata::MINOR_VERSION,
+            revision: metadata::REVISION,
+        }
+    }
+}
+
+impl fmt::Display for ProtocolVersion {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_fmt(format_args!(
+            "{}.{}.{}",
+            self.major, self.minor, self.revision
+        ))
     }
 }
 
@@ -93,7 +126,7 @@ pub struct AMQPRawFrame<I: ParsableInput> {
     pub payload: I,
 }
 
-/// Contente header
+/// Content header
 #[derive(Clone, Debug, PartialEq)]
 pub struct AMQPContentHeader {
     /// The class of content
