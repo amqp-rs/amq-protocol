@@ -11,7 +11,7 @@ pub fn gen_frame<'a, W: Write + BackToTheBuffer + 'a>(
     frame: &'a AMQPFrame,
 ) -> impl SerializeFn<W> + 'a {
     move |x| match frame {
-        AMQPFrame::ProtocolHeader(version) => gen_protocol_header(version)(x),
+        AMQPFrame::ProtocolHeader(version) => gen_protocol_header(*version)(x),
         AMQPFrame::Heartbeat(channel_id) => gen_heartbeat_frame(*channel_id)(x),
         AMQPFrame::Method(channel_id, method) => gen_method_frame(*channel_id, method)(x),
         AMQPFrame::Header(channel_id, class_id, header) => {
@@ -23,7 +23,7 @@ pub fn gen_frame<'a, W: Write + BackToTheBuffer + 'a>(
     }
 }
 
-fn gen_protocol_header<W: Write>(version: &ProtocolVersion) -> impl SerializeFn<W> {
+fn gen_protocol_header<W: Write>(version: ProtocolVersion) -> impl SerializeFn<W> {
     tuple((
         slice(metadata::NAME.as_bytes()),
         gen_short_short_uint(0),
@@ -31,7 +31,7 @@ fn gen_protocol_header<W: Write>(version: &ProtocolVersion) -> impl SerializeFn<
     ))
 }
 
-fn gen_protocol_version<W: Write>(version: &ProtocolVersion) -> impl SerializeFn<W> {
+fn gen_protocol_version<W: Write>(version: ProtocolVersion) -> impl SerializeFn<W> {
     tuple((
         gen_short_short_uint(version.major),
         gen_short_short_uint(version.minor),
