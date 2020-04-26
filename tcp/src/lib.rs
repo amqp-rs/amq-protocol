@@ -75,7 +75,7 @@ mod sys {
     use crate::{TcpStream, TcpStreamWrapper};
     use std::{
         mem::ManuallyDrop,
-        os::unix::io::{AsRawFd, FromRawFd},
+        os::unix::io::{AsRawFd, FromRawFd, RawFd},
     };
 
     impl TcpStreamWrapper {
@@ -86,6 +86,12 @@ mod sys {
             )))
         }
     }
+
+    impl AsRawFd for TcpStreamWrapper {
+        fn as_raw_fd(&self) -> RawFd {
+            self.0.as_raw_fd()
+        }
+    }
 }
 
 #[cfg(windows)]
@@ -93,7 +99,7 @@ mod sys {
     use crate::{TcpStream, TcpStreamWrapper};
     use std::{
         mem::ManuallyDrop,
-        os::windows::io::{AsRawSocket, FromRawSocket},
+        os::windows::io::{AsRawSocket, FromRawSocket, RawSocket},
     };
 
     impl TcpStreamWrapper {
@@ -102,6 +108,12 @@ mod sys {
             Self(ManuallyDrop::new(TcpStream::from_raw_socket(
                 socket.as_raw_socket(),
             )))
+        }
+    }
+
+    impl AsRawSocket for TcpStreamWrapper {
+        fn as_raw_socket(&self) -> RawSocket {
+            self.0.as_raw_socket()
         }
     }
 }
