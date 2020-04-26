@@ -1,6 +1,6 @@
 #![deny(missing_docs)]
 #![warn(rust_2018_idioms)]
-#![doc(html_root_url = "https://docs.rs/amq-protocol-codegen/6.0.0-rc1/")]
+#![doc(html_root_url = "https://docs.rs/amq-protocol-codegen/6.0.0-rc2/")]
 
 //! # AMQP code generation utilities
 //!
