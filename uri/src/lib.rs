@@ -74,6 +74,8 @@ pub struct AMQPQueryString {
     pub channel_max: Option<u16>,
     /// The maximum time between two heartbeats
     pub heartbeat: Option<u16>,
+    /// The maximum time to wait (in milliseconds) for the connection to succeed
+    pub connection_timeout: Option<u64>,
     /// The SASL mechanism used for authentication
     pub auth_mechanism: Option<SASLMechanism>,
     // Fields available in Erlang implementation for SSL settings:
@@ -178,6 +180,7 @@ impl FromStr for AMQPUri {
         let frame_max = int_queryparam(&url, "frame_max")?;
         let channel_max = int_queryparam(&url, "channel_max")?;
         let heartbeat = int_queryparam(&url, "heartbeat")?;
+        let connection_timeout = int_queryparam(&url, "connection_timeout")?;
         let auth_mechanism = url
             .query_pairs()
             .find(|&(ref key, _)| key == "auth_mechanism")
@@ -195,6 +198,7 @@ impl FromStr for AMQPUri {
                 frame_max,
                 channel_max,
                 heartbeat,
+                connection_timeout,
                 auth_mechanism,
             },
         })
@@ -313,15 +317,15 @@ mod test {
 
     #[test]
     fn test_parse_with_heartbeat_frame_max() {
-        let uri = "amqp://localhost/%2f?heartbeat=42&frame_max=64".parse();
+        let uri = "amqp://localhost/%2f?heartbeat=42&frame_max=64&connection_timeout=30000".parse();
         assert_eq!(
             uri,
             Ok(AMQPUri {
                 query: AMQPQueryString {
                     frame_max: Some(64),
-                    channel_max: None,
                     heartbeat: Some(42),
-                    auth_mechanism: None,
+                    connection_timeout: Some(30000),
+                    ..Default::default()
                 },
                 ..Default::default()
             })
