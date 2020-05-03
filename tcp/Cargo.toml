@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-tcp"
-version       = "6.0.0-rc2" # remember to update html_root_url
+version       = "6.0.0-rc3" # remember to update html_root_url
 edition       = "2018"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP URI TCP connection handling"
@@ -27,7 +27,7 @@ vendored-openssl          = ["tcp-stream/vendored-openssl"]
 log = "^0.4"
 
 [dependencies.amq-protocol-uri]
-version = "=6.0.0-rc2"
+version = "=6.0.0-rc3"
 path    = "../uri"
 
 [dependencies.tcp-stream]
