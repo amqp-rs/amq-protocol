@@ -129,11 +129,20 @@ mod test {
 
     #[test]
     fn test_protocol_header() {
-        assert_eq!(parse_frame(&['A' as u8, 'M' as u8, 'Q' as u8, 'P' as u8, 0, 0, 9, 1][..]), Ok((&[][..], AMQPFrame::ProtocolHeader(ProtocolVersion::amqp_0_9_1()))));
+        assert_eq!(
+            parse_frame(&['A' as u8, 'M' as u8, 'Q' as u8, 'P' as u8, 0, 0, 9, 1][..]),
+            Ok((
+                &[][..],
+                AMQPFrame::ProtocolHeader(ProtocolVersion::amqp_0_9_1())
+            ))
+        );
     }
 
     #[test]
     fn test_heartbeat() {
-        assert_eq!(parse_frame(&[8, 0, 1, 0, 0, 0, 0, 206][..]), Ok((&[][..], AMQPFrame::Heartbeat(1))));
+        assert_eq!(
+            parse_frame(&[8, 0, 1, 0, 0, 0, 0, 206][..]),
+            Ok((&[][..], AMQPFrame::Heartbeat(1)))
+        );
     }
 }
