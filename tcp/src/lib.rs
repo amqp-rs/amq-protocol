@@ -12,6 +12,7 @@ use log::trace;
 use std::{
     mem::ManuallyDrop,
     ops::{Deref, DerefMut},
+    time::Duration,
 };
 
 /// Re-export TcpStream
@@ -44,7 +45,11 @@ impl AMQPUriTcpExt for AMQPUri {
     fn connect_with_identity(&self, identity: Option<Identity<'_, '_>>) -> HandshakeResult {
         let uri = format!("{}:{}", self.authority.host, self.authority.port);
         trace!("Connecting to {}", uri);
-        let stream = TcpStream::connect(uri)?;
+        let stream = if let Some(timeout) = self.query.connection_timeout {
+            TcpStream::connect_timeout(uri, Duration::from_millis(timeout))
+        } else {
+            TcpStream::connect(uri)
+        }?;
 
         match self.scheme {
             AMQPScheme::AMQP => Ok(stream),
