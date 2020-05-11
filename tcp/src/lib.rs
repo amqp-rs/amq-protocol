@@ -25,7 +25,7 @@ pub use tcp_stream::NativeTlsConnector;
 pub use tcp_stream::OpenSslConnector;
 
 #[cfg(feature = "rustls-connector")]
-pub use tcp_stream::RustlsConnector;
+pub use tcp_stream::{RustlsConnector, RustlsConnectorConfig};
 
 /// Trait providing a method to connect to a TcpStream
 pub trait AMQPUriTcpExt {
