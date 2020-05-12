@@ -16,7 +16,7 @@ use std::{
 };
 
 /// Re-export TcpStream
-pub use tcp_stream::{HandshakeError, HandshakeResult, Identity, MidHandshakeTlsStream, TcpStream};
+pub use tcp_stream::{HandshakeError, HandshakeResult, Identity, MidHandshakeTlsStream, TcpStream, TLSConfig};
 
 #[cfg(feature = "native-tls")]
 pub use tcp_stream::NativeTlsConnector;
@@ -34,15 +34,15 @@ pub trait AMQPUriTcpExt {
     where
         Self: Sized,
     {
-        self.connect_with_identity(None)
+        self.connect_with_config(TLSConfig::default())
     }
 
-    /// connect to a TcpStream with the given identity
-    fn connect_with_identity(&self, identity: Option<Identity<'_, '_>>) -> HandshakeResult;
+    /// connect to a TcpStream with the given configuration
+    fn connect_with_config(&self, config: TLSConfig<'_, '_, '_>) -> HandshakeResult;
 }
 
 impl AMQPUriTcpExt for AMQPUri {
-    fn connect_with_identity(&self, identity: Option<Identity<'_, '_>>) -> HandshakeResult {
+    fn connect_with_config(&self, config: TLSConfig<'_, '_, '_>) -> HandshakeResult {
         let uri = format!("{}:{}", self.authority.host, self.authority.port);
         trace!("Connecting to {}", uri);
         let stream = if let Some(timeout) = self.query.connection_timeout {
@@ -53,7 +53,7 @@ impl AMQPUriTcpExt for AMQPUri {
 
         match self.scheme {
             AMQPScheme::AMQP => Ok(stream),
-            AMQPScheme::AMQPS => stream.into_tls(&self.authority.host, identity),
+            AMQPScheme::AMQPS => stream.into_tls(&self.authority.host, config),
         }
     }
 }
