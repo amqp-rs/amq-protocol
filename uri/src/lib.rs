@@ -117,7 +117,7 @@ impl FromStr for SASLMechanism {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
+        match s.to_lowercase().as_str() {
             "amqplain" => Ok(SASLMechanism::AMQPlain),
             "external" => Ok(SASLMechanism::External),
             "plain" => Ok(SASLMechanism::Plain),
