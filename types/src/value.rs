@@ -34,7 +34,7 @@ pub enum AMQPValue {
     LongString(LongString),
     /// An array of AMQPValue
     FieldArray(FieldArray),
-    /// A timestamp (u32)
+    /// A timestamp (u64)
     Timestamp(Timestamp),
     /// A Map<String, AMQPValue>
     FieldTable(FieldTable),

@@ -41,7 +41,7 @@ pub enum AMQPType {
     LongString,
     /// An array of AMQPValue
     FieldArray,
-    /// A timestamp (u32)
+    /// A timestamp (u64)
     Timestamp,
     /// A Map<String, AMQPValue>
     FieldTable,
@@ -141,7 +141,7 @@ pub type LongLongUInt = u64;
 pub type Float = f32;
 /// A f64
 pub type Double = f64;
-/// A timestamp (u32)
+/// A timestamp (u64)
 pub type Timestamp = LongLongUInt;
 /// No value
 pub type Void = ();
