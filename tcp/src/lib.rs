@@ -16,7 +16,9 @@ use std::{
 };
 
 /// Re-export TcpStream
-pub use tcp_stream::{HandshakeError, HandshakeResult, Identity, MidHandshakeTlsStream, TcpStream, TLSConfig};
+pub use tcp_stream::{
+    HandshakeError, HandshakeResult, Identity, MidHandshakeTlsStream, TLSConfig, TcpStream,
+};
 
 #[cfg(feature = "native-tls")]
 pub use tcp_stream::NativeTlsConnector;
@@ -85,6 +87,10 @@ mod sys {
 
     impl TcpStreamWrapper {
         /// Clone the TcpStream. Original one needs to last at least for the same lifetime.
+        ///
+        /// # Safety
+        ///
+        /// The inner TcpStream won't be closed on drop and the original one needs to live longer
         pub unsafe fn new(socket: &TcpStream) -> Self {
             Self(ManuallyDrop::new(TcpStream::from_raw_fd(
                 socket.as_raw_fd(),
