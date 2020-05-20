@@ -49,7 +49,6 @@ impl<'a> HandlebarsAMQPExtension for CodeGenerator<'a> {
         self.register_helper("sanitize_name", Box::new(SanitizeNameHelper));
         self.register_helper("pass_by_ref", Box::new(PassByRefHelper));
         self.register_helper("use_str_ref", Box::new(UseStrRefHelper));
-        self.register_helper("method_has_flag", Box::new(MethodHasFlagHelper));
         self.register_helper("each_argument", Box::new(EachArgumentHelper));
         self.register_helper("amqp_value_ref", Box::new(AMQPValueRefHelper));
         self
@@ -233,36 +232,6 @@ impl HelperDef for UseStrRefHelper {
             _ => false,
         };
         Ok(Some(ScopedJson::Derived(JsonValue::from(use_str_ref))))
-    }
-}
-
-/// Helper for checking if a method has the given flag argument
-pub struct MethodHasFlagHelper;
-impl HelperDef for MethodHasFlagHelper {
-    fn call_inner<'reg: 'rc, 'rc>(
-        &self,
-        h: &Helper<'reg, 'rc>,
-        _: &'reg Handlebars<'_>,
-        _: &'rc Context,
-        _: &mut RenderContext<'reg, 'rc>,
-    ) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
-        let arg0 = h.param(0).ok_or_else(|| {
-            RenderError::new("First param not found for helper \"method_has_flag\"")
-        })?;
-        let arg1 = h.param(1).ok_or_else(|| {
-            RenderError::new("Second param not found for helper \"method_has_flag\"")
-        })?;
-        let method = serde_json::from_value::<AMQPMethod>(arg0.value().clone()).map_err(|_| {
-            RenderError::new("Non-AMQPMethod first param given to helper \"method_has_flag\"")
-        })?;
-        let flag = arg1.value().as_str().ok_or_else(|| {
-            RenderError::new("Non-string second param given to helper \"method_has_flag\"")
-        })?;
-        let has_flag = method.arguments.iter().any(|arg| match arg {
-            AMQPArgument::Value(_) => false,
-            AMQPArgument::Flags(f) => f.flags.iter().any(|f| f.name == flag),
-        });
-        Ok(Some(ScopedJson::Derived(JsonValue::from(has_flag))))
     }
 }
 
