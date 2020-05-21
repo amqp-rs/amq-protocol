@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-uri"
-version       = "6.0.0-rc5" # remember to update html_root_url
+version       = "6.0.0-rc6" # remember to update html_root_url
 edition       = "2018"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP URI manipulation"
