@@ -7,7 +7,12 @@ use handlebars::{
 };
 use serde_json::{self, Value};
 
-use std::{collections::HashMap, fs::File, io::Write, path::Path};
+use std::{
+    collections::HashMap,
+    fs::{self, File},
+    io::Write,
+    path::Path,
+};
 
 /// Type alias to avoid making our users explicitly depend on an extra dependency
 pub type CodeGenerator<'a> = Handlebars<'a>;
@@ -47,6 +52,7 @@ impl<'a> HandlebarsAMQPExtension for CodeGenerator<'a> {
         self.register_helper("snake", Box::new(SnakeHelper));
         self.register_helper("snake_type", Box::new(SnakeTypeHelper));
         self.register_helper("sanitize_name", Box::new(SanitizeNameHelper));
+        self.register_helper("include_more", Box::new(IncludeMoreHelper));
         self.register_helper("pass_by_ref", Box::new(PassByRefHelper));
         self.register_helper("use_str_ref", Box::new(UseStrRefHelper));
         self.register_helper("each_argument", Box::new(EachArgumentHelper));
@@ -182,6 +188,45 @@ impl HelperDef for SanitizeNameHelper {
             RenderError::new("Non-string param given to helper \"sanitize_name\"")
         })?;
         out.write(&param.replace('-', "_"))?;
+        Ok(())
+    }
+}
+
+/// Helper to include additional code such as rustdoc
+pub struct IncludeMoreHelper;
+impl HelperDef for IncludeMoreHelper {
+    fn call<'reg: 'rc, 'rc>(
+        &self,
+        h: &Helper<'reg, 'rc>,
+        _: &'reg Handlebars<'_>,
+        _: &'rc Context,
+        _: &mut RenderContext<'reg, 'rc>,
+        out: &mut dyn Output,
+    ) -> HelperResult {
+        let amqp_class = h
+            .param(0)
+            .ok_or_else(|| RenderError::new("Param not found for helper \"include_more\""))?;
+        let amqp_method = h
+            .param(1)
+            .ok_or_else(|| RenderError::new("Param not found for helper \"include_more\""))?;
+        let amqp_class = amqp_class
+            .value()
+            .as_str()
+            .ok_or_else(|| RenderError::new("Non-string param given to helper \"include_more\""))?;
+        let amqp_method = amqp_method
+            .value()
+            .as_str()
+            .ok_or_else(|| RenderError::new("Non-string param given to helper \"include_more\""))?;
+        if let Ok(cargo_manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") {
+            let include = Path::new(&cargo_manifest_dir)
+                .join("templates")
+                .join("includes")
+                .join(amqp_class)
+                .join(format!("{}.rs", amqp_method));
+            if let Ok(include) = fs::read_to_string(include) {
+                out.write(&include)?;
+            }
+        }
         Ok(())
     }
 }
