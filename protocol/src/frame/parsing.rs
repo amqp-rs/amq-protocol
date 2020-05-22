@@ -59,6 +59,7 @@ pub fn parse_frame<I: ParsableInput>(i: I) -> ParserResult<I, AMQPFrame> {
     context(
         "parse_frame",
         alt((
+            map(parse_protocol_header, AMQPFrame::ProtocolHeader),
             map_res(
                 parse_raw_frame,
                 |AMQPRawFrame {
@@ -77,7 +78,6 @@ pub fn parse_frame<I: ParsableInput>(i: I) -> ParserResult<I, AMQPFrame> {
                     AMQPFrameType::Heartbeat => Ok(AMQPFrame::Heartbeat(channel_id)),
                 },
             ),
-            map(parse_protocol_header, AMQPFrame::ProtocolHeader),
         )),
     )(i)
 }
