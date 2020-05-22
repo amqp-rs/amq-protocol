@@ -32,6 +32,8 @@ impl From<ShortUInt> for AMQPChannel {
 /// The type of AMQP Frame
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum AMQPFrameType {
+    /// The Protocol Header,
+    ProtocolHeader,
     /// Call a method
     Method,
     /// Content header
