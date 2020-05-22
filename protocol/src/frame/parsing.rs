@@ -8,7 +8,7 @@ use crate::{
 use nom::{
     branch::alt,
     bytes::streaming::{tag, take},
-    combinator::{all_consuming, flat_map, map, map_opt, map_res},
+    combinator::{all_consuming, cut, flat_map, map, map_opt, map_res},
     error::context,
     sequence::{pair, tuple},
 };
@@ -86,19 +86,21 @@ pub fn parse_frame<I: ParsableInput>(i: I) -> ParserResult<I, AMQPFrame> {
 pub fn parse_raw_frame<I: ParsableInput>(i: I) -> ParserResult<I, AMQPRawFrame<I>> {
     context(
         "parse_raw_frame",
-        flat_map(
-            tuple((parse_frame_type, parse_id, parse_long_uint)),
-            move |(frame_type, channel_id, size)| {
-                map(
-                    pair(take(size), tag(&[constants::FRAME_END][..])),
-                    move |(payload, _)| AMQPRawFrame {
-                        frame_type,
-                        channel_id,
-                        payload,
-                    },
-                )
-            },
-        ),
+        flat_map(parse_frame_type, move |frame_type| {
+            cut(flat_map(
+                pair(parse_id, parse_long_uint),
+                move |(channel_id, size)| {
+                    map(
+                        pair(take(size), tag(&[constants::FRAME_END][..])),
+                        move |(payload, _)| AMQPRawFrame {
+                            frame_type,
+                            channel_id,
+                            payload,
+                        },
+                    )
+                },
+            ))
+        }),
     )(i)
 }
 
