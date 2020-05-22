@@ -70,6 +70,10 @@ pub fn parse_frame<I: ParsableInput>(i: I) -> ParserResult<I, AMQPFrame> {
                          frame_type,
                          payload,
                      }: AMQPRawFrame<I>| match frame_type {
+                        // This should be unreachable be better have a sensitive value anyways
+                        AMQPFrameType::ProtocolHeader => {
+                            Ok(AMQPFrame::ProtocolHeader(ProtocolVersion::amqp_0_9_1()))
+                        }
                         AMQPFrameType::Method => all_consuming(parse_class)(payload)
                             .map(|(_, m)| AMQPFrame::Method(channel_id, m)),
                         AMQPFrameType::Header => all_consuming(parse_content_header)(payload)
@@ -79,7 +83,6 @@ pub fn parse_frame<I: ParsableInput>(i: I) -> ParserResult<I, AMQPFrame> {
                             payload.iter_elements().collect(),
                         )),
                         AMQPFrameType::Heartbeat => Ok(AMQPFrame::Heartbeat(channel_id)),
-                        _ => Ok(AMQPFrame::Heartbeat(0)), // FIXME
                     },
                 )(i),
             }
