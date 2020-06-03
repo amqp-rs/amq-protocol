@@ -17,7 +17,8 @@ use std::{
 
 /// Re-export TcpStream
 pub use tcp_stream::{
-    HandshakeError, HandshakeResult, Identity, MidHandshakeTlsStream, TLSConfig, TcpStream,
+    HandshakeError, HandshakeResult, Identity, MidHandshakeTlsStream, OwnedIdentity,
+    OwnedTLSConfig, TLSConfig, TcpStream,
 };
 
 #[cfg(feature = "native-tls")]
