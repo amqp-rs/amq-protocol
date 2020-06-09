@@ -16,6 +16,8 @@ name = "amq_protocol"
 
 [features]
 default                   = ["native-tls"]
+codegen                   = ["codegen-internal"]
+codegen-internal          = ["amq-protocol-codegen"]
 native-tls                = ["amq-protocol-tcp/native-tls"]
 openssl                   = ["amq-protocol-tcp/openssl"]
 rustls                    = ["amq-protocol-tcp/rustls"]
@@ -25,8 +27,9 @@ vendored-openssl          = ["amq-protocol-tcp/vendored-openssl"]
 verbose-errors            = ["amq-protocol-types/verbose-errors"]
 
 [build-dependencies.amq-protocol-codegen]
-version = "=6.0.0-rc10"
-path    = "../codegen"
+version  = "=6.0.0-rc10"
+path     = "../codegen"
+optional = true
 
 [dependencies.amq-protocol-tcp]
 version          = "=6.0.0-rc10"

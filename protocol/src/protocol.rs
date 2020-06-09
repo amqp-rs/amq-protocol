@@ -10,7 +10,10 @@ use nom::{
 };
 use std::{convert::TryFrom, error, fmt, io::Write};
 
+#[cfg(feature = "codegen")]
 include!(concat!(env!("OUT_DIR"), "/protocol.rs"));
+#[cfg(not(feature = "codegen"))]
+include!("generated.rs");
 
 /// Type alias for AMQP BasicProperties
 pub type BasicProperties = basic::AMQPProperties;
