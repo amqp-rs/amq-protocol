@@ -69,8 +69,8 @@ impl<'a> HandlebarsAMQPExtension for CodeGenerator<'a> {
         metadata: Option<Value>,
     ) {
         let dest_path = Path::new(out_dir).join(format!("{}.rs", target));
-        let mut f =
-            File::create(&dest_path).unwrap_or_else(|_| panic!("Failed to create {}.rs", target));
+        let mut f = File::create(&dest_path)
+            .unwrap_or_else(|err| panic!("Failed to create {:?}: {}", dest_path, err));
         let specs = AMQProtocolDefinition::load(metadata);
         let mut codegen = CodeGenerator::default().register_amqp_helpers();
         let mut data = HashMap::new();
