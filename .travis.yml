@@ -17,9 +17,10 @@ matrix:
         - rust: nightly
         - rust: nightly
           os: osx
-        - rust: nightly
-          script:
-                - cargo -Z minimal-versions test --verbose --all --all-features
+# Pest dependency on quote is broken, doesn't build with min version
+#        - rust: nightly
+#          script:
+#                - cargo -Z minimal-versions test --verbose --all --all-features
 
 script:
     - cargo build --verbose --all --all-features
