@@ -303,9 +303,10 @@ impl HelperDef for EachArgumentHelper {
             rc.push_block(block_context);
             let arguments: Vec<AMQPArgument> = serde_json::from_value(value.value().clone())
                 .map_err(|err| {
-                    RenderError::new(
-                        format!("Param is not a Vec<AMQPArgument> for helper \"each_argument\": {}", err)
-                    )
+                    RenderError::new(format!(
+                        "Param is not a Vec<AMQPArgument> for helper \"each_argument\": {}",
+                        err
+                    ))
                 })?;
             let len = arguments.len();
             let array_path = value.context_path();
