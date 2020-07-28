@@ -47,7 +47,7 @@ pub trait AMQPUriTcpExt {
 impl AMQPUriTcpExt for AMQPUri {
     fn connect_with_config(&self, config: TLSConfig<'_, '_, '_>) -> HandshakeResult {
         let uri = format!("{}:{}", self.authority.host, self.authority.port);
-        trace!(uri = %uri, "Connecting");
+        trace!(uri = %uri, "Connecting.");
         let stream = if let Some(timeout) = self.query.connection_timeout {
             TcpStream::connect_timeout(uri, Duration::from_millis(timeout))
         } else {
