@@ -63,6 +63,12 @@ impl<I> ContextError<I> for ParserErrors {
     }
 }
 
+impl<I, E> nom::error::FromExternalError<I, E> for ParserErrors {
+    fn from_external_error(input: I, kind: ErrorKind, _e: E) -> Self {
+        Self::from_error_kind(input, kind)
+    }
+}
+
 impl fmt::Display for ParserErrors {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "Parser error: {:?}", self.error)?;
