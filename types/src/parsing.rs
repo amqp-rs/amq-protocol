@@ -6,7 +6,7 @@ use nom::{
     error::{context, ContextError, ErrorKind, ParseError, VerboseErrorKind},
     multi::fold_many0,
     number::streaming::{
-        be_f32, be_f64, be_i16, be_i32, be_i64, be_i8, be_u16, be_u32, be_u64, be_u8,
+        be_f32, be_f64, be_i16, be_i32, be_i64, be_u16, be_u32, be_u64, i8 as be_i8, u8 as be_u8,
     },
     sequence::pair,
 };
