@@ -294,7 +294,7 @@ pub fn parse_flags<I: ParsableInput>(i: I, names: &[&str]) -> ParserResult<I, AM
 /// Traits required for parsing
 pub mod traits {
     /// Reexport nom traits required for parsing
-    pub use nom::{Compare, InputIter, InputLength, InputTake, Slice, UnspecializedInput};
+    pub use nom::{Compare, InputIter, InputLength, InputTake, Needed, Slice, UnspecializedInput};
 
     /// Trait used to ensure we can properly parse input
     pub trait ParsableInput:
