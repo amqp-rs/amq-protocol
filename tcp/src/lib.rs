@@ -8,11 +8,7 @@
 //! connecting to an AMQP URI
 
 use amq_protocol_uri::{AMQPScheme, AMQPUri};
-use std::{
-    mem::ManuallyDrop,
-    ops::{Deref, DerefMut},
-    time::Duration,
-};
+use std::time::Duration;
 use tracing::trace;
 
 /// Re-export TcpStream
@@ -57,75 +53,6 @@ impl AMQPUriTcpExt for AMQPUri {
         match self.scheme {
             AMQPScheme::AMQP => Ok(stream),
             AMQPScheme::AMQPS => stream.into_tls(&self.authority.host, config),
-        }
-    }
-}
-
-/// Unsafe wrapper "Cloning" the TcpStream but not closing it on drop.
-pub struct TcpStreamWrapper(ManuallyDrop<TcpStream>);
-
-impl Deref for TcpStreamWrapper {
-    type Target = TcpStream;
-
-    fn deref(&self) -> &Self::Target {
-        &*self.0
-    }
-}
-
-impl DerefMut for TcpStreamWrapper {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut *self.0
-    }
-}
-
-#[cfg(unix)]
-mod sys {
-    use crate::{TcpStream, TcpStreamWrapper};
-    use std::{
-        mem::ManuallyDrop,
-        os::unix::io::{AsRawFd, FromRawFd, RawFd},
-    };
-
-    impl TcpStreamWrapper {
-        /// Clone the TcpStream. Original one needs to last at least for the same lifetime.
-        ///
-        /// # Safety
-        ///
-        /// The inner TcpStream won't be closed on drop and the original one needs to live longer
-        pub unsafe fn new(socket: &TcpStream) -> Self {
-            Self(ManuallyDrop::new(TcpStream::from_raw_fd(
-                socket.as_raw_fd(),
-            )))
-        }
-    }
-
-    impl AsRawFd for TcpStreamWrapper {
-        fn as_raw_fd(&self) -> RawFd {
-            self.0.as_raw_fd()
-        }
-    }
-}
-
-#[cfg(windows)]
-mod sys {
-    use crate::{TcpStream, TcpStreamWrapper};
-    use std::{
-        mem::ManuallyDrop,
-        os::windows::io::{AsRawSocket, FromRawSocket, RawSocket},
-    };
-
-    impl TcpStreamWrapper {
-        /// Clone the TcpStream. Original one needs to last at least for the same lifetime.
-        pub unsafe fn new(socket: &TcpStream) -> Self {
-            Self(ManuallyDrop::new(TcpStream::from_raw_socket(
-                socket.as_raw_socket(),
-            )))
-        }
-    }
-
-    impl AsRawSocket for TcpStreamWrapper {
-        fn as_raw_socket(&self) -> RawSocket {
-            self.0.as_raw_socket()
         }
     }
 }
