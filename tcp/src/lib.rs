@@ -49,6 +49,7 @@ impl AMQPUriTcpExt for AMQPUri {
         } else {
             TcpStream::connect(uri)
         }?;
+        stream.set_nonblocking(true)?;
 
         match self.scheme {
             AMQPScheme::AMQP => Ok(stream),
