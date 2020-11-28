@@ -49,11 +49,11 @@ impl AMQPUriTcpExt for AMQPUri {
         } else {
             TcpStream::connect(uri)
         }?;
+        let stream = match self.scheme {
+            AMQPScheme::AMQP => stream,
+            AMQPScheme::AMQPS => stream.into_tls(&self.authority.host, config)?,
+        };
         stream.set_nonblocking(true)?;
-
-        match self.scheme {
-            AMQPScheme::AMQP => Ok(stream),
-            AMQPScheme::AMQPS => stream.into_tls(&self.authority.host, config),
-        }
+        Ok(stream)
     }
 }
