@@ -21,3 +21,22 @@ pub mod flags;
 pub mod generation;
 /// Parsing utilities for the various AMQP types.
 pub mod parsing;
+
+/// A Channel identifier
+pub type ChannelId = Identifier;
+/// The number of consumers
+pub type ConsumerCount = types::LongUInt;
+/// A delivery tag
+pub type DeliveryTag = types::LongLongUInt;
+/// the size of an AMQP frame
+pub type FrameSize = types::LongUInt;
+/// The maximum heartbeat interval
+pub type Heartbeat = types::ShortUInt;
+/// An identifier (class id or method id)
+pub type Identifier = types::ShortUInt;
+/// The number of messages
+pub type MessageCount = types::LongUInt;
+/// The size of a delivery's payload
+pub type PayloadSize = types::LongLongUInt;
+/// A reply code (for closing channels and connections)
+pub type ReplyCode = types::ShortUInt;
