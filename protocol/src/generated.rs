@@ -58,11 +58,11 @@ pub mod constants {
     /// FRAME-HEARTBEAT (Generated)
     pub const FRAME_HEARTBEAT: ShortShortUInt = 8;
     /// FRAME-MIN-SIZE (Generated)
-    pub const FRAME_MIN_SIZE: ShortUInt = 4096;
+    pub const FRAME_MIN_SIZE: LongUInt = 4096;
     /// FRAME-END (Generated)
     pub const FRAME_END: ShortShortUInt = 206;
     /// REPLY-SUCCESS (Generated)
-    pub const REPLY_SUCCESS: ShortShortUInt = 200;
+    pub const REPLY_SUCCESS: ShortUInt = 200;
 }
 
 /// The available soft AMQP errors

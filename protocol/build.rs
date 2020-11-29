@@ -2,11 +2,11 @@ fn main() {
     println!("cargo:rerun-if-env-changed=AMQ_PROTOCOL_CODEGEN_DIR");
     println!("cargo:rerun-if-env-changed=AMQ_PROTOCOL_CODEGEN_FILE");
 
-    #[cfg(feature = "codegen")]
+    #[cfg(feature = "codegen-internal")]
     codegen()
 }
 
-#[cfg(feature = "codegen")]
+#[cfg(feature = "codegen-internal")]
 fn codegen() {
     use amq_protocol_codegen::{CodeGenerator, HandlebarsAMQPExtension};
 

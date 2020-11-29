@@ -258,7 +258,9 @@ impl _AMQPConstant {
         AMQPConstant {
             name: self.name.clone(),
             value: self.value,
-            amqp_type: if self.value > 255 {
+            amqp_type: if self.name.ends_with("SIZE") {
+                AMQPType::LongUInt
+            } else if self.name.starts_with("REPLY") {
                 AMQPType::ShortUInt
             } else {
                 AMQPType::ShortShortUInt
@@ -583,7 +585,7 @@ mod test {
             hard_errors: vec![AMQPConstant {
                 name: "c3".to_string(),
                 value: 256,
-                amqp_type: AMQPType::ShortUInt,
+                amqp_type: AMQPType::ShortShortUInt,
             }],
             classes: vec![AMQPClass {
                 id: 42,
