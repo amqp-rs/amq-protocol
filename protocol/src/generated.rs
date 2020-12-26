@@ -277,6 +277,94 @@ pub enum AMQPClass {
     Confirm(confirm::AMQPMethod),
 }
 
+impl AMQPClass {
+    /// Get the AMQP class id (Generated)
+    pub fn get_amqp_class_id(&self) -> Identifier {
+        match self {
+            AMQPClass::Connection(_) => 10,
+            AMQPClass::Channel(_) => 20,
+            AMQPClass::Access(_) => 30,
+            AMQPClass::Exchange(_) => 40,
+            AMQPClass::Queue(_) => 50,
+            AMQPClass::Basic(_) => 60,
+            AMQPClass::Tx(_) => 90,
+            AMQPClass::Confirm(_) => 85,
+        }
+    }
+
+    /// Get the AMQP method id (Generated)
+    pub fn get_amqp_method_id(&self) -> Identifier {
+        match self {
+            AMQPClass::Connection(connection::AMQPMethod::Start(_)) => 10,
+            AMQPClass::Connection(connection::AMQPMethod::StartOk(_)) => 11,
+            AMQPClass::Connection(connection::AMQPMethod::Secure(_)) => 20,
+            AMQPClass::Connection(connection::AMQPMethod::SecureOk(_)) => 21,
+            AMQPClass::Connection(connection::AMQPMethod::Tune(_)) => 30,
+            AMQPClass::Connection(connection::AMQPMethod::TuneOk(_)) => 31,
+            AMQPClass::Connection(connection::AMQPMethod::Open(_)) => 40,
+            AMQPClass::Connection(connection::AMQPMethod::OpenOk(_)) => 41,
+            AMQPClass::Connection(connection::AMQPMethod::Close(_)) => 50,
+            AMQPClass::Connection(connection::AMQPMethod::CloseOk(_)) => 51,
+            AMQPClass::Connection(connection::AMQPMethod::Blocked(_)) => 60,
+            AMQPClass::Connection(connection::AMQPMethod::Unblocked(_)) => 61,
+            AMQPClass::Connection(connection::AMQPMethod::UpdateSecret(_)) => 70,
+            AMQPClass::Connection(connection::AMQPMethod::UpdateSecretOk(_)) => 71,
+            AMQPClass::Channel(channel::AMQPMethod::Open(_)) => 10,
+            AMQPClass::Channel(channel::AMQPMethod::OpenOk(_)) => 11,
+            AMQPClass::Channel(channel::AMQPMethod::Flow(_)) => 20,
+            AMQPClass::Channel(channel::AMQPMethod::FlowOk(_)) => 21,
+            AMQPClass::Channel(channel::AMQPMethod::Close(_)) => 40,
+            AMQPClass::Channel(channel::AMQPMethod::CloseOk(_)) => 41,
+            AMQPClass::Access(access::AMQPMethod::Request(_)) => 10,
+            AMQPClass::Access(access::AMQPMethod::RequestOk(_)) => 11,
+            AMQPClass::Exchange(exchange::AMQPMethod::Declare(_)) => 10,
+            AMQPClass::Exchange(exchange::AMQPMethod::DeclareOk(_)) => 11,
+            AMQPClass::Exchange(exchange::AMQPMethod::Delete(_)) => 20,
+            AMQPClass::Exchange(exchange::AMQPMethod::DeleteOk(_)) => 21,
+            AMQPClass::Exchange(exchange::AMQPMethod::Bind(_)) => 30,
+            AMQPClass::Exchange(exchange::AMQPMethod::BindOk(_)) => 31,
+            AMQPClass::Exchange(exchange::AMQPMethod::Unbind(_)) => 40,
+            AMQPClass::Exchange(exchange::AMQPMethod::UnbindOk(_)) => 51,
+            AMQPClass::Queue(queue::AMQPMethod::Declare(_)) => 10,
+            AMQPClass::Queue(queue::AMQPMethod::DeclareOk(_)) => 11,
+            AMQPClass::Queue(queue::AMQPMethod::Bind(_)) => 20,
+            AMQPClass::Queue(queue::AMQPMethod::BindOk(_)) => 21,
+            AMQPClass::Queue(queue::AMQPMethod::Purge(_)) => 30,
+            AMQPClass::Queue(queue::AMQPMethod::PurgeOk(_)) => 31,
+            AMQPClass::Queue(queue::AMQPMethod::Delete(_)) => 40,
+            AMQPClass::Queue(queue::AMQPMethod::DeleteOk(_)) => 41,
+            AMQPClass::Queue(queue::AMQPMethod::Unbind(_)) => 50,
+            AMQPClass::Queue(queue::AMQPMethod::UnbindOk(_)) => 51,
+            AMQPClass::Basic(basic::AMQPMethod::Qos(_)) => 10,
+            AMQPClass::Basic(basic::AMQPMethod::QosOk(_)) => 11,
+            AMQPClass::Basic(basic::AMQPMethod::Consume(_)) => 20,
+            AMQPClass::Basic(basic::AMQPMethod::ConsumeOk(_)) => 21,
+            AMQPClass::Basic(basic::AMQPMethod::Cancel(_)) => 30,
+            AMQPClass::Basic(basic::AMQPMethod::CancelOk(_)) => 31,
+            AMQPClass::Basic(basic::AMQPMethod::Publish(_)) => 40,
+            AMQPClass::Basic(basic::AMQPMethod::Return(_)) => 50,
+            AMQPClass::Basic(basic::AMQPMethod::Deliver(_)) => 60,
+            AMQPClass::Basic(basic::AMQPMethod::Get(_)) => 70,
+            AMQPClass::Basic(basic::AMQPMethod::GetOk(_)) => 71,
+            AMQPClass::Basic(basic::AMQPMethod::GetEmpty(_)) => 72,
+            AMQPClass::Basic(basic::AMQPMethod::Ack(_)) => 80,
+            AMQPClass::Basic(basic::AMQPMethod::Reject(_)) => 90,
+            AMQPClass::Basic(basic::AMQPMethod::RecoverAsync(_)) => 100,
+            AMQPClass::Basic(basic::AMQPMethod::Recover(_)) => 110,
+            AMQPClass::Basic(basic::AMQPMethod::RecoverOk(_)) => 111,
+            AMQPClass::Basic(basic::AMQPMethod::Nack(_)) => 120,
+            AMQPClass::Tx(tx::AMQPMethod::Select(_)) => 10,
+            AMQPClass::Tx(tx::AMQPMethod::SelectOk(_)) => 11,
+            AMQPClass::Tx(tx::AMQPMethod::Commit(_)) => 20,
+            AMQPClass::Tx(tx::AMQPMethod::CommitOk(_)) => 21,
+            AMQPClass::Tx(tx::AMQPMethod::Rollback(_)) => 30,
+            AMQPClass::Tx(tx::AMQPMethod::RollbackOk(_)) => 31,
+            AMQPClass::Confirm(confirm::AMQPMethod::Select(_)) => 10,
+            AMQPClass::Confirm(confirm::AMQPMethod::SelectOk(_)) => 11,
+        }
+    }
+}
+
 /// connection (generated)
 pub mod connection {
     use super::*;

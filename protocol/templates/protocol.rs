@@ -138,6 +138,28 @@ pub enum AMQPClass {
     {{/each ~}}
 }
 
+impl AMQPClass {
+    /// Get the AMQP class id (Generated)
+    pub fn get_amqp_class_id(&self) -> Identifier {
+        match self {
+            {{#each protocol.classes as |class| ~}}
+            AMQPClass::{{camel class.name}}(_) => {{class.id}},
+            {{/each ~}}
+        }
+    }
+
+    /// Get the AMQP method id (Generated)
+    pub fn get_amqp_method_id(&self) -> Identifier {
+        match self {
+            {{#each protocol.classes as |class| ~}}
+            {{#each class.methods as |method| ~}}
+            AMQPClass::{{camel class.name}}({{snake class.name}}::AMQPMethod::{{camel method.name}}(_)) => {{method.id}},
+            {{/each ~}}
+            {{/each ~}}
+        }
+    }
+}
+
 {{#each protocol.classes as |class|}}
 /// {{class.name}} (generated)
 pub mod {{snake class.name}} {
