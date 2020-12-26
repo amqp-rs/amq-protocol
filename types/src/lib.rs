@@ -42,5 +42,3 @@ pub type MessageCount = types::LongUInt;
 pub type PayloadSize = types::LongLongUInt;
 /// A reply code (for closing channels and connections)
 pub type ReplyCode = types::ShortUInt;
-/// The weight associated to a payload
-pub type Weight = types::ShortUInt;

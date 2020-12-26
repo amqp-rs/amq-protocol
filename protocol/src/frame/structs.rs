@@ -133,8 +133,6 @@ pub struct AMQPRawFrame<I: ParsableInput> {
 pub struct AMQPContentHeader {
     /// The class of content
     pub class_id: Identifier,
-    /// The weight of the content
-    pub weight: Weight,
     /// The size of the content's body
     pub body_size: PayloadSize,
     /// The AMQP properties associated with the content
