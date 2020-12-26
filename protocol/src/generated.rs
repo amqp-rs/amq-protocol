@@ -86,7 +86,7 @@ pub enum AMQPSoftError {
 
 impl AMQPSoftError {
     /// Get the id of the soft error
-    pub fn get_id(&self) -> ShortUInt {
+    pub fn get_id(&self) -> Identifier {
         match *self {
             AMQPSoftError::CONTENTTOOLARGE => 311,
             AMQPSoftError::NOROUTE => 312,
@@ -99,7 +99,7 @@ impl AMQPSoftError {
     }
 
     /// Get the soft error corresponding to an id
-    pub fn from_id(id: ShortUInt) -> Option<AMQPSoftError> {
+    pub fn from_id(id: Identifier) -> Option<AMQPSoftError> {
         match id {
             311 => Some(AMQPSoftError::CONTENTTOOLARGE),
             312 => Some(AMQPSoftError::NOROUTE),
@@ -156,7 +156,7 @@ pub enum AMQPHardError {
 
 impl AMQPHardError {
     /// Get the id of the hard error
-    pub fn get_id(&self) -> ShortUInt {
+    pub fn get_id(&self) -> Identifier {
         match *self {
             AMQPHardError::CONNECTIONFORCED => 320,
             AMQPHardError::INVALIDPATH => 402,
@@ -173,7 +173,7 @@ impl AMQPHardError {
     }
 
     /// Get the hard error corresponding to an id
-    pub fn from_id(id: ShortUInt) -> Option<AMQPHardError> {
+    pub fn from_id(id: Identifier) -> Option<AMQPHardError> {
         match id {
             320 => Some(AMQPHardError::CONNECTIONFORCED),
             402 => Some(AMQPHardError::INVALIDPATH),
@@ -275,94 +275,6 @@ pub enum AMQPClass {
     Tx(tx::AMQPMethod),
     /// confirm (Generated)
     Confirm(confirm::AMQPMethod),
-}
-
-impl AMQPClass {
-    /// Get the AMQP class id (Generated)
-    pub fn get_amqp_class_id(&self) -> u16 {
-        match self {
-            AMQPClass::Connection(_) => 10,
-            AMQPClass::Channel(_) => 20,
-            AMQPClass::Access(_) => 30,
-            AMQPClass::Exchange(_) => 40,
-            AMQPClass::Queue(_) => 50,
-            AMQPClass::Basic(_) => 60,
-            AMQPClass::Tx(_) => 90,
-            AMQPClass::Confirm(_) => 85,
-        }
-    }
-
-    /// Get the AMQP method id (Generated)
-    pub fn get_amqp_method_id(&self) -> u16 {
-        match self {
-            AMQPClass::Connection(connection::AMQPMethod::Start(_)) => 10,
-            AMQPClass::Connection(connection::AMQPMethod::StartOk(_)) => 11,
-            AMQPClass::Connection(connection::AMQPMethod::Secure(_)) => 20,
-            AMQPClass::Connection(connection::AMQPMethod::SecureOk(_)) => 21,
-            AMQPClass::Connection(connection::AMQPMethod::Tune(_)) => 30,
-            AMQPClass::Connection(connection::AMQPMethod::TuneOk(_)) => 31,
-            AMQPClass::Connection(connection::AMQPMethod::Open(_)) => 40,
-            AMQPClass::Connection(connection::AMQPMethod::OpenOk(_)) => 41,
-            AMQPClass::Connection(connection::AMQPMethod::Close(_)) => 50,
-            AMQPClass::Connection(connection::AMQPMethod::CloseOk(_)) => 51,
-            AMQPClass::Connection(connection::AMQPMethod::Blocked(_)) => 60,
-            AMQPClass::Connection(connection::AMQPMethod::Unblocked(_)) => 61,
-            AMQPClass::Connection(connection::AMQPMethod::UpdateSecret(_)) => 70,
-            AMQPClass::Connection(connection::AMQPMethod::UpdateSecretOk(_)) => 71,
-            AMQPClass::Channel(channel::AMQPMethod::Open(_)) => 10,
-            AMQPClass::Channel(channel::AMQPMethod::OpenOk(_)) => 11,
-            AMQPClass::Channel(channel::AMQPMethod::Flow(_)) => 20,
-            AMQPClass::Channel(channel::AMQPMethod::FlowOk(_)) => 21,
-            AMQPClass::Channel(channel::AMQPMethod::Close(_)) => 40,
-            AMQPClass::Channel(channel::AMQPMethod::CloseOk(_)) => 41,
-            AMQPClass::Access(access::AMQPMethod::Request(_)) => 10,
-            AMQPClass::Access(access::AMQPMethod::RequestOk(_)) => 11,
-            AMQPClass::Exchange(exchange::AMQPMethod::Declare(_)) => 10,
-            AMQPClass::Exchange(exchange::AMQPMethod::DeclareOk(_)) => 11,
-            AMQPClass::Exchange(exchange::AMQPMethod::Delete(_)) => 20,
-            AMQPClass::Exchange(exchange::AMQPMethod::DeleteOk(_)) => 21,
-            AMQPClass::Exchange(exchange::AMQPMethod::Bind(_)) => 30,
-            AMQPClass::Exchange(exchange::AMQPMethod::BindOk(_)) => 31,
-            AMQPClass::Exchange(exchange::AMQPMethod::Unbind(_)) => 40,
-            AMQPClass::Exchange(exchange::AMQPMethod::UnbindOk(_)) => 51,
-            AMQPClass::Queue(queue::AMQPMethod::Declare(_)) => 10,
-            AMQPClass::Queue(queue::AMQPMethod::DeclareOk(_)) => 11,
-            AMQPClass::Queue(queue::AMQPMethod::Bind(_)) => 20,
-            AMQPClass::Queue(queue::AMQPMethod::BindOk(_)) => 21,
-            AMQPClass::Queue(queue::AMQPMethod::Purge(_)) => 30,
-            AMQPClass::Queue(queue::AMQPMethod::PurgeOk(_)) => 31,
-            AMQPClass::Queue(queue::AMQPMethod::Delete(_)) => 40,
-            AMQPClass::Queue(queue::AMQPMethod::DeleteOk(_)) => 41,
-            AMQPClass::Queue(queue::AMQPMethod::Unbind(_)) => 50,
-            AMQPClass::Queue(queue::AMQPMethod::UnbindOk(_)) => 51,
-            AMQPClass::Basic(basic::AMQPMethod::Qos(_)) => 10,
-            AMQPClass::Basic(basic::AMQPMethod::QosOk(_)) => 11,
-            AMQPClass::Basic(basic::AMQPMethod::Consume(_)) => 20,
-            AMQPClass::Basic(basic::AMQPMethod::ConsumeOk(_)) => 21,
-            AMQPClass::Basic(basic::AMQPMethod::Cancel(_)) => 30,
-            AMQPClass::Basic(basic::AMQPMethod::CancelOk(_)) => 31,
-            AMQPClass::Basic(basic::AMQPMethod::Publish(_)) => 40,
-            AMQPClass::Basic(basic::AMQPMethod::Return(_)) => 50,
-            AMQPClass::Basic(basic::AMQPMethod::Deliver(_)) => 60,
-            AMQPClass::Basic(basic::AMQPMethod::Get(_)) => 70,
-            AMQPClass::Basic(basic::AMQPMethod::GetOk(_)) => 71,
-            AMQPClass::Basic(basic::AMQPMethod::GetEmpty(_)) => 72,
-            AMQPClass::Basic(basic::AMQPMethod::Ack(_)) => 80,
-            AMQPClass::Basic(basic::AMQPMethod::Reject(_)) => 90,
-            AMQPClass::Basic(basic::AMQPMethod::RecoverAsync(_)) => 100,
-            AMQPClass::Basic(basic::AMQPMethod::Recover(_)) => 110,
-            AMQPClass::Basic(basic::AMQPMethod::RecoverOk(_)) => 111,
-            AMQPClass::Basic(basic::AMQPMethod::Nack(_)) => 120,
-            AMQPClass::Tx(tx::AMQPMethod::Select(_)) => 10,
-            AMQPClass::Tx(tx::AMQPMethod::SelectOk(_)) => 11,
-            AMQPClass::Tx(tx::AMQPMethod::Commit(_)) => 20,
-            AMQPClass::Tx(tx::AMQPMethod::CommitOk(_)) => 21,
-            AMQPClass::Tx(tx::AMQPMethod::Rollback(_)) => 30,
-            AMQPClass::Tx(tx::AMQPMethod::RollbackOk(_)) => 31,
-            AMQPClass::Confirm(confirm::AMQPMethod::Select(_)) => 10,
-            AMQPClass::Confirm(confirm::AMQPMethod::SelectOk(_)) => 11,
-        }
-    }
 }
 
 /// connection (generated)
@@ -515,12 +427,12 @@ pub mod connection {
 
     impl Start {
         /// Get the AMQP class id for start (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             10
         }
 
         /// Get the AMQP method id for start (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             10
         }
     }
@@ -574,12 +486,12 @@ pub mod connection {
 
     impl StartOk {
         /// Get the AMQP class id for start-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             10
         }
 
         /// Get the AMQP method id for start-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             11
         }
     }
@@ -624,12 +536,12 @@ pub mod connection {
 
     impl Secure {
         /// Get the AMQP class id for secure (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             10
         }
 
         /// Get the AMQP method id for secure (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             20
         }
     }
@@ -660,12 +572,12 @@ pub mod connection {
 
     impl SecureOk {
         /// Get the AMQP class id for secure-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             10
         }
 
         /// Get the AMQP method id for secure-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             21
         }
     }
@@ -700,12 +612,12 @@ pub mod connection {
 
     impl Tune {
         /// Get the AMQP class id for tune (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             10
         }
 
         /// Get the AMQP method id for tune (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             30
         }
     }
@@ -751,12 +663,12 @@ pub mod connection {
 
     impl TuneOk {
         /// Get the AMQP class id for tune-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             10
         }
 
         /// Get the AMQP method id for tune-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             31
         }
     }
@@ -798,12 +710,12 @@ pub mod connection {
 
     impl Open {
         /// Get the AMQP class id for open (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             10
         }
 
         /// Get the AMQP method id for open (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             40
         }
     }
@@ -839,12 +751,12 @@ pub mod connection {
 
     impl OpenOk {
         /// Get the AMQP class id for open-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             10
         }
 
         /// Get the AMQP method id for open-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             41
         }
     }
@@ -881,12 +793,12 @@ pub mod connection {
 
     impl Close {
         /// Get the AMQP class id for close (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             10
         }
 
         /// Get the AMQP method id for close (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             50
         }
     }
@@ -928,12 +840,12 @@ pub mod connection {
 
     impl CloseOk {
         /// Get the AMQP class id for close-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             10
         }
 
         /// Get the AMQP method id for close-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             51
         }
     }
@@ -962,12 +874,12 @@ pub mod connection {
 
     impl Blocked {
         /// Get the AMQP class id for blocked (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             10
         }
 
         /// Get the AMQP method id for blocked (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             60
         }
     }
@@ -995,12 +907,12 @@ pub mod connection {
 
     impl Unblocked {
         /// Get the AMQP class id for unblocked (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             10
         }
 
         /// Get the AMQP method id for unblocked (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             61
         }
     }
@@ -1031,12 +943,12 @@ pub mod connection {
 
     impl UpdateSecret {
         /// Get the AMQP class id for update-secret (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             10
         }
 
         /// Get the AMQP method id for update-secret (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             70
         }
     }
@@ -1066,12 +978,12 @@ pub mod connection {
 
     impl UpdateSecretOk {
         /// Get the AMQP class id for update-secret-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             10
         }
 
         /// Get the AMQP method id for update-secret-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             71
         }
     }
@@ -1170,12 +1082,12 @@ pub mod channel {
 
     impl Open {
         /// Get the AMQP class id for open (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             20
         }
 
         /// Get the AMQP method id for open (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             10
         }
     }
@@ -1203,12 +1115,12 @@ pub mod channel {
 
     impl OpenOk {
         /// Get the AMQP class id for open-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             20
         }
 
         /// Get the AMQP method id for open-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             11
         }
     }
@@ -1239,12 +1151,12 @@ pub mod channel {
 
     impl Flow {
         /// Get the AMQP class id for flow (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             20
         }
 
         /// Get the AMQP method id for flow (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             20
         }
     }
@@ -1283,12 +1195,12 @@ pub mod channel {
 
     impl FlowOk {
         /// Get the AMQP class id for flow-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             20
         }
 
         /// Get the AMQP method id for flow-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             21
         }
     }
@@ -1333,12 +1245,12 @@ pub mod channel {
 
     impl Close {
         /// Get the AMQP class id for close (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             20
         }
 
         /// Get the AMQP method id for close (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             40
         }
     }
@@ -1380,12 +1292,12 @@ pub mod channel {
 
     impl CloseOk {
         /// Get the AMQP class id for close-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             20
         }
 
         /// Get the AMQP method id for close-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             41
         }
     }
@@ -1472,12 +1384,12 @@ pub mod access {
 
     impl Request {
         /// Get the AMQP class id for request (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             30
         }
 
         /// Get the AMQP method id for request (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             10
         }
     }
@@ -1526,12 +1438,12 @@ pub mod access {
 
     impl RequestOk {
         /// Get the AMQP class id for request-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             30
         }
 
         /// Get the AMQP method id for request-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             11
         }
     }
@@ -1665,12 +1577,12 @@ pub mod exchange {
 
     impl Declare {
         /// Get the AMQP class id for declare (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             40
         }
 
         /// Get the AMQP method id for declare (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             10
         }
     }
@@ -1730,12 +1642,12 @@ pub mod exchange {
 
     impl DeclareOk {
         /// Get the AMQP class id for declare-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             40
         }
 
         /// Get the AMQP method id for declare-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             11
         }
     }
@@ -1769,12 +1681,12 @@ pub mod exchange {
 
     impl Delete {
         /// Get the AMQP class id for delete (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             40
         }
 
         /// Get the AMQP method id for delete (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             20
         }
     }
@@ -1819,12 +1731,12 @@ pub mod exchange {
 
     impl DeleteOk {
         /// Get the AMQP class id for delete-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             40
         }
 
         /// Get the AMQP method id for delete-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             21
         }
     }
@@ -1862,12 +1774,12 @@ pub mod exchange {
 
     impl Bind {
         /// Get the AMQP class id for bind (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             40
         }
 
         /// Get the AMQP method id for bind (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             30
         }
     }
@@ -1919,12 +1831,12 @@ pub mod exchange {
 
     impl BindOk {
         /// Get the AMQP class id for bind-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             40
         }
 
         /// Get the AMQP method id for bind-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             31
         }
     }
@@ -1962,12 +1874,12 @@ pub mod exchange {
 
     impl Unbind {
         /// Get the AMQP class id for unbind (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             40
         }
 
         /// Get the AMQP method id for unbind (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             40
         }
     }
@@ -2019,12 +1931,12 @@ pub mod exchange {
 
     impl UnbindOk {
         /// Get the AMQP class id for unbind-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             40
         }
 
         /// Get the AMQP method id for unbind-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             51
         }
     }
@@ -2168,12 +2080,12 @@ pub mod queue {
 
     impl Declare {
         /// Get the AMQP class id for declare (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             50
         }
 
         /// Get the AMQP method id for declare (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             10
         }
     }
@@ -2237,12 +2149,12 @@ pub mod queue {
 
     impl DeclareOk {
         /// Get the AMQP class id for declare-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             50
         }
 
         /// Get the AMQP method id for declare-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             11
         }
     }
@@ -2293,12 +2205,12 @@ pub mod queue {
 
     impl Bind {
         /// Get the AMQP class id for bind (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             50
         }
 
         /// Get the AMQP method id for bind (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             20
         }
     }
@@ -2350,12 +2262,12 @@ pub mod queue {
 
     impl BindOk {
         /// Get the AMQP class id for bind-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             50
         }
 
         /// Get the AMQP method id for bind-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             21
         }
     }
@@ -2387,12 +2299,12 @@ pub mod queue {
 
     impl Purge {
         /// Get the AMQP class id for purge (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             50
         }
 
         /// Get the AMQP method id for purge (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             30
         }
     }
@@ -2438,12 +2350,12 @@ pub mod queue {
 
     impl PurgeOk {
         /// Get the AMQP class id for purge-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             50
         }
 
         /// Get the AMQP method id for purge-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             31
         }
     }
@@ -2481,12 +2393,12 @@ pub mod queue {
 
     impl Delete {
         /// Get the AMQP class id for delete (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             50
         }
 
         /// Get the AMQP method id for delete (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             40
         }
     }
@@ -2536,12 +2448,12 @@ pub mod queue {
 
     impl DeleteOk {
         /// Get the AMQP class id for delete-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             50
         }
 
         /// Get the AMQP method id for delete-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             41
         }
     }
@@ -2578,12 +2490,12 @@ pub mod queue {
 
     impl Unbind {
         /// Get the AMQP class id for unbind (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             50
         }
 
         /// Get the AMQP method id for unbind (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             50
         }
     }
@@ -2627,12 +2539,12 @@ pub mod queue {
 
     impl UnbindOk {
         /// Get the AMQP class id for unbind-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             50
         }
 
         /// Get the AMQP method id for unbind-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             51
         }
     }
@@ -2813,12 +2725,12 @@ pub mod basic {
 
     impl Qos {
         /// Get the AMQP class id for qos (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for qos (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             10
         }
     }
@@ -2861,12 +2773,12 @@ pub mod basic {
 
     impl QosOk {
         /// Get the AMQP class id for qos-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for qos-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             11
         }
     }
@@ -2908,12 +2820,12 @@ pub mod basic {
 
     impl Consume {
         /// Get the AMQP class id for consume (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for consume (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             20
         }
     }
@@ -2971,12 +2883,12 @@ pub mod basic {
 
     impl ConsumeOk {
         /// Get the AMQP class id for consume-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for consume-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             21
         }
     }
@@ -3010,12 +2922,12 @@ pub mod basic {
 
     impl Cancel {
         /// Get the AMQP class id for cancel (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for cancel (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             30
         }
     }
@@ -3059,12 +2971,12 @@ pub mod basic {
 
     impl CancelOk {
         /// Get the AMQP class id for cancel-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for cancel-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             31
         }
     }
@@ -3102,12 +3014,12 @@ pub mod basic {
 
     impl Publish {
         /// Get the AMQP class id for publish (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for publish (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             40
         }
     }
@@ -3164,12 +3076,12 @@ pub mod basic {
 
     impl Return {
         /// Get the AMQP class id for return (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for return (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             50
         }
     }
@@ -3223,12 +3135,12 @@ pub mod basic {
 
     impl Deliver {
         /// Get the AMQP class id for deliver (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for deliver (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             60
         }
     }
@@ -3284,12 +3196,12 @@ pub mod basic {
 
     impl Get {
         /// Get the AMQP class id for get (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for get (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             70
         }
     }
@@ -3344,12 +3256,12 @@ pub mod basic {
 
     impl GetOk {
         /// Get the AMQP class id for get-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for get-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             71
         }
     }
@@ -3399,12 +3311,12 @@ pub mod basic {
 
     impl GetEmpty {
         /// Get the AMQP class id for get-empty (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for get-empty (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             72
         }
     }
@@ -3438,12 +3350,12 @@ pub mod basic {
 
     impl Ack {
         /// Get the AMQP class id for ack (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for ack (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             80
         }
     }
@@ -3490,12 +3402,12 @@ pub mod basic {
 
     impl Reject {
         /// Get the AMQP class id for reject (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for reject (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             90
         }
     }
@@ -3539,12 +3451,12 @@ pub mod basic {
 
     impl RecoverAsync {
         /// Get the AMQP class id for recover-async (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for recover-async (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             100
         }
     }
@@ -3583,12 +3495,12 @@ pub mod basic {
 
     impl Recover {
         /// Get the AMQP class id for recover (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for recover (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             110
         }
     }
@@ -3624,12 +3536,12 @@ pub mod basic {
 
     impl RecoverOk {
         /// Get the AMQP class id for recover-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for recover-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             111
         }
     }
@@ -3663,12 +3575,12 @@ pub mod basic {
 
     impl Nack {
         /// Get the AMQP class id for nack (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             60
         }
 
         /// Get the AMQP method id for nack (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             120
         }
     }
@@ -4161,12 +4073,12 @@ pub mod tx {
 
     impl Select {
         /// Get the AMQP class id for select (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             90
         }
 
         /// Get the AMQP method id for select (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             10
         }
     }
@@ -4192,12 +4104,12 @@ pub mod tx {
 
     impl SelectOk {
         /// Get the AMQP class id for select-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             90
         }
 
         /// Get the AMQP method id for select-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             11
         }
     }
@@ -4223,12 +4135,12 @@ pub mod tx {
 
     impl Commit {
         /// Get the AMQP class id for commit (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             90
         }
 
         /// Get the AMQP method id for commit (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             20
         }
     }
@@ -4254,12 +4166,12 @@ pub mod tx {
 
     impl CommitOk {
         /// Get the AMQP class id for commit-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             90
         }
 
         /// Get the AMQP method id for commit-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             21
         }
     }
@@ -4285,12 +4197,12 @@ pub mod tx {
 
     impl Rollback {
         /// Get the AMQP class id for rollback (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             90
         }
 
         /// Get the AMQP method id for rollback (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             30
         }
     }
@@ -4316,12 +4228,12 @@ pub mod tx {
 
     impl RollbackOk {
         /// Get the AMQP class id for rollback-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             90
         }
 
         /// Get the AMQP method id for rollback-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             31
         }
     }
@@ -4397,12 +4309,12 @@ pub mod confirm {
 
     impl Select {
         /// Get the AMQP class id for select (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             85
         }
 
         /// Get the AMQP method id for select (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             10
         }
     }
@@ -4438,12 +4350,12 @@ pub mod confirm {
 
     impl SelectOk {
         /// Get the AMQP class id for select-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             85
         }
 
         /// Get the AMQP method id for select-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             11
         }
     }

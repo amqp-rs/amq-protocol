@@ -7,6 +7,7 @@
 //! amq-protocol-uri is a library aiming at providing tools to help
 //! managing AMQP URIs
 
+use amq_protocol_types::{ChannelId, FrameSize, Heartbeat};
 use url::Url;
 
 use std::{fmt, num::ParseIntError, str::FromStr};
@@ -69,11 +70,11 @@ pub struct AMQPUserInfo {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct AMQPQueryString {
     /// The maximum size of an AMQP Frame
-    pub frame_max: Option<u32>,
+    pub frame_max: Option<FrameSize>,
     /// The maximum number of open channels
-    pub channel_max: Option<u16>,
+    pub channel_max: Option<ChannelId>,
     /// The maximum time between two heartbeats
-    pub heartbeat: Option<u16>,
+    pub heartbeat: Option<Heartbeat>,
     /// The maximum time to wait (in milliseconds) for the connection to succeed
     pub connection_timeout: Option<u64>,
     /// The SASL mechanism used for authentication

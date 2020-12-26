@@ -24,6 +24,8 @@ pub mod parsing;
 
 /// A Channel identifier
 pub type ChannelId = Identifier;
+/// The size of a chunk of a delivery's payload
+pub type ChunkSize = types::LongUInt;
 /// The number of consumers
 pub type ConsumerCount = types::LongUInt;
 /// A delivery tag
@@ -40,3 +42,5 @@ pub type MessageCount = types::LongUInt;
 pub type PayloadSize = types::LongLongUInt;
 /// A reply code (for closing channels and connections)
 pub type ReplyCode = types::ShortUInt;
+/// The weight associated to a payload
+pub type Weight = types::ShortUInt;

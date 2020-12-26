@@ -32,7 +32,7 @@ impl AMQPError {
     }
 
     /// Get the error corresponding to an id
-    pub fn from_id(id: ShortUInt, message: ShortString) -> Option<Self> {
+    pub fn from_id(id: Identifier, message: ShortString) -> Option<Self> {
         AMQPErrorKind::from_id(id).map(|kind| Self { kind, message })
     }
 
@@ -42,7 +42,7 @@ impl AMQPError {
     }
 
     /// Get the id of the error
-    pub fn get_id(&self) -> ShortUInt {
+    pub fn get_id(&self) -> Identifier {
         self.kind.get_id()
     }
 
@@ -89,7 +89,7 @@ pub enum AMQPErrorKind {
 
 impl AMQPErrorKind {
     /// Get the id of the error
-    pub fn get_id(&self) -> ShortUInt {
+    pub fn get_id(&self) -> Identifier {
         match *self {
             AMQPErrorKind::Soft(ref s) => s.get_id(),
             AMQPErrorKind::Hard(ref h) => h.get_id(),
@@ -97,7 +97,7 @@ impl AMQPErrorKind {
     }
 
     /// Get the error kind corresponding to an id
-    pub fn from_id(id: ShortUInt) -> Option<Self> {
+    pub fn from_id(id: Identifier) -> Option<Self> {
         AMQPSoftError::from_id(id)
             .map(AMQPErrorKind::Soft)
             .or_else(|| AMQPHardError::from_id(id).map(AMQPErrorKind::Hard))

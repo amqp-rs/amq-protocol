@@ -37,7 +37,7 @@ pub enum AMQPSoftError {
 
 impl AMQPSoftError {
     /// Get the id of the soft error
-    pub fn get_id(&self) -> ShortUInt {
+    pub fn get_id(&self) -> Identifier {
         match *self {
             {{#each protocol.soft_errors as |constant| ~}}
             AMQPSoftError::{{camel constant.name}} => {{constant.value}},
@@ -46,7 +46,7 @@ impl AMQPSoftError {
     }
 
     /// Get the soft error corresponding to an id
-    pub fn from_id(id: ShortUInt) -> Option<AMQPSoftError> {
+    pub fn from_id(id: Identifier) -> Option<AMQPSoftError> {
         match id {
             {{#each protocol.soft_errors as |constant| ~}}
             {{constant.value}} => Some(AMQPSoftError::{{camel constant.name}}),
@@ -77,7 +77,7 @@ pub enum AMQPHardError {
 
 impl AMQPHardError {
     /// Get the id of the hard error
-    pub fn get_id(&self) -> ShortUInt {
+    pub fn get_id(&self) -> Identifier {
         match *self {
             {{#each protocol.hard_errors as |constant| ~}}
             AMQPHardError::{{camel constant.name}} => {{constant.value}},
@@ -86,7 +86,7 @@ impl AMQPHardError {
     }
 
     /// Get the hard error corresponding to an id
-    pub fn from_id(id: ShortUInt) -> Option<AMQPHardError> {
+    pub fn from_id(id: Identifier) -> Option<AMQPHardError> {
         match id {
             {{#each protocol.hard_errors as |constant| ~}}
             {{constant.value}} => Some(AMQPHardError::{{camel constant.name}}),
@@ -136,28 +136,6 @@ pub enum AMQPClass {
     /// {{class.name}} (Generated)
     {{camel class.name}}({{snake class.name}}::AMQPMethod),
     {{/each ~}}
-}
-
-impl AMQPClass {
-    /// Get the AMQP class id (Generated)
-    pub fn get_amqp_class_id(&self) -> u16 {
-        match self {
-            {{#each protocol.classes as |class| ~}}
-            AMQPClass::{{camel class.name}}(_) => {{class.id}},
-            {{/each ~}}
-        }
-    }
-
-    /// Get the AMQP method id (Generated)
-    pub fn get_amqp_method_id(&self) -> u16 {
-        match self {
-            {{#each protocol.classes as |class| ~}}
-            {{#each class.methods as |method| ~}}
-            AMQPClass::{{camel class.name}}({{snake class.name}}::AMQPMethod::{{camel method.name}}(_)) => {{method.id}},
-            {{/each ~}}
-            {{/each ~}}
-        }
-    }
 }
 
 {{#each protocol.classes as |class|}}
@@ -223,12 +201,12 @@ pub mod {{snake class.name}} {
 
     impl {{camel method.name}} {
         /// Get the AMQP class id for {{method.name}} (Generated)
-        pub fn get_amqp_class_id(&self) -> u16 {
+        pub fn get_amqp_class_id(&self) -> Identifier {
             {{class.id}}
         }
 
         /// Get the AMQP method id for {{method.name}} (Generated)
-        pub fn get_amqp_method_id(&self) -> u16 {
+        pub fn get_amqp_method_id(&self) -> Identifier {
             {{method.id}}
         }
     }

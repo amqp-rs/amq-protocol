@@ -13,6 +13,10 @@ license       = "BSD-2-Clause"
 [lib]
 name = "amq_protocol_uri"
 
+[dependencies.amq-protocol-types]
+version = "=7.0.0-alpha.2"
+path    = "../types"
+
 [dependencies]
 percent-encoding = "^2.0"
 url              = "^2.0"

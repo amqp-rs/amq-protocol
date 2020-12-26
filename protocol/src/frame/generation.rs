@@ -39,7 +39,7 @@ fn gen_protocol_version<W: Write>(version: ProtocolVersion) -> impl SerializeFn<
     ))
 }
 
-fn gen_heartbeat_frame<W: Write>(channel_id: ShortUInt) -> impl SerializeFn<W> {
+fn gen_heartbeat_frame<W: Write>(channel_id: ChannelId) -> impl SerializeFn<W> {
     tuple((
         gen_short_short_uint(constants::FRAME_HEARTBEAT),
         gen_id(channel_id),
@@ -49,7 +49,7 @@ fn gen_heartbeat_frame<W: Write>(channel_id: ShortUInt) -> impl SerializeFn<W> {
 }
 
 fn gen_method_frame<'a, W: Write + BackToTheBuffer + 'a>(
-    channel_id: ShortUInt,
+    channel_id: ChannelId,
     class: &'a AMQPClass,
 ) -> impl SerializeFn<W> + 'a {
     tuple((
@@ -61,9 +61,9 @@ fn gen_method_frame<'a, W: Write + BackToTheBuffer + 'a>(
 }
 
 fn gen_content_header_frame<'a, W: Write + BackToTheBuffer + 'a>(
-    channel_id: ShortUInt,
-    class_id: ShortUInt,
-    length: LongLongUInt,
+    channel_id: ChannelId,
+    class_id: Identifier,
+    length: PayloadSize,
     properties: &'a basic::AMQPProperties,
 ) -> impl SerializeFn<W> + 'a {
     tuple((
@@ -80,13 +80,13 @@ fn gen_content_header_frame<'a, W: Write + BackToTheBuffer + 'a>(
 }
 
 fn gen_content_body_frame<'a, W: Write + 'a>(
-    channel_id: ShortUInt,
+    channel_id: ChannelId,
     content: &'a [u8],
 ) -> impl SerializeFn<W> + 'a {
     tuple((
         gen_short_short_uint(constants::FRAME_BODY),
         gen_id(channel_id),
-        gen_long_uint(content.len() as LongUInt),
+        gen_long_uint(content.len() as ChunkSize),
         slice(content),
         gen_short_short_uint(constants::FRAME_END),
     ))

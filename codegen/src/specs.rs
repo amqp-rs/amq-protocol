@@ -53,7 +53,7 @@ pub struct AMQPConstant {
     /// The name of the constant
     pub name: String,
     /// The value of the constant
-    pub value: ShortUInt,
+    pub value: LongUInt,
     /// The type of the constant
     #[serde(rename = "type")]
     pub amqp_type: AMQPType,
@@ -63,7 +63,7 @@ pub struct AMQPConstant {
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPClass {
     /// The id of the class
-    pub id: ShortUInt,
+    pub id: Identifier,
     /// The methods of the class
     pub methods: Vec<AMQPMethod>,
     /// The name of the class
@@ -78,7 +78,7 @@ pub struct AMQPClass {
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct AMQPMethod {
     /// The id of the method
-    pub id: ShortUInt,
+    pub id: Identifier,
     /// The arguments of the method
     pub arguments: Vec<AMQPArgument>,
     /// The name of the method

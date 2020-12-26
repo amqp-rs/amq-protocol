@@ -248,7 +248,7 @@ enum _AMQPErrorKind {
 #[derive(Debug, Deserialize)]
 struct _AMQPConstant {
     pub name: String,
-    pub value: ShortUInt,
+    pub value: LongUInt,
     #[serde(rename = "class")]
     pub klass: Option<_AMQPErrorKind>,
 }
@@ -271,7 +271,7 @@ impl _AMQPConstant {
 
 #[derive(Debug, Deserialize)]
 struct _AMQPClass {
-    id: ShortUInt,
+    id: Identifier,
     methods: Vec<_AMQPMethod>,
     name: String,
     properties: Option<Vec<_AMQPProperty>>,
@@ -328,7 +328,7 @@ impl _AMQPClass {
 
 #[derive(Debug, Deserialize)]
 struct _AMQPMethod {
-    id: ShortUInt,
+    id: Identifier,
     arguments: Vec<_AMQPArgument>,
     name: String,
     synchronous: Option<Boolean>,

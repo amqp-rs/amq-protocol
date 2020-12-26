@@ -7,12 +7,12 @@ pub enum AMQPChannel {
     /// The Global (id 0) AMQP channel used for creating other channels and for heartbeat
     Global,
     /// A regular AMQP channel
-    Id(ShortUInt),
+    Id(ChannelId),
 }
 
 impl AMQPChannel {
     /// Get the channel id
-    pub fn get_id(self) -> ShortUInt {
+    pub fn get_id(self) -> ChannelId {
         match self {
             AMQPChannel::Global => 0,
             AMQPChannel::Id(id) => id,
@@ -20,8 +20,8 @@ impl AMQPChannel {
     }
 }
 
-impl From<ShortUInt> for AMQPChannel {
-    fn from(id: ShortUInt) -> AMQPChannel {
+impl From<ChannelId> for AMQPChannel {
+    fn from(id: ChannelId) -> AMQPChannel {
         match id {
             0 => AMQPChannel::Global,
             id => AMQPChannel::Id(id),
@@ -50,13 +50,13 @@ pub enum AMQPFrame {
     /// Protocol header frame
     ProtocolHeader(ProtocolVersion),
     /// Method call
-    Method(ShortUInt, AMQPClass),
+    Method(ChannelId, AMQPClass),
     /// Content header
-    Header(ShortUInt, ShortUInt, Box<AMQPContentHeader>),
+    Header(ChannelId, Identifier, Box<AMQPContentHeader>),
     /// Content body
-    Body(ShortUInt, Vec<u8>),
+    Body(ChannelId, Vec<u8>),
     /// Heartbeat frame
-    Heartbeat(ShortUInt),
+    Heartbeat(ChannelId),
 }
 
 impl AMQPFrame {
@@ -90,11 +90,11 @@ impl fmt::Display for AMQPFrame {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct ProtocolVersion {
     /// Major version of the protocol
-    pub major: u8,
+    pub major: ShortShortUInt,
     /// Minor version of the protocol
-    pub minor: u8,
+    pub minor: ShortShortUInt,
     /// Revision of the protocol
-    pub revision: u8,
+    pub revision: ShortShortUInt,
 }
 
 impl ProtocolVersion {
@@ -123,7 +123,7 @@ pub struct AMQPRawFrame<I: ParsableInput> {
     /// The type of frame
     pub frame_type: AMQPFrameType,
     /// The id this frame was received on
-    pub channel_id: ShortUInt,
+    pub channel_id: ChannelId,
     /// The payload of the frame
     pub payload: I,
 }
@@ -132,11 +132,11 @@ pub struct AMQPRawFrame<I: ParsableInput> {
 #[derive(Clone, Debug, PartialEq)]
 pub struct AMQPContentHeader {
     /// The class of content
-    pub class_id: ShortUInt,
+    pub class_id: Identifier,
     /// The weight of the content
-    pub weight: ShortUInt,
+    pub weight: Weight,
     /// The size of the content's body
-    pub body_size: LongLongUInt,
+    pub body_size: PayloadSize,
     /// The AMQP properties associated with the content
     pub properties: basic::AMQPProperties,
 }
