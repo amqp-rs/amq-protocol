@@ -14,7 +14,7 @@ license       = "BSD-2-Clause"
 name = "amq_protocol_tcp"
 
 [features]
-default                   = ["native-tls"]
+default                   = ["rustls"]
 native-tls                = ["tcp-stream/native-tls"]
 openssl                   = ["tcp-stream/openssl"]
 rustls                    = ["rustls-native-certs"]
@@ -28,7 +28,7 @@ version = "=7.0.0-alpha.4"
 path    = "../uri"
 
 [dependencies.tcp-stream]
-version          = "^0.21"
+version          = "^0.22"
 default-features = false
 
 [dependencies.tracing]
