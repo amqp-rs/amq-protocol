@@ -246,11 +246,14 @@ impl HelperDef for PassByRefHelper {
             .ok_or_else(|| RenderError::new("Param not found for helper \"pass_by_ref\""))?;
         let param: AMQPType = serde_json::from_value(value.value().clone())
             .map_err(|_| RenderError::new("Param is not an AMQPType for helper \"pass_by_ref\""))?;
-        let pass_by_ref = matches!(param, AMQPType::ShortString
-            | AMQPType::LongString
-            | AMQPType::FieldArray
-            | AMQPType::FieldTable
-            | AMQPType::ByteArray);
+        let pass_by_ref = matches!(
+            param,
+            AMQPType::ShortString
+                | AMQPType::LongString
+                | AMQPType::FieldArray
+                | AMQPType::FieldTable
+                | AMQPType::ByteArray
+        );
         Ok(Some(ScopedJson::Derived(JsonValue::from(pass_by_ref))))
     }
 }
@@ -269,7 +272,10 @@ impl HelperDef for UseStrRefHelper {
             .param(0)
             .ok_or_else(|| RenderError::new("Param not found for helper \"use_str_ref\""))?;
         let param = serde_json::from_value::<AMQPType>(value.value().clone()).ok();
-        let use_str_ref = matches!(param, Some(AMQPType::ShortString) | Some(AMQPType::LongString));
+        let use_str_ref = matches!(
+            param,
+            Some(AMQPType::ShortString) | Some(AMQPType::LongString)
+        );
         Ok(Some(ScopedJson::Derived(JsonValue::from(use_str_ref))))
     }
 }
