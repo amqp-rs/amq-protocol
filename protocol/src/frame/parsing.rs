@@ -142,7 +142,7 @@ mod test {
     #[test]
     fn test_protocol_header() {
         assert_eq!(
-            parse_frame(&['A' as u8, 'M' as u8, 'Q' as u8, 'P' as u8, 0, 0, 9, 1][..]),
+            parse_frame(&[b'A', b'M', b'Q', b'P', 0, 0, 9, 1][..]),
             Ok((
                 &[][..],
                 AMQPFrame::ProtocolHeader(ProtocolVersion::amqp_0_9_1())

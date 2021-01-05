@@ -246,14 +246,11 @@ impl HelperDef for PassByRefHelper {
             .ok_or_else(|| RenderError::new("Param not found for helper \"pass_by_ref\""))?;
         let param: AMQPType = serde_json::from_value(value.value().clone())
             .map_err(|_| RenderError::new("Param is not an AMQPType for helper \"pass_by_ref\""))?;
-        let pass_by_ref = match param {
-            AMQPType::ShortString
+        let pass_by_ref = matches!(param, AMQPType::ShortString
             | AMQPType::LongString
             | AMQPType::FieldArray
             | AMQPType::FieldTable
-            | AMQPType::ByteArray => true,
-            _ => false,
-        };
+            | AMQPType::ByteArray);
         Ok(Some(ScopedJson::Derived(JsonValue::from(pass_by_ref))))
     }
 }
@@ -272,10 +269,7 @@ impl HelperDef for UseStrRefHelper {
             .param(0)
             .ok_or_else(|| RenderError::new("Param not found for helper \"use_str_ref\""))?;
         let param = serde_json::from_value::<AMQPType>(value.value().clone()).ok();
-        let use_str_ref = match param {
-            Some(AMQPType::ShortString) | Some(AMQPType::LongString) => true,
-            _ => false,
-        };
+        let use_str_ref = matches!(param, Some(AMQPType::ShortString) | Some(AMQPType::LongString));
         Ok(Some(ScopedJson::Derived(JsonValue::from(use_str_ref))))
     }
 }
@@ -388,7 +382,7 @@ mod test {
 
     use std::collections::BTreeMap;
 
-    pub const TEMPLATE: &'static str = r#"
+    pub const TEMPLATE: &str = r#"
 {{protocol.name}} - {{protocol.major_version}}.{{protocol.minor_version}}.{{protocol.revision}}
 {{protocol.copyright}}
 port {{protocol.port}}

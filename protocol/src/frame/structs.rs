@@ -62,11 +62,7 @@ pub enum AMQPFrame {
 impl AMQPFrame {
     /// Return whether this frame is an AMQPFrame::Header or not
     pub fn is_header(&self) -> bool {
-        if let AMQPFrame::Header(..) = self {
-            true
-        } else {
-            false
-        }
+        matches!(self, AMQPFrame::Header(..))
     }
 }
 

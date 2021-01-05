@@ -325,7 +325,7 @@ pub mod traits {
 mod test {
     use super::*;
 
-    const EMPTY: &'static [u8] = b"";
+    const EMPTY: &[u8] = b"";
 
     #[test]
     fn test_parse_value() {
