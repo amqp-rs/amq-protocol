@@ -13,7 +13,7 @@ use url::Url;
 use std::{fmt, num::ParseIntError, str::FromStr};
 
 /// An AMQP Uri
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AMQPUri {
     /// The scheme used by the AMQP connection
     pub scheme: AMQPScheme,
@@ -26,7 +26,7 @@ pub struct AMQPUri {
 }
 
 /// The scheme used by the AMQP connection
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum AMQPScheme {
     /// Plain AMQP
     AMQP,
@@ -47,7 +47,7 @@ impl FromStr for AMQPScheme {
 }
 
 /// The connection information
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AMQPAuthority {
     /// The credentials used to connect to the server
     pub userinfo: AMQPUserInfo,
@@ -58,7 +58,7 @@ pub struct AMQPAuthority {
 }
 
 /// The credentials used to connect to the server
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AMQPUserInfo {
     /// The username
     pub username: String,
@@ -67,7 +67,7 @@ pub struct AMQPUserInfo {
 }
 
 /// The optional query string to pass parameters to the server
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct AMQPQueryString {
     /// The maximum size of an AMQP Frame
     pub frame_max: Option<FrameSize>,
