@@ -484,7 +484,7 @@ impl _AMQPArgument {
             None => {
                 let domain = match self.domain {
                     Some(ref domain) => domain,
-                    None => panic!(format!("{} has no type nor domain", self.name)),
+                    None => panic!("{} has no type nor domain", self.name),
                 };
                 *domains
                     .get(domain)
