@@ -316,9 +316,9 @@ impl HelperDef for EachArgumentHelper {
                         AMQPArgument::Value(_) => ("Value".to_owned(), true),
                         AMQPArgument::Flags(_) => ("Flags".to_owned(), false),
                     };
-                    block.set_local_var("@index".to_string(), to_json(&index));
-                    block.set_local_var("@last".to_string(), to_json(index == len - 1));
-                    block.set_local_var("@argument_is_value".to_string(), to_json(&is_value));
+                    block.set_local_var("index", to_json(&index));
+                    block.set_local_var("last", to_json(index == len - 1));
+                    block.set_local_var("argument_is_value", to_json(&is_value));
                     if let Some(ref p) = array_path {
                         if index == 0 {
                             let mut path = Vec::with_capacity(p.len() + 1);
@@ -506,7 +506,6 @@ property1: LongString
 64 - method1
 synchronous: true
 argument1(domain1): LongString
-
 flag1: true
 flag2: false
 "#

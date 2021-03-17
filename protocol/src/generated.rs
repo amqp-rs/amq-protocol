@@ -558,7 +558,6 @@ pub mod connection {
             Ok(input)
         }
     }
-
     /// start-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct StartOk {
@@ -614,7 +613,6 @@ pub mod connection {
             Ok(input)
         }
     }
-
     /// secure (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Secure {
@@ -650,7 +648,6 @@ pub mod connection {
             Ok(input)
         }
     }
-
     /// secure-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct SecureOk {
@@ -686,7 +683,6 @@ pub mod connection {
             Ok(input)
         }
     }
-
     /// tune (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Tune {
@@ -737,7 +733,6 @@ pub mod connection {
             Ok(input)
         }
     }
-
     /// tune-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct TuneOk {
@@ -788,7 +783,6 @@ pub mod connection {
             Ok(input)
         }
     }
-
     /// open (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Open {
@@ -812,7 +806,6 @@ pub mod connection {
     pub fn parse_open<I: ParsableInput>(i: I) -> ParserResult<I, Open> {
         let (i, virtual_host) = parse_short_string(i)?;
         let (i, _) = parse_short_string(i)?;
-
         let (i, _) = parse_flags(i, &["insist"])?;
         Ok((i, Open { virtual_host }))
     }
@@ -827,12 +820,10 @@ pub mod connection {
             input = gen_id(40)(input)?;
             input = gen_short_string(method.virtual_host.as_str())(input)?;
             input = gen_short_string("")(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// open-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct OpenOk {}
@@ -865,7 +856,6 @@ pub mod connection {
             Ok(input)
         }
     }
-
     /// close (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Close {
@@ -921,7 +911,6 @@ pub mod connection {
             Ok(input)
         }
     }
-
     /// close-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct CloseOk {}
@@ -952,7 +941,6 @@ pub mod connection {
             Ok(input)
         }
     }
-
     /// blocked (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Blocked {
@@ -988,7 +976,6 @@ pub mod connection {
             Ok(input)
         }
     }
-
     /// unblocked (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Unblocked {}
@@ -1019,7 +1006,6 @@ pub mod connection {
             Ok(input)
         }
     }
-
     /// update-secret (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct UpdateSecret {
@@ -1059,7 +1045,6 @@ pub mod connection {
             Ok(input)
         }
     }
-
     /// update-secret-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct UpdateSecretOk {}
@@ -1091,7 +1076,6 @@ pub mod connection {
         }
     }
 }
-
 /// channel (generated)
 pub mod channel {
     use super::*;
@@ -1196,7 +1180,6 @@ pub mod channel {
             Ok(input)
         }
     }
-
     /// open-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct OpenOk {}
@@ -1229,7 +1212,6 @@ pub mod channel {
             Ok(input)
         }
     }
-
     /// flow (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Flow {
@@ -1268,12 +1250,10 @@ pub mod channel {
             let mut flags = AMQPFlags::default();
             flags.add_flag("active".to_string(), method.active);
             input = gen_id(20)(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// flow-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct FlowOk {
@@ -1312,12 +1292,10 @@ pub mod channel {
             let mut flags = AMQPFlags::default();
             flags.add_flag("active".to_string(), method.active);
             input = gen_id(21)(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// close (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Close {
@@ -1373,7 +1351,6 @@ pub mod channel {
             Ok(input)
         }
     }
-
     /// close-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct CloseOk {}
@@ -1405,7 +1382,6 @@ pub mod channel {
         }
     }
 }
-
 /// access (generated)
 pub mod access {
     use super::*;
@@ -1457,7 +1433,6 @@ pub mod access {
     pub struct Request {
         /// realm (Generated)
         pub realm: ShortString,
-
         /// exclusive (Generated)
         pub exclusive: Boolean,
         /// passive (Generated)
@@ -1485,13 +1460,11 @@ pub mod access {
     /// Parse request (Generated)
     pub fn parse_request<I: ParsableInput>(i: I) -> ParserResult<I, Request> {
         let (i, realm) = parse_short_string(i)?;
-
         let (i, flags) = parse_flags(i, &["exclusive", "passive", "active", "write", "read"])?;
         Ok((
             i,
             Request {
                 realm,
-
                 exclusive: flags.get_flag("exclusive").unwrap_or(false),
                 passive: flags.get_flag("passive").unwrap_or(false),
                 active: flags.get_flag("active").unwrap_or(false),
@@ -1514,12 +1487,10 @@ pub mod access {
             flags.add_flag("read".to_string(), method.read);
             input = gen_id(10)(input)?;
             input = gen_short_string(method.realm.as_str())(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// request-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct RequestOk {}
@@ -1553,7 +1524,6 @@ pub mod access {
         }
     }
 }
-
 /// exchange (generated)
 pub mod exchange {
     use super::*;
@@ -1648,7 +1618,6 @@ pub mod exchange {
         pub exchange: ShortString,
         /// type (Generated)
         pub kind: ShortString,
-
         /// passive (Generated)
         pub passive: Boolean,
         /// durable (Generated)
@@ -1680,7 +1649,6 @@ pub mod exchange {
         let (i, _) = parse_short_uint(i)?;
         let (i, exchange) = parse_short_string(i)?;
         let (i, kind) = parse_short_string(i)?;
-
         let (i, flags) = parse_flags(
             i,
             &["passive", "durable", "auto-delete", "internal", "nowait"],
@@ -1691,7 +1659,6 @@ pub mod exchange {
             Declare {
                 exchange,
                 kind,
-
                 passive: flags.get_flag("passive").unwrap_or(false),
                 durable: flags.get_flag("durable").unwrap_or(false),
                 auto_delete: flags.get_flag("auto_delete").unwrap_or(false),
@@ -1717,13 +1684,11 @@ pub mod exchange {
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.exchange.as_str())(input)?;
             input = gen_short_string(method.kind.as_str())(input)?;
-
             input = gen_flags(&flags)(input)?;
             input = gen_field_table(&method.arguments)(input)?;
             Ok(input)
         }
     }
-
     /// declare-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct DeclareOk {}
@@ -1754,13 +1719,11 @@ pub mod exchange {
             Ok(input)
         }
     }
-
     /// delete (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Delete {
         /// exchange (Generated)
         pub exchange: ShortString,
-
         /// if-unused (Generated)
         pub if_unused: Boolean,
         /// nowait (Generated)
@@ -1783,13 +1746,11 @@ pub mod exchange {
     pub fn parse_delete<I: ParsableInput>(i: I) -> ParserResult<I, Delete> {
         let (i, _) = parse_short_uint(i)?;
         let (i, exchange) = parse_short_string(i)?;
-
         let (i, flags) = parse_flags(i, &["if-unused", "nowait"])?;
         Ok((
             i,
             Delete {
                 exchange,
-
                 if_unused: flags.get_flag("if_unused").unwrap_or(false),
                 nowait: flags.get_flag("nowait").unwrap_or(false),
             },
@@ -1807,12 +1768,10 @@ pub mod exchange {
             input = gen_id(20)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.exchange.as_str())(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// delete-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct DeleteOk {}
@@ -1843,7 +1802,6 @@ pub mod exchange {
             Ok(input)
         }
     }
-
     /// bind (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Bind {
@@ -1853,7 +1811,6 @@ pub mod exchange {
         pub source: ShortString,
         /// routing-key (Generated)
         pub routing_key: ShortString,
-
         /// nowait (Generated)
         pub nowait: Boolean,
         /// arguments (Generated)
@@ -1878,7 +1835,6 @@ pub mod exchange {
         let (i, destination) = parse_short_string(i)?;
         let (i, source) = parse_short_string(i)?;
         let (i, routing_key) = parse_short_string(i)?;
-
         let (i, flags) = parse_flags(i, &["nowait"])?;
         let (i, arguments) = parse_field_table(i)?;
         Ok((
@@ -1887,7 +1843,6 @@ pub mod exchange {
                 destination,
                 source,
                 routing_key,
-
                 nowait: flags.get_flag("nowait").unwrap_or(false),
                 arguments,
             },
@@ -1906,13 +1861,11 @@ pub mod exchange {
             input = gen_short_string(method.destination.as_str())(input)?;
             input = gen_short_string(method.source.as_str())(input)?;
             input = gen_short_string(method.routing_key.as_str())(input)?;
-
             input = gen_flags(&flags)(input)?;
             input = gen_field_table(&method.arguments)(input)?;
             Ok(input)
         }
     }
-
     /// bind-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct BindOk {}
@@ -1943,7 +1896,6 @@ pub mod exchange {
             Ok(input)
         }
     }
-
     /// unbind (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Unbind {
@@ -1953,7 +1905,6 @@ pub mod exchange {
         pub source: ShortString,
         /// routing-key (Generated)
         pub routing_key: ShortString,
-
         /// nowait (Generated)
         pub nowait: Boolean,
         /// arguments (Generated)
@@ -1978,7 +1929,6 @@ pub mod exchange {
         let (i, destination) = parse_short_string(i)?;
         let (i, source) = parse_short_string(i)?;
         let (i, routing_key) = parse_short_string(i)?;
-
         let (i, flags) = parse_flags(i, &["nowait"])?;
         let (i, arguments) = parse_field_table(i)?;
         Ok((
@@ -1987,7 +1937,6 @@ pub mod exchange {
                 destination,
                 source,
                 routing_key,
-
                 nowait: flags.get_flag("nowait").unwrap_or(false),
                 arguments,
             },
@@ -2006,13 +1955,11 @@ pub mod exchange {
             input = gen_short_string(method.destination.as_str())(input)?;
             input = gen_short_string(method.source.as_str())(input)?;
             input = gen_short_string(method.routing_key.as_str())(input)?;
-
             input = gen_flags(&flags)(input)?;
             input = gen_field_table(&method.arguments)(input)?;
             Ok(input)
         }
     }
-
     /// unbind-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct UnbindOk {}
@@ -2044,7 +1991,6 @@ pub mod exchange {
         }
     }
 }
-
 /// queue (generated)
 pub mod queue {
     use super::*;
@@ -2151,7 +2097,6 @@ pub mod queue {
     pub struct Declare {
         /// queue (Generated)
         pub queue: ShortString,
-
         /// passive (Generated)
         pub passive: Boolean,
         /// durable (Generated)
@@ -2182,7 +2127,6 @@ pub mod queue {
     pub fn parse_declare<I: ParsableInput>(i: I) -> ParserResult<I, Declare> {
         let (i, _) = parse_short_uint(i)?;
         let (i, queue) = parse_short_string(i)?;
-
         let (i, flags) = parse_flags(
             i,
             &["passive", "durable", "exclusive", "auto-delete", "nowait"],
@@ -2192,7 +2136,6 @@ pub mod queue {
             i,
             Declare {
                 queue,
-
                 passive: flags.get_flag("passive").unwrap_or(false),
                 durable: flags.get_flag("durable").unwrap_or(false),
                 exclusive: flags.get_flag("exclusive").unwrap_or(false),
@@ -2217,13 +2160,11 @@ pub mod queue {
             input = gen_id(10)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.queue.as_str())(input)?;
-
             input = gen_flags(&flags)(input)?;
             input = gen_field_table(&method.arguments)(input)?;
             Ok(input)
         }
     }
-
     /// declare-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct DeclareOk {
@@ -2274,7 +2215,6 @@ pub mod queue {
             Ok(input)
         }
     }
-
     /// bind (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Bind {
@@ -2284,7 +2224,6 @@ pub mod queue {
         pub exchange: ShortString,
         /// routing-key (Generated)
         pub routing_key: ShortString,
-
         /// nowait (Generated)
         pub nowait: Boolean,
         /// arguments (Generated)
@@ -2309,7 +2248,6 @@ pub mod queue {
         let (i, queue) = parse_short_string(i)?;
         let (i, exchange) = parse_short_string(i)?;
         let (i, routing_key) = parse_short_string(i)?;
-
         let (i, flags) = parse_flags(i, &["nowait"])?;
         let (i, arguments) = parse_field_table(i)?;
         Ok((
@@ -2318,7 +2256,6 @@ pub mod queue {
                 queue,
                 exchange,
                 routing_key,
-
                 nowait: flags.get_flag("nowait").unwrap_or(false),
                 arguments,
             },
@@ -2337,13 +2274,11 @@ pub mod queue {
             input = gen_short_string(method.queue.as_str())(input)?;
             input = gen_short_string(method.exchange.as_str())(input)?;
             input = gen_short_string(method.routing_key.as_str())(input)?;
-
             input = gen_flags(&flags)(input)?;
             input = gen_field_table(&method.arguments)(input)?;
             Ok(input)
         }
     }
-
     /// bind-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct BindOk {}
@@ -2374,13 +2309,11 @@ pub mod queue {
             Ok(input)
         }
     }
-
     /// purge (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Purge {
         /// queue (Generated)
         pub queue: ShortString,
-
         /// nowait (Generated)
         pub nowait: Boolean,
     }
@@ -2401,13 +2334,11 @@ pub mod queue {
     pub fn parse_purge<I: ParsableInput>(i: I) -> ParserResult<I, Purge> {
         let (i, _) = parse_short_uint(i)?;
         let (i, queue) = parse_short_string(i)?;
-
         let (i, flags) = parse_flags(i, &["nowait"])?;
         Ok((
             i,
             Purge {
                 queue,
-
                 nowait: flags.get_flag("nowait").unwrap_or(false),
             },
         ))
@@ -2423,12 +2354,10 @@ pub mod queue {
             input = gen_id(30)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.queue.as_str())(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// purge-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct PurgeOk {
@@ -2464,13 +2393,11 @@ pub mod queue {
             Ok(input)
         }
     }
-
     /// delete (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Delete {
         /// queue (Generated)
         pub queue: ShortString,
-
         /// if-unused (Generated)
         pub if_unused: Boolean,
         /// if-empty (Generated)
@@ -2495,13 +2422,11 @@ pub mod queue {
     pub fn parse_delete<I: ParsableInput>(i: I) -> ParserResult<I, Delete> {
         let (i, _) = parse_short_uint(i)?;
         let (i, queue) = parse_short_string(i)?;
-
         let (i, flags) = parse_flags(i, &["if-unused", "if-empty", "nowait"])?;
         Ok((
             i,
             Delete {
                 queue,
-
                 if_unused: flags.get_flag("if_unused").unwrap_or(false),
                 if_empty: flags.get_flag("if_empty").unwrap_or(false),
                 nowait: flags.get_flag("nowait").unwrap_or(false),
@@ -2521,12 +2446,10 @@ pub mod queue {
             input = gen_id(40)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.queue.as_str())(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// delete-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct DeleteOk {
@@ -2562,7 +2485,6 @@ pub mod queue {
             Ok(input)
         }
     }
-
     /// unbind (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Unbind {
@@ -2620,7 +2542,6 @@ pub mod queue {
             Ok(input)
         }
     }
-
     /// unbind-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct UnbindOk {}
@@ -2652,7 +2573,6 @@ pub mod queue {
         }
     }
 }
-
 /// basic (generated)
 pub mod basic {
     use super::*;
@@ -2806,7 +2726,6 @@ pub mod basic {
     pub struct Qos {
         /// prefetch-count (Generated)
         pub prefetch_count: ShortUInt,
-
         /// global (Generated)
         pub global: Boolean,
     }
@@ -2827,13 +2746,11 @@ pub mod basic {
     pub fn parse_qos<I: ParsableInput>(i: I) -> ParserResult<I, Qos> {
         let (i, _) = parse_long_uint(i)?;
         let (i, prefetch_count) = parse_short_uint(i)?;
-
         let (i, flags) = parse_flags(i, &["global"])?;
         Ok((
             i,
             Qos {
                 prefetch_count,
-
                 global: flags.get_flag("global").unwrap_or(false),
             },
         ))
@@ -2849,12 +2766,10 @@ pub mod basic {
             input = gen_id(10)(input)?;
             input = gen_long_uint(0)(input)?;
             input = gen_short_uint(method.prefetch_count)(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// qos-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct QosOk {}
@@ -2885,7 +2800,6 @@ pub mod basic {
             Ok(input)
         }
     }
-
     /// consume (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Consume {
@@ -2893,7 +2807,6 @@ pub mod basic {
         pub queue: ShortString,
         /// consumer-tag (Generated)
         pub consumer_tag: ShortString,
-
         /// no-local (Generated)
         pub no_local: Boolean,
         /// no-ack (Generated)
@@ -2923,7 +2836,6 @@ pub mod basic {
         let (i, _) = parse_short_uint(i)?;
         let (i, queue) = parse_short_string(i)?;
         let (i, consumer_tag) = parse_short_string(i)?;
-
         let (i, flags) = parse_flags(i, &["no-local", "no-ack", "exclusive", "nowait"])?;
         let (i, arguments) = parse_field_table(i)?;
         Ok((
@@ -2931,7 +2843,6 @@ pub mod basic {
             Consume {
                 queue,
                 consumer_tag,
-
                 no_local: flags.get_flag("no_local").unwrap_or(false),
                 no_ack: flags.get_flag("no_ack").unwrap_or(false),
                 exclusive: flags.get_flag("exclusive").unwrap_or(false),
@@ -2955,13 +2866,11 @@ pub mod basic {
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.queue.as_str())(input)?;
             input = gen_short_string(method.consumer_tag.as_str())(input)?;
-
             input = gen_flags(&flags)(input)?;
             input = gen_field_table(&method.arguments)(input)?;
             Ok(input)
         }
     }
-
     /// consume-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct ConsumeOk {
@@ -2997,13 +2906,11 @@ pub mod basic {
             Ok(input)
         }
     }
-
     /// cancel (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Cancel {
         /// consumer-tag (Generated)
         pub consumer_tag: ShortString,
-
         /// nowait (Generated)
         pub nowait: Boolean,
     }
@@ -3023,13 +2930,11 @@ pub mod basic {
     /// Parse cancel (Generated)
     pub fn parse_cancel<I: ParsableInput>(i: I) -> ParserResult<I, Cancel> {
         let (i, consumer_tag) = parse_short_string(i)?;
-
         let (i, flags) = parse_flags(i, &["nowait"])?;
         Ok((
             i,
             Cancel {
                 consumer_tag,
-
                 nowait: flags.get_flag("nowait").unwrap_or(false),
             },
         ))
@@ -3044,12 +2949,10 @@ pub mod basic {
             flags.add_flag("nowait".to_string(), method.nowait);
             input = gen_id(30)(input)?;
             input = gen_short_string(method.consumer_tag.as_str())(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// cancel-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct CancelOk {
@@ -3085,7 +2988,6 @@ pub mod basic {
             Ok(input)
         }
     }
-
     /// publish (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Publish {
@@ -3093,7 +2995,6 @@ pub mod basic {
         pub exchange: ShortString,
         /// routing-key (Generated)
         pub routing_key: ShortString,
-
         /// mandatory (Generated)
         pub mandatory: Boolean,
         /// immediate (Generated)
@@ -3117,14 +3018,12 @@ pub mod basic {
         let (i, _) = parse_short_uint(i)?;
         let (i, exchange) = parse_short_string(i)?;
         let (i, routing_key) = parse_short_string(i)?;
-
         let (i, flags) = parse_flags(i, &["mandatory", "immediate"])?;
         Ok((
             i,
             Publish {
                 exchange,
                 routing_key,
-
                 mandatory: flags.get_flag("mandatory").unwrap_or(false),
                 immediate: flags.get_flag("immediate").unwrap_or(false),
             },
@@ -3143,12 +3042,10 @@ pub mod basic {
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.exchange.as_str())(input)?;
             input = gen_short_string(method.routing_key.as_str())(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// return (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Return {
@@ -3204,7 +3101,6 @@ pub mod basic {
             Ok(input)
         }
     }
-
     /// deliver (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Deliver {
@@ -3212,7 +3108,6 @@ pub mod basic {
         pub consumer_tag: ShortString,
         /// delivery-tag (Generated)
         pub delivery_tag: LongLongUInt,
-
         /// redelivered (Generated)
         pub redelivered: Boolean,
         /// exchange (Generated)
@@ -3237,7 +3132,6 @@ pub mod basic {
     pub fn parse_deliver<I: ParsableInput>(i: I) -> ParserResult<I, Deliver> {
         let (i, consumer_tag) = parse_short_string(i)?;
         let (i, delivery_tag) = parse_long_long_uint(i)?;
-
         let (i, flags) = parse_flags(i, &["redelivered"])?;
         let (i, exchange) = parse_short_string(i)?;
         let (i, routing_key) = parse_short_string(i)?;
@@ -3246,7 +3140,6 @@ pub mod basic {
             Deliver {
                 consumer_tag,
                 delivery_tag,
-
                 redelivered: flags.get_flag("redelivered").unwrap_or(false),
                 exchange,
                 routing_key,
@@ -3264,20 +3157,17 @@ pub mod basic {
             input = gen_id(60)(input)?;
             input = gen_short_string(method.consumer_tag.as_str())(input)?;
             input = gen_long_long_uint(method.delivery_tag)(input)?;
-
             input = gen_flags(&flags)(input)?;
             input = gen_short_string(method.exchange.as_str())(input)?;
             input = gen_short_string(method.routing_key.as_str())(input)?;
             Ok(input)
         }
     }
-
     /// get (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Get {
         /// queue (Generated)
         pub queue: ShortString,
-
         /// no-ack (Generated)
         pub no_ack: Boolean,
     }
@@ -3298,13 +3188,11 @@ pub mod basic {
     pub fn parse_get<I: ParsableInput>(i: I) -> ParserResult<I, Get> {
         let (i, _) = parse_short_uint(i)?;
         let (i, queue) = parse_short_string(i)?;
-
         let (i, flags) = parse_flags(i, &["no-ack"])?;
         Ok((
             i,
             Get {
                 queue,
-
                 no_ack: flags.get_flag("no_ack").unwrap_or(false),
             },
         ))
@@ -3320,18 +3208,15 @@ pub mod basic {
             input = gen_id(70)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.queue.as_str())(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// get-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct GetOk {
         /// delivery-tag (Generated)
         pub delivery_tag: LongLongUInt,
-
         /// redelivered (Generated)
         pub redelivered: Boolean,
         /// exchange (Generated)
@@ -3357,7 +3242,6 @@ pub mod basic {
     /// Parse get-ok (Generated)
     pub fn parse_get_ok<I: ParsableInput>(i: I) -> ParserResult<I, GetOk> {
         let (i, delivery_tag) = parse_long_long_uint(i)?;
-
         let (i, flags) = parse_flags(i, &["redelivered"])?;
         let (i, exchange) = parse_short_string(i)?;
         let (i, routing_key) = parse_short_string(i)?;
@@ -3366,7 +3250,6 @@ pub mod basic {
             i,
             GetOk {
                 delivery_tag,
-
                 redelivered: flags.get_flag("redelivered").unwrap_or(false),
                 exchange,
                 routing_key,
@@ -3384,7 +3267,6 @@ pub mod basic {
             flags.add_flag("redelivered".to_string(), method.redelivered);
             input = gen_id(71)(input)?;
             input = gen_long_long_uint(method.delivery_tag)(input)?;
-
             input = gen_flags(&flags)(input)?;
             input = gen_short_string(method.exchange.as_str())(input)?;
             input = gen_short_string(method.routing_key.as_str())(input)?;
@@ -3392,7 +3274,6 @@ pub mod basic {
             Ok(input)
         }
     }
-
     /// get-empty (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct GetEmpty {}
@@ -3425,13 +3306,11 @@ pub mod basic {
             Ok(input)
         }
     }
-
     /// ack (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Ack {
         /// delivery-tag (Generated)
         pub delivery_tag: LongLongUInt,
-
         /// multiple (Generated)
         pub multiple: Boolean,
     }
@@ -3451,13 +3330,11 @@ pub mod basic {
     /// Parse ack (Generated)
     pub fn parse_ack<I: ParsableInput>(i: I) -> ParserResult<I, Ack> {
         let (i, delivery_tag) = parse_long_long_uint(i)?;
-
         let (i, flags) = parse_flags(i, &["multiple"])?;
         Ok((
             i,
             Ack {
                 delivery_tag,
-
                 multiple: flags.get_flag("multiple").unwrap_or(false),
             },
         ))
@@ -3472,18 +3349,15 @@ pub mod basic {
             flags.add_flag("multiple".to_string(), method.multiple);
             input = gen_id(80)(input)?;
             input = gen_long_long_uint(method.delivery_tag)(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// reject (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Reject {
         /// delivery-tag (Generated)
         pub delivery_tag: LongLongUInt,
-
         /// requeue (Generated)
         pub requeue: Boolean,
     }
@@ -3503,13 +3377,11 @@ pub mod basic {
     /// Parse reject (Generated)
     pub fn parse_reject<I: ParsableInput>(i: I) -> ParserResult<I, Reject> {
         let (i, delivery_tag) = parse_long_long_uint(i)?;
-
         let (i, flags) = parse_flags(i, &["requeue"])?;
         Ok((
             i,
             Reject {
                 delivery_tag,
-
                 requeue: flags.get_flag("requeue").unwrap_or(false),
             },
         ))
@@ -3524,12 +3396,10 @@ pub mod basic {
             flags.add_flag("requeue".to_string(), method.requeue);
             input = gen_id(90)(input)?;
             input = gen_long_long_uint(method.delivery_tag)(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// recover-async (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct RecoverAsync {
@@ -3568,12 +3438,10 @@ pub mod basic {
             let mut flags = AMQPFlags::default();
             flags.add_flag("requeue".to_string(), method.requeue);
             input = gen_id(100)(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// recover (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Recover {
@@ -3612,12 +3480,10 @@ pub mod basic {
             let mut flags = AMQPFlags::default();
             flags.add_flag("requeue".to_string(), method.requeue);
             input = gen_id(110)(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// recover-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct RecoverOk {}
@@ -3648,13 +3514,11 @@ pub mod basic {
             Ok(input)
         }
     }
-
     /// nack (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Nack {
         /// delivery-tag (Generated)
         pub delivery_tag: LongLongUInt,
-
         /// multiple (Generated)
         pub multiple: Boolean,
         /// requeue (Generated)
@@ -3676,13 +3540,11 @@ pub mod basic {
     /// Parse nack (Generated)
     pub fn parse_nack<I: ParsableInput>(i: I) -> ParserResult<I, Nack> {
         let (i, delivery_tag) = parse_long_long_uint(i)?;
-
         let (i, flags) = parse_flags(i, &["multiple", "requeue"])?;
         Ok((
             i,
             Nack {
                 delivery_tag,
-
                 multiple: flags.get_flag("multiple").unwrap_or(false),
                 requeue: flags.get_flag("requeue").unwrap_or(false),
             },
@@ -3699,7 +3561,6 @@ pub mod basic {
             flags.add_flag("requeue".to_string(), method.requeue);
             input = gen_id(120)(input)?;
             input = gen_long_long_uint(method.delivery_tag)(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
@@ -4080,7 +3941,6 @@ pub mod basic {
         })
     }
 }
-
 /// tx (generated)
 pub mod tx {
     use super::*;
@@ -4185,7 +4045,6 @@ pub mod tx {
             Ok(input)
         }
     }
-
     /// select-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct SelectOk {}
@@ -4216,7 +4075,6 @@ pub mod tx {
             Ok(input)
         }
     }
-
     /// commit (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Commit {}
@@ -4247,7 +4105,6 @@ pub mod tx {
             Ok(input)
         }
     }
-
     /// commit-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct CommitOk {}
@@ -4278,7 +4135,6 @@ pub mod tx {
             Ok(input)
         }
     }
-
     /// rollback (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct Rollback {}
@@ -4309,7 +4165,6 @@ pub mod tx {
             Ok(input)
         }
     }
-
     /// rollback-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct RollbackOk {}
@@ -4341,7 +4196,6 @@ pub mod tx {
         }
     }
 }
-
 /// confirm (generated)
 pub mod confirm {
     use super::*;
@@ -4426,12 +4280,10 @@ pub mod confirm {
             let mut flags = AMQPFlags::default();
             flags.add_flag("nowait".to_string(), method.nowait);
             input = gen_id(10)(input)?;
-
             input = gen_flags(&flags)(input)?;
             Ok(input)
         }
     }
-
     /// select-ok (Generated)
     #[derive(Clone, Debug, Default, PartialEq)]
     pub struct SelectOk {}
