@@ -295,10 +295,7 @@ impl HelperDef for UseBytesRefHelper {
             .param(0)
             .ok_or_else(|| RenderError::new("Param not found for helper \"use_bytes_ref\""))?;
         let param = serde_json::from_value::<AMQPType>(value.value().clone()).ok();
-        let use_bytes_ref = matches!(
-            param,
-            Some(AMQPType::LongString)
-        );
+        let use_bytes_ref = matches!(param, Some(AMQPType::LongString));
         Ok(Some(ScopedJson::Derived(JsonValue::from(use_bytes_ref))))
     }
 }
