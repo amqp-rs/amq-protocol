@@ -1,6 +1,6 @@
 #![deny(missing_docs)]
 #![warn(rust_2018_idioms)]
-#![doc(html_root_url = "https://docs.rs/amq-protocol/7.0.0-alpha.6/")]
+#![doc(html_root_url = "https://docs.rs/amq-protocol/7.0.0-alpha.7/")]
 
 //! # AMQP manipulation library
 //!
