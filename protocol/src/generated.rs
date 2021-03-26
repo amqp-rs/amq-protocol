@@ -553,8 +553,8 @@ pub mod connection {
             input = gen_short_short_uint(method.version_major)(input)?;
             input = gen_short_short_uint(method.version_minor)(input)?;
             input = gen_field_table(&method.server_properties)(input)?;
-            input = gen_long_string(method.mechanisms.as_str())(input)?;
-            input = gen_long_string(method.locales.as_str())(input)?;
+            input = gen_long_string(method.mechanisms.as_bytes())(input)?;
+            input = gen_long_string(method.locales.as_bytes())(input)?;
             Ok(input)
         }
     }
@@ -608,7 +608,7 @@ pub mod connection {
             input = gen_id(11)(input)?;
             input = gen_field_table(&method.client_properties)(input)?;
             input = gen_short_string(method.mechanism.as_str())(input)?;
-            input = gen_long_string(method.response.as_str())(input)?;
+            input = gen_long_string(method.response.as_bytes())(input)?;
             input = gen_short_string(method.locale.as_str())(input)?;
             Ok(input)
         }
@@ -644,7 +644,7 @@ pub mod connection {
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
             input = gen_id(20)(input)?;
-            input = gen_long_string(method.challenge.as_str())(input)?;
+            input = gen_long_string(method.challenge.as_bytes())(input)?;
             Ok(input)
         }
     }
@@ -679,7 +679,7 @@ pub mod connection {
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
             input = gen_id(21)(input)?;
-            input = gen_long_string(method.response.as_str())(input)?;
+            input = gen_long_string(method.response.as_bytes())(input)?;
             Ok(input)
         }
     }
@@ -1040,7 +1040,7 @@ pub mod connection {
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
             input = gen_id(70)(input)?;
-            input = gen_long_string(method.new_secret.as_str())(input)?;
+            input = gen_long_string(method.new_secret.as_bytes())(input)?;
             input = gen_short_string(method.reason.as_str())(input)?;
             Ok(input)
         }
@@ -1208,7 +1208,7 @@ pub mod channel {
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
             input = gen_id(11)(input)?;
-            input = gen_long_string("")(input)?;
+            input = gen_long_string(b"")(input)?;
             Ok(input)
         }
     }

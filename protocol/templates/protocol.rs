@@ -281,7 +281,7 @@ pub mod {{snake class.name}} {
             {{#if @argument_is_value ~}}
             {{#if argument.force_default ~}}
             {{/if ~}}
-            input = gen_{{snake_type argument.type}}({{#if (and (pass_by_ref argument.type) (not (use_str_ref argument.type))) ~}}&{{/if ~}}{{#if argument.force_default ~}}{{amqp_value_ref argument.default_value}}{{else}}method.{{snake argument.name}}{{#if (use_str_ref argument.type) ~}}.as_str(){{/if ~}}{{/if ~}})(input)?;
+            input = gen_{{snake_type argument.type}}({{#if (and (pass_by_ref argument.type) (not (use_str_ref argument.type))) ~}}&{{/if ~}}{{#if argument.force_default ~}}{{amqp_value_ref argument.default_value}}{{else}}method.{{snake argument.name}}{{#if (use_str_ref argument.type) ~}}{{#if (use_bytes_ref argument.type) ~}}.as_bytes(){{else}}.as_str(){{/if ~}}{{/if ~}}{{/if ~}})(input)?;
             {{else}}
             input = gen_flags(&flags)(input)?;
             {{/if ~}}

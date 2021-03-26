@@ -151,7 +151,7 @@ pub type Void = ();
 pub struct ShortString(String);
 /// A String
 #[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
-pub struct LongString(String);
+pub struct LongString(Vec<u8>);
 /// An array of AMQPValue
 #[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 pub struct FieldArray(Vec<AMQPValue>);
@@ -172,7 +172,7 @@ pub struct DecimalValue {
 }
 
 impl<'a> ShortString {
-    /// Get a reference to a LongString as &str
+    /// Get a reference to a ShortString as &str
     pub fn as_str(&'a self) -> &'a str {
         self.0.as_str()
     }
@@ -208,20 +208,15 @@ impl fmt::Display for ShortString {
 }
 
 impl<'a> LongString {
-    /// Get a reference to a LongString as &str
-    pub fn as_str(&'a self) -> &'a str {
-        self.0.as_str()
-    }
-
-    /// Splits a string slice by whitespace.
-    pub fn split_whitespace(&'a self) -> str::SplitWhitespace<'a> {
-        self.0.split_whitespace()
+    /// Get a reference to a LongString as &[u8]
+    pub fn as_bytes(&'a self) -> &'a [u8] {
+        &self.0[..]
     }
 }
 
 impl From<String> for LongString {
     fn from(s: String) -> Self {
-        Self(s)
+        Self(s.into_bytes())
     }
 }
 
@@ -231,15 +226,13 @@ impl From<&str> for LongString {
     }
 }
 
-impl borrow::Borrow<str> for LongString {
-    fn borrow(&self) -> &str {
-        self.0.borrow()
-    }
-}
-
 impl fmt::Display for LongString {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
+        if let Ok(s) = String::from_utf8(self.0.clone()) {
+            s.fmt(f)
+        } else {
+            f.write_fmt(format_args!("{:?}", self.0))
+        }
     }
 }
 

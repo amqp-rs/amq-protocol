@@ -55,6 +55,7 @@ impl<'a> HandlebarsAMQPExtension for CodeGenerator<'a> {
         self.register_helper("include_more", Box::new(IncludeMoreHelper));
         self.register_helper("pass_by_ref", Box::new(PassByRefHelper));
         self.register_helper("use_str_ref", Box::new(UseStrRefHelper));
+        self.register_helper("use_bytes_ref", Box::new(UseBytesRefHelper));
         self.register_helper("each_argument", Box::new(EachArgumentHelper));
         self.register_helper("amqp_value_ref", Box::new(AMQPValueRefHelper));
         self
@@ -280,6 +281,28 @@ impl HelperDef for UseStrRefHelper {
     }
 }
 
+/// Helper to check whether a param is passed using an &[u8] or its real type
+pub struct UseBytesRefHelper;
+impl HelperDef for UseBytesRefHelper {
+    fn call_inner<'reg: 'rc, 'rc>(
+        &self,
+        h: &Helper<'reg, 'rc>,
+        _: &'reg Handlebars<'_>,
+        _: &'rc Context,
+        _: &mut RenderContext<'reg, 'rc>,
+    ) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
+        let value = h
+            .param(0)
+            .ok_or_else(|| RenderError::new("Param not found for helper \"use_bytes_ref\""))?;
+        let param = serde_json::from_value::<AMQPType>(value.value().clone()).ok();
+        let use_bytes_ref = matches!(
+            param,
+            Some(AMQPType::LongString)
+        );
+        Ok(Some(ScopedJson::Derived(JsonValue::from(use_bytes_ref))))
+    }
+}
+
 /// Helper to walk through a Vec of [AMQPArgument](../specs.AMQPArgument.html).
 pub struct EachArgumentHelper;
 impl HelperDef for EachArgumentHelper {
@@ -371,7 +394,7 @@ impl HelperDef for AMQPValueRefHelper {
             AMQPValue::Double(v) => serde_json::to_value(v)?,
             AMQPValue::DecimalValue(v) => serde_json::to_value(v)?,
             AMQPValue::ShortString(v) => serde_json::to_value(format!("\"{}\"", v))?,
-            AMQPValue::LongString(v) => serde_json::to_value(format!("\"{}\"", v))?,
+            AMQPValue::LongString(v) => serde_json::to_value(format!("b\"{}\"", v))?,
             AMQPValue::FieldArray(v) => serde_json::to_value(v)?,
             AMQPValue::Timestamp(v) => serde_json::to_value(v)?,
             AMQPValue::FieldTable(v) => serde_json::to_value(v)?,

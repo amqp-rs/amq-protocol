@@ -41,7 +41,7 @@ pub fn gen_raw_value<'a, W: Write + BackToTheBuffer + 'a>(
         AMQPValue::Double(d) => gen_double(d)(x),
         AMQPValue::DecimalValue(d) => gen_decimal_value(d)(x),
         AMQPValue::ShortString(ref s) => gen_short_string(s.as_str())(x),
-        AMQPValue::LongString(ref s) => gen_long_string(s.as_str())(x),
+        AMQPValue::LongString(ref s) => gen_long_string(s.as_bytes())(x),
         AMQPValue::FieldArray(ref a) => gen_field_array(a)(x),
         AMQPValue::Timestamp(t) => gen_timestamp(t)(x),
         AMQPValue::FieldTable(ref t) => gen_field_table(t)(x),
@@ -136,8 +136,8 @@ pub fn gen_short_string<'a, W: Write + 'a>(s: &'a str) -> impl SerializeFn<W> + 
 }
 
 /// Generate the [LongString](../type.LongString.html) in the given buffer (x)
-pub fn gen_long_string<'a, W: Write + 'a>(s: &'a str) -> impl SerializeFn<W> + 'a {
-    pair(gen_long_uint(s.len() as LongUInt), slice(s.as_bytes()))
+pub fn gen_long_string<'a, W: Write + 'a>(s: &'a [u8]) -> impl SerializeFn<W> + 'a {
+    pair(gen_long_uint(s.len() as LongUInt), slice(s))
 }
 
 /// Generate the [FieldArray](../type.FieldArray.html) in the given buffer (x)
@@ -416,11 +416,11 @@ mod test {
     #[test]
     fn test_gen_long_string() {
         assert_eq!(
-            test_gen!(&mut [0, 0, 0, 0][..], gen_long_string, ""),
+            test_gen!(&mut [0, 0, 0, 0][..], gen_long_string, &[]),
             Ok((vec![0, 0, 0, 0], 4))
         );
         assert_eq!(
-            test_gen!(&mut [0, 0, 0, 0, 0, 0, 0, 0][..], gen_long_string, "test"),
+            test_gen!(&mut [0, 0, 0, 0, 0, 0, 0, 0][..], gen_long_string, b"test"),
             Ok((vec![0, 0, 0, 4, 116, 101, 115, 116], 8))
         );
     }
