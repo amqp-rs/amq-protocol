@@ -176,11 +176,6 @@ impl<'a> ShortString {
     pub fn as_str(&'a self) -> &'a str {
         self.0.as_str()
     }
-
-    /// Splits a string slice by whitespace.
-    pub fn split_whitespace(&'a self) -> str::SplitWhitespace<'a> {
-        self.0.split_whitespace()
-    }
 }
 
 impl From<String> for ShortString {
