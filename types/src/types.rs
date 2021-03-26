@@ -223,11 +223,7 @@ impl From<&str> for LongString {
 
 impl fmt::Display for LongString {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Ok(s) = String::from_utf8(self.0.clone()) {
-            s.fmt(f)
-        } else {
-            f.write_fmt(format_args!("{:?}", self.0))
-        }
+        String::from_utf8_lossy(&self.0).fmt(f)
     }
 }
 
