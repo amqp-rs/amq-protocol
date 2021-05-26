@@ -241,7 +241,7 @@ impl HelperDef for PassByRefHelper {
         _: &'reg Handlebars<'_>,
         _: &'rc Context,
         _: &mut RenderContext<'reg, 'rc>,
-    ) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
+    ) -> Result<ScopedJson<'reg, 'rc>, RenderError> {
         let value = h
             .param(0)
             .ok_or_else(|| RenderError::new("Param not found for helper \"pass_by_ref\""))?;
@@ -255,7 +255,7 @@ impl HelperDef for PassByRefHelper {
                 | AMQPType::FieldTable
                 | AMQPType::ByteArray
         );
-        Ok(Some(ScopedJson::Derived(JsonValue::from(pass_by_ref))))
+        Ok(ScopedJson::Derived(JsonValue::from(pass_by_ref)))
     }
 }
 
@@ -268,7 +268,7 @@ impl HelperDef for UseStrRefHelper {
         _: &'reg Handlebars<'_>,
         _: &'rc Context,
         _: &mut RenderContext<'reg, 'rc>,
-    ) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
+    ) -> Result<ScopedJson<'reg, 'rc>, RenderError> {
         let value = h
             .param(0)
             .ok_or_else(|| RenderError::new("Param not found for helper \"use_str_ref\""))?;
@@ -277,7 +277,7 @@ impl HelperDef for UseStrRefHelper {
             param,
             Some(AMQPType::ShortString) | Some(AMQPType::LongString)
         );
-        Ok(Some(ScopedJson::Derived(JsonValue::from(use_str_ref))))
+        Ok(ScopedJson::Derived(JsonValue::from(use_str_ref)))
     }
 }
 
@@ -290,13 +290,13 @@ impl HelperDef for UseBytesRefHelper {
         _: &'reg Handlebars<'_>,
         _: &'rc Context,
         _: &mut RenderContext<'reg, 'rc>,
-    ) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
+    ) -> Result<ScopedJson<'reg, 'rc>, RenderError> {
         let value = h
             .param(0)
             .ok_or_else(|| RenderError::new("Param not found for helper \"use_bytes_ref\""))?;
         let param = serde_json::from_value::<AMQPType>(value.value().clone()).ok();
         let use_bytes_ref = matches!(param, Some(AMQPType::LongString));
-        Ok(Some(ScopedJson::Derived(JsonValue::from(use_bytes_ref))))
+        Ok(ScopedJson::Derived(JsonValue::from(use_bytes_ref)))
     }
 }
 
@@ -372,7 +372,7 @@ impl HelperDef for AMQPValueRefHelper {
         _: &'reg Handlebars<'_>,
         _: &'rc Context,
         _: &mut RenderContext<'reg, 'rc>,
-    ) -> Result<Option<ScopedJson<'reg, 'rc>>, RenderError> {
+    ) -> Result<ScopedJson<'reg, 'rc>, RenderError> {
         let arg = h
             .param(0)
             .ok_or_else(|| RenderError::new("First param not found for helper \"amqp_value\""))?;
@@ -398,7 +398,7 @@ impl HelperDef for AMQPValueRefHelper {
             AMQPValue::ByteArray(v) => serde_json::to_value(v)?,
             AMQPValue::Void => JsonValue::Null,
         };
-        Ok(Some(ScopedJson::Derived(value)))
+        Ok(ScopedJson::Derived(value))
     }
 }
 
