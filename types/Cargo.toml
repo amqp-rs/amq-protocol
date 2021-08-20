@@ -24,7 +24,7 @@ version  = "^0.3"
 features = ["std"]
 
 [dependencies.nom]
-version  = "^6.0"
+version  = "=7.0.0-alpha3"
 features = ["std"]
 
 [dependencies.serde]

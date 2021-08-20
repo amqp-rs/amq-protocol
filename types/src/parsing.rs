@@ -239,7 +239,7 @@ pub fn parse_field_array<I: ParsableInput>(i: I) -> ParserResult<I, FieldArray> 
             flat_map(parse_long_uint, take),
             all_consuming(fold_many0(
                 context("parse_field_array_entry", complete(parse_value)),
-                FieldArray::default(),
+                FieldArray::default,
                 |mut acc, elem| {
                     acc.push(elem);
                     acc
@@ -265,7 +265,7 @@ pub fn parse_field_table<I: ParsableInput>(i: I) -> ParserResult<I, FieldTable> 
                     "parse_field_table_entry",
                     complete(pair(parse_short_string, parse_value)),
                 ),
-                FieldTable::default(),
+                FieldTable::default,
                 |mut acc, (key, value)| {
                     acc.insert(key, value);
                     acc
