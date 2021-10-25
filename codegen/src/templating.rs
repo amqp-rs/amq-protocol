@@ -520,10 +520,10 @@ Copyright 1
 Copyright 2
 port 5672
 domain1: LongString
-constant1 = 128
-42 - class1
+constant1= 128
+42- class1
 property1: LongString
-64 - method1
+64- method1
 synchronous: true
 argument1(domain1): LongString
 flag1: true

@@ -205,6 +205,10 @@ fn make_str<I: nom::InputIter<Item = u8>>(i: I) -> Result<String, std::string::F
     String::from_utf8(i.iter_elements().collect())
 }
 
+fn make_str_lossy<I: nom::InputIter<Item = u8>>(i: I) -> String {
+    String::from_utf8_lossy(&i.iter_elements().collect::<Vec<_>>()).into_owned()
+}
+
 /// Parse a [ShortString](../type.ShortString.html)
 pub fn parse_short_string<I: ParsableInput>(i: I) -> ParserResult<I, ShortString> {
     context(
@@ -221,7 +225,7 @@ pub fn parse_long_string<I: ParsableInput>(i: I) -> ParserResult<I, LongString> 
     context(
         "parse_long_string",
         map(
-            map_res(flat_map(parse_long_uint, take), make_str),
+            map(flat_map(parse_long_uint, take), make_str_lossy),
             LongString::from,
         ),
     )(i)
@@ -235,7 +239,7 @@ pub fn parse_field_array<I: ParsableInput>(i: I) -> ParserResult<I, FieldArray> 
             flat_map(parse_long_uint, take),
             all_consuming(fold_many0(
                 context("parse_field_array_entry", complete(parse_value)),
-                FieldArray::default(),
+                FieldArray::default,
                 |mut acc, elem| {
                     acc.push(elem);
                     acc
@@ -261,7 +265,7 @@ pub fn parse_field_table<I: ParsableInput>(i: I) -> ParserResult<I, FieldTable> 
                     "parse_field_table_entry",
                     complete(pair(parse_short_string, parse_value)),
                 ),
-                FieldTable::default(),
+                FieldTable::default,
                 |mut acc, (key, value)| {
                     acc.insert(key, value);
                     acc
