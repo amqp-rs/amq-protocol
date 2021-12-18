@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use crate::types::*;
 
 use serde::{Deserialize, Serialize};
@@ -105,6 +106,150 @@ impl AMQPValue {
             AMQPType::FieldTable => None,
             AMQPType::ByteArray => None,
             AMQPType::Void => value.as_null().map(|_| AMQPValue::Void),
+        }
+    }
+
+    /// If the value is bool, returns associated value. Returns None otherwise.
+    pub fn as_bool(&self) -> Option<bool> {
+        match self {
+            AMQPValue::Boolean(value) => Some(*value),
+            _ => None
+        }
+    }
+
+    /// If the value is ShortShortInt, returns associated value. Returns None otherwise.
+    pub fn as_short_short_int(&self) -> Option<i8> {
+        match self {
+            AMQPValue::ShortShortInt(value) => Some(*value),
+            _ => None
+        }
+    }
+
+    /// If the value is ShortShortUInt, returns associated value. Returns None otherwise.
+    pub fn as_short_short_uint(&self) -> Option<u8> {
+        match self {
+            AMQPValue::ShortShortUInt(value) => Some(*value),
+            _ => None
+        }
+    }
+
+    /// If the value is ShortInt, returns associated value. Returns None otherwise.
+    pub fn as_short_int(&self) -> Option<i16> {
+        match self {
+            AMQPValue::ShortInt(value) => Some(*value),
+            _ => None
+        }
+    }
+
+    /// If the value is ShortUInt, returns associated value. Returns None otherwise.
+    pub fn as_short_uint(&self) -> Option<u16> {
+        match self {
+            AMQPValue::ShortUInt(value) => Some(*value),
+            _ => None
+        }
+    }
+
+    /// If the value is LongInt, returns associated value. Returns None otherwise.
+    pub fn as_long_int(&self) -> Option<i32> {
+        match self {
+            AMQPValue::LongInt(value) => Some(*value),
+            _ => None
+        }
+    }
+
+    /// If the value is LongUInt, returns associated value. Returns None otherwise.
+    pub fn as_long_uint(&self) -> Option<u32> {
+        match self {
+            AMQPValue::LongUInt(value) => Some(*value),
+            _ => None
+        }
+    }
+
+    /// If the value is LongLongInt, returns associated value. Returns None otherwise.
+    pub fn as_long_long_int(&self) -> Option<i64> {
+        match self {
+            AMQPValue::LongLongInt(value) => Some(*value),
+            _ => None
+        }
+    }
+
+    /// If the value is Float, returns associated value. Returns None otherwise.
+    pub fn as_float(&self) -> Option<f32> {
+        match self {
+            AMQPValue::Float(value) => Some(*value),
+            _ => None
+        }
+    }
+
+    /// If the value is Double, returns associated value. Returns None otherwise.
+    pub fn as_double(&self) -> Option<f64> {
+        match self {
+            AMQPValue::Double(value) => Some(*value),
+            _ => None
+        }
+    }
+
+    /// If the value is DecimalValue, returns associated value. Returns None otherwise.
+    pub fn as_decimal(&self) -> Option<&DecimalValue> {
+        match self {
+            AMQPValue::DecimalValue(value) => Some(value),
+            _ => None
+        }
+    }
+
+    /// If the value is ShortString, returns associated value as str. Returns None otherwise.
+    pub fn as_short_string(&self) -> Option<&str> {
+        match self {
+            AMQPValue::ShortString(value) => Some(value.as_str()),
+            _ => None
+        }
+    }
+
+    /// If the value is LongString, returns associated value as bytes. Returns None otherwise.
+    pub fn as_long_string(&self) -> Option<&[u8]> {
+        match self {
+            AMQPValue::LongString(value) => Some(value.as_bytes()),
+            _ => None
+        }
+    }
+
+    /// If the value is FieldArray, returns associated value. Returns None otherwise.
+    pub fn as_array(&self) -> Option<&[AMQPValue]> {
+        match self {
+            AMQPValue::FieldArray(value) => Some(value.as_slice()),
+            _ => None
+        }
+    }
+
+    /// If the value is Timestamp, returns associated value. Returns None otherwise.
+    pub fn as_timestamp(&self) -> Option<u64> {
+        match self {
+            AMQPValue::Timestamp(value) => Some(*value),
+            _ => None
+        }
+    }
+
+    /// If the value is FieldTable, returns associated value. Returns None otherwise.
+    pub fn as_field_table(&self) -> Option<&BTreeMap<ShortString, AMQPValue>> {
+        match self {
+            AMQPValue::FieldTable(value) => Some(value.inner()),
+            _ => None
+        }
+    }
+
+    /// If the value is ByteArray, returns associated value. Returns None otherwise.
+    pub fn as_byte_array(&self) -> Option<&[u8]> {
+        match self {
+            AMQPValue::ByteArray(value) => Some(value.as_slice()),
+            _ => None
+        }
+    }
+
+    /// Returns true if value is Void.
+    pub fn is_void(&self) -> bool {
+        match self {
+            AMQPValue::Void => true,
+            _ => false
         }
     }
 }
