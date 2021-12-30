@@ -339,7 +339,7 @@ impl HelperDef for EachArgumentHelper {
                     block.set_local_var("index", to_json(&index));
                     block.set_local_var("last", to_json(index == len - 1));
                     block.set_local_var("argument_is_value", to_json(&is_value));
-                    if let Some(ref p) = array_path {
+                    if let Some(p) = array_path {
                         if index == 0 {
                             let mut path = Vec::with_capacity(p.len() + 1);
                             path.extend_from_slice(p);

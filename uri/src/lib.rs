@@ -177,7 +177,7 @@ impl FromStr for AMQPUri {
             .domain()
             .map_or(Ok(default.authority.host), percent_decode)?;
         let port = url.port().unwrap_or_else(|| scheme.default_port());
-        let vhost = percent_decode(&url.path().get(1..).unwrap_or("/"))?;
+        let vhost = percent_decode(url.path().get(1..).unwrap_or("/"))?;
         let frame_max = int_queryparam(&url, "frame_max")?;
         let channel_max = int_queryparam(&url, "channel_max")?;
         let heartbeat = int_queryparam(&url, "heartbeat")?;

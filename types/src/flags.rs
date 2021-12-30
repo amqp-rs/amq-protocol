@@ -3,7 +3,7 @@ use crate::types::Boolean;
 use serde::{Deserialize, Serialize};
 
 /// A struct representing AMQP boolean flags for RPC
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 pub struct AMQPFlags {
     flags: Vec<(String, Boolean)>,
 }
@@ -47,12 +47,6 @@ impl AMQPFlags {
             .collect();
 
         AMQPFlags { flags }
-    }
-}
-
-impl Default for AMQPFlags {
-    fn default() -> AMQPFlags {
-        AMQPFlags { flags: Vec::new() }
     }
 }
 

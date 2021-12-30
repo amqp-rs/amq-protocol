@@ -3566,7 +3566,7 @@ pub mod basic {
         }
     }
     /// basic properties (Generated)
-    #[derive(Clone, Debug, PartialEq)]
+    #[derive(Clone, Debug, Default, PartialEq)]
     pub struct AMQPProperties {
         content_type: Option<ShortString>,
         content_encoding: Option<ShortString>,
@@ -3582,27 +3582,6 @@ pub mod basic {
         user_id: Option<ShortString>,
         app_id: Option<ShortString>,
         cluster_id: Option<ShortString>,
-    }
-
-    impl Default for AMQPProperties {
-        fn default() -> AMQPProperties {
-            AMQPProperties {
-                content_type: None,
-                content_encoding: None,
-                headers: None,
-                delivery_mode: None,
-                priority: None,
-                correlation_id: None,
-                reply_to: None,
-                expiration: None,
-                message_id: None,
-                timestamp: None,
-                kind: None,
-                user_id: None,
-                app_id: None,
-                cluster_id: None,
-            }
-        }
     }
 
     impl AMQPProperties {

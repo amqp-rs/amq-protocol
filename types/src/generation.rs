@@ -162,7 +162,7 @@ pub fn gen_field_table<'a, W: Write + BackToTheBuffer + 'a>(
 fn gen_field_entry<'a, W: Write + BackToTheBuffer + 'a>(
     e: (&'a ShortString, &'a AMQPValue),
 ) -> impl SerializeFn<W> + 'a {
-    pair(gen_short_string(e.0.as_str()), gen_value(&e.1))
+    pair(gen_short_string(e.0.as_str()), gen_value(e.1))
 }
 
 /// Generate the [ByteArray](../type.ByteArray.html) in the given buffer (x)

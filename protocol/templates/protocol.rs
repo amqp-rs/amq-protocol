@@ -292,21 +292,11 @@ pub mod {{snake class.name}} {
     {{/each ~}}
     {{#if class.properties ~}}
     /// {{class.name}} properties (Generated)
-    #[derive(Clone, Debug, PartialEq)]
+    #[derive(Clone, Debug, Default, PartialEq)]
     pub struct AMQPProperties {
         {{#each class.properties as |property| ~}}
         {{snake property.name}}: Option<{{property.type}}>,
         {{/each ~}}
-    }
-
-    impl Default for AMQPProperties {
-        fn default() -> AMQPProperties {
-            AMQPProperties {
-                {{#each class.properties as |property| ~}}
-                {{snake property.name}}: None,
-                {{/each ~}}
-            }
-        }
     }
 
     impl AMQPProperties {
