@@ -1,4 +1,3 @@
-use std::collections::BTreeMap;
 use crate::types::*;
 
 use serde::{Deserialize, Serialize};
@@ -110,146 +109,146 @@ impl AMQPValue {
     }
 
     /// If the value is bool, returns associated value. Returns None otherwise.
-    pub fn as_bool(&self) -> Option<bool> {
+    pub fn as_bool(&self) -> Option<Boolean> {
         match self {
             AMQPValue::Boolean(value) => Some(*value),
-            _ => None
+            _ => None,
         }
     }
 
     /// If the value is ShortShortInt, returns associated value. Returns None otherwise.
-    pub fn as_short_short_int(&self) -> Option<i8> {
+    pub fn as_short_short_int(&self) -> Option<ShortShortInt> {
         match self {
             AMQPValue::ShortShortInt(value) => Some(*value),
-            _ => None
+            _ => None,
         }
     }
 
     /// If the value is ShortShortUInt, returns associated value. Returns None otherwise.
-    pub fn as_short_short_uint(&self) -> Option<u8> {
+    pub fn as_short_short_uint(&self) -> Option<ShortShortUInt> {
         match self {
             AMQPValue::ShortShortUInt(value) => Some(*value),
-            _ => None
+            _ => None,
         }
     }
 
     /// If the value is ShortInt, returns associated value. Returns None otherwise.
-    pub fn as_short_int(&self) -> Option<i16> {
+    pub fn as_short_int(&self) -> Option<ShortInt> {
         match self {
             AMQPValue::ShortInt(value) => Some(*value),
-            _ => None
+            _ => None,
         }
     }
 
     /// If the value is ShortUInt, returns associated value. Returns None otherwise.
-    pub fn as_short_uint(&self) -> Option<u16> {
+    pub fn as_short_uint(&self) -> Option<ShortUInt> {
         match self {
             AMQPValue::ShortUInt(value) => Some(*value),
-            _ => None
+            _ => None,
         }
     }
 
     /// If the value is LongInt, returns associated value. Returns None otherwise.
-    pub fn as_long_int(&self) -> Option<i32> {
+    pub fn as_long_int(&self) -> Option<LongInt> {
         match self {
             AMQPValue::LongInt(value) => Some(*value),
-            _ => None
+            _ => None,
         }
     }
 
     /// If the value is LongUInt, returns associated value. Returns None otherwise.
-    pub fn as_long_uint(&self) -> Option<u32> {
+    pub fn as_long_uint(&self) -> Option<LongUInt> {
         match self {
             AMQPValue::LongUInt(value) => Some(*value),
-            _ => None
+            _ => None,
         }
     }
 
     /// If the value is LongLongInt, returns associated value. Returns None otherwise.
-    pub fn as_long_long_int(&self) -> Option<i64> {
+    pub fn as_long_long_int(&self) -> Option<LongLongInt> {
         match self {
             AMQPValue::LongLongInt(value) => Some(*value),
-            _ => None
+            _ => None,
         }
     }
 
     /// If the value is Float, returns associated value. Returns None otherwise.
-    pub fn as_float(&self) -> Option<f32> {
+    pub fn as_float(&self) -> Option<Float> {
         match self {
             AMQPValue::Float(value) => Some(*value),
-            _ => None
+            _ => None,
         }
     }
 
     /// If the value is Double, returns associated value. Returns None otherwise.
-    pub fn as_double(&self) -> Option<f64> {
+    pub fn as_double(&self) -> Option<Double> {
         match self {
             AMQPValue::Double(value) => Some(*value),
-            _ => None
+            _ => None,
         }
     }
 
     /// If the value is DecimalValue, returns associated value. Returns None otherwise.
-    pub fn as_decimal(&self) -> Option<&DecimalValue> {
+    pub fn as_decimal_value(&self) -> Option<DecimalValue> {
         match self {
-            AMQPValue::DecimalValue(value) => Some(value),
-            _ => None
+            AMQPValue::DecimalValue(value) => Some(*value),
+            _ => None,
         }
     }
 
     /// If the value is ShortString, returns associated value as str. Returns None otherwise.
-    pub fn as_short_string(&self) -> Option<&str> {
+    pub fn as_short_string(&self) -> Option<&ShortString> {
         match self {
-            AMQPValue::ShortString(value) => Some(value.as_str()),
-            _ => None
+            AMQPValue::ShortString(value) => Some(value),
+            _ => None,
         }
     }
 
     /// If the value is LongString, returns associated value as bytes. Returns None otherwise.
-    pub fn as_long_string(&self) -> Option<&[u8]> {
+    pub fn as_long_string(&self) -> Option<&LongString> {
         match self {
-            AMQPValue::LongString(value) => Some(value.as_bytes()),
-            _ => None
+            AMQPValue::LongString(value) => Some(value),
+            _ => None,
         }
     }
 
     /// If the value is FieldArray, returns associated value. Returns None otherwise.
-    pub fn as_array(&self) -> Option<&[AMQPValue]> {
+    pub fn as_array(&self) -> Option<&FieldArray> {
         match self {
-            AMQPValue::FieldArray(value) => Some(value.as_slice()),
-            _ => None
+            AMQPValue::FieldArray(value) => Some(value),
+            _ => None,
         }
     }
 
     /// If the value is Timestamp, returns associated value. Returns None otherwise.
-    pub fn as_timestamp(&self) -> Option<u64> {
+    pub fn as_timestamp(&self) -> Option<Timestamp> {
         match self {
             AMQPValue::Timestamp(value) => Some(*value),
-            _ => None
+            _ => None,
         }
     }
 
     /// If the value is FieldTable, returns associated value. Returns None otherwise.
-    pub fn as_field_table(&self) -> Option<&BTreeMap<ShortString, AMQPValue>> {
+    pub fn as_field_table(&self) -> Option<&FieldTable> {
         match self {
-            AMQPValue::FieldTable(value) => Some(value.inner()),
-            _ => None
+            AMQPValue::FieldTable(value) => Some(value),
+            _ => None,
         }
     }
 
     /// If the value is ByteArray, returns associated value. Returns None otherwise.
-    pub fn as_byte_array(&self) -> Option<&[u8]> {
+    pub fn as_byte_array(&self) -> Option<&ByteArray> {
         match self {
-            AMQPValue::ByteArray(value) => Some(value.as_slice()),
-            _ => None
+            AMQPValue::ByteArray(value) => Some(value),
+            _ => None,
         }
     }
 
     /// Returns true if value is Void.
-    pub fn is_void(&self) -> bool {
+    pub fn as_void(&self) -> Option<()> {
         match self {
-            AMQPValue::Void => true,
-            _ => false
+            AMQPValue::Void => Some(()),
+            _ => None,
         }
     }
 }
