@@ -4,7 +4,7 @@ version       = "7.0.0-beta.1" # remember to update html_root_url
 edition       = "2021"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP URI TCP connection handling"
-repository    = "https://github.com/CleverCloud/amq-protocol"
+repository    = "https://github.com/amqp-rs/amq-protocol"
 documentation = "https://docs.rs/amq-protocol-tcp"
 keywords      = ["amqp","rabbitmq","protocol"]
 categories    = ["api-bindings","network-programming"]
@@ -37,5 +37,4 @@ version          = "^0.1"
 default-features = false
 
 [badges]
-travis-ci = { repository = "sozu-proxy/amq-protocol" }
-appveyor  = { repository = "Keruspe/amq-protocol" }
+maintenance = { status = "actively-developed" }
