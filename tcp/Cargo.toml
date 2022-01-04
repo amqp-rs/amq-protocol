@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-tcp"
-version       = "7.0.0-beta.1" # remember to update html_root_url
+version       = "7.0.0" # remember to update html_root_url
 edition       = "2021"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP URI TCP connection handling"
@@ -25,7 +25,7 @@ rustls-connector          = ["tcp-stream/rustls-connector"]
 vendored-openssl          = ["tcp-stream/vendored-openssl"]
 
 [dependencies.amq-protocol-uri]
-version = "=7.0.0-beta.1"
+version = "=7.0.0"
 path    = "../uri"
 
 [dependencies.tcp-stream]
