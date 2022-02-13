@@ -224,12 +224,12 @@ pub fn parse_class<I: ParsableInput>(i: I) -> ParserResult<I, AMQPClass> {
         map_opt(
             flat_map(parse_id, |id| {
                 move |i| match id {
+                    60 => map(map(parse_basic, AMQPClass::Basic), Some)(i),
                     10 => map(map(parse_connection, AMQPClass::Connection), Some)(i),
                     20 => map(map(parse_channel, AMQPClass::Channel), Some)(i),
                     30 => map(map(parse_access, AMQPClass::Access), Some)(i),
                     40 => map(map(parse_exchange, AMQPClass::Exchange), Some)(i),
                     50 => map(map(parse_queue, AMQPClass::Queue), Some)(i),
-                    60 => map(map(parse_basic, AMQPClass::Basic), Some)(i),
                     90 => map(map(parse_tx, AMQPClass::Tx), Some)(i),
                     85 => map(map(parse_confirm, AMQPClass::Confirm), Some)(i),
                     _ => Ok((i, None)),
@@ -245,12 +245,12 @@ pub fn gen_class<'a, W: Write + BackToTheBuffer + 'a>(
     class: &'a AMQPClass,
 ) -> impl SerializeFn<W> + 'a {
     move |input| match *class {
+        AMQPClass::Basic(ref basic) => basic::gen_basic(basic)(input),
         AMQPClass::Connection(ref connection) => connection::gen_connection(connection)(input),
         AMQPClass::Channel(ref channel) => channel::gen_channel(channel)(input),
         AMQPClass::Access(ref access) => access::gen_access(access)(input),
         AMQPClass::Exchange(ref exchange) => exchange::gen_exchange(exchange)(input),
         AMQPClass::Queue(ref queue) => queue::gen_queue(queue)(input),
-        AMQPClass::Basic(ref basic) => basic::gen_basic(basic)(input),
         AMQPClass::Tx(ref tx) => tx::gen_tx(tx)(input),
         AMQPClass::Confirm(ref confirm) => confirm::gen_confirm(confirm)(input),
     }
@@ -259,6 +259,8 @@ pub fn gen_class<'a, W: Write + BackToTheBuffer + 'a>(
 /// The available AMQP classes
 #[derive(Clone, Debug, PartialEq)]
 pub enum AMQPClass {
+    /// basic (Generated)
+    Basic(basic::AMQPMethod),
     /// connection (Generated)
     Connection(connection::AMQPMethod),
     /// channel (Generated)
@@ -269,8 +271,6 @@ pub enum AMQPClass {
     Exchange(exchange::AMQPMethod),
     /// queue (Generated)
     Queue(queue::AMQPMethod),
-    /// basic (Generated)
-    Basic(basic::AMQPMethod),
     /// tx (Generated)
     Tx(tx::AMQPMethod),
     /// confirm (Generated)
@@ -281,12 +281,12 @@ impl AMQPClass {
     /// Get the AMQP class id (Generated)
     pub fn get_amqp_class_id(&self) -> Identifier {
         match self {
+            AMQPClass::Basic(_) => 60,
             AMQPClass::Connection(_) => 10,
             AMQPClass::Channel(_) => 20,
             AMQPClass::Access(_) => 30,
             AMQPClass::Exchange(_) => 40,
             AMQPClass::Queue(_) => 50,
-            AMQPClass::Basic(_) => 60,
             AMQPClass::Tx(_) => 90,
             AMQPClass::Confirm(_) => 85,
         }
@@ -295,6 +295,24 @@ impl AMQPClass {
     /// Get the AMQP method id (Generated)
     pub fn get_amqp_method_id(&self) -> Identifier {
         match self {
+            AMQPClass::Basic(basic::AMQPMethod::Qos(_)) => 10,
+            AMQPClass::Basic(basic::AMQPMethod::QosOk(_)) => 11,
+            AMQPClass::Basic(basic::AMQPMethod::Consume(_)) => 20,
+            AMQPClass::Basic(basic::AMQPMethod::ConsumeOk(_)) => 21,
+            AMQPClass::Basic(basic::AMQPMethod::Cancel(_)) => 30,
+            AMQPClass::Basic(basic::AMQPMethod::CancelOk(_)) => 31,
+            AMQPClass::Basic(basic::AMQPMethod::Publish(_)) => 40,
+            AMQPClass::Basic(basic::AMQPMethod::Return(_)) => 50,
+            AMQPClass::Basic(basic::AMQPMethod::Deliver(_)) => 60,
+            AMQPClass::Basic(basic::AMQPMethod::Get(_)) => 70,
+            AMQPClass::Basic(basic::AMQPMethod::GetOk(_)) => 71,
+            AMQPClass::Basic(basic::AMQPMethod::GetEmpty(_)) => 72,
+            AMQPClass::Basic(basic::AMQPMethod::Ack(_)) => 80,
+            AMQPClass::Basic(basic::AMQPMethod::Reject(_)) => 90,
+            AMQPClass::Basic(basic::AMQPMethod::RecoverAsync(_)) => 100,
+            AMQPClass::Basic(basic::AMQPMethod::Recover(_)) => 110,
+            AMQPClass::Basic(basic::AMQPMethod::RecoverOk(_)) => 111,
+            AMQPClass::Basic(basic::AMQPMethod::Nack(_)) => 120,
             AMQPClass::Connection(connection::AMQPMethod::Start(_)) => 10,
             AMQPClass::Connection(connection::AMQPMethod::StartOk(_)) => 11,
             AMQPClass::Connection(connection::AMQPMethod::Secure(_)) => 20,
@@ -335,24 +353,6 @@ impl AMQPClass {
             AMQPClass::Queue(queue::AMQPMethod::DeleteOk(_)) => 41,
             AMQPClass::Queue(queue::AMQPMethod::Unbind(_)) => 50,
             AMQPClass::Queue(queue::AMQPMethod::UnbindOk(_)) => 51,
-            AMQPClass::Basic(basic::AMQPMethod::Qos(_)) => 10,
-            AMQPClass::Basic(basic::AMQPMethod::QosOk(_)) => 11,
-            AMQPClass::Basic(basic::AMQPMethod::Consume(_)) => 20,
-            AMQPClass::Basic(basic::AMQPMethod::ConsumeOk(_)) => 21,
-            AMQPClass::Basic(basic::AMQPMethod::Cancel(_)) => 30,
-            AMQPClass::Basic(basic::AMQPMethod::CancelOk(_)) => 31,
-            AMQPClass::Basic(basic::AMQPMethod::Publish(_)) => 40,
-            AMQPClass::Basic(basic::AMQPMethod::Return(_)) => 50,
-            AMQPClass::Basic(basic::AMQPMethod::Deliver(_)) => 60,
-            AMQPClass::Basic(basic::AMQPMethod::Get(_)) => 70,
-            AMQPClass::Basic(basic::AMQPMethod::GetOk(_)) => 71,
-            AMQPClass::Basic(basic::AMQPMethod::GetEmpty(_)) => 72,
-            AMQPClass::Basic(basic::AMQPMethod::Ack(_)) => 80,
-            AMQPClass::Basic(basic::AMQPMethod::Reject(_)) => 90,
-            AMQPClass::Basic(basic::AMQPMethod::RecoverAsync(_)) => 100,
-            AMQPClass::Basic(basic::AMQPMethod::Recover(_)) => 110,
-            AMQPClass::Basic(basic::AMQPMethod::RecoverOk(_)) => 111,
-            AMQPClass::Basic(basic::AMQPMethod::Nack(_)) => 120,
             AMQPClass::Tx(tx::AMQPMethod::Select(_)) => 10,
             AMQPClass::Tx(tx::AMQPMethod::SelectOk(_)) => 11,
             AMQPClass::Tx(tx::AMQPMethod::Commit(_)) => 20,
@@ -365,6 +365,1353 @@ impl AMQPClass {
     }
 }
 
+/// basic (generated)
+pub mod basic {
+    use super::*;
+
+    /// Parse basic (Generated)
+    pub fn parse_basic<I: ParsableInput>(i: I) -> ParserResult<I, basic::AMQPMethod> {
+        context(
+            "parse_basic",
+            map_opt(
+                flat_map(parse_id, |id| {
+                    move |i| match id {
+                        10 => context("parse_qos", map(map(parse_qos, AMQPMethod::Qos), Some))(i),
+                        11 => context(
+                            "parse_qos_ok",
+                            map(map(parse_qos_ok, AMQPMethod::QosOk), Some),
+                        )(i),
+                        20 => context(
+                            "parse_consume",
+                            map(map(parse_consume, AMQPMethod::Consume), Some),
+                        )(i),
+                        21 => context(
+                            "parse_consume_ok",
+                            map(map(parse_consume_ok, AMQPMethod::ConsumeOk), Some),
+                        )(i),
+                        30 => context(
+                            "parse_cancel",
+                            map(map(parse_cancel, AMQPMethod::Cancel), Some),
+                        )(i),
+                        31 => context(
+                            "parse_cancel_ok",
+                            map(map(parse_cancel_ok, AMQPMethod::CancelOk), Some),
+                        )(i),
+                        40 => context(
+                            "parse_publish",
+                            map(map(parse_publish, AMQPMethod::Publish), Some),
+                        )(i),
+                        50 => context(
+                            "parse_return",
+                            map(map(parse_return, AMQPMethod::Return), Some),
+                        )(i),
+                        60 => context(
+                            "parse_deliver",
+                            map(map(parse_deliver, AMQPMethod::Deliver), Some),
+                        )(i),
+                        70 => context("parse_get", map(map(parse_get, AMQPMethod::Get), Some))(i),
+                        71 => context(
+                            "parse_get_ok",
+                            map(map(parse_get_ok, AMQPMethod::GetOk), Some),
+                        )(i),
+                        72 => context(
+                            "parse_get_empty",
+                            map(map(parse_get_empty, AMQPMethod::GetEmpty), Some),
+                        )(i),
+                        80 => context("parse_ack", map(map(parse_ack, AMQPMethod::Ack), Some))(i),
+                        90 => context(
+                            "parse_reject",
+                            map(map(parse_reject, AMQPMethod::Reject), Some),
+                        )(i),
+                        100 => context(
+                            "parse_recover_async",
+                            map(map(parse_recover_async, AMQPMethod::RecoverAsync), Some),
+                        )(i),
+                        110 => context(
+                            "parse_recover",
+                            map(map(parse_recover, AMQPMethod::Recover), Some),
+                        )(i),
+                        111 => context(
+                            "parse_recover_ok",
+                            map(map(parse_recover_ok, AMQPMethod::RecoverOk), Some),
+                        )(i),
+                        120 => {
+                            context("parse_nack", map(map(parse_nack, AMQPMethod::Nack), Some))(i)
+                        }
+                        _ => Ok((i, None)),
+                    }
+                }),
+                std::convert::identity,
+            ),
+        )(i)
+    }
+
+    /// Serialize basic (Generated)
+    pub fn gen_basic<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a AMQPMethod,
+    ) -> impl SerializeFn<W> + 'a {
+        cookie_factory::sequence::pair(gen_id(60), move |input| match *method {
+            AMQPMethod::Qos(ref qos) => gen_qos(qos)(input),
+            AMQPMethod::QosOk(ref qos_ok) => gen_qos_ok(qos_ok)(input),
+            AMQPMethod::Consume(ref consume) => gen_consume(consume)(input),
+            AMQPMethod::ConsumeOk(ref consume_ok) => gen_consume_ok(consume_ok)(input),
+            AMQPMethod::Cancel(ref cancel) => gen_cancel(cancel)(input),
+            AMQPMethod::CancelOk(ref cancel_ok) => gen_cancel_ok(cancel_ok)(input),
+            AMQPMethod::Publish(ref publish) => gen_publish(publish)(input),
+            AMQPMethod::Return(ref r#return) => gen_return(r#return)(input),
+            AMQPMethod::Deliver(ref deliver) => gen_deliver(deliver)(input),
+            AMQPMethod::Get(ref get) => gen_get(get)(input),
+            AMQPMethod::GetOk(ref get_ok) => gen_get_ok(get_ok)(input),
+            AMQPMethod::GetEmpty(ref get_empty) => gen_get_empty(get_empty)(input),
+            AMQPMethod::Ack(ref ack) => gen_ack(ack)(input),
+            AMQPMethod::Reject(ref reject) => gen_reject(reject)(input),
+            AMQPMethod::RecoverAsync(ref recover_async) => gen_recover_async(recover_async)(input),
+            AMQPMethod::Recover(ref recover) => gen_recover(recover)(input),
+            AMQPMethod::RecoverOk(ref recover_ok) => gen_recover_ok(recover_ok)(input),
+            AMQPMethod::Nack(ref nack) => gen_nack(nack)(input),
+        })
+    }
+
+    /// The available methods in basic
+    #[derive(Clone, Debug, PartialEq)]
+    pub enum AMQPMethod {
+        /// qos (Generated)
+        Qos(Qos),
+        /// qos-ok (Generated)
+        QosOk(QosOk),
+        /// consume (Generated)
+        Consume(Consume),
+        /// consume-ok (Generated)
+        ConsumeOk(ConsumeOk),
+        /// cancel (Generated)
+        Cancel(Cancel),
+        /// cancel-ok (Generated)
+        CancelOk(CancelOk),
+        /// publish (Generated)
+        Publish(Publish),
+        /// return (Generated)
+        Return(Return),
+        /// deliver (Generated)
+        Deliver(Deliver),
+        /// get (Generated)
+        Get(Get),
+        /// get-ok (Generated)
+        GetOk(GetOk),
+        /// get-empty (Generated)
+        GetEmpty(GetEmpty),
+        /// ack (Generated)
+        Ack(Ack),
+        /// reject (Generated)
+        Reject(Reject),
+        /// recover-async (Generated)
+        RecoverAsync(RecoverAsync),
+        /// recover (Generated)
+        Recover(Recover),
+        /// recover-ok (Generated)
+        RecoverOk(RecoverOk),
+        /// nack (Generated)
+        Nack(Nack),
+    }
+
+    /// qos (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct Qos {
+        /// prefetch-count (Generated)
+        pub prefetch_count: ShortUInt,
+        /// global (Generated)
+        pub global: Boolean,
+    }
+
+    impl Qos {
+        /// Get the AMQP class id for qos (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for qos (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            10
+        }
+    }
+
+    /// Parse qos (Generated)
+    pub fn parse_qos<I: ParsableInput>(i: I) -> ParserResult<I, Qos> {
+        let (i, _) = parse_long_uint(i)?;
+        let (i, prefetch_count) = parse_short_uint(i)?;
+        let (i, flags) = parse_flags(i, &["global"])?;
+        Ok((
+            i,
+            Qos {
+                prefetch_count,
+                global: flags.get_flag("global").unwrap_or(false),
+            },
+        ))
+    }
+
+    /// Serialize qos (Generated)
+    pub fn gen_qos<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a Qos,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            let mut flags = AMQPFlags::default();
+            flags.add_flag("global".to_string(), method.global);
+            input = gen_id(10)(input)?;
+            input = gen_long_uint(0)(input)?;
+            input = gen_short_uint(method.prefetch_count)(input)?;
+            input = gen_flags(&flags)(input)?;
+            Ok(input)
+        }
+    }
+    /// qos-ok (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct QosOk {}
+
+    impl QosOk {
+        /// Get the AMQP class id for qos-ok (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for qos-ok (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            11
+        }
+    }
+
+    /// Parse qos-ok (Generated)
+    pub fn parse_qos_ok<I: ParsableInput>(i: I) -> ParserResult<I, QosOk> {
+        Ok((i, QosOk {}))
+    }
+
+    /// Serialize qos-ok (Generated)
+    pub fn gen_qos_ok<'a, W: Write + BackToTheBuffer + 'a>(
+        _: &'a QosOk,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            input = gen_id(11)(input)?;
+            Ok(input)
+        }
+    }
+    /// consume (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct Consume {
+        /// queue (Generated)
+        pub queue: ShortString,
+        /// consumer-tag (Generated)
+        pub consumer_tag: ShortString,
+        /// no-local (Generated)
+        pub no_local: Boolean,
+        /// no-ack (Generated)
+        pub no_ack: Boolean,
+        /// exclusive (Generated)
+        pub exclusive: Boolean,
+        /// nowait (Generated)
+        pub nowait: Boolean,
+        /// arguments (Generated)
+        pub arguments: FieldTable,
+    }
+
+    impl Consume {
+        /// Get the AMQP class id for consume (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for consume (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            20
+        }
+    }
+
+    /// Parse consume (Generated)
+    pub fn parse_consume<I: ParsableInput>(i: I) -> ParserResult<I, Consume> {
+        let (i, _) = parse_short_uint(i)?;
+        let (i, queue) = parse_short_string(i)?;
+        let (i, consumer_tag) = parse_short_string(i)?;
+        let (i, flags) = parse_flags(i, &["no-local", "no-ack", "exclusive", "nowait"])?;
+        let (i, arguments) = parse_field_table(i)?;
+        Ok((
+            i,
+            Consume {
+                queue,
+                consumer_tag,
+                no_local: flags.get_flag("no_local").unwrap_or(false),
+                no_ack: flags.get_flag("no_ack").unwrap_or(false),
+                exclusive: flags.get_flag("exclusive").unwrap_or(false),
+                nowait: flags.get_flag("nowait").unwrap_or(false),
+                arguments,
+            },
+        ))
+    }
+
+    /// Serialize consume (Generated)
+    pub fn gen_consume<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a Consume,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            let mut flags = AMQPFlags::default();
+            flags.add_flag("no_local".to_string(), method.no_local);
+            flags.add_flag("no_ack".to_string(), method.no_ack);
+            flags.add_flag("exclusive".to_string(), method.exclusive);
+            flags.add_flag("nowait".to_string(), method.nowait);
+            input = gen_id(20)(input)?;
+            input = gen_short_uint(0)(input)?;
+            input = gen_short_string(method.queue.as_str())(input)?;
+            input = gen_short_string(method.consumer_tag.as_str())(input)?;
+            input = gen_flags(&flags)(input)?;
+            input = gen_field_table(&method.arguments)(input)?;
+            Ok(input)
+        }
+    }
+    /// consume-ok (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct ConsumeOk {
+        /// consumer-tag (Generated)
+        pub consumer_tag: ShortString,
+    }
+
+    impl ConsumeOk {
+        /// Get the AMQP class id for consume-ok (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for consume-ok (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            21
+        }
+    }
+
+    /// Parse consume-ok (Generated)
+    pub fn parse_consume_ok<I: ParsableInput>(i: I) -> ParserResult<I, ConsumeOk> {
+        let (i, consumer_tag) = parse_short_string(i)?;
+        Ok((i, ConsumeOk { consumer_tag }))
+    }
+
+    /// Serialize consume-ok (Generated)
+    pub fn gen_consume_ok<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a ConsumeOk,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            input = gen_id(21)(input)?;
+            input = gen_short_string(method.consumer_tag.as_str())(input)?;
+            Ok(input)
+        }
+    }
+    /// cancel (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct Cancel {
+        /// consumer-tag (Generated)
+        pub consumer_tag: ShortString,
+        /// nowait (Generated)
+        pub nowait: Boolean,
+    }
+
+    impl Cancel {
+        /// Get the AMQP class id for cancel (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for cancel (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            30
+        }
+    }
+
+    /// Parse cancel (Generated)
+    pub fn parse_cancel<I: ParsableInput>(i: I) -> ParserResult<I, Cancel> {
+        let (i, consumer_tag) = parse_short_string(i)?;
+        let (i, flags) = parse_flags(i, &["nowait"])?;
+        Ok((
+            i,
+            Cancel {
+                consumer_tag,
+                nowait: flags.get_flag("nowait").unwrap_or(false),
+            },
+        ))
+    }
+
+    /// Serialize cancel (Generated)
+    pub fn gen_cancel<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a Cancel,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            let mut flags = AMQPFlags::default();
+            flags.add_flag("nowait".to_string(), method.nowait);
+            input = gen_id(30)(input)?;
+            input = gen_short_string(method.consumer_tag.as_str())(input)?;
+            input = gen_flags(&flags)(input)?;
+            Ok(input)
+        }
+    }
+    /// cancel-ok (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct CancelOk {
+        /// consumer-tag (Generated)
+        pub consumer_tag: ShortString,
+    }
+
+    impl CancelOk {
+        /// Get the AMQP class id for cancel-ok (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for cancel-ok (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            31
+        }
+    }
+
+    /// Parse cancel-ok (Generated)
+    pub fn parse_cancel_ok<I: ParsableInput>(i: I) -> ParserResult<I, CancelOk> {
+        let (i, consumer_tag) = parse_short_string(i)?;
+        Ok((i, CancelOk { consumer_tag }))
+    }
+
+    /// Serialize cancel-ok (Generated)
+    pub fn gen_cancel_ok<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a CancelOk,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            input = gen_id(31)(input)?;
+            input = gen_short_string(method.consumer_tag.as_str())(input)?;
+            Ok(input)
+        }
+    }
+    /// publish (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct Publish {
+        /// exchange (Generated)
+        pub exchange: ShortString,
+        /// routing-key (Generated)
+        pub routing_key: ShortString,
+        /// mandatory (Generated)
+        pub mandatory: Boolean,
+        /// immediate (Generated)
+        pub immediate: Boolean,
+    }
+
+    impl Publish {
+        /// Get the AMQP class id for publish (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for publish (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            40
+        }
+    }
+
+    /// Parse publish (Generated)
+    pub fn parse_publish<I: ParsableInput>(i: I) -> ParserResult<I, Publish> {
+        let (i, _) = parse_short_uint(i)?;
+        let (i, exchange) = parse_short_string(i)?;
+        let (i, routing_key) = parse_short_string(i)?;
+        let (i, flags) = parse_flags(i, &["mandatory", "immediate"])?;
+        Ok((
+            i,
+            Publish {
+                exchange,
+                routing_key,
+                mandatory: flags.get_flag("mandatory").unwrap_or(false),
+                immediate: flags.get_flag("immediate").unwrap_or(false),
+            },
+        ))
+    }
+
+    /// Serialize publish (Generated)
+    pub fn gen_publish<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a Publish,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            let mut flags = AMQPFlags::default();
+            flags.add_flag("mandatory".to_string(), method.mandatory);
+            flags.add_flag("immediate".to_string(), method.immediate);
+            input = gen_id(40)(input)?;
+            input = gen_short_uint(0)(input)?;
+            input = gen_short_string(method.exchange.as_str())(input)?;
+            input = gen_short_string(method.routing_key.as_str())(input)?;
+            input = gen_flags(&flags)(input)?;
+            Ok(input)
+        }
+    }
+    /// return (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct Return {
+        /// reply-code (Generated)
+        pub reply_code: ShortUInt,
+        /// reply-text (Generated)
+        pub reply_text: ShortString,
+        /// exchange (Generated)
+        pub exchange: ShortString,
+        /// routing-key (Generated)
+        pub routing_key: ShortString,
+    }
+
+    impl Return {
+        /// Get the AMQP class id for return (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for return (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            50
+        }
+    }
+
+    /// Parse return (Generated)
+    pub fn parse_return<I: ParsableInput>(i: I) -> ParserResult<I, Return> {
+        let (i, reply_code) = parse_short_uint(i)?;
+        let (i, reply_text) = parse_short_string(i)?;
+        let (i, exchange) = parse_short_string(i)?;
+        let (i, routing_key) = parse_short_string(i)?;
+        Ok((
+            i,
+            Return {
+                reply_code,
+                reply_text,
+                exchange,
+                routing_key,
+            },
+        ))
+    }
+
+    /// Serialize return (Generated)
+    pub fn gen_return<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a Return,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            input = gen_id(50)(input)?;
+            input = gen_short_uint(method.reply_code)(input)?;
+            input = gen_short_string(method.reply_text.as_str())(input)?;
+            input = gen_short_string(method.exchange.as_str())(input)?;
+            input = gen_short_string(method.routing_key.as_str())(input)?;
+            Ok(input)
+        }
+    }
+    /// deliver (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct Deliver {
+        /// consumer-tag (Generated)
+        pub consumer_tag: ShortString,
+        /// delivery-tag (Generated)
+        pub delivery_tag: LongLongUInt,
+        /// redelivered (Generated)
+        pub redelivered: Boolean,
+        /// exchange (Generated)
+        pub exchange: ShortString,
+        /// routing-key (Generated)
+        pub routing_key: ShortString,
+    }
+
+    impl Deliver {
+        /// Get the AMQP class id for deliver (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for deliver (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            60
+        }
+    }
+
+    /// Parse deliver (Generated)
+    pub fn parse_deliver<I: ParsableInput>(i: I) -> ParserResult<I, Deliver> {
+        let (i, consumer_tag) = parse_short_string(i)?;
+        let (i, delivery_tag) = parse_long_long_uint(i)?;
+        let (i, flags) = parse_flags(i, &["redelivered"])?;
+        let (i, exchange) = parse_short_string(i)?;
+        let (i, routing_key) = parse_short_string(i)?;
+        Ok((
+            i,
+            Deliver {
+                consumer_tag,
+                delivery_tag,
+                redelivered: flags.get_flag("redelivered").unwrap_or(false),
+                exchange,
+                routing_key,
+            },
+        ))
+    }
+
+    /// Serialize deliver (Generated)
+    pub fn gen_deliver<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a Deliver,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            let mut flags = AMQPFlags::default();
+            flags.add_flag("redelivered".to_string(), method.redelivered);
+            input = gen_id(60)(input)?;
+            input = gen_short_string(method.consumer_tag.as_str())(input)?;
+            input = gen_long_long_uint(method.delivery_tag)(input)?;
+            input = gen_flags(&flags)(input)?;
+            input = gen_short_string(method.exchange.as_str())(input)?;
+            input = gen_short_string(method.routing_key.as_str())(input)?;
+            Ok(input)
+        }
+    }
+    /// get (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct Get {
+        /// queue (Generated)
+        pub queue: ShortString,
+        /// no-ack (Generated)
+        pub no_ack: Boolean,
+    }
+
+    impl Get {
+        /// Get the AMQP class id for get (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for get (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            70
+        }
+    }
+
+    /// Parse get (Generated)
+    pub fn parse_get<I: ParsableInput>(i: I) -> ParserResult<I, Get> {
+        let (i, _) = parse_short_uint(i)?;
+        let (i, queue) = parse_short_string(i)?;
+        let (i, flags) = parse_flags(i, &["no-ack"])?;
+        Ok((
+            i,
+            Get {
+                queue,
+                no_ack: flags.get_flag("no_ack").unwrap_or(false),
+            },
+        ))
+    }
+
+    /// Serialize get (Generated)
+    pub fn gen_get<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a Get,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            let mut flags = AMQPFlags::default();
+            flags.add_flag("no_ack".to_string(), method.no_ack);
+            input = gen_id(70)(input)?;
+            input = gen_short_uint(0)(input)?;
+            input = gen_short_string(method.queue.as_str())(input)?;
+            input = gen_flags(&flags)(input)?;
+            Ok(input)
+        }
+    }
+    /// get-ok (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct GetOk {
+        /// delivery-tag (Generated)
+        pub delivery_tag: LongLongUInt,
+        /// redelivered (Generated)
+        pub redelivered: Boolean,
+        /// exchange (Generated)
+        pub exchange: ShortString,
+        /// routing-key (Generated)
+        pub routing_key: ShortString,
+        /// message-count (Generated)
+        pub message_count: LongUInt,
+    }
+
+    impl GetOk {
+        /// Get the AMQP class id for get-ok (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for get-ok (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            71
+        }
+    }
+
+    /// Parse get-ok (Generated)
+    pub fn parse_get_ok<I: ParsableInput>(i: I) -> ParserResult<I, GetOk> {
+        let (i, delivery_tag) = parse_long_long_uint(i)?;
+        let (i, flags) = parse_flags(i, &["redelivered"])?;
+        let (i, exchange) = parse_short_string(i)?;
+        let (i, routing_key) = parse_short_string(i)?;
+        let (i, message_count) = parse_long_uint(i)?;
+        Ok((
+            i,
+            GetOk {
+                delivery_tag,
+                redelivered: flags.get_flag("redelivered").unwrap_or(false),
+                exchange,
+                routing_key,
+                message_count,
+            },
+        ))
+    }
+
+    /// Serialize get-ok (Generated)
+    pub fn gen_get_ok<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a GetOk,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            let mut flags = AMQPFlags::default();
+            flags.add_flag("redelivered".to_string(), method.redelivered);
+            input = gen_id(71)(input)?;
+            input = gen_long_long_uint(method.delivery_tag)(input)?;
+            input = gen_flags(&flags)(input)?;
+            input = gen_short_string(method.exchange.as_str())(input)?;
+            input = gen_short_string(method.routing_key.as_str())(input)?;
+            input = gen_long_uint(method.message_count)(input)?;
+            Ok(input)
+        }
+    }
+    /// get-empty (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct GetEmpty {}
+
+    impl GetEmpty {
+        /// Get the AMQP class id for get-empty (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for get-empty (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            72
+        }
+    }
+
+    /// Parse get-empty (Generated)
+    pub fn parse_get_empty<I: ParsableInput>(i: I) -> ParserResult<I, GetEmpty> {
+        let (i, _) = parse_short_string(i)?;
+        Ok((i, GetEmpty {}))
+    }
+
+    /// Serialize get-empty (Generated)
+    pub fn gen_get_empty<'a, W: Write + BackToTheBuffer + 'a>(
+        _method: &'a GetEmpty,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            input = gen_id(72)(input)?;
+            input = gen_short_string("")(input)?;
+            Ok(input)
+        }
+    }
+    /// ack (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct Ack {
+        /// delivery-tag (Generated)
+        pub delivery_tag: LongLongUInt,
+        /// multiple (Generated)
+        pub multiple: Boolean,
+    }
+
+    impl Ack {
+        /// Get the AMQP class id for ack (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for ack (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            80
+        }
+    }
+
+    /// Parse ack (Generated)
+    pub fn parse_ack<I: ParsableInput>(i: I) -> ParserResult<I, Ack> {
+        let (i, delivery_tag) = parse_long_long_uint(i)?;
+        let (i, flags) = parse_flags(i, &["multiple"])?;
+        Ok((
+            i,
+            Ack {
+                delivery_tag,
+                multiple: flags.get_flag("multiple").unwrap_or(false),
+            },
+        ))
+    }
+
+    /// Serialize ack (Generated)
+    pub fn gen_ack<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a Ack,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            let mut flags = AMQPFlags::default();
+            flags.add_flag("multiple".to_string(), method.multiple);
+            input = gen_id(80)(input)?;
+            input = gen_long_long_uint(method.delivery_tag)(input)?;
+            input = gen_flags(&flags)(input)?;
+            Ok(input)
+        }
+    }
+    /// reject (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct Reject {
+        /// delivery-tag (Generated)
+        pub delivery_tag: LongLongUInt,
+        /// requeue (Generated)
+        pub requeue: Boolean,
+    }
+
+    impl Reject {
+        /// Get the AMQP class id for reject (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for reject (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            90
+        }
+    }
+
+    /// Parse reject (Generated)
+    pub fn parse_reject<I: ParsableInput>(i: I) -> ParserResult<I, Reject> {
+        let (i, delivery_tag) = parse_long_long_uint(i)?;
+        let (i, flags) = parse_flags(i, &["requeue"])?;
+        Ok((
+            i,
+            Reject {
+                delivery_tag,
+                requeue: flags.get_flag("requeue").unwrap_or(false),
+            },
+        ))
+    }
+
+    /// Serialize reject (Generated)
+    pub fn gen_reject<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a Reject,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            let mut flags = AMQPFlags::default();
+            flags.add_flag("requeue".to_string(), method.requeue);
+            input = gen_id(90)(input)?;
+            input = gen_long_long_uint(method.delivery_tag)(input)?;
+            input = gen_flags(&flags)(input)?;
+            Ok(input)
+        }
+    }
+    /// recover-async (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct RecoverAsync {
+        /// requeue (Generated)
+        pub requeue: Boolean,
+    }
+
+    impl RecoverAsync {
+        /// Get the AMQP class id for recover-async (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for recover-async (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            100
+        }
+    }
+
+    /// Parse recover-async (Generated)
+    pub fn parse_recover_async<I: ParsableInput>(i: I) -> ParserResult<I, RecoverAsync> {
+        let (i, flags) = parse_flags(i, &["requeue"])?;
+        Ok((
+            i,
+            RecoverAsync {
+                requeue: flags.get_flag("requeue").unwrap_or(false),
+            },
+        ))
+    }
+
+    /// Serialize recover-async (Generated)
+    pub fn gen_recover_async<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a RecoverAsync,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            let mut flags = AMQPFlags::default();
+            flags.add_flag("requeue".to_string(), method.requeue);
+            input = gen_id(100)(input)?;
+            input = gen_flags(&flags)(input)?;
+            Ok(input)
+        }
+    }
+    /// recover (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct Recover {
+        /// requeue (Generated)
+        pub requeue: Boolean,
+    }
+
+    impl Recover {
+        /// Get the AMQP class id for recover (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for recover (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            110
+        }
+    }
+
+    /// Parse recover (Generated)
+    pub fn parse_recover<I: ParsableInput>(i: I) -> ParserResult<I, Recover> {
+        let (i, flags) = parse_flags(i, &["requeue"])?;
+        Ok((
+            i,
+            Recover {
+                requeue: flags.get_flag("requeue").unwrap_or(false),
+            },
+        ))
+    }
+
+    /// Serialize recover (Generated)
+    pub fn gen_recover<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a Recover,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            let mut flags = AMQPFlags::default();
+            flags.add_flag("requeue".to_string(), method.requeue);
+            input = gen_id(110)(input)?;
+            input = gen_flags(&flags)(input)?;
+            Ok(input)
+        }
+    }
+    /// recover-ok (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct RecoverOk {}
+
+    impl RecoverOk {
+        /// Get the AMQP class id for recover-ok (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for recover-ok (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            111
+        }
+    }
+
+    /// Parse recover-ok (Generated)
+    pub fn parse_recover_ok<I: ParsableInput>(i: I) -> ParserResult<I, RecoverOk> {
+        Ok((i, RecoverOk {}))
+    }
+
+    /// Serialize recover-ok (Generated)
+    pub fn gen_recover_ok<'a, W: Write + BackToTheBuffer + 'a>(
+        _: &'a RecoverOk,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            input = gen_id(111)(input)?;
+            Ok(input)
+        }
+    }
+    /// nack (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct Nack {
+        /// delivery-tag (Generated)
+        pub delivery_tag: LongLongUInt,
+        /// multiple (Generated)
+        pub multiple: Boolean,
+        /// requeue (Generated)
+        pub requeue: Boolean,
+    }
+
+    impl Nack {
+        /// Get the AMQP class id for nack (Generated)
+        pub fn get_amqp_class_id(&self) -> Identifier {
+            60
+        }
+
+        /// Get the AMQP method id for nack (Generated)
+        pub fn get_amqp_method_id(&self) -> Identifier {
+            120
+        }
+    }
+
+    /// Parse nack (Generated)
+    pub fn parse_nack<I: ParsableInput>(i: I) -> ParserResult<I, Nack> {
+        let (i, delivery_tag) = parse_long_long_uint(i)?;
+        let (i, flags) = parse_flags(i, &["multiple", "requeue"])?;
+        Ok((
+            i,
+            Nack {
+                delivery_tag,
+                multiple: flags.get_flag("multiple").unwrap_or(false),
+                requeue: flags.get_flag("requeue").unwrap_or(false),
+            },
+        ))
+    }
+
+    /// Serialize nack (Generated)
+    pub fn gen_nack<'a, W: Write + BackToTheBuffer + 'a>(
+        method: &'a Nack,
+    ) -> impl SerializeFn<W> + 'a {
+        move |mut input| {
+            let mut flags = AMQPFlags::default();
+            flags.add_flag("multiple".to_string(), method.multiple);
+            flags.add_flag("requeue".to_string(), method.requeue);
+            input = gen_id(120)(input)?;
+            input = gen_long_long_uint(method.delivery_tag)(input)?;
+            input = gen_flags(&flags)(input)?;
+            Ok(input)
+        }
+    }
+    /// basic properties (Generated)
+    #[derive(Clone, Debug, Default, PartialEq)]
+    pub struct AMQPProperties {
+        content_type: Option<ShortString>,
+        content_encoding: Option<ShortString>,
+        headers: Option<FieldTable>,
+        delivery_mode: Option<ShortShortUInt>,
+        priority: Option<ShortShortUInt>,
+        correlation_id: Option<ShortString>,
+        reply_to: Option<ShortString>,
+        expiration: Option<ShortString>,
+        message_id: Option<ShortString>,
+        timestamp: Option<Timestamp>,
+        kind: Option<ShortString>,
+        user_id: Option<ShortString>,
+        app_id: Option<ShortString>,
+        cluster_id: Option<ShortString>,
+    }
+
+    impl AMQPProperties {
+        /// Set content-type (Generated)
+        pub fn with_content_type(mut self, value: ShortString) -> AMQPProperties {
+            self.content_type = Some(value);
+            self
+        }
+        /// Set content-encoding (Generated)
+        pub fn with_content_encoding(mut self, value: ShortString) -> AMQPProperties {
+            self.content_encoding = Some(value);
+            self
+        }
+        /// Set headers (Generated)
+        pub fn with_headers(mut self, value: FieldTable) -> AMQPProperties {
+            self.headers = Some(value);
+            self
+        }
+        /// Set delivery-mode (Generated)
+        pub fn with_delivery_mode(mut self, value: ShortShortUInt) -> AMQPProperties {
+            self.delivery_mode = Some(value);
+            self
+        }
+        /// Set priority (Generated)
+        pub fn with_priority(mut self, value: ShortShortUInt) -> AMQPProperties {
+            self.priority = Some(value);
+            self
+        }
+        /// Set correlation-id (Generated)
+        pub fn with_correlation_id(mut self, value: ShortString) -> AMQPProperties {
+            self.correlation_id = Some(value);
+            self
+        }
+        /// Set reply-to (Generated)
+        pub fn with_reply_to(mut self, value: ShortString) -> AMQPProperties {
+            self.reply_to = Some(value);
+            self
+        }
+        /// Set expiration (Generated)
+        pub fn with_expiration(mut self, value: ShortString) -> AMQPProperties {
+            self.expiration = Some(value);
+            self
+        }
+        /// Set message-id (Generated)
+        pub fn with_message_id(mut self, value: ShortString) -> AMQPProperties {
+            self.message_id = Some(value);
+            self
+        }
+        /// Set timestamp (Generated)
+        pub fn with_timestamp(mut self, value: Timestamp) -> AMQPProperties {
+            self.timestamp = Some(value);
+            self
+        }
+        /// Set type (Generated)
+        pub fn with_kind(mut self, value: ShortString) -> AMQPProperties {
+            self.kind = Some(value);
+            self
+        }
+        /// Set user-id (Generated)
+        pub fn with_user_id(mut self, value: ShortString) -> AMQPProperties {
+            self.user_id = Some(value);
+            self
+        }
+        /// Set app-id (Generated)
+        pub fn with_app_id(mut self, value: ShortString) -> AMQPProperties {
+            self.app_id = Some(value);
+            self
+        }
+        /// Set cluster-id (Generated)
+        pub fn with_cluster_id(mut self, value: ShortString) -> AMQPProperties {
+            self.cluster_id = Some(value);
+            self
+        }
+        /// Get content-type (Generated)
+        pub fn content_type(&self) -> &Option<ShortString> {
+            &self.content_type
+        }
+        /// Get content-encoding (Generated)
+        pub fn content_encoding(&self) -> &Option<ShortString> {
+            &self.content_encoding
+        }
+        /// Get headers (Generated)
+        pub fn headers(&self) -> &Option<FieldTable> {
+            &self.headers
+        }
+        /// Get delivery-mode (Generated)
+        pub fn delivery_mode(&self) -> &Option<ShortShortUInt> {
+            &self.delivery_mode
+        }
+        /// Get priority (Generated)
+        pub fn priority(&self) -> &Option<ShortShortUInt> {
+            &self.priority
+        }
+        /// Get correlation-id (Generated)
+        pub fn correlation_id(&self) -> &Option<ShortString> {
+            &self.correlation_id
+        }
+        /// Get reply-to (Generated)
+        pub fn reply_to(&self) -> &Option<ShortString> {
+            &self.reply_to
+        }
+        /// Get expiration (Generated)
+        pub fn expiration(&self) -> &Option<ShortString> {
+            &self.expiration
+        }
+        /// Get message-id (Generated)
+        pub fn message_id(&self) -> &Option<ShortString> {
+            &self.message_id
+        }
+        /// Get timestamp (Generated)
+        pub fn timestamp(&self) -> &Option<Timestamp> {
+            &self.timestamp
+        }
+        /// Get type (Generated)
+        pub fn kind(&self) -> &Option<ShortString> {
+            &self.kind
+        }
+        /// Get user-id (Generated)
+        pub fn user_id(&self) -> &Option<ShortString> {
+            &self.user_id
+        }
+        /// Get app-id (Generated)
+        pub fn app_id(&self) -> &Option<ShortString> {
+            &self.app_id
+        }
+        /// Get cluster-id (Generated)
+        pub fn cluster_id(&self) -> &Option<ShortString> {
+            &self.cluster_id
+        }
+        /// Get the bitmask for serialization (Generated)
+        #[allow(clippy::identity_op)]
+        pub fn bitmask(&self) -> ShortUInt {
+            (if self.content_type.is_some() {
+                1 << (15 - 0)
+            } else {
+                0
+            }) + (if self.content_encoding.is_some() {
+                1 << (15 - 1)
+            } else {
+                0
+            }) + (if self.headers.is_some() {
+                1 << (15 - 2)
+            } else {
+                0
+            }) + (if self.delivery_mode.is_some() {
+                1 << (15 - 3)
+            } else {
+                0
+            }) + (if self.priority.is_some() {
+                1 << (15 - 4)
+            } else {
+                0
+            }) + (if self.correlation_id.is_some() {
+                1 << (15 - 5)
+            } else {
+                0
+            }) + (if self.reply_to.is_some() {
+                1 << (15 - 6)
+            } else {
+                0
+            }) + (if self.expiration.is_some() {
+                1 << (15 - 7)
+            } else {
+                0
+            }) + (if self.message_id.is_some() {
+                1 << (15 - 8)
+            } else {
+                0
+            }) + (if self.timestamp.is_some() {
+                1 << (15 - 9)
+            } else {
+                0
+            }) + (if self.kind.is_some() {
+                1 << (15 - 10)
+            } else {
+                0
+            }) + (if self.user_id.is_some() {
+                1 << (15 - 11)
+            } else {
+                0
+            }) + (if self.app_id.is_some() {
+                1 << (15 - 12)
+            } else {
+                0
+            }) + (if self.cluster_id.is_some() {
+                1 << (15 - 13)
+            } else {
+                0
+            })
+        }
+    }
+
+    /// Parse basic properties (Generated)
+    #[allow(clippy::identity_op)]
+    pub fn parse_properties<I: ParsableInput>(i: I) -> ParserResult<I, AMQPProperties> {
+        let (i, flags) = parse_short_uint(i)?;
+        let (i, content_type) = if flags & (1 << (15 - 0)) != 0 {
+            map(parse_short_string, Some)(i)?
+        } else {
+            (i, None)
+        };
+        let (i, content_encoding) = if flags & (1 << (15 - 1)) != 0 {
+            map(parse_short_string, Some)(i)?
+        } else {
+            (i, None)
+        };
+        let (i, headers) = if flags & (1 << (15 - 2)) != 0 {
+            map(parse_field_table, Some)(i)?
+        } else {
+            (i, None)
+        };
+        let (i, delivery_mode) = if flags & (1 << (15 - 3)) != 0 {
+            map(parse_short_short_uint, Some)(i)?
+        } else {
+            (i, None)
+        };
+        let (i, priority) = if flags & (1 << (15 - 4)) != 0 {
+            map(parse_short_short_uint, Some)(i)?
+        } else {
+            (i, None)
+        };
+        let (i, correlation_id) = if flags & (1 << (15 - 5)) != 0 {
+            map(parse_short_string, Some)(i)?
+        } else {
+            (i, None)
+        };
+        let (i, reply_to) = if flags & (1 << (15 - 6)) != 0 {
+            map(parse_short_string, Some)(i)?
+        } else {
+            (i, None)
+        };
+        let (i, expiration) = if flags & (1 << (15 - 7)) != 0 {
+            map(parse_short_string, Some)(i)?
+        } else {
+            (i, None)
+        };
+        let (i, message_id) = if flags & (1 << (15 - 8)) != 0 {
+            map(parse_short_string, Some)(i)?
+        } else {
+            (i, None)
+        };
+        let (i, timestamp) = if flags & (1 << (15 - 9)) != 0 {
+            map(parse_timestamp, Some)(i)?
+        } else {
+            (i, None)
+        };
+        let (i, kind) = if flags & (1 << (15 - 10)) != 0 {
+            map(parse_short_string, Some)(i)?
+        } else {
+            (i, None)
+        };
+        let (i, user_id) = if flags & (1 << (15 - 11)) != 0 {
+            map(parse_short_string, Some)(i)?
+        } else {
+            (i, None)
+        };
+        let (i, app_id) = if flags & (1 << (15 - 12)) != 0 {
+            map(parse_short_string, Some)(i)?
+        } else {
+            (i, None)
+        };
+        let (i, cluster_id) = if flags & (1 << (15 - 13)) != 0 {
+            map(parse_short_string, Some)(i)?
+        } else {
+            (i, None)
+        };
+        Ok((
+            i,
+            AMQPProperties {
+                content_type,
+                content_encoding,
+                headers,
+                delivery_mode,
+                priority,
+                correlation_id,
+                reply_to,
+                expiration,
+                message_id,
+                timestamp,
+                kind,
+                user_id,
+                app_id,
+                cluster_id,
+            },
+        ))
+    }
+
+    /// Serialize basic properties (Generated)
+    pub fn gen_properties<'a, W: Write + BackToTheBuffer + 'a>(
+        props: &'a AMQPProperties,
+    ) -> impl SerializeFn<W> + 'a {
+        cookie_factory::sequence::pair(gen_short_uint(props.bitmask()), move |mut input| {
+            if let Some(prop) = props.content_type.as_ref() {
+                input = gen_short_string(prop.as_str())(input)?;
+            }
+            if let Some(prop) = props.content_encoding.as_ref() {
+                input = gen_short_string(prop.as_str())(input)?;
+            }
+            if let Some(prop) = props.headers.as_ref() {
+                input = gen_field_table(prop)(input)?;
+            }
+            if let Some(prop) = props.delivery_mode {
+                input = gen_short_short_uint(prop)(input)?;
+            }
+            if let Some(prop) = props.priority {
+                input = gen_short_short_uint(prop)(input)?;
+            }
+            if let Some(prop) = props.correlation_id.as_ref() {
+                input = gen_short_string(prop.as_str())(input)?;
+            }
+            if let Some(prop) = props.reply_to.as_ref() {
+                input = gen_short_string(prop.as_str())(input)?;
+            }
+            if let Some(prop) = props.expiration.as_ref() {
+                input = gen_short_string(prop.as_str())(input)?;
+            }
+            if let Some(prop) = props.message_id.as_ref() {
+                input = gen_short_string(prop.as_str())(input)?;
+            }
+            if let Some(prop) = props.timestamp {
+                input = gen_timestamp(prop)(input)?;
+            }
+            if let Some(prop) = props.kind.as_ref() {
+                input = gen_short_string(prop.as_str())(input)?;
+            }
+            if let Some(prop) = props.user_id.as_ref() {
+                input = gen_short_string(prop.as_str())(input)?;
+            }
+            if let Some(prop) = props.app_id.as_ref() {
+                input = gen_short_string(prop.as_str())(input)?;
+            }
+            if let Some(prop) = props.cluster_id.as_ref() {
+                input = gen_short_string(prop.as_str())(input)?;
+            }
+            Ok(input)
+        })
+    }
+}
 /// connection (generated)
 pub mod connection {
     use super::*;
@@ -2571,1353 +3918,6 @@ pub mod queue {
             input = gen_id(51)(input)?;
             Ok(input)
         }
-    }
-}
-/// basic (generated)
-pub mod basic {
-    use super::*;
-
-    /// Parse basic (Generated)
-    pub fn parse_basic<I: ParsableInput>(i: I) -> ParserResult<I, basic::AMQPMethod> {
-        context(
-            "parse_basic",
-            map_opt(
-                flat_map(parse_id, |id| {
-                    move |i| match id {
-                        10 => context("parse_qos", map(map(parse_qos, AMQPMethod::Qos), Some))(i),
-                        11 => context(
-                            "parse_qos_ok",
-                            map(map(parse_qos_ok, AMQPMethod::QosOk), Some),
-                        )(i),
-                        20 => context(
-                            "parse_consume",
-                            map(map(parse_consume, AMQPMethod::Consume), Some),
-                        )(i),
-                        21 => context(
-                            "parse_consume_ok",
-                            map(map(parse_consume_ok, AMQPMethod::ConsumeOk), Some),
-                        )(i),
-                        30 => context(
-                            "parse_cancel",
-                            map(map(parse_cancel, AMQPMethod::Cancel), Some),
-                        )(i),
-                        31 => context(
-                            "parse_cancel_ok",
-                            map(map(parse_cancel_ok, AMQPMethod::CancelOk), Some),
-                        )(i),
-                        40 => context(
-                            "parse_publish",
-                            map(map(parse_publish, AMQPMethod::Publish), Some),
-                        )(i),
-                        50 => context(
-                            "parse_return",
-                            map(map(parse_return, AMQPMethod::Return), Some),
-                        )(i),
-                        60 => context(
-                            "parse_deliver",
-                            map(map(parse_deliver, AMQPMethod::Deliver), Some),
-                        )(i),
-                        70 => context("parse_get", map(map(parse_get, AMQPMethod::Get), Some))(i),
-                        71 => context(
-                            "parse_get_ok",
-                            map(map(parse_get_ok, AMQPMethod::GetOk), Some),
-                        )(i),
-                        72 => context(
-                            "parse_get_empty",
-                            map(map(parse_get_empty, AMQPMethod::GetEmpty), Some),
-                        )(i),
-                        80 => context("parse_ack", map(map(parse_ack, AMQPMethod::Ack), Some))(i),
-                        90 => context(
-                            "parse_reject",
-                            map(map(parse_reject, AMQPMethod::Reject), Some),
-                        )(i),
-                        100 => context(
-                            "parse_recover_async",
-                            map(map(parse_recover_async, AMQPMethod::RecoverAsync), Some),
-                        )(i),
-                        110 => context(
-                            "parse_recover",
-                            map(map(parse_recover, AMQPMethod::Recover), Some),
-                        )(i),
-                        111 => context(
-                            "parse_recover_ok",
-                            map(map(parse_recover_ok, AMQPMethod::RecoverOk), Some),
-                        )(i),
-                        120 => {
-                            context("parse_nack", map(map(parse_nack, AMQPMethod::Nack), Some))(i)
-                        }
-                        _ => Ok((i, None)),
-                    }
-                }),
-                std::convert::identity,
-            ),
-        )(i)
-    }
-
-    /// Serialize basic (Generated)
-    pub fn gen_basic<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a AMQPMethod,
-    ) -> impl SerializeFn<W> + 'a {
-        cookie_factory::sequence::pair(gen_id(60), move |input| match *method {
-            AMQPMethod::Qos(ref qos) => gen_qos(qos)(input),
-            AMQPMethod::QosOk(ref qos_ok) => gen_qos_ok(qos_ok)(input),
-            AMQPMethod::Consume(ref consume) => gen_consume(consume)(input),
-            AMQPMethod::ConsumeOk(ref consume_ok) => gen_consume_ok(consume_ok)(input),
-            AMQPMethod::Cancel(ref cancel) => gen_cancel(cancel)(input),
-            AMQPMethod::CancelOk(ref cancel_ok) => gen_cancel_ok(cancel_ok)(input),
-            AMQPMethod::Publish(ref publish) => gen_publish(publish)(input),
-            AMQPMethod::Return(ref r#return) => gen_return(r#return)(input),
-            AMQPMethod::Deliver(ref deliver) => gen_deliver(deliver)(input),
-            AMQPMethod::Get(ref get) => gen_get(get)(input),
-            AMQPMethod::GetOk(ref get_ok) => gen_get_ok(get_ok)(input),
-            AMQPMethod::GetEmpty(ref get_empty) => gen_get_empty(get_empty)(input),
-            AMQPMethod::Ack(ref ack) => gen_ack(ack)(input),
-            AMQPMethod::Reject(ref reject) => gen_reject(reject)(input),
-            AMQPMethod::RecoverAsync(ref recover_async) => gen_recover_async(recover_async)(input),
-            AMQPMethod::Recover(ref recover) => gen_recover(recover)(input),
-            AMQPMethod::RecoverOk(ref recover_ok) => gen_recover_ok(recover_ok)(input),
-            AMQPMethod::Nack(ref nack) => gen_nack(nack)(input),
-        })
-    }
-
-    /// The available methods in basic
-    #[derive(Clone, Debug, PartialEq)]
-    pub enum AMQPMethod {
-        /// qos (Generated)
-        Qos(Qos),
-        /// qos-ok (Generated)
-        QosOk(QosOk),
-        /// consume (Generated)
-        Consume(Consume),
-        /// consume-ok (Generated)
-        ConsumeOk(ConsumeOk),
-        /// cancel (Generated)
-        Cancel(Cancel),
-        /// cancel-ok (Generated)
-        CancelOk(CancelOk),
-        /// publish (Generated)
-        Publish(Publish),
-        /// return (Generated)
-        Return(Return),
-        /// deliver (Generated)
-        Deliver(Deliver),
-        /// get (Generated)
-        Get(Get),
-        /// get-ok (Generated)
-        GetOk(GetOk),
-        /// get-empty (Generated)
-        GetEmpty(GetEmpty),
-        /// ack (Generated)
-        Ack(Ack),
-        /// reject (Generated)
-        Reject(Reject),
-        /// recover-async (Generated)
-        RecoverAsync(RecoverAsync),
-        /// recover (Generated)
-        Recover(Recover),
-        /// recover-ok (Generated)
-        RecoverOk(RecoverOk),
-        /// nack (Generated)
-        Nack(Nack),
-    }
-
-    /// qos (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct Qos {
-        /// prefetch-count (Generated)
-        pub prefetch_count: ShortUInt,
-        /// global (Generated)
-        pub global: Boolean,
-    }
-
-    impl Qos {
-        /// Get the AMQP class id for qos (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for qos (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            10
-        }
-    }
-
-    /// Parse qos (Generated)
-    pub fn parse_qos<I: ParsableInput>(i: I) -> ParserResult<I, Qos> {
-        let (i, _) = parse_long_uint(i)?;
-        let (i, prefetch_count) = parse_short_uint(i)?;
-        let (i, flags) = parse_flags(i, &["global"])?;
-        Ok((
-            i,
-            Qos {
-                prefetch_count,
-                global: flags.get_flag("global").unwrap_or(false),
-            },
-        ))
-    }
-
-    /// Serialize qos (Generated)
-    pub fn gen_qos<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a Qos,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("global".to_string(), method.global);
-            input = gen_id(10)(input)?;
-            input = gen_long_uint(0)(input)?;
-            input = gen_short_uint(method.prefetch_count)(input)?;
-            input = gen_flags(&flags)(input)?;
-            Ok(input)
-        }
-    }
-    /// qos-ok (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct QosOk {}
-
-    impl QosOk {
-        /// Get the AMQP class id for qos-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for qos-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            11
-        }
-    }
-
-    /// Parse qos-ok (Generated)
-    pub fn parse_qos_ok<I: ParsableInput>(i: I) -> ParserResult<I, QosOk> {
-        Ok((i, QosOk {}))
-    }
-
-    /// Serialize qos-ok (Generated)
-    pub fn gen_qos_ok<'a, W: Write + BackToTheBuffer + 'a>(
-        _: &'a QosOk,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            input = gen_id(11)(input)?;
-            Ok(input)
-        }
-    }
-    /// consume (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct Consume {
-        /// queue (Generated)
-        pub queue: ShortString,
-        /// consumer-tag (Generated)
-        pub consumer_tag: ShortString,
-        /// no-local (Generated)
-        pub no_local: Boolean,
-        /// no-ack (Generated)
-        pub no_ack: Boolean,
-        /// exclusive (Generated)
-        pub exclusive: Boolean,
-        /// nowait (Generated)
-        pub nowait: Boolean,
-        /// arguments (Generated)
-        pub arguments: FieldTable,
-    }
-
-    impl Consume {
-        /// Get the AMQP class id for consume (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for consume (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            20
-        }
-    }
-
-    /// Parse consume (Generated)
-    pub fn parse_consume<I: ParsableInput>(i: I) -> ParserResult<I, Consume> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, queue) = parse_short_string(i)?;
-        let (i, consumer_tag) = parse_short_string(i)?;
-        let (i, flags) = parse_flags(i, &["no-local", "no-ack", "exclusive", "nowait"])?;
-        let (i, arguments) = parse_field_table(i)?;
-        Ok((
-            i,
-            Consume {
-                queue,
-                consumer_tag,
-                no_local: flags.get_flag("no_local").unwrap_or(false),
-                no_ack: flags.get_flag("no_ack").unwrap_or(false),
-                exclusive: flags.get_flag("exclusive").unwrap_or(false),
-                nowait: flags.get_flag("nowait").unwrap_or(false),
-                arguments,
-            },
-        ))
-    }
-
-    /// Serialize consume (Generated)
-    pub fn gen_consume<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a Consume,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("no_local".to_string(), method.no_local);
-            flags.add_flag("no_ack".to_string(), method.no_ack);
-            flags.add_flag("exclusive".to_string(), method.exclusive);
-            flags.add_flag("nowait".to_string(), method.nowait);
-            input = gen_id(20)(input)?;
-            input = gen_short_uint(0)(input)?;
-            input = gen_short_string(method.queue.as_str())(input)?;
-            input = gen_short_string(method.consumer_tag.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
-            input = gen_field_table(&method.arguments)(input)?;
-            Ok(input)
-        }
-    }
-    /// consume-ok (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct ConsumeOk {
-        /// consumer-tag (Generated)
-        pub consumer_tag: ShortString,
-    }
-
-    impl ConsumeOk {
-        /// Get the AMQP class id for consume-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for consume-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            21
-        }
-    }
-
-    /// Parse consume-ok (Generated)
-    pub fn parse_consume_ok<I: ParsableInput>(i: I) -> ParserResult<I, ConsumeOk> {
-        let (i, consumer_tag) = parse_short_string(i)?;
-        Ok((i, ConsumeOk { consumer_tag }))
-    }
-
-    /// Serialize consume-ok (Generated)
-    pub fn gen_consume_ok<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a ConsumeOk,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            input = gen_id(21)(input)?;
-            input = gen_short_string(method.consumer_tag.as_str())(input)?;
-            Ok(input)
-        }
-    }
-    /// cancel (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct Cancel {
-        /// consumer-tag (Generated)
-        pub consumer_tag: ShortString,
-        /// nowait (Generated)
-        pub nowait: Boolean,
-    }
-
-    impl Cancel {
-        /// Get the AMQP class id for cancel (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for cancel (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            30
-        }
-    }
-
-    /// Parse cancel (Generated)
-    pub fn parse_cancel<I: ParsableInput>(i: I) -> ParserResult<I, Cancel> {
-        let (i, consumer_tag) = parse_short_string(i)?;
-        let (i, flags) = parse_flags(i, &["nowait"])?;
-        Ok((
-            i,
-            Cancel {
-                consumer_tag,
-                nowait: flags.get_flag("nowait").unwrap_or(false),
-            },
-        ))
-    }
-
-    /// Serialize cancel (Generated)
-    pub fn gen_cancel<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a Cancel,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("nowait".to_string(), method.nowait);
-            input = gen_id(30)(input)?;
-            input = gen_short_string(method.consumer_tag.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
-            Ok(input)
-        }
-    }
-    /// cancel-ok (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct CancelOk {
-        /// consumer-tag (Generated)
-        pub consumer_tag: ShortString,
-    }
-
-    impl CancelOk {
-        /// Get the AMQP class id for cancel-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for cancel-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            31
-        }
-    }
-
-    /// Parse cancel-ok (Generated)
-    pub fn parse_cancel_ok<I: ParsableInput>(i: I) -> ParserResult<I, CancelOk> {
-        let (i, consumer_tag) = parse_short_string(i)?;
-        Ok((i, CancelOk { consumer_tag }))
-    }
-
-    /// Serialize cancel-ok (Generated)
-    pub fn gen_cancel_ok<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a CancelOk,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            input = gen_id(31)(input)?;
-            input = gen_short_string(method.consumer_tag.as_str())(input)?;
-            Ok(input)
-        }
-    }
-    /// publish (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct Publish {
-        /// exchange (Generated)
-        pub exchange: ShortString,
-        /// routing-key (Generated)
-        pub routing_key: ShortString,
-        /// mandatory (Generated)
-        pub mandatory: Boolean,
-        /// immediate (Generated)
-        pub immediate: Boolean,
-    }
-
-    impl Publish {
-        /// Get the AMQP class id for publish (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for publish (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            40
-        }
-    }
-
-    /// Parse publish (Generated)
-    pub fn parse_publish<I: ParsableInput>(i: I) -> ParserResult<I, Publish> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, exchange) = parse_short_string(i)?;
-        let (i, routing_key) = parse_short_string(i)?;
-        let (i, flags) = parse_flags(i, &["mandatory", "immediate"])?;
-        Ok((
-            i,
-            Publish {
-                exchange,
-                routing_key,
-                mandatory: flags.get_flag("mandatory").unwrap_or(false),
-                immediate: flags.get_flag("immediate").unwrap_or(false),
-            },
-        ))
-    }
-
-    /// Serialize publish (Generated)
-    pub fn gen_publish<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a Publish,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("mandatory".to_string(), method.mandatory);
-            flags.add_flag("immediate".to_string(), method.immediate);
-            input = gen_id(40)(input)?;
-            input = gen_short_uint(0)(input)?;
-            input = gen_short_string(method.exchange.as_str())(input)?;
-            input = gen_short_string(method.routing_key.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
-            Ok(input)
-        }
-    }
-    /// return (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct Return {
-        /// reply-code (Generated)
-        pub reply_code: ShortUInt,
-        /// reply-text (Generated)
-        pub reply_text: ShortString,
-        /// exchange (Generated)
-        pub exchange: ShortString,
-        /// routing-key (Generated)
-        pub routing_key: ShortString,
-    }
-
-    impl Return {
-        /// Get the AMQP class id for return (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for return (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            50
-        }
-    }
-
-    /// Parse return (Generated)
-    pub fn parse_return<I: ParsableInput>(i: I) -> ParserResult<I, Return> {
-        let (i, reply_code) = parse_short_uint(i)?;
-        let (i, reply_text) = parse_short_string(i)?;
-        let (i, exchange) = parse_short_string(i)?;
-        let (i, routing_key) = parse_short_string(i)?;
-        Ok((
-            i,
-            Return {
-                reply_code,
-                reply_text,
-                exchange,
-                routing_key,
-            },
-        ))
-    }
-
-    /// Serialize return (Generated)
-    pub fn gen_return<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a Return,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            input = gen_id(50)(input)?;
-            input = gen_short_uint(method.reply_code)(input)?;
-            input = gen_short_string(method.reply_text.as_str())(input)?;
-            input = gen_short_string(method.exchange.as_str())(input)?;
-            input = gen_short_string(method.routing_key.as_str())(input)?;
-            Ok(input)
-        }
-    }
-    /// deliver (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct Deliver {
-        /// consumer-tag (Generated)
-        pub consumer_tag: ShortString,
-        /// delivery-tag (Generated)
-        pub delivery_tag: LongLongUInt,
-        /// redelivered (Generated)
-        pub redelivered: Boolean,
-        /// exchange (Generated)
-        pub exchange: ShortString,
-        /// routing-key (Generated)
-        pub routing_key: ShortString,
-    }
-
-    impl Deliver {
-        /// Get the AMQP class id for deliver (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for deliver (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            60
-        }
-    }
-
-    /// Parse deliver (Generated)
-    pub fn parse_deliver<I: ParsableInput>(i: I) -> ParserResult<I, Deliver> {
-        let (i, consumer_tag) = parse_short_string(i)?;
-        let (i, delivery_tag) = parse_long_long_uint(i)?;
-        let (i, flags) = parse_flags(i, &["redelivered"])?;
-        let (i, exchange) = parse_short_string(i)?;
-        let (i, routing_key) = parse_short_string(i)?;
-        Ok((
-            i,
-            Deliver {
-                consumer_tag,
-                delivery_tag,
-                redelivered: flags.get_flag("redelivered").unwrap_or(false),
-                exchange,
-                routing_key,
-            },
-        ))
-    }
-
-    /// Serialize deliver (Generated)
-    pub fn gen_deliver<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a Deliver,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("redelivered".to_string(), method.redelivered);
-            input = gen_id(60)(input)?;
-            input = gen_short_string(method.consumer_tag.as_str())(input)?;
-            input = gen_long_long_uint(method.delivery_tag)(input)?;
-            input = gen_flags(&flags)(input)?;
-            input = gen_short_string(method.exchange.as_str())(input)?;
-            input = gen_short_string(method.routing_key.as_str())(input)?;
-            Ok(input)
-        }
-    }
-    /// get (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct Get {
-        /// queue (Generated)
-        pub queue: ShortString,
-        /// no-ack (Generated)
-        pub no_ack: Boolean,
-    }
-
-    impl Get {
-        /// Get the AMQP class id for get (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for get (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            70
-        }
-    }
-
-    /// Parse get (Generated)
-    pub fn parse_get<I: ParsableInput>(i: I) -> ParserResult<I, Get> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, queue) = parse_short_string(i)?;
-        let (i, flags) = parse_flags(i, &["no-ack"])?;
-        Ok((
-            i,
-            Get {
-                queue,
-                no_ack: flags.get_flag("no_ack").unwrap_or(false),
-            },
-        ))
-    }
-
-    /// Serialize get (Generated)
-    pub fn gen_get<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a Get,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("no_ack".to_string(), method.no_ack);
-            input = gen_id(70)(input)?;
-            input = gen_short_uint(0)(input)?;
-            input = gen_short_string(method.queue.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
-            Ok(input)
-        }
-    }
-    /// get-ok (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct GetOk {
-        /// delivery-tag (Generated)
-        pub delivery_tag: LongLongUInt,
-        /// redelivered (Generated)
-        pub redelivered: Boolean,
-        /// exchange (Generated)
-        pub exchange: ShortString,
-        /// routing-key (Generated)
-        pub routing_key: ShortString,
-        /// message-count (Generated)
-        pub message_count: LongUInt,
-    }
-
-    impl GetOk {
-        /// Get the AMQP class id for get-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for get-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            71
-        }
-    }
-
-    /// Parse get-ok (Generated)
-    pub fn parse_get_ok<I: ParsableInput>(i: I) -> ParserResult<I, GetOk> {
-        let (i, delivery_tag) = parse_long_long_uint(i)?;
-        let (i, flags) = parse_flags(i, &["redelivered"])?;
-        let (i, exchange) = parse_short_string(i)?;
-        let (i, routing_key) = parse_short_string(i)?;
-        let (i, message_count) = parse_long_uint(i)?;
-        Ok((
-            i,
-            GetOk {
-                delivery_tag,
-                redelivered: flags.get_flag("redelivered").unwrap_or(false),
-                exchange,
-                routing_key,
-                message_count,
-            },
-        ))
-    }
-
-    /// Serialize get-ok (Generated)
-    pub fn gen_get_ok<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a GetOk,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("redelivered".to_string(), method.redelivered);
-            input = gen_id(71)(input)?;
-            input = gen_long_long_uint(method.delivery_tag)(input)?;
-            input = gen_flags(&flags)(input)?;
-            input = gen_short_string(method.exchange.as_str())(input)?;
-            input = gen_short_string(method.routing_key.as_str())(input)?;
-            input = gen_long_uint(method.message_count)(input)?;
-            Ok(input)
-        }
-    }
-    /// get-empty (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct GetEmpty {}
-
-    impl GetEmpty {
-        /// Get the AMQP class id for get-empty (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for get-empty (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            72
-        }
-    }
-
-    /// Parse get-empty (Generated)
-    pub fn parse_get_empty<I: ParsableInput>(i: I) -> ParserResult<I, GetEmpty> {
-        let (i, _) = parse_short_string(i)?;
-        Ok((i, GetEmpty {}))
-    }
-
-    /// Serialize get-empty (Generated)
-    pub fn gen_get_empty<'a, W: Write + BackToTheBuffer + 'a>(
-        _method: &'a GetEmpty,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            input = gen_id(72)(input)?;
-            input = gen_short_string("")(input)?;
-            Ok(input)
-        }
-    }
-    /// ack (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct Ack {
-        /// delivery-tag (Generated)
-        pub delivery_tag: LongLongUInt,
-        /// multiple (Generated)
-        pub multiple: Boolean,
-    }
-
-    impl Ack {
-        /// Get the AMQP class id for ack (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for ack (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            80
-        }
-    }
-
-    /// Parse ack (Generated)
-    pub fn parse_ack<I: ParsableInput>(i: I) -> ParserResult<I, Ack> {
-        let (i, delivery_tag) = parse_long_long_uint(i)?;
-        let (i, flags) = parse_flags(i, &["multiple"])?;
-        Ok((
-            i,
-            Ack {
-                delivery_tag,
-                multiple: flags.get_flag("multiple").unwrap_or(false),
-            },
-        ))
-    }
-
-    /// Serialize ack (Generated)
-    pub fn gen_ack<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a Ack,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("multiple".to_string(), method.multiple);
-            input = gen_id(80)(input)?;
-            input = gen_long_long_uint(method.delivery_tag)(input)?;
-            input = gen_flags(&flags)(input)?;
-            Ok(input)
-        }
-    }
-    /// reject (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct Reject {
-        /// delivery-tag (Generated)
-        pub delivery_tag: LongLongUInt,
-        /// requeue (Generated)
-        pub requeue: Boolean,
-    }
-
-    impl Reject {
-        /// Get the AMQP class id for reject (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for reject (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            90
-        }
-    }
-
-    /// Parse reject (Generated)
-    pub fn parse_reject<I: ParsableInput>(i: I) -> ParserResult<I, Reject> {
-        let (i, delivery_tag) = parse_long_long_uint(i)?;
-        let (i, flags) = parse_flags(i, &["requeue"])?;
-        Ok((
-            i,
-            Reject {
-                delivery_tag,
-                requeue: flags.get_flag("requeue").unwrap_or(false),
-            },
-        ))
-    }
-
-    /// Serialize reject (Generated)
-    pub fn gen_reject<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a Reject,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("requeue".to_string(), method.requeue);
-            input = gen_id(90)(input)?;
-            input = gen_long_long_uint(method.delivery_tag)(input)?;
-            input = gen_flags(&flags)(input)?;
-            Ok(input)
-        }
-    }
-    /// recover-async (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct RecoverAsync {
-        /// requeue (Generated)
-        pub requeue: Boolean,
-    }
-
-    impl RecoverAsync {
-        /// Get the AMQP class id for recover-async (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for recover-async (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            100
-        }
-    }
-
-    /// Parse recover-async (Generated)
-    pub fn parse_recover_async<I: ParsableInput>(i: I) -> ParserResult<I, RecoverAsync> {
-        let (i, flags) = parse_flags(i, &["requeue"])?;
-        Ok((
-            i,
-            RecoverAsync {
-                requeue: flags.get_flag("requeue").unwrap_or(false),
-            },
-        ))
-    }
-
-    /// Serialize recover-async (Generated)
-    pub fn gen_recover_async<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a RecoverAsync,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("requeue".to_string(), method.requeue);
-            input = gen_id(100)(input)?;
-            input = gen_flags(&flags)(input)?;
-            Ok(input)
-        }
-    }
-    /// recover (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct Recover {
-        /// requeue (Generated)
-        pub requeue: Boolean,
-    }
-
-    impl Recover {
-        /// Get the AMQP class id for recover (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for recover (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            110
-        }
-    }
-
-    /// Parse recover (Generated)
-    pub fn parse_recover<I: ParsableInput>(i: I) -> ParserResult<I, Recover> {
-        let (i, flags) = parse_flags(i, &["requeue"])?;
-        Ok((
-            i,
-            Recover {
-                requeue: flags.get_flag("requeue").unwrap_or(false),
-            },
-        ))
-    }
-
-    /// Serialize recover (Generated)
-    pub fn gen_recover<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a Recover,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("requeue".to_string(), method.requeue);
-            input = gen_id(110)(input)?;
-            input = gen_flags(&flags)(input)?;
-            Ok(input)
-        }
-    }
-    /// recover-ok (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct RecoverOk {}
-
-    impl RecoverOk {
-        /// Get the AMQP class id for recover-ok (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for recover-ok (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            111
-        }
-    }
-
-    /// Parse recover-ok (Generated)
-    pub fn parse_recover_ok<I: ParsableInput>(i: I) -> ParserResult<I, RecoverOk> {
-        Ok((i, RecoverOk {}))
-    }
-
-    /// Serialize recover-ok (Generated)
-    pub fn gen_recover_ok<'a, W: Write + BackToTheBuffer + 'a>(
-        _: &'a RecoverOk,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            input = gen_id(111)(input)?;
-            Ok(input)
-        }
-    }
-    /// nack (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct Nack {
-        /// delivery-tag (Generated)
-        pub delivery_tag: LongLongUInt,
-        /// multiple (Generated)
-        pub multiple: Boolean,
-        /// requeue (Generated)
-        pub requeue: Boolean,
-    }
-
-    impl Nack {
-        /// Get the AMQP class id for nack (Generated)
-        pub fn get_amqp_class_id(&self) -> Identifier {
-            60
-        }
-
-        /// Get the AMQP method id for nack (Generated)
-        pub fn get_amqp_method_id(&self) -> Identifier {
-            120
-        }
-    }
-
-    /// Parse nack (Generated)
-    pub fn parse_nack<I: ParsableInput>(i: I) -> ParserResult<I, Nack> {
-        let (i, delivery_tag) = parse_long_long_uint(i)?;
-        let (i, flags) = parse_flags(i, &["multiple", "requeue"])?;
-        Ok((
-            i,
-            Nack {
-                delivery_tag,
-                multiple: flags.get_flag("multiple").unwrap_or(false),
-                requeue: flags.get_flag("requeue").unwrap_or(false),
-            },
-        ))
-    }
-
-    /// Serialize nack (Generated)
-    pub fn gen_nack<'a, W: Write + BackToTheBuffer + 'a>(
-        method: &'a Nack,
-    ) -> impl SerializeFn<W> + 'a {
-        move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("multiple".to_string(), method.multiple);
-            flags.add_flag("requeue".to_string(), method.requeue);
-            input = gen_id(120)(input)?;
-            input = gen_long_long_uint(method.delivery_tag)(input)?;
-            input = gen_flags(&flags)(input)?;
-            Ok(input)
-        }
-    }
-    /// basic properties (Generated)
-    #[derive(Clone, Debug, Default, PartialEq)]
-    pub struct AMQPProperties {
-        content_type: Option<ShortString>,
-        content_encoding: Option<ShortString>,
-        headers: Option<FieldTable>,
-        delivery_mode: Option<ShortShortUInt>,
-        priority: Option<ShortShortUInt>,
-        correlation_id: Option<ShortString>,
-        reply_to: Option<ShortString>,
-        expiration: Option<ShortString>,
-        message_id: Option<ShortString>,
-        timestamp: Option<Timestamp>,
-        kind: Option<ShortString>,
-        user_id: Option<ShortString>,
-        app_id: Option<ShortString>,
-        cluster_id: Option<ShortString>,
-    }
-
-    impl AMQPProperties {
-        /// Set content-type (Generated)
-        pub fn with_content_type(mut self, value: ShortString) -> AMQPProperties {
-            self.content_type = Some(value);
-            self
-        }
-        /// Set content-encoding (Generated)
-        pub fn with_content_encoding(mut self, value: ShortString) -> AMQPProperties {
-            self.content_encoding = Some(value);
-            self
-        }
-        /// Set headers (Generated)
-        pub fn with_headers(mut self, value: FieldTable) -> AMQPProperties {
-            self.headers = Some(value);
-            self
-        }
-        /// Set delivery-mode (Generated)
-        pub fn with_delivery_mode(mut self, value: ShortShortUInt) -> AMQPProperties {
-            self.delivery_mode = Some(value);
-            self
-        }
-        /// Set priority (Generated)
-        pub fn with_priority(mut self, value: ShortShortUInt) -> AMQPProperties {
-            self.priority = Some(value);
-            self
-        }
-        /// Set correlation-id (Generated)
-        pub fn with_correlation_id(mut self, value: ShortString) -> AMQPProperties {
-            self.correlation_id = Some(value);
-            self
-        }
-        /// Set reply-to (Generated)
-        pub fn with_reply_to(mut self, value: ShortString) -> AMQPProperties {
-            self.reply_to = Some(value);
-            self
-        }
-        /// Set expiration (Generated)
-        pub fn with_expiration(mut self, value: ShortString) -> AMQPProperties {
-            self.expiration = Some(value);
-            self
-        }
-        /// Set message-id (Generated)
-        pub fn with_message_id(mut self, value: ShortString) -> AMQPProperties {
-            self.message_id = Some(value);
-            self
-        }
-        /// Set timestamp (Generated)
-        pub fn with_timestamp(mut self, value: Timestamp) -> AMQPProperties {
-            self.timestamp = Some(value);
-            self
-        }
-        /// Set type (Generated)
-        pub fn with_kind(mut self, value: ShortString) -> AMQPProperties {
-            self.kind = Some(value);
-            self
-        }
-        /// Set user-id (Generated)
-        pub fn with_user_id(mut self, value: ShortString) -> AMQPProperties {
-            self.user_id = Some(value);
-            self
-        }
-        /// Set app-id (Generated)
-        pub fn with_app_id(mut self, value: ShortString) -> AMQPProperties {
-            self.app_id = Some(value);
-            self
-        }
-        /// Set cluster-id (Generated)
-        pub fn with_cluster_id(mut self, value: ShortString) -> AMQPProperties {
-            self.cluster_id = Some(value);
-            self
-        }
-        /// Get content-type (Generated)
-        pub fn content_type(&self) -> &Option<ShortString> {
-            &self.content_type
-        }
-        /// Get content-encoding (Generated)
-        pub fn content_encoding(&self) -> &Option<ShortString> {
-            &self.content_encoding
-        }
-        /// Get headers (Generated)
-        pub fn headers(&self) -> &Option<FieldTable> {
-            &self.headers
-        }
-        /// Get delivery-mode (Generated)
-        pub fn delivery_mode(&self) -> &Option<ShortShortUInt> {
-            &self.delivery_mode
-        }
-        /// Get priority (Generated)
-        pub fn priority(&self) -> &Option<ShortShortUInt> {
-            &self.priority
-        }
-        /// Get correlation-id (Generated)
-        pub fn correlation_id(&self) -> &Option<ShortString> {
-            &self.correlation_id
-        }
-        /// Get reply-to (Generated)
-        pub fn reply_to(&self) -> &Option<ShortString> {
-            &self.reply_to
-        }
-        /// Get expiration (Generated)
-        pub fn expiration(&self) -> &Option<ShortString> {
-            &self.expiration
-        }
-        /// Get message-id (Generated)
-        pub fn message_id(&self) -> &Option<ShortString> {
-            &self.message_id
-        }
-        /// Get timestamp (Generated)
-        pub fn timestamp(&self) -> &Option<Timestamp> {
-            &self.timestamp
-        }
-        /// Get type (Generated)
-        pub fn kind(&self) -> &Option<ShortString> {
-            &self.kind
-        }
-        /// Get user-id (Generated)
-        pub fn user_id(&self) -> &Option<ShortString> {
-            &self.user_id
-        }
-        /// Get app-id (Generated)
-        pub fn app_id(&self) -> &Option<ShortString> {
-            &self.app_id
-        }
-        /// Get cluster-id (Generated)
-        pub fn cluster_id(&self) -> &Option<ShortString> {
-            &self.cluster_id
-        }
-        /// Get the bitmask for serialization (Generated)
-        #[allow(clippy::identity_op)]
-        pub fn bitmask(&self) -> ShortUInt {
-            (if self.content_type.is_some() {
-                1 << (15 - 0)
-            } else {
-                0
-            }) + (if self.content_encoding.is_some() {
-                1 << (15 - 1)
-            } else {
-                0
-            }) + (if self.headers.is_some() {
-                1 << (15 - 2)
-            } else {
-                0
-            }) + (if self.delivery_mode.is_some() {
-                1 << (15 - 3)
-            } else {
-                0
-            }) + (if self.priority.is_some() {
-                1 << (15 - 4)
-            } else {
-                0
-            }) + (if self.correlation_id.is_some() {
-                1 << (15 - 5)
-            } else {
-                0
-            }) + (if self.reply_to.is_some() {
-                1 << (15 - 6)
-            } else {
-                0
-            }) + (if self.expiration.is_some() {
-                1 << (15 - 7)
-            } else {
-                0
-            }) + (if self.message_id.is_some() {
-                1 << (15 - 8)
-            } else {
-                0
-            }) + (if self.timestamp.is_some() {
-                1 << (15 - 9)
-            } else {
-                0
-            }) + (if self.kind.is_some() {
-                1 << (15 - 10)
-            } else {
-                0
-            }) + (if self.user_id.is_some() {
-                1 << (15 - 11)
-            } else {
-                0
-            }) + (if self.app_id.is_some() {
-                1 << (15 - 12)
-            } else {
-                0
-            }) + (if self.cluster_id.is_some() {
-                1 << (15 - 13)
-            } else {
-                0
-            })
-        }
-    }
-
-    /// Parse basic properties (Generated)
-    #[allow(clippy::identity_op)]
-    pub fn parse_properties<I: ParsableInput>(i: I) -> ParserResult<I, AMQPProperties> {
-        let (i, flags) = parse_short_uint(i)?;
-        let (i, content_type) = if flags & (1 << (15 - 0)) != 0 {
-            map(parse_short_string, Some)(i)?
-        } else {
-            (i, None)
-        };
-        let (i, content_encoding) = if flags & (1 << (15 - 1)) != 0 {
-            map(parse_short_string, Some)(i)?
-        } else {
-            (i, None)
-        };
-        let (i, headers) = if flags & (1 << (15 - 2)) != 0 {
-            map(parse_field_table, Some)(i)?
-        } else {
-            (i, None)
-        };
-        let (i, delivery_mode) = if flags & (1 << (15 - 3)) != 0 {
-            map(parse_short_short_uint, Some)(i)?
-        } else {
-            (i, None)
-        };
-        let (i, priority) = if flags & (1 << (15 - 4)) != 0 {
-            map(parse_short_short_uint, Some)(i)?
-        } else {
-            (i, None)
-        };
-        let (i, correlation_id) = if flags & (1 << (15 - 5)) != 0 {
-            map(parse_short_string, Some)(i)?
-        } else {
-            (i, None)
-        };
-        let (i, reply_to) = if flags & (1 << (15 - 6)) != 0 {
-            map(parse_short_string, Some)(i)?
-        } else {
-            (i, None)
-        };
-        let (i, expiration) = if flags & (1 << (15 - 7)) != 0 {
-            map(parse_short_string, Some)(i)?
-        } else {
-            (i, None)
-        };
-        let (i, message_id) = if flags & (1 << (15 - 8)) != 0 {
-            map(parse_short_string, Some)(i)?
-        } else {
-            (i, None)
-        };
-        let (i, timestamp) = if flags & (1 << (15 - 9)) != 0 {
-            map(parse_timestamp, Some)(i)?
-        } else {
-            (i, None)
-        };
-        let (i, kind) = if flags & (1 << (15 - 10)) != 0 {
-            map(parse_short_string, Some)(i)?
-        } else {
-            (i, None)
-        };
-        let (i, user_id) = if flags & (1 << (15 - 11)) != 0 {
-            map(parse_short_string, Some)(i)?
-        } else {
-            (i, None)
-        };
-        let (i, app_id) = if flags & (1 << (15 - 12)) != 0 {
-            map(parse_short_string, Some)(i)?
-        } else {
-            (i, None)
-        };
-        let (i, cluster_id) = if flags & (1 << (15 - 13)) != 0 {
-            map(parse_short_string, Some)(i)?
-        } else {
-            (i, None)
-        };
-        Ok((
-            i,
-            AMQPProperties {
-                content_type,
-                content_encoding,
-                headers,
-                delivery_mode,
-                priority,
-                correlation_id,
-                reply_to,
-                expiration,
-                message_id,
-                timestamp,
-                kind,
-                user_id,
-                app_id,
-                cluster_id,
-            },
-        ))
-    }
-
-    /// Serialize basic properties (Generated)
-    pub fn gen_properties<'a, W: Write + BackToTheBuffer + 'a>(
-        props: &'a AMQPProperties,
-    ) -> impl SerializeFn<W> + 'a {
-        cookie_factory::sequence::pair(gen_short_uint(props.bitmask()), move |mut input| {
-            if let Some(prop) = props.content_type.as_ref() {
-                input = gen_short_string(prop.as_str())(input)?;
-            }
-            if let Some(prop) = props.content_encoding.as_ref() {
-                input = gen_short_string(prop.as_str())(input)?;
-            }
-            if let Some(prop) = props.headers.as_ref() {
-                input = gen_field_table(prop)(input)?;
-            }
-            if let Some(prop) = props.delivery_mode {
-                input = gen_short_short_uint(prop)(input)?;
-            }
-            if let Some(prop) = props.priority {
-                input = gen_short_short_uint(prop)(input)?;
-            }
-            if let Some(prop) = props.correlation_id.as_ref() {
-                input = gen_short_string(prop.as_str())(input)?;
-            }
-            if let Some(prop) = props.reply_to.as_ref() {
-                input = gen_short_string(prop.as_str())(input)?;
-            }
-            if let Some(prop) = props.expiration.as_ref() {
-                input = gen_short_string(prop.as_str())(input)?;
-            }
-            if let Some(prop) = props.message_id.as_ref() {
-                input = gen_short_string(prop.as_str())(input)?;
-            }
-            if let Some(prop) = props.timestamp {
-                input = gen_timestamp(prop)(input)?;
-            }
-            if let Some(prop) = props.kind.as_ref() {
-                input = gen_short_string(prop.as_str())(input)?;
-            }
-            if let Some(prop) = props.user_id.as_ref() {
-                input = gen_short_string(prop.as_str())(input)?;
-            }
-            if let Some(prop) = props.app_id.as_ref() {
-                input = gen_short_string(prop.as_str())(input)?;
-            }
-            if let Some(prop) = props.cluster_id.as_ref() {
-                input = gen_short_string(prop.as_str())(input)?;
-            }
-            Ok(input)
-        })
     }
 }
 /// tx (generated)
