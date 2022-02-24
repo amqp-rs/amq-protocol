@@ -8,6 +8,7 @@ use nom::{
     combinator::{flat_map, map, map_opt},
     error::context,
 };
+use serde::{Deserialize, Serialize};
 use std::{convert::TryFrom, error, fmt, io::Write};
 
 #[cfg(feature = "codegen")]

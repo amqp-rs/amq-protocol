@@ -53,5 +53,9 @@ features = ["std"]
 version  = "^7.0"
 features = ["std"]
 
+[dependencies.serde]
+version  = "^1.0"
+features = ["derive"]
+
 [badges]
 maintenance = { status = "actively-developed" }
