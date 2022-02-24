@@ -1358,7 +1358,7 @@ pub mod basic {
         }
     }
     /// basic properties (Generated)
-    #[derive(Clone, Debug, Default, PartialEq, serde::Serialize, serde::Deserialize)]
+    #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
     pub struct AMQPProperties {
         content_type: Option<ShortString>,
         content_encoding: Option<ShortString>,
