@@ -205,10 +205,6 @@ fn make_str<I: nom::InputIter<Item = u8>>(i: I) -> Result<String, std::string::F
     String::from_utf8(i.iter_elements().collect())
 }
 
-fn make_str_lossy<I: nom::InputIter<Item = u8>>(i: I) -> String {
-    String::from_utf8_lossy(&i.iter_elements().collect::<Vec<_>>()).into_owned()
-}
-
 /// Parse a [ShortString](../type.ShortString.html)
 pub fn parse_short_string<I: ParsableInput>(i: I) -> ParserResult<I, ShortString> {
     context(
@@ -224,10 +220,9 @@ pub fn parse_short_string<I: ParsableInput>(i: I) -> ParserResult<I, ShortString
 pub fn parse_long_string<I: ParsableInput>(i: I) -> ParserResult<I, LongString> {
     context(
         "parse_long_string",
-        map(
-            map(flat_map(parse_long_uint, take), make_str_lossy),
-            LongString::from,
-        ),
+        map(flat_map(parse_long_uint, take), |i: I| {
+            i.iter_elements().collect::<Vec<u8>>().into()
+        }),
     )(i)
 }
 
