@@ -208,8 +208,11 @@ impl<'a> LongString {
         &self.0[..]
     }
 }
- 
-impl<B> From<B> for LongString where B: Into<Vec<u8>> {
+
+impl<B> From<B> for LongString
+where
+    B: Into<Vec<u8>>,
+{
     fn from(bytes: B) -> Self {
         Self(bytes.into())
     }
@@ -327,7 +330,6 @@ mod test {
         assert_eq!(AMQPType::Void.to_string(), "Void");
     }
 
-
     #[test]
     fn long_string_ergonomics() {
         let str_ref = "string ref";
@@ -354,5 +356,4 @@ mod test {
             assert_eq!(left, right);
         }
     }
-
 }
