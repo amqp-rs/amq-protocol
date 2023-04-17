@@ -29,7 +29,7 @@ version = "=7.0.1"
 path    = "../uri"
 
 [dependencies.tcp-stream]
-version          = "^0.24"
+version          = "^0.25"
 default-features = false
 
 [dependencies.tracing]
