@@ -336,14 +336,12 @@ mod test {
         let str_owned = "string owned".to_owned();
         let vec = b"bytes".to_vec();
         let array = b"bytes".to_owned();
-        // let slice_fixed = b"bytes";
         let slice = &b"bytes"[..];
 
-        let from_str_ref: LongString = str_ref.clone().into();
+        let from_str_ref: LongString = str_ref.into();
         let from_str_owned: LongString = str_owned.clone().into();
         let from_vec: LongString = vec.clone().into();
         let from_array: LongString = array.into();
-        // let from_slice_fixed: LongString = slice_fixed.into();
         let from_slice: LongString = slice.into();
 
         for (left, right) in [
