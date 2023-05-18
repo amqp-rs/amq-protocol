@@ -209,15 +209,12 @@ impl<'a> LongString {
     }
 }
 
-impl From<String> for LongString {
-    fn from(s: String) -> Self {
-        Self(s.into_bytes())
-    }
-}
-
-impl From<&str> for LongString {
-    fn from(s: &str) -> Self {
-        s.to_owned().into()
+impl<B> From<B> for LongString
+where
+    B: Into<Vec<u8>>,
+{
+    fn from(bytes: B) -> Self {
+        Self(bytes.into())
     }
 }
 
@@ -331,5 +328,30 @@ mod test {
     fn test_type_to_string() {
         assert_eq!(AMQPType::Boolean.to_string(), "Boolean");
         assert_eq!(AMQPType::Void.to_string(), "Void");
+    }
+
+    #[test]
+    fn long_string_ergonomics() {
+        let str_ref = "string ref";
+        let str_owned = "string owned".to_owned();
+        let vec = b"bytes".to_vec();
+        let array = b"bytes".to_owned();
+        let slice = &b"bytes"[..];
+
+        let from_str_ref: LongString = str_ref.into();
+        let from_str_owned: LongString = str_owned.clone().into();
+        let from_vec: LongString = vec.clone().into();
+        let from_array: LongString = array.into();
+        let from_slice: LongString = slice.into();
+
+        for (left, right) in [
+            (str_ref.as_bytes(), from_str_ref.as_bytes()),
+            (str_owned.as_bytes(), from_str_owned.as_bytes()),
+            (vec.as_ref(), from_vec.as_bytes()),
+            (array.as_ref(), from_array.as_bytes()),
+            (slice, from_slice.as_bytes()),
+        ] {
+            assert_eq!(left, right);
+        }
     }
 }
