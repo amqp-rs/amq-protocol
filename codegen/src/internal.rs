@@ -361,7 +361,7 @@ impl _AMQPMethod {
             .unwrap_or_default();
         if is_reply && metadata.get("state").is_none() {
             if let Some(state) = class_md
-                .and_then(|c| c.get(&self.name.replace("-ok", "")))
+                .and_then(|c| c.get(self.name.replace("-ok", "")))
                 .and_then(|m| m.get("metadata"))
                 .and_then(|m| m.get("state"))
             {
@@ -370,7 +370,7 @@ impl _AMQPMethod {
         }
         if is_reply && metadata.get("confirmation").is_none() {
             if let Some(confirmation) = class_md
-                .and_then(|c| c.get(&self.name.replace("-ok", "")))
+                .and_then(|c| c.get(self.name.replace("-ok", "")))
                 .and_then(|m| m.get("metadata"))
                 .and_then(|m| m.get("confirmation"))
             {
@@ -411,7 +411,7 @@ impl _AMQPMethod {
                 .unwrap_or(false);
             let amqp_type = argument.get_type(domains);
             if amqp_type == AMQPType::Boolean {
-                let mut flgs = flags.take().unwrap_or_else(Vec::new);
+                let mut flgs = flags.take().unwrap_or_default();
                 flgs.push(argument.to_flag_specs(force_default));
                 flags = Some(flgs);
             } else {

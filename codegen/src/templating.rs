@@ -78,7 +78,7 @@ impl<'a> HandlebarsAMQPExtension for CodeGenerator<'a> {
 
         codegen.set_strict_mode(true);
         codegen
-            .register_template_string(template_name, template.to_string())
+            .register_template_string(template_name, template)
             .unwrap_or_else(|e| panic!("Failed to register {} template: {}", template_name, e));
         data.insert(
             var_name.to_string(),
@@ -336,9 +336,9 @@ impl HelperDef for EachArgumentHelper {
                         AMQPArgument::Value(_) => ("Value".to_owned(), true),
                         AMQPArgument::Flags(_) => ("Flags".to_owned(), false),
                     };
-                    block.set_local_var("index", to_json(&index));
+                    block.set_local_var("index", to_json(index));
                     block.set_local_var("last", to_json(index == len - 1));
-                    block.set_local_var("argument_is_value", to_json(&is_value));
+                    block.set_local_var("argument_is_value", to_json(is_value));
                     if let Some(p) = array_path {
                         if index == 0 {
                             let mut path = Vec::with_capacity(p.len() + 1);
@@ -509,9 +509,7 @@ synchronous: {{method.synchronous}}
         let mut data = HashMap::new();
         let mut codegen = CodeGenerator::default().register_amqp_helpers();
         data.insert("protocol".to_string(), specs());
-        assert!(codegen
-            .register_template_string("main", TEMPLATE.to_string())
-            .is_ok());
+        assert!(codegen.register_template_string("main", TEMPLATE).is_ok());
         assert_eq!(
             codegen.render("main", &data).unwrap(),
             r#"

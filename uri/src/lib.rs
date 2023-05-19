@@ -26,9 +26,10 @@ pub struct AMQPUri {
 }
 
 /// The scheme used by the AMQP connection
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub enum AMQPScheme {
     /// Plain AMQP
+    #[default]
     AMQP,
     /// Encrypted AMQP over TLS
     AMQPS,
@@ -85,22 +86,17 @@ pub struct AMQPQueryString {
 }
 
 /// The SASL mechanisms supported by RabbitMQ
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum SASLMechanism {
     /// This is a legacy mechanism kept for backward compatibility
     AMQPlain,
     /// Delegate all authentication to the transport instead of the RabbitMQ server
     External,
     /// Default plain login, this should be supported everywhere
+    #[default]
     Plain,
     /// A demo of RabbitMQ SecureOk mechanism, offers the same level of security as Plain
     RabbitCrDemo,
-}
-
-impl Default for SASLMechanism {
-    fn default() -> Self {
-        SASLMechanism::Plain
-    }
 }
 
 impl fmt::Display for SASLMechanism {
@@ -151,7 +147,7 @@ fn int_queryparam<T: FromStr<Err = ParseIntError>>(
     param: &str,
 ) -> Result<Option<T>, String> {
     url.query_pairs()
-        .find(|&(ref key, _)| key == param)
+        .find(|(key, _)| key == param)
         .map_or(Ok(None), |(_, ref value)| value.parse::<T>().map(Some))
         .map_err(|e: ParseIntError| e.to_string())
 }
@@ -184,7 +180,7 @@ impl FromStr for AMQPUri {
         let connection_timeout = int_queryparam(&url, "connection_timeout")?;
         let auth_mechanism = url
             .query_pairs()
-            .find(|&(ref key, _)| key == "auth_mechanism")
+            .find(|(key, _)| key == "auth_mechanism")
             .map_or(Ok(None), |(_, ref value)| value.parse().map(Some))?;
 
         Ok(AMQPUri {
@@ -213,12 +209,6 @@ impl AMQPScheme {
             AMQPScheme::AMQP => 5672,
             AMQPScheme::AMQPS => 5671,
         }
-    }
-}
-
-impl Default for AMQPScheme {
-    fn default() -> Self {
-        AMQPScheme::AMQP
     }
 }
 
