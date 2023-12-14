@@ -3,7 +3,7 @@ use crate::{specs::*, util::*};
 use amq_protocol_types::{AMQPType, AMQPValue};
 use handlebars::{
     self, to_json, BlockContext, BlockParams, Context, Handlebars, Helper, HelperDef, HelperResult,
-    JsonValue, Output, RenderContext, RenderError, Renderable, ScopedJson,
+    JsonValue, Output, RenderContext, RenderError, RenderErrorReason, Renderable, ScopedJson,
 };
 use serde_json::{self, Value};
 
@@ -105,7 +105,7 @@ pub struct CamelHelper;
 impl HelperDef for CamelHelper {
     fn call<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         _: &'reg Handlebars<'_>,
         _: &'rc Context,
         _: &mut RenderContext<'reg, 'rc>,
@@ -113,11 +113,14 @@ impl HelperDef for CamelHelper {
     ) -> HelperResult {
         let value = h
             .param(0)
-            .ok_or_else(|| RenderError::new("Param not found for helper \"camel\""))?;
-        let param = value
-            .value()
-            .as_str()
-            .ok_or_else(|| RenderError::new("Non-string param given to helper \"camel\""))?;
+            .ok_or_else(|| RenderErrorReason::ParamNotFoundForIndex("camel", 0))?;
+        let param = value.value().as_str().ok_or_else(|| {
+            RenderErrorReason::ParamTypeMismatchForName(
+                "camel",
+                "string".to_string(),
+                "string".to_string(),
+            )
+        })?;
         out.write(&camel_case(param))?;
         Ok(())
     }
@@ -128,7 +131,7 @@ pub struct SnakeHelper;
 impl HelperDef for SnakeHelper {
     fn call<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         _: &'reg Handlebars<'_>,
         _: &'rc Context,
         _: &mut RenderContext<'reg, 'rc>,
@@ -136,15 +139,18 @@ impl HelperDef for SnakeHelper {
     ) -> HelperResult {
         let value = h
             .param(0)
-            .ok_or_else(|| RenderError::new("First param not found for helper \"snake\""))?;
+            .ok_or_else(|| RenderErrorReason::ParamNotFoundForIndex("snake", 0))?;
         let raw = h
             .param(1)
             .and_then(|raw| raw.value().as_bool())
             .unwrap_or(true);
-        let param = value
-            .value()
-            .as_str()
-            .ok_or_else(|| RenderError::new("Non-string first param given to helper \"snake\""))?;
+        let param = value.value().as_str().ok_or_else(|| {
+            RenderErrorReason::ParamTypeMismatchForName(
+                "snake",
+                "string".to_string(),
+                "string".to_string(),
+            )
+        })?;
         out.write(&snake_case(param, raw))?;
         Ok(())
     }
@@ -155,7 +161,7 @@ pub struct SnakeTypeHelper;
 impl HelperDef for SnakeTypeHelper {
     fn call<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         _: &'reg Handlebars<'_>,
         _: &'rc Context,
         _: &mut RenderContext<'reg, 'rc>,
@@ -163,9 +169,14 @@ impl HelperDef for SnakeTypeHelper {
     ) -> HelperResult {
         let value = h
             .param(0)
-            .ok_or_else(|| RenderError::new("Param not found for helper \"snake_type\""))?;
-        let param: AMQPType = serde_json::from_value(value.value().clone())
-            .map_err(|_| RenderError::new("Param is not an AMQPType for helper \"snake_type\""))?;
+            .ok_or_else(|| RenderErrorReason::ParamNotFoundForIndex("snake_type", 0))?;
+        let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| {
+            RenderErrorReason::ParamTypeMismatchForName(
+                "snake_type",
+                "AMQPType".to_string(),
+                "string".to_string(),
+            )
+        })?;
         out.write(&snake_case(&param.to_string(), true))?;
         Ok(())
     }
@@ -176,7 +187,7 @@ pub struct SanitizeNameHelper;
 impl HelperDef for SanitizeNameHelper {
     fn call<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         _: &'reg Handlebars<'_>,
         _: &'rc Context,
         _: &mut RenderContext<'reg, 'rc>,
@@ -184,9 +195,13 @@ impl HelperDef for SanitizeNameHelper {
     ) -> HelperResult {
         let value = h
             .param(0)
-            .ok_or_else(|| RenderError::new("Param not found for helper \"sanitize_name\""))?;
+            .ok_or_else(|| RenderErrorReason::ParamNotFoundForIndex("sanitize_name", 0))?;
         let param = value.value().as_str().ok_or_else(|| {
-            RenderError::new("Non-string param given to helper \"sanitize_name\"")
+            RenderErrorReason::ParamTypeMismatchForName(
+                "sanitize_name",
+                "string".to_string(),
+                "string".to_string(),
+            )
         })?;
         out.write(&param.replace('-', "_"))?;
         Ok(())
@@ -198,7 +213,7 @@ pub struct IncludeMoreHelper;
 impl HelperDef for IncludeMoreHelper {
     fn call<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         _: &'reg Handlebars<'_>,
         _: &'rc Context,
         _: &mut RenderContext<'reg, 'rc>,
@@ -206,18 +221,24 @@ impl HelperDef for IncludeMoreHelper {
     ) -> HelperResult {
         let amqp_class = h
             .param(0)
-            .ok_or_else(|| RenderError::new("Param not found for helper \"include_more\""))?;
+            .ok_or_else(|| RenderErrorReason::ParamNotFoundForIndex("include_more", 0))?;
         let amqp_method = h
             .param(1)
-            .ok_or_else(|| RenderError::new("Param not found for helper \"include_more\""))?;
-        let amqp_class = amqp_class
-            .value()
-            .as_str()
-            .ok_or_else(|| RenderError::new("Non-string param given to helper \"include_more\""))?;
-        let amqp_method = amqp_method
-            .value()
-            .as_str()
-            .ok_or_else(|| RenderError::new("Non-string param given to helper \"include_more\""))?;
+            .ok_or_else(|| RenderErrorReason::ParamNotFoundForIndex("include_more", 1))?;
+        let amqp_class = amqp_class.value().as_str().ok_or_else(|| {
+            RenderErrorReason::ParamTypeMismatchForName(
+                "include_more",
+                "string".to_string(),
+                "class".to_string(),
+            )
+        })?;
+        let amqp_method = amqp_method.value().as_str().ok_or_else(|| {
+            RenderErrorReason::ParamTypeMismatchForName(
+                "include_more",
+                "string".to_string(),
+                "method".to_string(),
+            )
+        })?;
         if let Ok(cargo_manifest_dir) = std::env::var("CARGO_MANIFEST_DIR") {
             let include = Path::new(&cargo_manifest_dir)
                 .join("templates")
@@ -237,16 +258,21 @@ pub struct PassByRefHelper;
 impl HelperDef for PassByRefHelper {
     fn call_inner<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         _: &'reg Handlebars<'_>,
         _: &'rc Context,
         _: &mut RenderContext<'reg, 'rc>,
-    ) -> Result<ScopedJson<'reg, 'rc>, RenderError> {
+    ) -> Result<ScopedJson<'rc>, RenderError> {
         let value = h
             .param(0)
-            .ok_or_else(|| RenderError::new("Param not found for helper \"pass_by_ref\""))?;
-        let param: AMQPType = serde_json::from_value(value.value().clone())
-            .map_err(|_| RenderError::new("Param is not an AMQPType for helper \"pass_by_ref\""))?;
+            .ok_or_else(|| RenderErrorReason::ParamNotFoundForIndex("pass_by_ref", 0))?;
+        let param: AMQPType = serde_json::from_value(value.value().clone()).map_err(|_| {
+            RenderErrorReason::ParamTypeMismatchForName(
+                "pass_by_ref",
+                "AMQPType".to_string(),
+                "string".to_string(),
+            )
+        })?;
         let pass_by_ref = matches!(
             param,
             AMQPType::ShortString
@@ -264,14 +290,14 @@ pub struct UseStrRefHelper;
 impl HelperDef for UseStrRefHelper {
     fn call_inner<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         _: &'reg Handlebars<'_>,
         _: &'rc Context,
         _: &mut RenderContext<'reg, 'rc>,
-    ) -> Result<ScopedJson<'reg, 'rc>, RenderError> {
+    ) -> Result<ScopedJson<'rc>, RenderError> {
         let value = h
             .param(0)
-            .ok_or_else(|| RenderError::new("Param not found for helper \"use_str_ref\""))?;
+            .ok_or_else(|| RenderErrorReason::ParamNotFoundForIndex("use_str_ref", 0))?;
         let param = serde_json::from_value::<AMQPType>(value.value().clone()).ok();
         let use_str_ref = matches!(
             param,
@@ -286,14 +312,14 @@ pub struct UseBytesRefHelper;
 impl HelperDef for UseBytesRefHelper {
     fn call_inner<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         _: &'reg Handlebars<'_>,
         _: &'rc Context,
         _: &mut RenderContext<'reg, 'rc>,
-    ) -> Result<ScopedJson<'reg, 'rc>, RenderError> {
+    ) -> Result<ScopedJson<'rc>, RenderError> {
         let value = h
             .param(0)
-            .ok_or_else(|| RenderError::new("Param not found for helper \"use_bytes_ref\""))?;
+            .ok_or_else(|| RenderErrorReason::ParamNotFoundForIndex("use_bytes_ref", 0))?;
         let param = serde_json::from_value::<AMQPType>(value.value().clone()).ok();
         let use_bytes_ref = matches!(param, Some(AMQPType::LongString));
         Ok(ScopedJson::Derived(JsonValue::from(use_bytes_ref)))
@@ -305,7 +331,7 @@ pub struct EachArgumentHelper;
 impl HelperDef for EachArgumentHelper {
     fn call<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         r: &'reg Handlebars<'_>,
         ctx: &'rc Context,
         rc: &mut RenderContext<'reg, 'rc>,
@@ -313,7 +339,7 @@ impl HelperDef for EachArgumentHelper {
     ) -> HelperResult {
         let value = h
             .param(0)
-            .ok_or_else(|| RenderError::new("Param not found for helper \"each_argument\""))?;
+            .ok_or_else(|| RenderErrorReason::ParamNotFoundForIndex("each_argument", 0))?;
 
         if let Some(t) = h.template() {
             let mut block_context = BlockContext::new();
@@ -322,11 +348,12 @@ impl HelperDef for EachArgumentHelper {
             }
             rc.push_block(block_context);
             let arguments: Vec<AMQPArgument> = serde_json::from_value(value.value().clone())
-                .map_err(|err| {
-                    RenderError::new(format!(
-                        "Param is not a Vec<AMQPArgument> for helper \"each_argument\": {}",
-                        err
-                    ))
+                .map_err(|_| {
+                    RenderErrorReason::ParamTypeMismatchForName(
+                        "each_argument",
+                        "Vec<AMQPArgument>".to_string(),
+                        "arguments".to_string(),
+                    )
                 })?;
             let len = arguments.len();
             let array_path = value.context_path();
@@ -368,37 +395,46 @@ pub struct AMQPValueRefHelper;
 impl HelperDef for AMQPValueRefHelper {
     fn call_inner<'reg: 'rc, 'rc>(
         &self,
-        h: &Helper<'reg, 'rc>,
+        h: &Helper<'rc>,
         _: &'reg Handlebars<'_>,
         _: &'rc Context,
         _: &mut RenderContext<'reg, 'rc>,
-    ) -> Result<ScopedJson<'reg, 'rc>, RenderError> {
+    ) -> Result<ScopedJson<'rc>, RenderError> {
         let arg = h
             .param(0)
-            .ok_or_else(|| RenderError::new("First param not found for helper \"amqp_value\""))?;
-        let param: AMQPValue = serde_json::from_value(arg.value().clone())
-            .map_err(|_| RenderError::new("Param is not an AMQPValue for helper \"amqp_value\""))?;
-        let value = match param {
-            AMQPValue::Boolean(v) => serde_json::to_value(v)?,
-            AMQPValue::ShortShortInt(v) => serde_json::to_value(v)?,
-            AMQPValue::ShortShortUInt(v) => serde_json::to_value(v)?,
-            AMQPValue::ShortInt(v) => serde_json::to_value(v)?,
-            AMQPValue::ShortUInt(v) => serde_json::to_value(v)?,
-            AMQPValue::LongInt(v) => serde_json::to_value(v)?,
-            AMQPValue::LongUInt(v) => serde_json::to_value(v)?,
-            AMQPValue::LongLongInt(v) => serde_json::to_value(v)?,
-            AMQPValue::Float(v) => serde_json::to_value(v)?,
-            AMQPValue::Double(v) => serde_json::to_value(v)?,
-            AMQPValue::DecimalValue(v) => serde_json::to_value(v)?,
-            AMQPValue::ShortString(v) => serde_json::to_value(format!("\"{}\"", v))?,
-            AMQPValue::LongString(v) => serde_json::to_value(format!("b\"{}\"", v))?,
-            AMQPValue::FieldArray(v) => serde_json::to_value(v)?,
-            AMQPValue::Timestamp(v) => serde_json::to_value(v)?,
-            AMQPValue::FieldTable(v) => serde_json::to_value(v)?,
-            AMQPValue::ByteArray(v) => serde_json::to_value(v)?,
-            AMQPValue::Void => JsonValue::Null,
-        };
+            .ok_or_else(|| RenderErrorReason::ParamNotFoundForIndex("amqp_value", 0))?;
+        let param = serde_json::from_value(arg.value().clone()).map_err(|_| {
+            RenderErrorReason::ParamTypeMismatchForName(
+                "amqp_value",
+                "AMQPValue".to_string(),
+                "value".to_string(),
+            )
+        })?;
+        let value = json_value(param).map_err(RenderErrorReason::SerdeError)?;
         Ok(ScopedJson::Derived(value))
+    }
+}
+
+fn json_value(val: AMQPValue) -> serde_json::Result<serde_json::Value> {
+    match val {
+        AMQPValue::Boolean(v) => serde_json::to_value(v),
+        AMQPValue::ShortShortInt(v) => serde_json::to_value(v),
+        AMQPValue::ShortShortUInt(v) => serde_json::to_value(v),
+        AMQPValue::ShortInt(v) => serde_json::to_value(v),
+        AMQPValue::ShortUInt(v) => serde_json::to_value(v),
+        AMQPValue::LongInt(v) => serde_json::to_value(v),
+        AMQPValue::LongUInt(v) => serde_json::to_value(v),
+        AMQPValue::LongLongInt(v) => serde_json::to_value(v),
+        AMQPValue::Float(v) => serde_json::to_value(v),
+        AMQPValue::Double(v) => serde_json::to_value(v),
+        AMQPValue::DecimalValue(v) => serde_json::to_value(v),
+        AMQPValue::ShortString(v) => serde_json::to_value(format!("\"{}\"", v)),
+        AMQPValue::LongString(v) => serde_json::to_value(format!("b\"{}\"", v)),
+        AMQPValue::FieldArray(v) => serde_json::to_value(v),
+        AMQPValue::Timestamp(v) => serde_json::to_value(v),
+        AMQPValue::FieldTable(v) => serde_json::to_value(v),
+        AMQPValue::ByteArray(v) => serde_json::to_value(v),
+        AMQPValue::Void => Ok(JsonValue::Null),
     }
 }
 
