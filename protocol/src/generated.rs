@@ -13,7 +13,7 @@ pub mod metadata {
     /// The default port of the protocol
     pub const PORT: LongUInt = 5672;
     /// The copyright holding the protocol
-    pub const COPYRIGHT: &str = r#"Copyright (C) 2008-2020 VMware, Inc. or its affiliates.
+    pub const COPYRIGHT: &str = r#"Copyright (C) 2007-2024 Broadcom Inc. and its subsidiaries. All rights reserved.
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this file (the "Software"), to deal in the
