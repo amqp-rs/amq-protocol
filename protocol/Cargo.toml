@@ -46,8 +46,9 @@ version = "=7.1.2"
 path    = "../uri"
 
 [dependencies.cookie-factory]
-version  = "^0.3"
-features = ["std"]
+version          = "^0.3"
+default-features = false
+features         = ["std"]
 
 [dependencies.nom]
 version  = "^7.0"

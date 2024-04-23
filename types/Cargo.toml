@@ -21,8 +21,9 @@ verbose-errors = []
 serde_json = "^1.0"
 
 [dependencies.cookie-factory]
-version  = "^0.3"
-features = ["std"]
+version          = "^0.3"
+default-features = false
+features         = ["std"]
 
 [dependencies.nom]
 version  = "^7.0"
