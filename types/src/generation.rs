@@ -173,9 +173,9 @@ pub fn gen_byte_array<'a, W: Write + 'a>(a: &'a ByteArray) -> impl SerializeFn<W
 /// Generate the [AMQPFlags](../type.AMQPFlags.html) in the given buffer (x)
 pub fn gen_flags<'a, W: Write + 'a>(f: &'a AMQPFlags) -> impl SerializeFn<W> + 'a {
     move |x| {
-        f.get_bytes().iter().fold(Ok(x), |acc: GenResult<W>, b| {
-            acc.and_then(|x| gen_short_short_uint(*b)(x))
-        })
+        f.get_bytes()
+            .iter()
+            .try_fold(x, |acc, b| gen_short_short_uint(*b)(acc))
     }
 }
 
