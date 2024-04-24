@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-codegen"
-version       = "7.1.2" # remember to update html_root_url
+version       = "7.1.2"
 edition       = "2021"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP specifications - codegen"
