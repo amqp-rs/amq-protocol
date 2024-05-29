@@ -9,6 +9,7 @@ use nom::{
         be_f32, be_f64, be_i16, be_i32, be_i64, be_u16, be_u32, be_u64, i8 as be_i8, u8 as be_u8,
     },
     sequence::pair,
+    Parser,
 };
 use std::{error, fmt};
 use traits::*;
@@ -92,34 +93,34 @@ pub type ParserResult<I, T> = Result<(I, T), ParserError>;
 /// Parse the [AMQPValue](../type.AMQPValue.html) of the given [AMQPType](../type.AMQPType.html)
 pub fn parse_raw_value<I: ParsableInput>(
     amqp_type: AMQPType,
-) -> impl FnMut(I) -> ParserResult<I, AMQPValue> {
+) -> impl Parser<I, Output = AMQPValue, Error = ParserErrors> {
     context("parse_raw_value", move |i| match amqp_type {
-        AMQPType::Boolean => map(parse_boolean, AMQPValue::Boolean)(i),
-        AMQPType::ShortShortInt => map(parse_short_short_int, AMQPValue::ShortShortInt)(i),
-        AMQPType::ShortShortUInt => map(parse_short_short_uint, AMQPValue::ShortShortUInt)(i),
-        AMQPType::ShortInt => map(parse_short_int, AMQPValue::ShortInt)(i),
-        AMQPType::ShortUInt => map(parse_short_uint, AMQPValue::ShortUInt)(i),
-        AMQPType::LongInt => map(parse_long_int, AMQPValue::LongInt)(i),
-        AMQPType::LongUInt => map(parse_long_uint, AMQPValue::LongUInt)(i),
-        AMQPType::LongLongInt => map(parse_long_long_int, AMQPValue::LongLongInt)(i),
+        AMQPType::Boolean => map(parse_boolean, AMQPValue::Boolean).parse(i),
+        AMQPType::ShortShortInt => map(parse_short_short_int, AMQPValue::ShortShortInt).parse(i),
+        AMQPType::ShortShortUInt => map(parse_short_short_uint, AMQPValue::ShortShortUInt).parse(i),
+        AMQPType::ShortInt => map(parse_short_int, AMQPValue::ShortInt).parse(i),
+        AMQPType::ShortUInt => map(parse_short_uint, AMQPValue::ShortUInt).parse(i),
+        AMQPType::LongInt => map(parse_long_int, AMQPValue::LongInt).parse(i),
+        AMQPType::LongUInt => map(parse_long_uint, AMQPValue::LongUInt).parse(i),
+        AMQPType::LongLongInt => map(parse_long_long_int, AMQPValue::LongLongInt).parse(i),
         /* RabbitMQ treats LongLongUInt as a LongLongInt hence expose it as such */
-        AMQPType::LongLongUInt => map(parse_long_long_int, AMQPValue::LongLongInt)(i),
-        AMQPType::Float => map(parse_float, AMQPValue::Float)(i),
-        AMQPType::Double => map(parse_double, AMQPValue::Double)(i),
-        AMQPType::DecimalValue => map(parse_decimal_value, AMQPValue::DecimalValue)(i),
-        AMQPType::ShortString => map(parse_short_string, AMQPValue::ShortString)(i),
-        AMQPType::LongString => map(parse_long_string, AMQPValue::LongString)(i),
-        AMQPType::FieldArray => map(parse_field_array, AMQPValue::FieldArray)(i),
-        AMQPType::Timestamp => map(parse_timestamp, AMQPValue::Timestamp)(i),
-        AMQPType::FieldTable => map(parse_field_table, AMQPValue::FieldTable)(i),
-        AMQPType::ByteArray => map(parse_byte_array, AMQPValue::ByteArray)(i),
+        AMQPType::LongLongUInt => map(parse_long_long_int, AMQPValue::LongLongInt).parse(i),
+        AMQPType::Float => map(parse_float, AMQPValue::Float).parse(i),
+        AMQPType::Double => map(parse_double, AMQPValue::Double).parse(i),
+        AMQPType::DecimalValue => map(parse_decimal_value, AMQPValue::DecimalValue).parse(i),
+        AMQPType::ShortString => map(parse_short_string, AMQPValue::ShortString).parse(i),
+        AMQPType::LongString => map(parse_long_string, AMQPValue::LongString).parse(i),
+        AMQPType::FieldArray => map(parse_field_array, AMQPValue::FieldArray).parse(i),
+        AMQPType::Timestamp => map(parse_timestamp, AMQPValue::Timestamp).parse(i),
+        AMQPType::FieldTable => map(parse_field_table, AMQPValue::FieldTable).parse(i),
+        AMQPType::ByteArray => map(parse_byte_array, AMQPValue::ByteArray).parse(i),
         AMQPType::Void => Ok((i, AMQPValue::Void)),
     })
 }
 
 /// Parse an [AMQPValue](../type.AMQPValue.html)
 pub fn parse_value<I: ParsableInput>(i: I) -> ParserResult<I, AMQPValue> {
-    context("parse_value", flat_map(parse_type, parse_raw_value))(i)
+    context("parse_value", flat_map(parse_type, parse_raw_value)).parse(i)
 }
 
 /// Parse an [AMQPType](../type.AMQPType.html)
@@ -127,67 +128,68 @@ pub fn parse_type<I: ParsableInput>(i: I) -> ParserResult<I, AMQPType> {
     context(
         "parse_type",
         map_opt(be_u8, |t| AMQPType::from_id(t as char)),
-    )(i)
+    )
+    .parse(i)
 }
 
 /// Parse an id [(ShortUInt)](../type.ShortUInt.html)
 pub fn parse_id<I: ParsableInput>(i: I) -> ParserResult<I, ShortUInt> {
-    context("parse_id", parse_short_uint)(i)
+    context("parse_id", parse_short_uint).parse(i)
 }
 
 /// Parse a [Boolean](../type.Boolean.html)
 pub fn parse_boolean<I: ParsableInput>(i: I) -> ParserResult<I, Boolean> {
-    context("parse_boolean", map(be_u8, |b| b != 0))(i)
+    context("parse_boolean", map(be_u8, |b| b != 0)).parse(i)
 }
 
 /// Parse a [ShortShortInt](../type.ShortShortInt.html)
 pub fn parse_short_short_int<I: ParsableInput>(i: I) -> ParserResult<I, ShortShortInt> {
-    context("parse_short_short_int", be_i8)(i)
+    context("parse_short_short_int", be_i8).parse(i)
 }
 
 /// Parse a [ShortShortUInt](../type.ShortShortUInt.html)
 pub fn parse_short_short_uint<I: ParsableInput>(i: I) -> ParserResult<I, ShortShortUInt> {
-    context("parse_short_short_uint", be_u8)(i)
+    context("parse_short_short_uint", be_u8).parse(i)
 }
 
 /// Parse a [ShortInt](../type.ShortInt.html)
 pub fn parse_short_int<I: ParsableInput>(i: I) -> ParserResult<I, ShortInt> {
-    context("parse_short_int", be_i16)(i)
+    context("parse_short_int", be_i16).parse(i)
 }
 
 /// Parse a [ShortUInt](../type.ShortUInt.html)
 pub fn parse_short_uint<I: ParsableInput>(i: I) -> ParserResult<I, ShortUInt> {
-    context("parse_short_uint", be_u16)(i)
+    context("parse_short_uint", be_u16).parse(i)
 }
 
 /// Parse a [LongInt](../type.LongInt.html)
 pub fn parse_long_int<I: ParsableInput>(i: I) -> ParserResult<I, LongInt> {
-    context("parse_long_int", be_i32)(i)
+    context("parse_long_int", be_i32).parse(i)
 }
 
 /// Parse a [LongUInt](../type.LongUInt.html)
 pub fn parse_long_uint<I: ParsableInput>(i: I) -> ParserResult<I, LongUInt> {
-    context("parse_long_uint", be_u32)(i)
+    context("parse_long_uint", be_u32).parse(i)
 }
 
 /// Parse a [LongLongInt](../type.LongLongInt.html)
 pub fn parse_long_long_int<I: ParsableInput>(i: I) -> ParserResult<I, LongLongInt> {
-    context("parse_long_long_int", be_i64)(i)
+    context("parse_long_long_int", be_i64).parse(i)
 }
 
 /// Parse a [LongLongUInt](../type.LongLongUInt.html)
 pub fn parse_long_long_uint<I: ParsableInput>(i: I) -> ParserResult<I, LongLongUInt> {
-    context("parse_long_long_uint", be_u64)(i)
+    context("parse_long_long_uint", be_u64).parse(i)
 }
 
 /// Parse a [Float](../type.Float.html)
 pub fn parse_float<I: ParsableInput>(i: I) -> ParserResult<I, Float> {
-    context("parse_float", be_f32)(i)
+    context("parse_float", be_f32).parse(i)
 }
 
 /// Parse a [Double](../type.Double.html)
 pub fn parse_double<I: ParsableInput>(i: I) -> ParserResult<I, Double> {
-    context("parse_double", be_f64)(i)
+    context("parse_double", be_f64).parse(i)
 }
 
 /// Parse a [DecimalValue](../type.DecimalValue.html)
@@ -198,10 +200,11 @@ pub fn parse_decimal_value<I: ParsableInput>(i: I) -> ParserResult<I, DecimalVal
             pair(parse_short_short_uint, parse_long_uint),
             |(scale, value)| DecimalValue { scale, value },
         ),
-    )(i)
+    )
+    .parse(i)
 }
 
-fn make_str<I: nom::InputIter<Item = u8>>(i: I) -> Result<String, std::string::FromUtf8Error> {
+fn make_str<I: Input<Item = u8>>(i: I) -> Result<String, std::string::FromUtf8Error> {
     String::from_utf8(i.iter_elements().collect())
 }
 
@@ -213,7 +216,8 @@ pub fn parse_short_string<I: ParsableInput>(i: I) -> ParserResult<I, ShortString
             map_res(flat_map(parse_short_short_uint, take), make_str),
             ShortString::from,
         ),
-    )(i)
+    )
+    .parse(i)
 }
 
 /// Parse a [LongString](../type.LongString.html)
@@ -223,7 +227,8 @@ pub fn parse_long_string<I: ParsableInput>(i: I) -> ParserResult<I, LongString> 
         map(flat_map(parse_long_uint, take), |i: I| {
             i.iter_elements().collect::<Vec<u8>>().into()
         }),
-    )(i)
+    )
+    .parse(i)
 }
 
 /// Parse a [FieldArray](../type.FieldArray.html)
@@ -241,12 +246,13 @@ pub fn parse_field_array<I: ParsableInput>(i: I) -> ParserResult<I, FieldArray> 
                 },
             )),
         ),
-    )(i)
+    )
+    .parse(i)
 }
 
 /// Parse a [Timestamp](../type.Timestamp.html)
 pub fn parse_timestamp<I: ParsableInput>(i: I) -> ParserResult<I, Timestamp> {
-    context("parse_timestamp", parse_long_long_uint)(i)
+    context("parse_timestamp", parse_long_long_uint).parse(i)
 }
 
 /// Parse a [FieldTable](../type.FieldTable.html)
@@ -267,7 +273,8 @@ pub fn parse_field_table<I: ParsableInput>(i: I) -> ParserResult<I, FieldTable> 
                 },
             )),
         ),
-    )(i)
+    )
+    .parse(i)
 }
 
 /// Parse a [ByteArray](../type.ByteArray.html)
@@ -277,7 +284,8 @@ pub fn parse_byte_array<I: ParsableInput>(i: I) -> ParserResult<I, ByteArray> {
         map(flat_map(parse_long_uint, take), |i: I| {
             i.iter_elements().collect::<Vec<u8>>().into()
         }),
-    )(i)
+    )
+    .parse(i)
 }
 
 /// Parse the [AMQPFlags](../type.AMQPFlags.html) for which the names are provided
@@ -287,37 +295,19 @@ pub fn parse_flags<I: ParsableInput>(i: I, names: &[&str]) -> ParserResult<I, AM
         map(take((names.len() + 7) / 8), |b| {
             AMQPFlags::from_bytes(names, b)
         }),
-    )(i)
+    )
+    .parse(i)
 }
 
 /// Traits required for parsing
 pub mod traits {
     /// Reexport nom traits required for parsing
-    pub use nom::{Compare, InputIter, InputLength, InputTake, Needed, Slice, UnspecializedInput};
+    pub use nom::{Compare, Input, Needed};
 
     /// Trait used to ensure we can properly parse input
-    pub trait ParsableInput:
-        Clone
-        + Compare<&'static [u8]>
-        + InputIter<Item = u8>
-        + InputLength
-        + InputTake
-        + Slice<std::ops::RangeFrom<usize>>
-        + PartialEq
-    {
-    }
+    pub trait ParsableInput: Clone + Compare<&'static [u8]> + Input<Item = u8> + PartialEq {}
 
-    impl<
-            T: Clone
-                + Compare<&'static [u8]>
-                + InputIter<Item = u8>
-                + InputLength
-                + InputTake
-                + PartialEq
-                + Slice<std::ops::RangeFrom<usize>>,
-        > ParsableInput for T
-    {
-    }
+    impl<T: Clone + Compare<&'static [u8]> + Input<Item = u8> + PartialEq> ParsableInput for T {}
 }
 
 #[cfg(test)]
@@ -341,20 +331,20 @@ mod test {
     #[test]
     fn test_parse_raw_value() {
         assert_eq!(
-            parse_raw_value(AMQPType::Timestamp)(&[42, 42, 42, 42, 42, 42, 42, 42][..]),
+            parse_raw_value(AMQPType::Timestamp).parse(&[42, 42, 42, 42, 42, 42, 42, 42][..]),
             Ok((EMPTY, AMQPValue::Timestamp(3038287259199220266)))
         );
         assert_eq!(
-            parse_raw_value(AMQPType::LongString)(&[0, 0, 0, 4, 116, 101, 115, 116][..]),
+            parse_raw_value(AMQPType::LongString).parse(&[0, 0, 0, 4, 116, 101, 115, 116][..]),
             Ok((EMPTY, AMQPValue::LongString("test".into())))
         );
         /* Test internal exceptions */
         assert_eq!(
-            parse_raw_value(AMQPType::LongLongUInt)(&[42, 42, 42, 42, 42, 42, 42, 42][..]),
+            parse_raw_value(AMQPType::LongLongUInt).parse(&[42, 42, 42, 42, 42, 42, 42, 42][..]),
             Ok((EMPTY, AMQPValue::LongLongInt(3038287259199220266)))
         );
         assert_eq!(
-            parse_raw_value(AMQPType::ShortString)(&[4, 116, 101, 115, 116][..]),
+            parse_raw_value(AMQPType::ShortString).parse(&[4, 116, 101, 115, 116][..]),
             Ok((EMPTY, AMQPValue::ShortString("test".into())))
         );
     }

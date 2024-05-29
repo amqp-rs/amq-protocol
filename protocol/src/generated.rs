@@ -224,20 +224,21 @@ pub fn parse_class<I: ParsableInput>(i: I) -> ParserResult<I, AMQPClass> {
         map_opt(
             flat_map(parse_id, |id| {
                 move |i| match id {
-                    60 => map(map(parse_basic, AMQPClass::Basic), Some)(i),
-                    10 => map(map(parse_connection, AMQPClass::Connection), Some)(i),
-                    20 => map(map(parse_channel, AMQPClass::Channel), Some)(i),
-                    30 => map(map(parse_access, AMQPClass::Access), Some)(i),
-                    40 => map(map(parse_exchange, AMQPClass::Exchange), Some)(i),
-                    50 => map(map(parse_queue, AMQPClass::Queue), Some)(i),
-                    90 => map(map(parse_tx, AMQPClass::Tx), Some)(i),
-                    85 => map(map(parse_confirm, AMQPClass::Confirm), Some)(i),
+                    60 => map(map(parse_basic, AMQPClass::Basic), Some).parse(i),
+                    10 => map(map(parse_connection, AMQPClass::Connection), Some).parse(i),
+                    20 => map(map(parse_channel, AMQPClass::Channel), Some).parse(i),
+                    30 => map(map(parse_access, AMQPClass::Access), Some).parse(i),
+                    40 => map(map(parse_exchange, AMQPClass::Exchange), Some).parse(i),
+                    50 => map(map(parse_queue, AMQPClass::Queue), Some).parse(i),
+                    90 => map(map(parse_tx, AMQPClass::Tx), Some).parse(i),
+                    85 => map(map(parse_confirm, AMQPClass::Confirm), Some).parse(i),
                     _ => Ok((i, None)),
                 }
             }),
             std::convert::identity,
         ),
-    )(i)
+    )
+    .parse(i)
 }
 
 /// Serialize an AMQP class
@@ -376,74 +377,91 @@ pub mod basic {
             map_opt(
                 flat_map(parse_id, |id| {
                     move |i| match id {
-                        10 => context("parse_qos", map(map(parse_qos, AMQPMethod::Qos), Some))(i),
+                        10 => context("parse_qos", map(map(parse_qos, AMQPMethod::Qos), Some))
+                            .parse(i),
                         11 => context(
                             "parse_qos_ok",
                             map(map(parse_qos_ok, AMQPMethod::QosOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         20 => context(
                             "parse_consume",
                             map(map(parse_consume, AMQPMethod::Consume), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         21 => context(
                             "parse_consume_ok",
                             map(map(parse_consume_ok, AMQPMethod::ConsumeOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         30 => context(
                             "parse_cancel",
                             map(map(parse_cancel, AMQPMethod::Cancel), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         31 => context(
                             "parse_cancel_ok",
                             map(map(parse_cancel_ok, AMQPMethod::CancelOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         40 => context(
                             "parse_publish",
                             map(map(parse_publish, AMQPMethod::Publish), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         50 => context(
                             "parse_return",
                             map(map(parse_return, AMQPMethod::Return), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         60 => context(
                             "parse_deliver",
                             map(map(parse_deliver, AMQPMethod::Deliver), Some),
-                        )(i),
-                        70 => context("parse_get", map(map(parse_get, AMQPMethod::Get), Some))(i),
+                        )
+                        .parse(i),
+                        70 => context("parse_get", map(map(parse_get, AMQPMethod::Get), Some))
+                            .parse(i),
                         71 => context(
                             "parse_get_ok",
                             map(map(parse_get_ok, AMQPMethod::GetOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         72 => context(
                             "parse_get_empty",
                             map(map(parse_get_empty, AMQPMethod::GetEmpty), Some),
-                        )(i),
-                        80 => context("parse_ack", map(map(parse_ack, AMQPMethod::Ack), Some))(i),
+                        )
+                        .parse(i),
+                        80 => context("parse_ack", map(map(parse_ack, AMQPMethod::Ack), Some))
+                            .parse(i),
                         90 => context(
                             "parse_reject",
                             map(map(parse_reject, AMQPMethod::Reject), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         100 => context(
                             "parse_recover_async",
                             map(map(parse_recover_async, AMQPMethod::RecoverAsync), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         110 => context(
                             "parse_recover",
                             map(map(parse_recover, AMQPMethod::Recover), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         111 => context(
                             "parse_recover_ok",
                             map(map(parse_recover_ok, AMQPMethod::RecoverOk), Some),
-                        )(i),
-                        120 => {
-                            context("parse_nack", map(map(parse_nack, AMQPMethod::Nack), Some))(i)
-                        }
+                        )
+                        .parse(i),
+                        120 => context("parse_nack", map(map(parse_nack, AMQPMethod::Nack), Some))
+                            .parse(i),
                         _ => Ok((i, None)),
                     }
                 }),
                 std::convert::identity,
             ),
-        )(i)
+        )
+        .parse(i)
     }
 
     /// Serialize basic (Generated)
@@ -536,8 +554,8 @@ pub mod basic {
 
     /// Parse qos (Generated)
     pub fn parse_qos<I: ParsableInput>(i: I) -> ParserResult<I, Qos> {
-        let (i, _) = parse_long_uint(i)?;
-        let (i, prefetch_count) = parse_short_uint(i)?;
+        let (i, _) = parse_long_uint.parse(i)?;
+        let (i, prefetch_count) = parse_short_uint.parse(i)?;
         let (i, flags) = parse_flags(i, &["global"])?;
         Ok((
             i,
@@ -625,11 +643,11 @@ pub mod basic {
 
     /// Parse consume (Generated)
     pub fn parse_consume<I: ParsableInput>(i: I) -> ParserResult<I, Consume> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, queue) = parse_short_string(i)?;
-        let (i, consumer_tag) = parse_short_string(i)?;
+        let (i, _) = parse_short_uint.parse(i)?;
+        let (i, queue) = parse_short_string.parse(i)?;
+        let (i, consumer_tag) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(i, &["no-local", "no-ack", "exclusive", "nowait"])?;
-        let (i, arguments) = parse_field_table(i)?;
+        let (i, arguments) = parse_field_table.parse(i)?;
         Ok((
             i,
             Consume {
@@ -684,7 +702,7 @@ pub mod basic {
 
     /// Parse consume-ok (Generated)
     pub fn parse_consume_ok<I: ParsableInput>(i: I) -> ParserResult<I, ConsumeOk> {
-        let (i, consumer_tag) = parse_short_string(i)?;
+        let (i, consumer_tag) = parse_short_string.parse(i)?;
         Ok((i, ConsumeOk { consumer_tag }))
     }
 
@@ -721,7 +739,7 @@ pub mod basic {
 
     /// Parse cancel (Generated)
     pub fn parse_cancel<I: ParsableInput>(i: I) -> ParserResult<I, Cancel> {
-        let (i, consumer_tag) = parse_short_string(i)?;
+        let (i, consumer_tag) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(i, &["nowait"])?;
         Ok((
             i,
@@ -766,7 +784,7 @@ pub mod basic {
 
     /// Parse cancel-ok (Generated)
     pub fn parse_cancel_ok<I: ParsableInput>(i: I) -> ParserResult<I, CancelOk> {
-        let (i, consumer_tag) = parse_short_string(i)?;
+        let (i, consumer_tag) = parse_short_string.parse(i)?;
         Ok((i, CancelOk { consumer_tag }))
     }
 
@@ -807,9 +825,9 @@ pub mod basic {
 
     /// Parse publish (Generated)
     pub fn parse_publish<I: ParsableInput>(i: I) -> ParserResult<I, Publish> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, exchange) = parse_short_string(i)?;
-        let (i, routing_key) = parse_short_string(i)?;
+        let (i, _) = parse_short_uint.parse(i)?;
+        let (i, exchange) = parse_short_string.parse(i)?;
+        let (i, routing_key) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(i, &["mandatory", "immediate"])?;
         Ok((
             i,
@@ -865,10 +883,10 @@ pub mod basic {
 
     /// Parse return (Generated)
     pub fn parse_return<I: ParsableInput>(i: I) -> ParserResult<I, Return> {
-        let (i, reply_code) = parse_short_uint(i)?;
-        let (i, reply_text) = parse_short_string(i)?;
-        let (i, exchange) = parse_short_string(i)?;
-        let (i, routing_key) = parse_short_string(i)?;
+        let (i, reply_code) = parse_short_uint.parse(i)?;
+        let (i, reply_text) = parse_short_string.parse(i)?;
+        let (i, exchange) = parse_short_string.parse(i)?;
+        let (i, routing_key) = parse_short_string.parse(i)?;
         Ok((
             i,
             Return {
@@ -922,11 +940,11 @@ pub mod basic {
 
     /// Parse deliver (Generated)
     pub fn parse_deliver<I: ParsableInput>(i: I) -> ParserResult<I, Deliver> {
-        let (i, consumer_tag) = parse_short_string(i)?;
-        let (i, delivery_tag) = parse_long_long_uint(i)?;
+        let (i, consumer_tag) = parse_short_string.parse(i)?;
+        let (i, delivery_tag) = parse_long_long_uint.parse(i)?;
         let (i, flags) = parse_flags(i, &["redelivered"])?;
-        let (i, exchange) = parse_short_string(i)?;
-        let (i, routing_key) = parse_short_string(i)?;
+        let (i, exchange) = parse_short_string.parse(i)?;
+        let (i, routing_key) = parse_short_string.parse(i)?;
         Ok((
             i,
             Deliver {
@@ -978,8 +996,8 @@ pub mod basic {
 
     /// Parse get (Generated)
     pub fn parse_get<I: ParsableInput>(i: I) -> ParserResult<I, Get> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, queue) = parse_short_string(i)?;
+        let (i, _) = parse_short_uint.parse(i)?;
+        let (i, queue) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(i, &["no-ack"])?;
         Ok((
             i,
@@ -1033,11 +1051,11 @@ pub mod basic {
 
     /// Parse get-ok (Generated)
     pub fn parse_get_ok<I: ParsableInput>(i: I) -> ParserResult<I, GetOk> {
-        let (i, delivery_tag) = parse_long_long_uint(i)?;
+        let (i, delivery_tag) = parse_long_long_uint.parse(i)?;
         let (i, flags) = parse_flags(i, &["redelivered"])?;
-        let (i, exchange) = parse_short_string(i)?;
-        let (i, routing_key) = parse_short_string(i)?;
-        let (i, message_count) = parse_long_uint(i)?;
+        let (i, exchange) = parse_short_string.parse(i)?;
+        let (i, routing_key) = parse_short_string.parse(i)?;
+        let (i, message_count) = parse_long_uint.parse(i)?;
         Ok((
             i,
             GetOk {
@@ -1084,7 +1102,7 @@ pub mod basic {
 
     /// Parse get-empty (Generated)
     pub fn parse_get_empty<I: ParsableInput>(i: I) -> ParserResult<I, GetEmpty> {
-        let (i, _) = parse_short_string(i)?;
+        let (i, _) = parse_short_string.parse(i)?;
         Ok((i, GetEmpty {}))
     }
 
@@ -1121,7 +1139,7 @@ pub mod basic {
 
     /// Parse ack (Generated)
     pub fn parse_ack<I: ParsableInput>(i: I) -> ParserResult<I, Ack> {
-        let (i, delivery_tag) = parse_long_long_uint(i)?;
+        let (i, delivery_tag) = parse_long_long_uint.parse(i)?;
         let (i, flags) = parse_flags(i, &["multiple"])?;
         Ok((
             i,
@@ -1168,7 +1186,7 @@ pub mod basic {
 
     /// Parse reject (Generated)
     pub fn parse_reject<I: ParsableInput>(i: I) -> ParserResult<I, Reject> {
-        let (i, delivery_tag) = parse_long_long_uint(i)?;
+        let (i, delivery_tag) = parse_long_long_uint.parse(i)?;
         let (i, flags) = parse_flags(i, &["requeue"])?;
         Ok((
             i,
@@ -1331,7 +1349,7 @@ pub mod basic {
 
     /// Parse nack (Generated)
     pub fn parse_nack<I: ParsableInput>(i: I) -> ParserResult<I, Nack> {
-        let (i, delivery_tag) = parse_long_long_uint(i)?;
+        let (i, delivery_tag) = parse_long_long_uint.parse(i)?;
         let (i, flags) = parse_flags(i, &["multiple", "requeue"])?;
         Ok((
             i,
@@ -1571,72 +1589,72 @@ pub mod basic {
     pub fn parse_properties<I: ParsableInput>(i: I) -> ParserResult<I, AMQPProperties> {
         let (i, flags) = parse_short_uint(i)?;
         let (i, content_type) = if flags & (1 << (15 - 0)) != 0 {
-            map(parse_short_string, Some)(i)?
+            map(parse_short_string, Some).parse(i)?
         } else {
             (i, None)
         };
         let (i, content_encoding) = if flags & (1 << (15 - 1)) != 0 {
-            map(parse_short_string, Some)(i)?
+            map(parse_short_string, Some).parse(i)?
         } else {
             (i, None)
         };
         let (i, headers) = if flags & (1 << (15 - 2)) != 0 {
-            map(parse_field_table, Some)(i)?
+            map(parse_field_table, Some).parse(i)?
         } else {
             (i, None)
         };
         let (i, delivery_mode) = if flags & (1 << (15 - 3)) != 0 {
-            map(parse_short_short_uint, Some)(i)?
+            map(parse_short_short_uint, Some).parse(i)?
         } else {
             (i, None)
         };
         let (i, priority) = if flags & (1 << (15 - 4)) != 0 {
-            map(parse_short_short_uint, Some)(i)?
+            map(parse_short_short_uint, Some).parse(i)?
         } else {
             (i, None)
         };
         let (i, correlation_id) = if flags & (1 << (15 - 5)) != 0 {
-            map(parse_short_string, Some)(i)?
+            map(parse_short_string, Some).parse(i)?
         } else {
             (i, None)
         };
         let (i, reply_to) = if flags & (1 << (15 - 6)) != 0 {
-            map(parse_short_string, Some)(i)?
+            map(parse_short_string, Some).parse(i)?
         } else {
             (i, None)
         };
         let (i, expiration) = if flags & (1 << (15 - 7)) != 0 {
-            map(parse_short_string, Some)(i)?
+            map(parse_short_string, Some).parse(i)?
         } else {
             (i, None)
         };
         let (i, message_id) = if flags & (1 << (15 - 8)) != 0 {
-            map(parse_short_string, Some)(i)?
+            map(parse_short_string, Some).parse(i)?
         } else {
             (i, None)
         };
         let (i, timestamp) = if flags & (1 << (15 - 9)) != 0 {
-            map(parse_timestamp, Some)(i)?
+            map(parse_timestamp, Some).parse(i)?
         } else {
             (i, None)
         };
         let (i, kind) = if flags & (1 << (15 - 10)) != 0 {
-            map(parse_short_string, Some)(i)?
+            map(parse_short_string, Some).parse(i)?
         } else {
             (i, None)
         };
         let (i, user_id) = if flags & (1 << (15 - 11)) != 0 {
-            map(parse_short_string, Some)(i)?
+            map(parse_short_string, Some).parse(i)?
         } else {
             (i, None)
         };
         let (i, app_id) = if flags & (1 << (15 - 12)) != 0 {
-            map(parse_short_string, Some)(i)?
+            map(parse_short_string, Some).parse(i)?
         } else {
             (i, None)
         };
         let (i, cluster_id) = if flags & (1 << (15 - 13)) != 0 {
-            map(parse_short_string, Some)(i)?
+            map(parse_short_string, Some).parse(i)?
         } else {
             (i, None)
         };
@@ -1726,66 +1744,77 @@ pub mod connection {
                         10 => context(
                             "parse_start",
                             map(map(parse_start, AMQPMethod::Start), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         11 => context(
                             "parse_start_ok",
                             map(map(parse_start_ok, AMQPMethod::StartOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         20 => context(
                             "parse_secure",
                             map(map(parse_secure, AMQPMethod::Secure), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         21 => context(
                             "parse_secure_ok",
                             map(map(parse_secure_ok, AMQPMethod::SecureOk), Some),
-                        )(i),
-                        30 => {
-                            context("parse_tune", map(map(parse_tune, AMQPMethod::Tune), Some))(i)
-                        }
+                        )
+                        .parse(i),
+                        30 => context("parse_tune", map(map(parse_tune, AMQPMethod::Tune), Some))
+                            .parse(i),
                         31 => context(
                             "parse_tune_ok",
                             map(map(parse_tune_ok, AMQPMethod::TuneOk), Some),
-                        )(i),
-                        40 => {
-                            context("parse_open", map(map(parse_open, AMQPMethod::Open), Some))(i)
-                        }
+                        )
+                        .parse(i),
+                        40 => context("parse_open", map(map(parse_open, AMQPMethod::Open), Some))
+                            .parse(i),
                         41 => context(
                             "parse_open_ok",
                             map(map(parse_open_ok, AMQPMethod::OpenOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         50 => context(
                             "parse_close",
                             map(map(parse_close, AMQPMethod::Close), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         51 => context(
                             "parse_close_ok",
                             map(map(parse_close_ok, AMQPMethod::CloseOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         60 => context(
                             "parse_blocked",
                             map(map(parse_blocked, AMQPMethod::Blocked), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         61 => context(
                             "parse_unblocked",
                             map(map(parse_unblocked, AMQPMethod::Unblocked), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         70 => context(
                             "parse_update_secret",
                             map(map(parse_update_secret, AMQPMethod::UpdateSecret), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         71 => context(
                             "parse_update_secret_ok",
                             map(
                                 map(parse_update_secret_ok, AMQPMethod::UpdateSecretOk),
                                 Some,
                             ),
-                        )(i),
+                        )
+                        .parse(i),
                         _ => Ok((i, None)),
                     }
                 }),
                 std::convert::identity,
             ),
-        )(i)
+        )
+        .parse(i)
     }
 
     /// Serialize connection (Generated)
@@ -1874,11 +1903,11 @@ pub mod connection {
 
     /// Parse start (Generated)
     pub fn parse_start<I: ParsableInput>(i: I) -> ParserResult<I, Start> {
-        let (i, version_major) = parse_short_short_uint(i)?;
-        let (i, version_minor) = parse_short_short_uint(i)?;
-        let (i, server_properties) = parse_field_table(i)?;
-        let (i, mechanisms) = parse_long_string(i)?;
-        let (i, locales) = parse_long_string(i)?;
+        let (i, version_major) = parse_short_short_uint.parse(i)?;
+        let (i, version_minor) = parse_short_short_uint.parse(i)?;
+        let (i, server_properties) = parse_field_table.parse(i)?;
+        let (i, mechanisms) = parse_long_string.parse(i)?;
+        let (i, locales) = parse_long_string.parse(i)?;
         Ok((
             i,
             Start {
@@ -1932,10 +1961,10 @@ pub mod connection {
 
     /// Parse start-ok (Generated)
     pub fn parse_start_ok<I: ParsableInput>(i: I) -> ParserResult<I, StartOk> {
-        let (i, client_properties) = parse_field_table(i)?;
-        let (i, mechanism) = parse_short_string(i)?;
-        let (i, response) = parse_long_string(i)?;
-        let (i, locale) = parse_short_string(i)?;
+        let (i, client_properties) = parse_field_table.parse(i)?;
+        let (i, mechanism) = parse_short_string.parse(i)?;
+        let (i, response) = parse_long_string.parse(i)?;
+        let (i, locale) = parse_short_string.parse(i)?;
         Ok((
             i,
             StartOk {
@@ -1981,7 +2010,7 @@ pub mod connection {
 
     /// Parse secure (Generated)
     pub fn parse_secure<I: ParsableInput>(i: I) -> ParserResult<I, Secure> {
-        let (i, challenge) = parse_long_string(i)?;
+        let (i, challenge) = parse_long_string.parse(i)?;
         Ok((i, Secure { challenge }))
     }
 
@@ -2016,7 +2045,7 @@ pub mod connection {
 
     /// Parse secure-ok (Generated)
     pub fn parse_secure_ok<I: ParsableInput>(i: I) -> ParserResult<I, SecureOk> {
-        let (i, response) = parse_long_string(i)?;
+        let (i, response) = parse_long_string.parse(i)?;
         Ok((i, SecureOk { response }))
     }
 
@@ -2055,9 +2084,9 @@ pub mod connection {
 
     /// Parse tune (Generated)
     pub fn parse_tune<I: ParsableInput>(i: I) -> ParserResult<I, Tune> {
-        let (i, channel_max) = parse_short_uint(i)?;
-        let (i, frame_max) = parse_long_uint(i)?;
-        let (i, heartbeat) = parse_short_uint(i)?;
+        let (i, channel_max) = parse_short_uint.parse(i)?;
+        let (i, frame_max) = parse_long_uint.parse(i)?;
+        let (i, heartbeat) = parse_short_uint.parse(i)?;
         Ok((
             i,
             Tune {
@@ -2105,9 +2134,9 @@ pub mod connection {
 
     /// Parse tune-ok (Generated)
     pub fn parse_tune_ok<I: ParsableInput>(i: I) -> ParserResult<I, TuneOk> {
-        let (i, channel_max) = parse_short_uint(i)?;
-        let (i, frame_max) = parse_long_uint(i)?;
-        let (i, heartbeat) = parse_short_uint(i)?;
+        let (i, channel_max) = parse_short_uint.parse(i)?;
+        let (i, frame_max) = parse_long_uint.parse(i)?;
+        let (i, heartbeat) = parse_short_uint.parse(i)?;
         Ok((
             i,
             TuneOk {
@@ -2151,8 +2180,8 @@ pub mod connection {
 
     /// Parse open (Generated)
     pub fn parse_open<I: ParsableInput>(i: I) -> ParserResult<I, Open> {
-        let (i, virtual_host) = parse_short_string(i)?;
-        let (i, _) = parse_short_string(i)?;
+        let (i, virtual_host) = parse_short_string.parse(i)?;
+        let (i, _) = parse_short_string.parse(i)?;
         let (i, _) = parse_flags(i, &["insist"])?;
         Ok((i, Open { virtual_host }))
     }
@@ -2189,7 +2218,7 @@ pub mod connection {
 
     /// Parse open-ok (Generated)
     pub fn parse_open_ok<I: ParsableInput>(i: I) -> ParserResult<I, OpenOk> {
-        let (i, _) = parse_short_string(i)?;
+        let (i, _) = parse_short_string.parse(i)?;
         Ok((i, OpenOk {}))
     }
 
@@ -2230,10 +2259,10 @@ pub mod connection {
 
     /// Parse close (Generated)
     pub fn parse_close<I: ParsableInput>(i: I) -> ParserResult<I, Close> {
-        let (i, reply_code) = parse_short_uint(i)?;
-        let (i, reply_text) = parse_short_string(i)?;
-        let (i, class_id) = parse_short_uint(i)?;
-        let (i, method_id) = parse_short_uint(i)?;
+        let (i, reply_code) = parse_short_uint.parse(i)?;
+        let (i, reply_text) = parse_short_string.parse(i)?;
+        let (i, class_id) = parse_short_uint.parse(i)?;
+        let (i, method_id) = parse_short_uint.parse(i)?;
         Ok((
             i,
             Close {
@@ -2309,7 +2338,7 @@ pub mod connection {
 
     /// Parse blocked (Generated)
     pub fn parse_blocked<I: ParsableInput>(i: I) -> ParserResult<I, Blocked> {
-        let (i, reason) = parse_short_string(i)?;
+        let (i, reason) = parse_short_string.parse(i)?;
         Ok((i, Blocked { reason }))
     }
 
@@ -2376,8 +2405,8 @@ pub mod connection {
 
     /// Parse update-secret (Generated)
     pub fn parse_update_secret<I: ParsableInput>(i: I) -> ParserResult<I, UpdateSecret> {
-        let (i, new_secret) = parse_long_string(i)?;
-        let (i, reason) = parse_short_string(i)?;
+        let (i, new_secret) = parse_long_string.parse(i)?;
+        let (i, reason) = parse_short_string.parse(i)?;
         Ok((i, UpdateSecret { new_secret, reason }))
     }
 
@@ -2434,34 +2463,37 @@ pub mod channel {
             map_opt(
                 flat_map(parse_id, |id| {
                     move |i| match id {
-                        10 => {
-                            context("parse_open", map(map(parse_open, AMQPMethod::Open), Some))(i)
-                        }
+                        10 => context("parse_open", map(map(parse_open, AMQPMethod::Open), Some))
+                            .parse(i),
                         11 => context(
                             "parse_open_ok",
                             map(map(parse_open_ok, AMQPMethod::OpenOk), Some),
-                        )(i),
-                        20 => {
-                            context("parse_flow", map(map(parse_flow, AMQPMethod::Flow), Some))(i)
-                        }
+                        )
+                        .parse(i),
+                        20 => context("parse_flow", map(map(parse_flow, AMQPMethod::Flow), Some))
+                            .parse(i),
                         21 => context(
                             "parse_flow_ok",
                             map(map(parse_flow_ok, AMQPMethod::FlowOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         40 => context(
                             "parse_close",
                             map(map(parse_close, AMQPMethod::Close), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         41 => context(
                             "parse_close_ok",
                             map(map(parse_close_ok, AMQPMethod::CloseOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         _ => Ok((i, None)),
                     }
                 }),
                 std::convert::identity,
             ),
-        )(i)
+        )
+        .parse(i)
     }
 
     /// Serialize channel (Generated)
@@ -2513,7 +2545,7 @@ pub mod channel {
 
     /// Parse open (Generated)
     pub fn parse_open<I: ParsableInput>(i: I) -> ParserResult<I, Open> {
-        let (i, _) = parse_short_string(i)?;
+        let (i, _) = parse_short_string.parse(i)?;
         Ok((i, Open {}))
     }
 
@@ -2545,7 +2577,7 @@ pub mod channel {
 
     /// Parse open-ok (Generated)
     pub fn parse_open_ok<I: ParsableInput>(i: I) -> ParserResult<I, OpenOk> {
-        let (i, _) = parse_long_string(i)?;
+        let (i, _) = parse_long_string.parse(i)?;
         Ok((i, OpenOk {}))
     }
 
@@ -2670,10 +2702,10 @@ pub mod channel {
 
     /// Parse close (Generated)
     pub fn parse_close<I: ParsableInput>(i: I) -> ParserResult<I, Close> {
-        let (i, reply_code) = parse_short_uint(i)?;
-        let (i, reply_text) = parse_short_string(i)?;
-        let (i, class_id) = parse_short_uint(i)?;
-        let (i, method_id) = parse_short_uint(i)?;
+        let (i, reply_code) = parse_short_uint.parse(i)?;
+        let (i, reply_text) = parse_short_string.parse(i)?;
+        let (i, class_id) = parse_short_uint.parse(i)?;
+        let (i, method_id) = parse_short_uint.parse(i)?;
         Ok((
             i,
             Close {
@@ -2743,17 +2775,20 @@ pub mod access {
                         10 => context(
                             "parse_request",
                             map(map(parse_request, AMQPMethod::Request), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         11 => context(
                             "parse_request_ok",
                             map(map(parse_request_ok, AMQPMethod::RequestOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         _ => Ok((i, None)),
                     }
                 }),
                 std::convert::identity,
             ),
-        )(i)
+        )
+        .parse(i)
     }
 
     /// Serialize access (Generated)
@@ -2806,7 +2841,7 @@ pub mod access {
 
     /// Parse request (Generated)
     pub fn parse_request<I: ParsableInput>(i: I) -> ParserResult<I, Request> {
-        let (i, realm) = parse_short_string(i)?;
+        let (i, realm) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(i, &["exclusive", "passive", "active", "write", "read"])?;
         Ok((
             i,
@@ -2856,7 +2891,7 @@ pub mod access {
 
     /// Parse request-ok (Generated)
     pub fn parse_request_ok<I: ParsableInput>(i: I) -> ParserResult<I, RequestOk> {
-        let (i, _) = parse_short_uint(i)?;
+        let (i, _) = parse_short_uint.parse(i)?;
         Ok((i, RequestOk {}))
     }
 
@@ -2885,40 +2920,47 @@ pub mod exchange {
                         10 => context(
                             "parse_declare",
                             map(map(parse_declare, AMQPMethod::Declare), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         11 => context(
                             "parse_declare_ok",
                             map(map(parse_declare_ok, AMQPMethod::DeclareOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         20 => context(
                             "parse_delete",
                             map(map(parse_delete, AMQPMethod::Delete), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         21 => context(
                             "parse_delete_ok",
                             map(map(parse_delete_ok, AMQPMethod::DeleteOk), Some),
-                        )(i),
-                        30 => {
-                            context("parse_bind", map(map(parse_bind, AMQPMethod::Bind), Some))(i)
-                        }
+                        )
+                        .parse(i),
+                        30 => context("parse_bind", map(map(parse_bind, AMQPMethod::Bind), Some))
+                            .parse(i),
                         31 => context(
                             "parse_bind_ok",
                             map(map(parse_bind_ok, AMQPMethod::BindOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         40 => context(
                             "parse_unbind",
                             map(map(parse_unbind, AMQPMethod::Unbind), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         51 => context(
                             "parse_unbind_ok",
                             map(map(parse_unbind_ok, AMQPMethod::UnbindOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         _ => Ok((i, None)),
                     }
                 }),
                 std::convert::identity,
             ),
-        )(i)
+        )
+        .parse(i)
     }
 
     /// Serialize exchange (Generated)
@@ -2993,14 +3035,14 @@ pub mod exchange {
 
     /// Parse declare (Generated)
     pub fn parse_declare<I: ParsableInput>(i: I) -> ParserResult<I, Declare> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, exchange) = parse_short_string(i)?;
-        let (i, kind) = parse_short_string(i)?;
+        let (i, _) = parse_short_uint.parse(i)?;
+        let (i, exchange) = parse_short_string.parse(i)?;
+        let (i, kind) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(
             i,
             &["passive", "durable", "auto-delete", "internal", "nowait"],
         )?;
-        let (i, arguments) = parse_field_table(i)?;
+        let (i, arguments) = parse_field_table.parse(i)?;
         Ok((
             i,
             Declare {
@@ -3091,8 +3133,8 @@ pub mod exchange {
 
     /// Parse delete (Generated)
     pub fn parse_delete<I: ParsableInput>(i: I) -> ParserResult<I, Delete> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, exchange) = parse_short_string(i)?;
+        let (i, _) = parse_short_uint.parse(i)?;
+        let (i, exchange) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(i, &["if-unused", "nowait"])?;
         Ok((
             i,
@@ -3178,12 +3220,12 @@ pub mod exchange {
 
     /// Parse bind (Generated)
     pub fn parse_bind<I: ParsableInput>(i: I) -> ParserResult<I, Bind> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, destination) = parse_short_string(i)?;
-        let (i, source) = parse_short_string(i)?;
-        let (i, routing_key) = parse_short_string(i)?;
+        let (i, _) = parse_short_uint.parse(i)?;
+        let (i, destination) = parse_short_string.parse(i)?;
+        let (i, source) = parse_short_string.parse(i)?;
+        let (i, routing_key) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(i, &["nowait"])?;
-        let (i, arguments) = parse_field_table(i)?;
+        let (i, arguments) = parse_field_table.parse(i)?;
         Ok((
             i,
             Bind {
@@ -3272,12 +3314,12 @@ pub mod exchange {
 
     /// Parse unbind (Generated)
     pub fn parse_unbind<I: ParsableInput>(i: I) -> ParserResult<I, Unbind> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, destination) = parse_short_string(i)?;
-        let (i, source) = parse_short_string(i)?;
-        let (i, routing_key) = parse_short_string(i)?;
+        let (i, _) = parse_short_uint.parse(i)?;
+        let (i, destination) = parse_short_string.parse(i)?;
+        let (i, source) = parse_short_string.parse(i)?;
+        let (i, routing_key) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(i, &["nowait"])?;
-        let (i, arguments) = parse_field_table(i)?;
+        let (i, arguments) = parse_field_table.parse(i)?;
         Ok((
             i,
             Unbind {
@@ -3352,48 +3394,57 @@ pub mod queue {
                         10 => context(
                             "parse_declare",
                             map(map(parse_declare, AMQPMethod::Declare), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         11 => context(
                             "parse_declare_ok",
                             map(map(parse_declare_ok, AMQPMethod::DeclareOk), Some),
-                        )(i),
-                        20 => {
-                            context("parse_bind", map(map(parse_bind, AMQPMethod::Bind), Some))(i)
-                        }
+                        )
+                        .parse(i),
+                        20 => context("parse_bind", map(map(parse_bind, AMQPMethod::Bind), Some))
+                            .parse(i),
                         21 => context(
                             "parse_bind_ok",
                             map(map(parse_bind_ok, AMQPMethod::BindOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         30 => context(
                             "parse_purge",
                             map(map(parse_purge, AMQPMethod::Purge), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         31 => context(
                             "parse_purge_ok",
                             map(map(parse_purge_ok, AMQPMethod::PurgeOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         40 => context(
                             "parse_delete",
                             map(map(parse_delete, AMQPMethod::Delete), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         41 => context(
                             "parse_delete_ok",
                             map(map(parse_delete_ok, AMQPMethod::DeleteOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         50 => context(
                             "parse_unbind",
                             map(map(parse_unbind, AMQPMethod::Unbind), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         51 => context(
                             "parse_unbind_ok",
                             map(map(parse_unbind_ok, AMQPMethod::UnbindOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         _ => Ok((i, None)),
                     }
                 }),
                 std::convert::identity,
             ),
-        )(i)
+        )
+        .parse(i)
     }
 
     /// Serialize queue (Generated)
@@ -3472,13 +3523,13 @@ pub mod queue {
 
     /// Parse declare (Generated)
     pub fn parse_declare<I: ParsableInput>(i: I) -> ParserResult<I, Declare> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, queue) = parse_short_string(i)?;
+        let (i, _) = parse_short_uint.parse(i)?;
+        let (i, queue) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(
             i,
             &["passive", "durable", "exclusive", "auto-delete", "nowait"],
         )?;
-        let (i, arguments) = parse_field_table(i)?;
+        let (i, arguments) = parse_field_table.parse(i)?;
         Ok((
             i,
             Declare {
@@ -3537,9 +3588,9 @@ pub mod queue {
 
     /// Parse declare-ok (Generated)
     pub fn parse_declare_ok<I: ParsableInput>(i: I) -> ParserResult<I, DeclareOk> {
-        let (i, queue) = parse_short_string(i)?;
-        let (i, message_count) = parse_long_uint(i)?;
-        let (i, consumer_count) = parse_long_uint(i)?;
+        let (i, queue) = parse_short_string.parse(i)?;
+        let (i, message_count) = parse_long_uint.parse(i)?;
+        let (i, consumer_count) = parse_long_uint.parse(i)?;
         Ok((
             i,
             DeclareOk {
@@ -3591,12 +3642,12 @@ pub mod queue {
 
     /// Parse bind (Generated)
     pub fn parse_bind<I: ParsableInput>(i: I) -> ParserResult<I, Bind> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, queue) = parse_short_string(i)?;
-        let (i, exchange) = parse_short_string(i)?;
-        let (i, routing_key) = parse_short_string(i)?;
+        let (i, _) = parse_short_uint.parse(i)?;
+        let (i, queue) = parse_short_string.parse(i)?;
+        let (i, exchange) = parse_short_string.parse(i)?;
+        let (i, routing_key) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(i, &["nowait"])?;
-        let (i, arguments) = parse_field_table(i)?;
+        let (i, arguments) = parse_field_table.parse(i)?;
         Ok((
             i,
             Bind {
@@ -3679,8 +3730,8 @@ pub mod queue {
 
     /// Parse purge (Generated)
     pub fn parse_purge<I: ParsableInput>(i: I) -> ParserResult<I, Purge> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, queue) = parse_short_string(i)?;
+        let (i, _) = parse_short_uint.parse(i)?;
+        let (i, queue) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(i, &["nowait"])?;
         Ok((
             i,
@@ -3726,7 +3777,7 @@ pub mod queue {
 
     /// Parse purge-ok (Generated)
     pub fn parse_purge_ok<I: ParsableInput>(i: I) -> ParserResult<I, PurgeOk> {
-        let (i, message_count) = parse_long_uint(i)?;
+        let (i, message_count) = parse_long_uint.parse(i)?;
         Ok((i, PurgeOk { message_count }))
     }
 
@@ -3767,8 +3818,8 @@ pub mod queue {
 
     /// Parse delete (Generated)
     pub fn parse_delete<I: ParsableInput>(i: I) -> ParserResult<I, Delete> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, queue) = parse_short_string(i)?;
+        let (i, _) = parse_short_uint.parse(i)?;
+        let (i, queue) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(i, &["if-unused", "if-empty", "nowait"])?;
         Ok((
             i,
@@ -3818,7 +3869,7 @@ pub mod queue {
 
     /// Parse delete-ok (Generated)
     pub fn parse_delete_ok<I: ParsableInput>(i: I) -> ParserResult<I, DeleteOk> {
-        let (i, message_count) = parse_long_uint(i)?;
+        let (i, message_count) = parse_long_uint.parse(i)?;
         Ok((i, DeleteOk { message_count }))
     }
 
@@ -3859,11 +3910,11 @@ pub mod queue {
 
     /// Parse unbind (Generated)
     pub fn parse_unbind<I: ParsableInput>(i: I) -> ParserResult<I, Unbind> {
-        let (i, _) = parse_short_uint(i)?;
-        let (i, queue) = parse_short_string(i)?;
-        let (i, exchange) = parse_short_string(i)?;
-        let (i, routing_key) = parse_short_string(i)?;
-        let (i, arguments) = parse_field_table(i)?;
+        let (i, _) = parse_short_uint.parse(i)?;
+        let (i, queue) = parse_short_string.parse(i)?;
+        let (i, exchange) = parse_short_string.parse(i)?;
+        let (i, routing_key) = parse_short_string.parse(i)?;
+        let (i, arguments) = parse_field_table.parse(i)?;
         Ok((
             i,
             Unbind {
@@ -3934,33 +3985,40 @@ pub mod tx {
                         10 => context(
                             "parse_select",
                             map(map(parse_select, AMQPMethod::Select), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         11 => context(
                             "parse_select_ok",
                             map(map(parse_select_ok, AMQPMethod::SelectOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         20 => context(
                             "parse_commit",
                             map(map(parse_commit, AMQPMethod::Commit), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         21 => context(
                             "parse_commit_ok",
                             map(map(parse_commit_ok, AMQPMethod::CommitOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         30 => context(
                             "parse_rollback",
                             map(map(parse_rollback, AMQPMethod::Rollback), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         31 => context(
                             "parse_rollback_ok",
                             map(map(parse_rollback_ok, AMQPMethod::RollbackOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         _ => Ok((i, None)),
                     }
                 }),
                 std::convert::identity,
             ),
-        )(i)
+        )
+        .parse(i)
     }
 
     /// Serialize tx (Generated)
@@ -4189,17 +4247,20 @@ pub mod confirm {
                         10 => context(
                             "parse_select",
                             map(map(parse_select, AMQPMethod::Select), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         11 => context(
                             "parse_select_ok",
                             map(map(parse_select_ok, AMQPMethod::SelectOk), Some),
-                        )(i),
+                        )
+                        .parse(i),
                         _ => Ok((i, None)),
                     }
                 }),
                 std::convert::identity,
             ),
-        )(i)
+        )
+        .parse(i)
     }
 
     /// Serialize confirm (Generated)

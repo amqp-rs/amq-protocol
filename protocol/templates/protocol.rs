@@ -114,10 +114,10 @@ use self::{{snake class.name}}::parse_{{snake class.name}};
 pub fn parse_class<I: ParsableInput>(i: I) -> ParserResult<I, AMQPClass> {
     context("parse_class", map_opt(flat_map(parse_id, |id| move |i| match id {
         {{#each protocol.classes as |class| ~}}
-        {{class.id}} => map(map(parse_{{snake class.name false}}, AMQPClass::{{camel class.name}}), Some)(i),
+        {{class.id}} => map(map(parse_{{snake class.name false}}, AMQPClass::{{camel class.name}}), Some).parse(i),
         {{/each ~}}
         _ => Ok((i, None)),
-    }), std::convert::identity))(i)
+    }), std::convert::identity)).parse(i)
 }
 
 /// Serialize an AMQP class
@@ -169,10 +169,10 @@ pub mod {{snake class.name}} {
     pub fn parse_{{snake class.name false}}<I: ParsableInput>(i: I) -> ParserResult<I, {{snake class.name}}::AMQPMethod> {
         context("parse_{{snake class.name false}}", map_opt(flat_map(parse_id, |id| move |i| match id {
             {{#each class.methods as |method| ~}}
-            {{method.id}} => context("parse_{{snake method.name false}}", map(map(parse_{{snake method.name false}}, AMQPMethod::{{camel method.name}}), Some))(i),
+            {{method.id}} => context("parse_{{snake method.name false}}", map(map(parse_{{snake method.name false}}, AMQPMethod::{{camel method.name}}), Some)).parse(i),
             {{/each ~}}
             _ => Ok((i, None)),
-        }), std::convert::identity))(i)
+        }), std::convert::identity)).parse(i)
     }
 
     /// Serialize {{class.name}} (Generated)
@@ -237,7 +237,7 @@ pub mod {{snake class.name}} {
     pub fn parse_{{snake method.name false}}<I: ParsableInput>(i: I) -> ParserResult<I, {{camel method.name}}> {
         {{#each_argument method.arguments as |argument| ~}}
         {{#if @argument_is_value ~}}
-        let (i, {{#if argument.force_default ~}}_{{else}}{{snake argument.name}}{{/if ~}}) = parse_{{snake_type argument.type}}(i)?;
+        let (i, {{#if argument.force_default ~}}_{{else}}{{snake argument.name}}{{/if ~}}) = parse_{{snake_type argument.type}}.parse(i)?;
         {{else}}
         let (i, {{#if argument.ignore_flags ~}}_{{else}}flags{{/if ~}}) = parse_flags(i, &[
             {{#each argument.flags as |flag| ~}}
@@ -329,7 +329,7 @@ pub mod {{snake class.name}} {
     pub fn parse_properties<I: ParsableInput>(i: I) -> ParserResult<I, AMQPProperties> {
         let (i, flags) = parse_short_uint(i)?;
         {{#each class.properties as |property| ~}}
-        let (i, {{snake property.name}}) = if flags & (1 << (15 - {{@index}})) != 0 { map(parse_{{snake_type property.type}}, Some)(i)? } else { (i, None) };
+        let (i, {{snake property.name}}) = if flags & (1 << (15 - {{@index}})) != 0 { map(parse_{{snake_type property.type}}, Some).parse(i)? } else { (i, None) };
         {{/each ~}}
         Ok((i, AMQPProperties {
             {{#each class.properties as |property| ~}}
