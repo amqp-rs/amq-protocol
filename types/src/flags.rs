@@ -33,7 +33,7 @@ impl AMQPFlags {
     }
 
     /// Initialize AMQPFlags from AMQP RPC serialization
-    pub fn from_bytes<I: nom::InputIter<Item = u8>>(names: &[&str], bytes: I) -> AMQPFlags {
+    pub fn from_bytes<I: nom::Input<Item = u8>>(names: &[&str], bytes: I) -> AMQPFlags {
         let flags = names
             .iter()
             .map(ToString::to_string)
