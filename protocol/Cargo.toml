@@ -16,7 +16,7 @@ rust-version  = "1.63.0"
 name = "amq_protocol"
 
 [features]
-default                   = ["native-tls"]
+default                   = ["rustls"]
 codegen                   = ["codegen-internal"]
 codegen-internal          = ["amq-protocol-codegen"]
 native-tls                = ["amq-protocol-tcp/native-tls"]
@@ -26,6 +26,11 @@ rustls-native-certs       = ["amq-protocol-tcp/rustls-native-certs"]
 rustls-webpki-roots-certs = ["amq-protocol-tcp/rustls-webpki-roots-certs"]
 vendored-openssl          = ["amq-protocol-tcp/vendored-openssl"]
 verbose-errors            = ["amq-protocol-types/verbose-errors"]
+
+# rustls crypto providers. Choose at least one. Otherwise, runtime errors.
+# See https://docs.rs/rustls/latest/rustls/#crate-features. for more info
+rustls--aws_lc_rs         = ["amq-protocol-tcp/rustls--aws_lc_rs"] # default, but doesn't build everywhere
+rustls--ring              = ["amq-protocol-tcp/rustls--ring"] # more compatible, (e.g., easily builds on Windows)
 
 [build-dependencies.amq-protocol-codegen]
 version  = "=7.2.0"
