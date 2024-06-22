@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-tcp"
-version       = "8.0.0-alpha.1"
+version       = "8.0.0-alpha.2"
 edition       = "2021"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP URI TCP connection handling"
@@ -30,7 +30,7 @@ rustls--aws_lc_rs         = ["tcp-stream/rustls--aws_lc_rs"] # default, but does
 rustls--ring              = ["tcp-stream/rustls--ring"] # more compatible, (e.g., easily builds on Windows)
 
 [dependencies.amq-protocol-uri]
-version = "=8.0.0-alpha.1"
+version = "=8.0.0-alpha.2"
 path    = "../uri"
 
 [dependencies.tcp-stream]
