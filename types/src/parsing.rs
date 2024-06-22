@@ -302,7 +302,7 @@ pub fn parse_flags<I: ParsableInput>(i: I, names: &[&str]) -> ParserResult<I, AM
 /// Traits required for parsing
 pub mod traits {
     /// Reexport nom traits required for parsing
-    pub use nom::{Compare, Input, Needed};
+    pub use nom::{Compare, CompareResult, Input, Needed};
 
     /// Trait used to ensure we can properly parse input
     pub trait ParsableInput: Clone + Compare<&'static [u8]> + Input<Item = u8> + PartialEq {}
