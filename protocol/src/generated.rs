@@ -1378,72 +1378,72 @@ pub mod basic {
 
     impl AMQPProperties {
         /// Set content-type (Generated)
-        pub fn with_content_type(mut self, value: ShortString) -> AMQPProperties {
+        pub fn with_content_type(mut self, value: ShortString) -> Self {
             self.content_type = Some(value);
             self
         }
         /// Set content-encoding (Generated)
-        pub fn with_content_encoding(mut self, value: ShortString) -> AMQPProperties {
+        pub fn with_content_encoding(mut self, value: ShortString) -> Self {
             self.content_encoding = Some(value);
             self
         }
         /// Set headers (Generated)
-        pub fn with_headers(mut self, value: FieldTable) -> AMQPProperties {
+        pub fn with_headers(mut self, value: FieldTable) -> Self {
             self.headers = Some(value);
             self
         }
         /// Set delivery-mode (Generated)
-        pub fn with_delivery_mode(mut self, value: ShortShortUInt) -> AMQPProperties {
+        pub fn with_delivery_mode(mut self, value: ShortShortUInt) -> Self {
             self.delivery_mode = Some(value);
             self
         }
         /// Set priority (Generated)
-        pub fn with_priority(mut self, value: ShortShortUInt) -> AMQPProperties {
+        pub fn with_priority(mut self, value: ShortShortUInt) -> Self {
             self.priority = Some(value);
             self
         }
         /// Set correlation-id (Generated)
-        pub fn with_correlation_id(mut self, value: ShortString) -> AMQPProperties {
+        pub fn with_correlation_id(mut self, value: ShortString) -> Self {
             self.correlation_id = Some(value);
             self
         }
         /// Set reply-to (Generated)
-        pub fn with_reply_to(mut self, value: ShortString) -> AMQPProperties {
+        pub fn with_reply_to(mut self, value: ShortString) -> Self {
             self.reply_to = Some(value);
             self
         }
         /// Set expiration (Generated)
-        pub fn with_expiration(mut self, value: ShortString) -> AMQPProperties {
+        pub fn with_expiration(mut self, value: ShortString) -> Self {
             self.expiration = Some(value);
             self
         }
         /// Set message-id (Generated)
-        pub fn with_message_id(mut self, value: ShortString) -> AMQPProperties {
+        pub fn with_message_id(mut self, value: ShortString) -> Self {
             self.message_id = Some(value);
             self
         }
         /// Set timestamp (Generated)
-        pub fn with_timestamp(mut self, value: Timestamp) -> AMQPProperties {
+        pub fn with_timestamp(mut self, value: Timestamp) -> Self {
             self.timestamp = Some(value);
             self
         }
         /// Set type (Generated)
-        pub fn with_kind(mut self, value: ShortString) -> AMQPProperties {
+        pub fn with_type(mut self, value: ShortString) -> Self {
             self.kind = Some(value);
             self
         }
         /// Set user-id (Generated)
-        pub fn with_user_id(mut self, value: ShortString) -> AMQPProperties {
+        pub fn with_user_id(mut self, value: ShortString) -> Self {
             self.user_id = Some(value);
             self
         }
         /// Set app-id (Generated)
-        pub fn with_app_id(mut self, value: ShortString) -> AMQPProperties {
+        pub fn with_app_id(mut self, value: ShortString) -> Self {
             self.app_id = Some(value);
             self
         }
         /// Set cluster-id (Generated)
-        pub fn with_cluster_id(mut self, value: ShortString) -> AMQPProperties {
+        pub fn with_cluster_id(mut self, value: ShortString) -> Self {
             self.cluster_id = Some(value);
             self
         }

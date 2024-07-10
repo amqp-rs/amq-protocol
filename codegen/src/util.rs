@@ -24,6 +24,7 @@ pub fn camel_case(name: &str) -> String {
 pub fn snake_case(name: &str, raw: bool) -> String {
     match name {
         "return" if raw => "r#return".to_string(),
+        "type" if !raw => "type".to_string(),
         "type" => "kind".to_string(),
         name => {
             let mut new_word = false;

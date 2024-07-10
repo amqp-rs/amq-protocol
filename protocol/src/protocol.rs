@@ -126,6 +126,14 @@ impl From<AMQPHardError> for AMQPErrorKind {
     }
 }
 
+impl basic::AMQPProperties {
+    #[deprecated(note = "use with_type instead")]
+    /// deprecated: use with_type instead
+    pub fn with_kind(self, value: ShortString) -> Self {
+        self.with_type(value)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

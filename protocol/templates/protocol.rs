@@ -302,7 +302,7 @@ pub mod {{snake class.name}} {
     impl AMQPProperties {
         {{#each class.properties as |property| ~}}
         /// Set {{property.name}} (Generated)
-        pub fn with_{{snake property.name false}}(mut self, value: {{property.type}}) -> AMQPProperties {
+        pub fn with_{{snake property.name false}}(mut self, value: {{property.type}}) -> Self {
             self.{{snake property.name}} = Some(value);
             self
         }
