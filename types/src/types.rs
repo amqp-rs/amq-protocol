@@ -202,6 +202,12 @@ impl fmt::Display for ShortString {
     }
 }
 
+impl From<ShortString> for String {
+    fn from(value: ShortString) -> Self {
+        value.0
+    }
+}
+
 impl<'a> LongString {
     /// Get a reference to a LongString as &[u8]
     pub fn as_bytes(&'a self) -> &'a [u8] {
