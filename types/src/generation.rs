@@ -183,12 +183,12 @@ pub fn gen_flags<'a, W: Write + 'a>(f: &'a AMQPFlags) -> impl SerializeFn<W> + '
 mod test {
     use super::*;
 
-    use cookie_factory::gen;
+    use cookie_factory::r#gen as cf_gen;
 
     macro_rules! test_gen (
         ($buf: expr, $gen: ident, $val: expr) => ({
             let buf = $buf;
-            let len = gen($gen($val), &mut buf[..]).map(|t| t.1);
+            let len = cf_gen($gen($val), &mut buf[..]).map(|t| t.1);
             match len {
                 Err(e)  => Err(format!("{:?}", e)),
                 Ok(len) => Ok((buf.to_vec(), len)),

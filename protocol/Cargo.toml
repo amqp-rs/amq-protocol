@@ -18,7 +18,7 @@ name = "amq_protocol"
 [features]
 default                   = ["rustls"]
 codegen                   = ["codegen-internal"]
-codegen-internal          = ["amq-protocol-codegen"]
+codegen-internal          = ["dep:amq-protocol-codegen"]
 native-tls                = ["amq-protocol-tcp/native-tls"]
 openssl                   = ["amq-protocol-tcp/openssl"]
 rustls                    = ["amq-protocol-tcp/rustls"]

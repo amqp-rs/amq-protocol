@@ -19,9 +19,9 @@ default                   = ["rustls"]
 native-tls                = ["tcp-stream/native-tls"]
 openssl                   = ["tcp-stream/openssl"]
 rustls                    = ["rustls-native-certs", "rustls--aws_lc_rs"]
-rustls-native-certs       = ["rustls-connector", "tcp-stream/rustls-native-certs"]
-rustls-webpki-roots-certs = ["rustls-connector", "tcp-stream/rustls-webpki-roots-certs"]
-rustls-connector          = ["tcp-stream/rustls-connector"]
+rustls-native-certs       = ["rustls-common", "tcp-stream/rustls-native-certs"]
+rustls-webpki-roots-certs = ["rustls-common", "tcp-stream/rustls-webpki-roots-certs"]
+rustls-common             = ["tcp-stream/rustls-common"]
 vendored-openssl          = ["tcp-stream/vendored-openssl"]
 
 # rustls crypto providers. Choose at least one. Otherwise, runtime errors.

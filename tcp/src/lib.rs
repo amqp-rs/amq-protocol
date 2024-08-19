@@ -21,7 +21,7 @@ pub use tcp_stream::NativeTlsConnector;
 #[cfg(feature = "openssl")]
 pub use tcp_stream::OpenSslConnector;
 
-#[cfg(feature = "rustls-connector")]
+#[cfg(feature = "rustls-common")]
 pub use tcp_stream::{RustlsConnector, RustlsConnectorConfig};
 
 /// Trait providing a method to connect to a TcpStream
