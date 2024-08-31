@@ -24,6 +24,14 @@ jobs:
             profile: minimal
             override: true
 
+      - name: Install NASM for aws-lc-rs on Windows
+        if: runner.os == 'Windows'
+        uses: ilammy/setup-nasm@v1
+
+      - name: Install ninja-build tool for aws-lc-fips-sys on Windows
+        if: runner.os == 'Windows'
+        uses: seanmiddleditch/gha-setup-ninja@v5
+
       - name: Run cargo check
         uses: actions-rs/cargo@v1
         with:
