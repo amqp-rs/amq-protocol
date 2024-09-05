@@ -18,8 +18,10 @@ pub fn camel_case(name: &str) -> String {
 }
 
 /// Convert input to snake case
+///
 /// For the purpose of the AMQP codegen usage, we also handle a few special cases:
 /// "type" and "return" become "kind" and "r#return" if raw is true
+///
 /// A word needs to be composed of at least two letters, this makes UInt become uint and not u_int
 pub fn snake_case(name: &str, raw: bool) -> String {
     match name {
