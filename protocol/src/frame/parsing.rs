@@ -157,4 +157,25 @@ mod test {
             Ok((&[][..], AMQPFrame::Heartbeat(1)))
         );
     }
+
+    #[test]
+    fn test_parse_declare_queue_frame() {
+        let frame = AMQPFrame::Method(
+            1,
+            AMQPClass::Queue(queue::AMQPMethod::Declare(queue::Declare {
+                queue: "some_queue".into(),
+                passive: true,
+                durable: true,
+                exclusive: true,
+                auto_delete: true,
+                nowait: true,
+                arguments: Default::default(),
+            })),
+        );
+
+        let mut buffer = vec![0u8; 30];
+
+        assert!(gen_frame(&frame)(buffer.as_mut_slice().into()).is_ok());
+        assert_eq!(parse_frame(buffer.as_slice()), Ok((&[][..], frame)));
+    }
 }

@@ -241,7 +241,7 @@ pub mod {{snake class.name}} {
         {{else}}
         let (i, {{#if argument.ignore_flags ~}}_{{else}}flags{{/if ~}}) = parse_flags(i, &[
             {{#each argument.flags as |flag| ~}}
-            "{{flag.name}}",
+            "{{snake flag.name}}",
             {{/each ~}}
         ])?;
         {{/if ~}}
