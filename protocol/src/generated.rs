@@ -646,7 +646,7 @@ pub mod basic {
         let (i, _) = parse_short_uint.parse(i)?;
         let (i, queue) = parse_short_string.parse(i)?;
         let (i, consumer_tag) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["no-local", "no-ack", "exclusive", "nowait"])?;
+        let (i, flags) = parse_flags(i, &["no_local", "no_ack", "exclusive", "nowait"])?;
         let (i, arguments) = parse_field_table.parse(i)?;
         Ok((
             i,
@@ -998,7 +998,7 @@ pub mod basic {
     pub fn parse_get<I: ParsableInput>(i: I) -> ParserResult<I, Get> {
         let (i, _) = parse_short_uint.parse(i)?;
         let (i, queue) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["no-ack"])?;
+        let (i, flags) = parse_flags(i, &["no_ack"])?;
         Ok((
             i,
             Get {
@@ -3040,7 +3040,7 @@ pub mod exchange {
         let (i, kind) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(
             i,
-            &["passive", "durable", "auto-delete", "internal", "nowait"],
+            &["passive", "durable", "auto_delete", "internal", "nowait"],
         )?;
         let (i, arguments) = parse_field_table.parse(i)?;
         Ok((
@@ -3135,7 +3135,7 @@ pub mod exchange {
     pub fn parse_delete<I: ParsableInput>(i: I) -> ParserResult<I, Delete> {
         let (i, _) = parse_short_uint.parse(i)?;
         let (i, exchange) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["if-unused", "nowait"])?;
+        let (i, flags) = parse_flags(i, &["if_unused", "nowait"])?;
         Ok((
             i,
             Delete {
@@ -3527,7 +3527,7 @@ pub mod queue {
         let (i, queue) = parse_short_string.parse(i)?;
         let (i, flags) = parse_flags(
             i,
-            &["passive", "durable", "exclusive", "auto-delete", "nowait"],
+            &["passive", "durable", "exclusive", "auto_delete", "nowait"],
         )?;
         let (i, arguments) = parse_field_table.parse(i)?;
         Ok((
@@ -3820,7 +3820,7 @@ pub mod queue {
     pub fn parse_delete<I: ParsableInput>(i: I) -> ParserResult<I, Delete> {
         let (i, _) = parse_short_uint.parse(i)?;
         let (i, queue) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["if-unused", "if-empty", "nowait"])?;
+        let (i, flags) = parse_flags(i, &["if_unused", "if_empty", "nowait"])?;
         Ok((
             i,
             Delete {
