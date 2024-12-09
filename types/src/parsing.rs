@@ -17,12 +17,12 @@ use traits::*;
 /// Error context for `ParserErrors`
 #[derive(Clone, Debug, Eq, PartialEq)]
 enum VerboseErrorKind {
-  /// Static string added by the `context` function
-  Context(&'static str),
-  /// Indicates which character was expected by the `char` function
-  Char(char),
-  /// Error kind given by various nom parsers
-  Nom(ErrorKind),
+    /// Static string added by the `context` function
+    Context(&'static str),
+    /// Indicates which character was expected by the `char` function
+    Char(char),
+    /// Error kind given by various nom parsers
+    Nom(ErrorKind),
 }
 
 /// Struct holding the errors stack
