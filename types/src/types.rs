@@ -250,8 +250,9 @@ impl From<Vec<AMQPValue>> for FieldArray {
 
 impl FieldTable {
     /// Insert a new entry in the table
-    pub fn insert(&mut self, k: ShortString, v: AMQPValue) {
+    pub fn insert(&mut self, k: ShortString, v: AMQPValue) -> &mut Self {
         self.0.insert(k, v);
+        self
     }
 
     /// Check whether the table contains the given key
