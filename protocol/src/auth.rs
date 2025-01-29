@@ -43,7 +43,7 @@ impl Credentials {
     }
 
     fn amqplain_auth_string(&self) -> String {
-        let needed_len = 4 /* FieldTable length */ + 15 /* LOGIN + PASSWORD + 2 * 1 (length) */ + 5 /* type + length */ + self.username().as_bytes().len() + 5 /* type + length */ + self.password().as_bytes().len();
+        let needed_len = 4 /* FieldTable length */ + 15 /* LOGIN + PASSWORD + 2 * 1 (length) */ + 5 /* type + length */ + self.username().len() + 5 /* type + length */ + self.password().len();
         let mut buf = vec![0; needed_len];
         let mut table = FieldTable::default();
         table.insert(
