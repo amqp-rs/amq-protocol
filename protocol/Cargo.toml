@@ -10,7 +10,7 @@ keywords      = ["amqp","rabbitmq","protocol","nom"]
 categories    = ["api-bindings","network-programming"]
 license       = "BSD-2-Clause"
 build         = "build.rs"
-rust-version  = "1.74.0"
+rust-version  = "1.80.0"
 
 [lib]
 name = "amq_protocol"
