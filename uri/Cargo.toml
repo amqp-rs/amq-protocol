@@ -1,6 +1,6 @@
 [package]
 name          = "amq-protocol-uri"
-version       = "8.1.0"
+version       = "8.1.1"
 edition       = "2021"
 authors       = ["Marc-Antoine Perennou <%arc-Antoine@Perennou.com>"]
 description   = "AMQP URI manipulation"
@@ -15,7 +15,7 @@ rust-version  = "1.81.0"
 name = "amq_protocol_uri"
 
 [dependencies.amq-protocol-types]
-version = "=8.1.0"
+version = "=8.1.1"
 path    = "../types"
 
 [dependencies]
