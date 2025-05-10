@@ -9,7 +9,7 @@ documentation = "https://docs.rs/amq-protocol-tcp"
 keywords      = ["amqp","rabbitmq","protocol"]
 categories    = ["api-bindings","network-programming"]
 license       = "BSD-2-Clause"
-rust-version  = "1.81.0"
+rust-version  = "1.82.0"
 
 [lib]
 name = "amq_protocol_tcp"
