@@ -1,6 +1,6 @@
 pub use crate::uri::SASLMechanism;
 use crate::{
-    types::{generation::gen_field_table, AMQPValue, FieldTable},
+    types::{AMQPValue, FieldTable, generation::gen_field_table},
     uri::AMQPUserInfo,
 };
 

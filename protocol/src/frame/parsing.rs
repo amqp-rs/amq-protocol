@@ -6,10 +6,10 @@ use crate::{
     types::parsing::*,
 };
 use nom::{
+    Parser,
     bytes::streaming::{tag, take},
     combinator::{all_consuming, flat_map, map, map_opt, map_res},
     error::context,
-    Parser,
 };
 use traits::ParsableInput;
 

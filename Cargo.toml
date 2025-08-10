@@ -9,5 +9,5 @@ license = "BSD-2-Clause"
 repository = "https://github.com/amqp-rs/amq-protocol"
 categories = ["api-bindings", "network-programming"]
 keywords = ["amqp","rabbitmq","protocol","nom"]
-edition = "2021"
-rust-version = "1.82.0"
+edition = "2024"
+rust-version = "1.85.0"

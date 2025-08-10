@@ -3,7 +3,7 @@ pub use cookie_factory::{BackToTheBuffer, GenError, GenResult, SerializeFn};
 
 use crate::{flags::*, types::*, value::*};
 use cookie_factory::{
-    bytes::{be_f32, be_f64, be_i16, be_i32, be_i64, be_i8, be_u16, be_u32, be_u64, be_u8},
+    bytes::{be_f32, be_f64, be_i8, be_i16, be_i32, be_i64, be_u8, be_u16, be_u32, be_u64},
     combinator::{back_to_the_buffer, slice},
     multi::many_ref,
     sequence::pair,
@@ -476,7 +476,9 @@ mod test {
         );
         assert_eq!(
             test_gen!(
-                &mut [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0][..],
+                &mut [
+                    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+                ][..],
                 gen_field_table,
                 &table
             ),

@@ -5,9 +5,9 @@ use crate::types::{
     *,
 };
 use nom::{
+    Parser,
     combinator::{flat_map, map, map_opt},
     error::context,
-    Parser,
 };
 use serde::{Deserialize, Serialize};
 use std::{convert::TryFrom, error, fmt, io::Write};

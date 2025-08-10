@@ -1,15 +1,14 @@
 use crate::{flags::*, types::*, value::*};
 use nom::{
-    self,
+    self, Parser,
     bytes::streaming::take,
     combinator::{all_consuming, complete, flat_map, map, map_opt, map_parser, map_res},
-    error::{context, ContextError, ErrorKind, ParseError},
+    error::{ContextError, ErrorKind, ParseError, context},
     multi::fold_many0,
     number::streaming::{
         be_f32, be_f64, be_i16, be_i32, be_i64, be_u16, be_u32, be_u64, i8 as be_i8, u8 as be_u8,
     },
     sequence::pair,
-    Parser,
 };
 use std::{error, fmt};
 use traits::*;
