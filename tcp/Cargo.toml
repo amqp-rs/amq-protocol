@@ -17,6 +17,8 @@ name = "amq_protocol_tcp"
 
 [features]
 default                   = ["rustls"]
+hickory-dns               = ["dep:hickory-to-socket-addrs"]
+
 native-tls                = ["tcp-stream/native-tls"]
 openssl                   = ["tcp-stream/openssl"]
 rustls                    = ["rustls-native-certs", "rustls--aws_lc_rs"]
@@ -30,9 +32,16 @@ vendored-openssl          = ["tcp-stream/vendored-openssl"]
 rustls--aws_lc_rs         = ["tcp-stream/rustls--aws_lc_rs"] # default, but doesn't build everywhere
 rustls--ring              = ["tcp-stream/rustls--ring"] # more compatible, (e.g., easily builds on Windows)
 
+[dependencies]
+cfg-if = "^1.0"
+
 [dependencies.amq-protocol-uri]
 version = "=8.1.2"
 path    = "../uri"
+
+[dependencies.hickory-to-socket-addrs]
+version = "^1.0"
+optional = true
 
 [dependencies.tcp-stream]
 version          = "^0.30.1"

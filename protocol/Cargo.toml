@@ -20,6 +20,7 @@ name = "amq_protocol"
 default                   = ["rustls"]
 codegen                   = ["codegen-internal"]
 codegen-internal          = ["dep:amq-protocol-codegen"]
+hickory-dns               = ["amq-protocol-tcp/hickory-dns"]
 native-tls                = ["amq-protocol-tcp/native-tls"]
 openssl                   = ["amq-protocol-tcp/openssl"]
 rustls                    = ["amq-protocol-tcp/rustls"]

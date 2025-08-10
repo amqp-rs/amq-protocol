@@ -7,6 +7,7 @@
 ## Features
 
 - codegen: force code generation (default to pregenerated sources)
+- hickory-dns: use hickory-dns for domain name resolution to avoid spurious network hangs
 - vendored-openssl: use a vendored openssl version instead of the system one (when using openssl backend)
 - verbose-errors: enable more verbose errors in the AMQP parser
 
