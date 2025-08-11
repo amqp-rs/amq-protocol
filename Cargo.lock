@@ -39,7 +39,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol"
-version = "8.2.1"
+version = "8.2.2"
 dependencies = [
  "amq-protocol-codegen",
  "amq-protocol-tcp",
@@ -52,7 +52,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-codegen"
-version = "8.2.1"
+version = "8.2.2"
 dependencies = [
  "amq-protocol-types",
  "handlebars",
@@ -62,7 +62,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-tcp"
-version = "8.2.1"
+version = "8.2.2"
 dependencies = [
  "amq-protocol-uri",
  "cfg-if",
@@ -73,7 +73,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-types"
-version = "8.2.1"
+version = "8.2.2"
 dependencies = [
  "cookie-factory",
  "nom 8.0.0",
@@ -83,7 +83,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-uri"
-version = "8.2.1"
+version = "8.2.2"
 dependencies = [
  "amq-protocol-types",
  "percent-encoding",
@@ -1761,9 +1761,9 @@ dependencies = [
 
 [[package]]
 name = "rustls-connector"
-version = "0.21.7"
+version = "0.21.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b68f41384a0c195494f07c9bf5d020dcfca869d3b1492c9391bbc267bd9904fd"
+checksum = "c50d602e059e8b92d30390d6baf0fb96560fcc4f12f45f474cc3af88799e6e3c"
 dependencies = [
  "log",
  "rustls",
