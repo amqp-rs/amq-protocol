@@ -36,15 +36,15 @@ rustls--ring              = ["tcp-stream/rustls--ring"] # more compatible, (e.g.
 cfg-if = "^1.0"
 
 [dependencies.amq-protocol-uri]
-version = "=8.1.2"
+version = "=8.2.0"
 path    = "../uri"
 
 [dependencies.hickory-to-socket-addrs]
-version = "^1.0"
+version = "^1.2"
 optional = true
 
 [dependencies.tcp-stream]
-version          = "^0.30.1"
+version          = "^0.30.3"
 default-features = false
 
 [dependencies.tracing]
