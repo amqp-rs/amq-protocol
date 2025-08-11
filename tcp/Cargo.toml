@@ -36,7 +36,7 @@ rustls--ring              = ["tcp-stream/rustls--ring"] # more compatible, (e.g.
 cfg-if = "^1.0"
 
 [dependencies.amq-protocol-uri]
-version = "=8.2.0"
+version = "=8.2.1"
 path    = "../uri"
 
 [dependencies.hickory-to-socket-addrs]
