@@ -59,7 +59,7 @@ impl TryFrom<channel::Close> for AMQPError {
 
     fn try_from(method: channel::Close) -> Result<Self, Self::Error> {
         Self::from_id(method.reply_code, method.reply_text.clone())
-            .ok_or_else(|| format!("Couldn't convert method to error: {:?}", method))
+            .ok_or_else(|| format!("Couldn't convert method to error: {method:?}"))
     }
 }
 
@@ -68,7 +68,7 @@ impl TryFrom<connection::Close> for AMQPError {
 
     fn try_from(method: connection::Close) -> Result<Self, Self::Error> {
         Self::from_id(method.reply_code, method.reply_text.clone())
-            .ok_or_else(|| format!("Couldn't convert method to error: {:?}", method))
+            .ok_or_else(|| format!("Couldn't convert method to error: {method:?}"))
     }
 }
 
@@ -109,8 +109,8 @@ impl AMQPErrorKind {
 impl fmt::Display for AMQPErrorKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            AMQPErrorKind::Soft(err) => write!(f, "AMQP soft error: {}", err),
-            AMQPErrorKind::Hard(err) => write!(f, "AMQP hard error: {}", err),
+            AMQPErrorKind::Soft(err) => write!(f, "AMQP soft error: {err}"),
+            AMQPErrorKind::Hard(err) => write!(f, "AMQP hard error: {err}"),
         }
     }
 }

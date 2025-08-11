@@ -86,7 +86,7 @@ impl fmt::Display for ParserErrors {
         if let Some(errors) = self.errors.as_ref() {
             for error in errors {
                 writeln!(f)?;
-                write!(f, "\tat {:?}", error)?;
+                write!(f, "\tat {error:?}")?;
             }
         }
         Ok(())
@@ -302,7 +302,7 @@ pub fn parse_byte_array<I: ParsableInput>(i: I) -> ParserResult<I, ByteArray> {
 pub fn parse_flags<I: ParsableInput>(i: I, names: &[&str]) -> ParserResult<I, AMQPFlags> {
     context(
         "parse_flags",
-        map(take((names.len() + 7) / 8), |b| {
+        map(take(names.len().div_ceil(8)), |b| {
             AMQPFlags::from_bytes(names, b)
         }),
     )

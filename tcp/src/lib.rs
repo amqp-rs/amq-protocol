@@ -1,4 +1,5 @@
 #![deny(missing_docs)]
+#![allow(clippy::result_large_err)]
 
 //! # AMQP URI TCP connection handling
 //!

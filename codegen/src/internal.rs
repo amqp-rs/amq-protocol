@@ -488,7 +488,7 @@ impl _AMQPArgument {
                 };
                 *domains
                     .get(domain)
-                    .unwrap_or_else(|| panic!("No {} domain exists", domain))
+                    .unwrap_or_else(|| panic!("No {domain} domain exists"))
             }
         }
     }

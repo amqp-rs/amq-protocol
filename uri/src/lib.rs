@@ -40,7 +40,7 @@ impl FromStr for AMQPScheme {
         match s {
             "amqp" => Ok(AMQPScheme::AMQP),
             "amqps" => Ok(AMQPScheme::AMQPS),
-            s => Err(format!("Invalid AMQP scheme: {}", s)),
+            s => Err(format!("Invalid AMQP scheme: {s}")),
         }
     }
 }
@@ -117,7 +117,7 @@ impl FromStr for SASLMechanism {
             "external" => Ok(SASLMechanism::External),
             "plain" => Ok(SASLMechanism::Plain),
             "rabbit-cr-demo" => Ok(SASLMechanism::RabbitCrDemo),
-            s => Err(format!("Invalid SASL mechanism: {}", s)),
+            s => Err(format!("Invalid SASL mechanism: {s}")),
         }
     }
 }
@@ -156,7 +156,7 @@ impl FromStr for AMQPUri {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let url = Url::parse(s).map_err(|e| e.to_string())?;
         if url.cannot_be_a_base() {
-            return Err(format!("Invalid URL: '{}'", s));
+            return Err(format!("Invalid URL: '{s}'"));
         }
         let default = AMQPUri::default();
         let scheme = url.scheme().parse::<AMQPScheme>()?;

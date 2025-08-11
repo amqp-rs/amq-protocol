@@ -70,10 +70,10 @@ impl fmt::Display for AMQPFrame {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             AMQPFrame::ProtocolHeader(version) => {
-                f.write_fmt(format_args!("AMQPFrame::ProtocolHeader({})", version))
+                f.write_fmt(format_args!("AMQPFrame::ProtocolHeader({version})"))
             }
             AMQPFrame::Method(_, klass) => {
-                f.write_fmt(format_args!("AMQPFrame::Method({:?})", klass))
+                f.write_fmt(format_args!("AMQPFrame::Method({klass:?})"))
             }
             AMQPFrame::Header(..) => f.write_str("AMQPFrame::Header"),
             AMQPFrame::Body(..) => f.write_str("AMQPFrame::Body"),

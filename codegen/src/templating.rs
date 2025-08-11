@@ -70,9 +70,9 @@ impl<'a> HandlebarsAMQPExtension for CodeGenerator<'a> {
         var_name: &str,
         metadata: Option<Value>,
     ) {
-        let dest_path = Path::new(out_dir).join(format!("{}.rs", target));
+        let dest_path = Path::new(out_dir).join(format!("{target}.rs"));
         let mut f = File::create(&dest_path)
-            .unwrap_or_else(|err| panic!("Failed to create {:?}: {}", dest_path, err));
+            .unwrap_or_else(|err| panic!("Failed to create {dest_path:?}: {err}"));
         let specs = AMQProtocolDefinition::load(metadata);
         let mut codegen = CodeGenerator::default().register_amqp_helpers();
         let mut data = HashMap::new();
@@ -80,11 +80,11 @@ impl<'a> HandlebarsAMQPExtension for CodeGenerator<'a> {
         codegen.set_strict_mode(true);
         codegen
             .register_template_string(template_name, template)
-            .unwrap_or_else(|e| panic!("Failed to register {} template: {}", template_name, e));
+            .unwrap_or_else(|e| panic!("Failed to register {template_name} template: {e}"));
         data.insert(
             var_name.to_string(),
             serde_json::to_value(specs)
-                .unwrap_or_else(|e| panic!("Failed to serialize specs: {}", e)),
+                .unwrap_or_else(|e| panic!("Failed to serialize specs: {e}")),
         );
 
         writeln!(
@@ -92,12 +92,9 @@ impl<'a> HandlebarsAMQPExtension for CodeGenerator<'a> {
             "{}",
             codegen
                 .render(template_name, &data)
-                .unwrap_or_else(|err| panic!(
-                    "Failed to render {} template: {}",
-                    template_name, err
-                ))
+                .unwrap_or_else(|err| panic!("Failed to render {template_name} template: {err}"))
         )
-        .unwrap_or_else(|e| panic!("Failed to generate {}.rs: {}", target, e));
+        .unwrap_or_else(|e| panic!("Failed to generate {target}.rs: {e}"));
     }
 }
 
@@ -245,7 +242,7 @@ impl HelperDef for IncludeMoreHelper {
                 .join("templates")
                 .join("includes")
                 .join(amqp_class)
-                .join(format!("{}.rs", amqp_method));
+                .join(format!("{amqp_method}.rs"));
             if let Ok(include) = fs::read_to_string(include) {
                 out.write(&include)?;
             }
@@ -429,8 +426,8 @@ fn json_value(val: AMQPValue) -> serde_json::Result<serde_json::Value> {
         AMQPValue::Float(v) => serde_json::to_value(v),
         AMQPValue::Double(v) => serde_json::to_value(v),
         AMQPValue::DecimalValue(v) => serde_json::to_value(v),
-        AMQPValue::ShortString(v) => serde_json::to_value(format!("\"{}\"", v)),
-        AMQPValue::LongString(v) => serde_json::to_value(format!("b\"{}\"", v)),
+        AMQPValue::ShortString(v) => serde_json::to_value(format!("\"{v}\"")),
+        AMQPValue::LongString(v) => serde_json::to_value(format!("b\"{v}\"")),
         AMQPValue::FieldArray(v) => serde_json::to_value(v),
         AMQPValue::Timestamp(v) => serde_json::to_value(v),
         AMQPValue::FieldTable(v) => serde_json::to_value(v),
