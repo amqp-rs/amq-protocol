@@ -48,7 +48,7 @@ impl AMQPUriTcpExt for AMQPUri {
 
                 let uri = HickoryToSocketAddrs::new(&self.authority.host, self.authority.port);
             } else {
-                let uri = format!("{}:{}", self.authority.host, self.authority.port);
+                let uri = (self.authority.host.as_str(), self.authority.port);
             }
         }
         trace!(uri = ?uri, "Connecting.");
