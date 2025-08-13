@@ -44,7 +44,7 @@ version = "^1.2"
 optional = true
 
 [dependencies.tcp-stream]
-version          = "^0.30.3"
+version          = "^0.30.7"
 default-features = false
 
 [dependencies.tracing]
