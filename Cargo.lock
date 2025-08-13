@@ -39,7 +39,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol"
-version = "8.2.2"
+version = "8.3.0"
 dependencies = [
  "amq-protocol-codegen",
  "amq-protocol-tcp",
@@ -52,7 +52,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-codegen"
-version = "8.2.2"
+version = "8.3.0"
 dependencies = [
  "amq-protocol-types",
  "handlebars",
@@ -62,7 +62,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-tcp"
-version = "8.2.2"
+version = "8.3.0"
 dependencies = [
  "amq-protocol-uri",
  "async-trait",
@@ -76,7 +76,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-types"
-version = "8.2.2"
+version = "8.3.0"
 dependencies = [
  "cookie-factory",
  "nom 8.0.0",
@@ -86,7 +86,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-uri"
-version = "8.2.2"
+version = "8.3.0"
 dependencies = [
  "amq-protocol-types",
  "percent-encoding",

@@ -39,7 +39,7 @@ executor-trait = "^2.1"
 reactor-trait = "^2.7"
 
 [dependencies.amq-protocol-uri]
-version = "=8.2.2"
+version = "=8.3.0"
 path    = "../uri"
 
 [dependencies.hickory-to-socket-addrs]
