@@ -44,13 +44,14 @@ pub trait AMQPUriTcpExt {
     fn connect_with_config(&self, config: TLSConfig<'_, '_, '_>) -> HandshakeResult;
 
     /// connect to a TcpStream
-    async fn connect_async<R: TcpReactor + Send + Sync, E: Deref + Send + Sync>(
+    async fn connect_async<R: Deref + Send + Sync, E: Deref + Send + Sync>(
         &self,
         reactor: R,
         executor: E,
     ) -> io::Result<AsyncTcpStream>
     where
         Self: Sized,
+        R::Target: TcpReactor + Send + Sync,
         E::Target: BlockingExecutor + Send + Sync,
     {
         self.connect_with_config_async(TLSConfig::default(), reactor, executor)
@@ -58,13 +59,14 @@ pub trait AMQPUriTcpExt {
     }
 
     /// connect to a TcpStream with the given configuration
-    async fn connect_with_config_async<R: TcpReactor + Send + Sync, E: Deref + Send + Sync>(
+    async fn connect_with_config_async<R: Deref + Send + Sync, E: Deref + Send + Sync>(
         &self,
         config: TLSConfig<'_, '_, '_>,
         reactor: R,
         executor: E,
     ) -> io::Result<AsyncTcpStream>
     where
+        R::Target: TcpReactor + Send + Sync,
         E::Target: BlockingExecutor + Send + Sync;
 }
 
@@ -94,13 +96,14 @@ impl AMQPUriTcpExt for AMQPUri {
         Ok(stream)
     }
 
-    async fn connect_with_config_async<R: TcpReactor + Send + Sync, E: Deref + Send + Sync>(
+    async fn connect_with_config_async<R: Deref + Send + Sync, E: Deref + Send + Sync>(
         &self,
         config: TLSConfig<'_, '_, '_>,
         reactor: R,
         executor: E,
     ) -> io::Result<AsyncTcpStream>
     where
+        R::Target: TcpReactor + Send + Sync,
         E::Target: BlockingExecutor + Send + Sync,
     {
         cfg_if! {
