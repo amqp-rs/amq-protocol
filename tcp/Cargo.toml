@@ -48,8 +48,9 @@ optional = true
 features = ["reactor-trait"]
 
 [dependencies.tcp-stream]
-version          = "^0.30.9"
+version          = "^0.31.2"
 default-features = false
+features = ["futures"]
 
 [dependencies.tracing]
 version          = "^0.1"
