@@ -1,6 +1,6 @@
 [package]
-name          = "amq-protocol-tcp"
-description   = "AMQP URI TCP connection handling"
+name = "amq-protocol-tcp"
+description = "AMQP URI TCP connection handling"
 documentation = "https://docs.rs/amq-protocol-tcp"
 
 authors.workspace = true
@@ -16,21 +16,28 @@ version.workspace = true
 name = "amq_protocol_tcp"
 
 [features]
-default                   = ["rustls"]
-hickory-dns               = ["dep:hickory-to-socket-addrs"]
+default = ["rustls"]
+hickory-dns = ["dep:hickory-to-socket-addrs"]
 
-native-tls                = ["tcp-stream/native-tls-futures"]
-openssl                   = ["tcp-stream/openssl-futures"]
-rustls                    = ["rustls-native-certs", "rustls--aws_lc_rs"]
-rustls-native-certs       = ["rustls-common", "tcp-stream/rustls-native-certs"]
-rustls-webpki-roots-certs = ["rustls-common", "tcp-stream/rustls-webpki-roots-certs"]
-rustls-common             = ["tcp-stream/rustls-futures"]
-vendored-openssl          = ["tcp-stream/vendored-openssl"]
+native-tls = ["tcp-stream/native-tls-futures"]
+openssl = ["tcp-stream/openssl-futures"]
+rustls = ["rustls-native-certs", "rustls--aws_lc_rs"]
+rustls-native-certs = ["rustls-common", "tcp-stream/rustls-native-certs"]
+rustls-webpki-roots-certs = [
+    "rustls-common",
+    "tcp-stream/rustls-webpki-roots-certs",
+]
+rustls-common = ["tcp-stream/rustls-futures"]
+vendored-openssl = ["tcp-stream/vendored-openssl"]
 
 # rustls crypto providers. Choose at least one. Otherwise, runtime errors.
 # See https://docs.rs/rustls/latest/rustls/#crate-features. for more info
-rustls--aws_lc_rs         = ["tcp-stream/rustls--aws_lc_rs"] # default, but doesn't build everywhere
-rustls--ring              = ["tcp-stream/rustls--ring"] # more compatible, (e.g., easily builds on Windows)
+rustls--aws_lc_rs = [
+    "tcp-stream/rustls--aws_lc_rs",
+] # default, but doesn't build everywhere
+rustls--ring = [
+    "tcp-stream/rustls--ring",
+] # more compatible, (e.g., easily builds on Windows)
 
 [dependencies]
 async-trait = "^0.1.42"
@@ -40,7 +47,7 @@ reactor-trait = "^2.7"
 
 [dependencies.amq-protocol-uri]
 version = "=8.3.0"
-path    = "../uri"
+path = "../uri"
 
 [dependencies.hickory-to-socket-addrs]
 version = "^1.3"
@@ -48,12 +55,12 @@ optional = true
 features = ["reactor-trait"]
 
 [dependencies.tcp-stream]
-version          = "^0.31.2"
+version = "0.30.9"
 default-features = false
 features = ["futures"]
 
 [dependencies.tracing]
-version          = "^0.1"
+version = "^0.1"
 default-features = false
 
 [badges]
