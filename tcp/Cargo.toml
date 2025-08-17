@@ -50,6 +50,7 @@ features = ["reactor-trait"]
 [dependencies.tcp-stream]
 version          = "^0.30.9"
 default-features = false
+features         = ["futures"]
 
 [dependencies.tracing]
 version          = "^0.1"
