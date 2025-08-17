@@ -50,6 +50,7 @@ features = ["futures"]
 [dependencies.tcp-stream]
 version          = "^0.31.2"
 default-features = false
+features         = ["futures"]
 
 [dependencies.tracing]
 version          = "^0.1"
