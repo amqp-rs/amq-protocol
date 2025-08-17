@@ -3,7 +3,7 @@ resolver = "3"
 members = [ "codegen", "protocol", "tcp", "types", "uri" ]
 
 [workspace.package]
-version = "8.3.0"
+version = "8.3.1"
 authors = ["Marc-Antoine Perennou <Marc-Antoine@Perennou.com>"]
 license = "BSD-2-Clause"
 repository = "https://github.com/amqp-rs/amq-protocol"
