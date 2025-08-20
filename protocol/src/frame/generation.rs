@@ -91,3 +91,45 @@ fn gen_content_body_frame<'a, W: Write + 'a>(
         gen_short_short_uint(constants::FRAME_END),
     ))
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn generate_header_frame() {
+        use crate::{
+            protocol::BasicProperties,
+            frame::{AMQPContentHeader, WriteContext},
+        };
+
+        let channel_id = 1;
+        let hdr = AMQPContentHeader {
+            class_id: 60,
+            body_size: 5,
+            properties: BasicProperties::default(),
+        };
+        let header = AMQPFrame::Header(channel_id, hdr.class_id, Box::new(hdr));
+
+        let buf = Vec::<u8>::new();
+        let val = gen_frame::<Vec<u8>>(&header);
+
+        let ctx = WriteContext::from(buf);
+        let (frame, _size) = val(ctx).unwrap().into_inner();
+        println!("header: {:?}", header);
+        println!("frame: {:?}", frame);
+
+        let expected = [
+            2, // frame type
+            0, 1, // channel ID
+            0, 0, 0, 14, // payload size (of header frame)
+            0, 60, // <-- method class id, not serialized, but should
+            0, 0, // weight, basically unused
+            0, 0, 0, 0, 0, 0, 0, 5, // body_size
+            0, 0,   // property flags
+            206, // 0xCE frame end marker
+        ];
+
+        assert_eq!(frame, expected);
+    }
+}
