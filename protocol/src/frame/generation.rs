@@ -14,11 +14,12 @@ pub fn gen_frame<'a, W: Write + BackToTheBuffer + 'a>(
         AMQPFrame::ProtocolHeader(version) => gen_protocol_header(*version)(x),
         AMQPFrame::Heartbeat(channel_id) => gen_heartbeat_frame(*channel_id)(x),
         AMQPFrame::Method(channel_id, method) => gen_method_frame(*channel_id, method)(x),
-        AMQPFrame::Header(channel_id, header) => {
-            gen_content_header_frame(*channel_id, header.class_id, header.body_size, &header.properties)(
-                x,
-            )
-        }
+        AMQPFrame::Header(channel_id, header) => gen_content_header_frame(
+            *channel_id,
+            header.class_id,
+            header.body_size,
+            &header.properties,
+        )(x),
         AMQPFrame::Body(channel_id, data) => gen_content_body_frame(*channel_id, data)(x),
     }
 }
@@ -99,8 +100,8 @@ mod test {
     #[test]
     fn generate_header_frame() {
         use crate::{
-            protocol::BasicProperties,
             frame::{AMQPContentHeader, WriteContext},
+            protocol::BasicProperties,
         };
 
         let channel_id = 1;
