@@ -86,7 +86,11 @@ pub fn parse_frame<I: ParsableInput>(i: I) -> ParserResult<I, AMQPFrame> {
                             channel_id,
                             payload.iter_elements().collect(),
                         )),
-                        AMQPFrameType::Heartbeat => Ok(AMQPFrame::Heartbeat(channel_id)),
+                        AMQPFrameType::Heartbeat => Ok(if channel_id == 0 {
+                            AMQPFrame::Heartbeat
+                        } else {
+                            AMQPFrame::InvalidHeartbeat(channel_id)
+                        }),
                     },
                 )
                 .parse(i),
@@ -158,8 +162,12 @@ mod test {
     #[test]
     fn test_heartbeat() {
         assert_eq!(
+            parse_frame(&[8, 0, 0, 0, 0, 0, 0, 206][..]),
+            Ok((&[][..], AMQPFrame::Heartbeat))
+        );
+        assert_eq!(
             parse_frame(&[8, 0, 1, 0, 0, 0, 0, 206][..]),
-            Ok((&[][..], AMQPFrame::Heartbeat(1)))
+            Ok((&[][..], AMQPFrame::InvalidHeartbeat(1)))
         );
     }
 

@@ -12,7 +12,8 @@ pub fn gen_frame<'a, W: Write + BackToTheBuffer + 'a>(
 ) -> impl SerializeFn<W> + 'a {
     move |x| match frame {
         AMQPFrame::ProtocolHeader(version) => gen_protocol_header(*version)(x),
-        AMQPFrame::Heartbeat(channel_id) => gen_heartbeat_frame(*channel_id)(x),
+        AMQPFrame::Heartbeat => gen_heartbeat_frame(0)(x),
+        AMQPFrame::InvalidHeartbeat(channel_id) => gen_heartbeat_frame(*channel_id)(x),
         AMQPFrame::Method(channel_id, method) => gen_method_frame(*channel_id, method)(x),
         AMQPFrame::Header(channel_id, header) => gen_content_header_frame(
             *channel_id,

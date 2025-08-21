@@ -55,8 +55,10 @@ pub enum AMQPFrame {
     Header(ChannelId, Box<AMQPContentHeader>),
     /// Content body
     Body(ChannelId, Vec<u8>),
-    /// Heartbeat frame
-    Heartbeat(ChannelId),
+    /// Heartbeat frame (Channel 0 enforced as per specifications)
+    Heartbeat,
+    /// Invalid Heartbeat frame (With configurable ChannelId, not following specifications)
+    InvalidHeartbeat(ChannelId),
 }
 
 impl AMQPFrame {
@@ -77,7 +79,10 @@ impl fmt::Display for AMQPFrame {
             }
             AMQPFrame::Header(..) => f.write_str("AMQPFrame::Header"),
             AMQPFrame::Body(..) => f.write_str("AMQPFrame::Body"),
-            AMQPFrame::Heartbeat(_) => f.write_str("AMQPFrame::Heartbeat"),
+            AMQPFrame::Heartbeat => f.write_str("AMQPFrame::Heartbeat"),
+            AMQPFrame::InvalidHeartbeat(id) => {
+                f.write_fmt(format_args!("AMQPFrame::InvalidHeartbeat({id})"))
+            }
         }
     }
 }
