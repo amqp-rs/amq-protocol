@@ -16,8 +16,12 @@ version.workspace = true
 name = "amq_protocol_tcp"
 
 [features]
-default                   = ["rustls"]
-hickory-dns               = ["dep:hickory-to-socket-addrs"]
+default                   = ["rustls", "tokio"]
+
+async-global-executor     = ["async-rs/async-global-executor", "async-rs/async-io"]
+hickory-dns               = ["async-rs/hickory-dns"]
+smol                      = ["async-rs/smol"]
+tokio                     = ["async-rs/tokio"]
 
 native-tls                = ["tcp-stream/native-tls-futures"]
 openssl                   = ["tcp-stream/openssl-futures"]
@@ -33,22 +37,18 @@ rustls--aws_lc_rs         = ["tcp-stream/rustls--aws_lc_rs"] # default, but does
 rustls--ring              = ["tcp-stream/rustls--ring"] # more compatible, (e.g., easily builds on Windows)
 
 [dependencies]
-async-trait = "^0.1.42"
 cfg-if = "^1.0"
-executor-trait = "^2.1"
-reactor-trait = "^3.0"
 
 [dependencies.amq-protocol-uri]
 version = "=9.0.1"
 path    = "../uri"
 
-[dependencies.hickory-to-socket-addrs]
-version = "^2.0"
-optional = true
-features = ["futures"]
+[dependencies.async-rs]
+version = "^0.6.1"
+default-features = false
 
 [dependencies.tcp-stream]
-version          = "^0.31.2"
+version          = "^0.32.2"
 default-features = false
 features         = ["futures"]
 
