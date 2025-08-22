@@ -81,7 +81,7 @@ pub fn parse_frame<I: ParsableInput>(i: I) -> ParserResult<I, AMQPFrame> {
                             .map(|(_, m)| AMQPFrame::Method(channel_id, m)),
                         AMQPFrameType::Header => all_consuming(parse_content_header)
                             .parse(payload)
-                            .map(|(_, h)| AMQPFrame::Header(channel_id, Box::new(h))),
+                            .map(|(_, h)| AMQPFrame::Header(channel_id, h)),
                         AMQPFrameType::Body => Ok(AMQPFrame::Body(
                             channel_id,
                             payload.iter_elements().collect(),

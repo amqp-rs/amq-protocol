@@ -111,7 +111,7 @@ mod test {
             body_size: 5,
             properties: BasicProperties::default(),
         };
-        let header = AMQPFrame::Header(channel_id, Box::new(hdr));
+        let header = AMQPFrame::Header(channel_id, hdr);
 
         let buf = Vec::<u8>::new();
         let val = gen_frame::<Vec<u8>>(&header);

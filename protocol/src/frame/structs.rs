@@ -52,7 +52,7 @@ pub enum AMQPFrame {
     /// Method call
     Method(ChannelId, AMQPClass),
     /// Content header
-    Header(ChannelId, Box<AMQPContentHeader>),
+    Header(ChannelId, AMQPContentHeader),
     /// Content body
     Body(ChannelId, Vec<u8>),
     /// Heartbeat frame (Channel 0 enforced as per specifications)
