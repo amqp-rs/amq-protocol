@@ -22,7 +22,7 @@ pub use tcp_stream::{
 pub use tcp_stream::NativeTlsConnector;
 
 #[cfg(feature = "openssl")]
-pub use tcp_stream::OpenSslConnector;
+pub use tcp_stream::OpensslConnector;
 
 #[cfg(feature = "rustls-common")]
 pub use tcp_stream::{RustlsConnector, RustlsConnectorConfig};

@@ -44,11 +44,11 @@ version = "=9.0.1"
 path    = "../uri"
 
 [dependencies.async-rs]
-version = "^0.6.1"
+version = "^0.6.5"
 default-features = false
 
 [dependencies.tcp-stream]
-version          = "^0.32.2"
+version          = "^0.32.3"
 default-features = false
 features         = ["futures"]
 
