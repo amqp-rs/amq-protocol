@@ -18,9 +18,15 @@ name = "amq_protocol"
 
 [features]
 default                   = ["rustls"]
+
 codegen                   = ["codegen-internal"]
 codegen-internal          = ["dep:amq-protocol-codegen"]
+
+async-global-executor     = ["amq-protocol-tcp/async-global-executor"]
 hickory-dns               = ["amq-protocol-tcp/hickory-dns"]
+smol                      = ["amq-protocol-tcp/smol"]
+tokio                     = ["amq-protocol-tcp/tokio"]
+
 native-tls                = ["amq-protocol-tcp/native-tls"]
 openssl                   = ["amq-protocol-tcp/openssl"]
 rustls                    = ["amq-protocol-tcp/rustls"]
@@ -35,21 +41,21 @@ rustls--aws_lc_rs         = ["amq-protocol-tcp/rustls--aws_lc_rs"] # default, bu
 rustls--ring              = ["amq-protocol-tcp/rustls--ring"] # more compatible, (e.g., easily builds on Windows)
 
 [build-dependencies.amq-protocol-codegen]
-version  = "=10.0.0-beta.1"
+version  = "=10.0.0-beta.2"
 path     = "../codegen"
 optional = true
 
 [dependencies.amq-protocol-tcp]
-version          = "=10.0.0-beta.1"
+version          = "=10.0.0-beta.2"
 default-features = false
 path             = "../tcp"
 
 [dependencies.amq-protocol-types]
-version = "=10.0.0-beta.1"
+version = "=10.0.0-beta.2"
 path    = "../types"
 
 [dependencies.amq-protocol-uri]
-version = "=10.0.0-beta.1"
+version = "=10.0.0-beta.2"
 path    = "../uri"
 
 [dependencies.cookie-factory]
