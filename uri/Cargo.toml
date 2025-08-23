@@ -16,7 +16,7 @@ version.workspace = true
 name = "amq_protocol_uri"
 
 [dependencies.amq-protocol-types]
-version = "=9.0.1"
+version = "=10.0.0-beta.1"
 path    = "../types"
 
 [dependencies]
