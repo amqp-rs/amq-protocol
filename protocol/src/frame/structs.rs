@@ -66,6 +66,18 @@ impl AMQPFrame {
     pub fn is_header(&self) -> bool {
         matches!(self, AMQPFrame::Header(..))
     }
+
+    /// Returns the channel id associated with this frame
+    pub fn channel_id(&self) -> ChannelId {
+        match self {
+            AMQPFrame::ProtocolHeader(_) => 0,
+            AMQPFrame::Method(id, _) => *id,
+            AMQPFrame::Header(id, _) => *id,
+            AMQPFrame::Body(id, _) => *id,
+            AMQPFrame::Heartbeat => 0,
+            AMQPFrame::InvalidHeartbeat(id) => *id,
+        }
+    }
 }
 
 impl fmt::Display for AMQPFrame {
