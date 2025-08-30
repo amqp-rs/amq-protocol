@@ -41,21 +41,21 @@ rustls--aws_lc_rs         = ["amq-protocol-tcp/rustls--aws_lc_rs"] # default, bu
 rustls--ring              = ["amq-protocol-tcp/rustls--ring"] # more compatible, (e.g., easily builds on Windows)
 
 [build-dependencies.amq-protocol-codegen]
-version  = "=10.0.0-beta.4"
+version  = "=10.0.0-beta.5"
 path     = "../codegen"
 optional = true
 
 [dependencies.amq-protocol-tcp]
-version          = "=10.0.0-beta.4"
+version          = "=10.0.0-beta.5"
 default-features = false
 path             = "../tcp"
 
 [dependencies.amq-protocol-types]
-version = "=10.0.0-beta.4"
+version = "=10.0.0-beta.5"
 path    = "../types"
 
 [dependencies.amq-protocol-uri]
-version = "=10.0.0-beta.4"
+version = "=10.0.0-beta.5"
 path    = "../uri"
 
 [dependencies.cookie-factory]
