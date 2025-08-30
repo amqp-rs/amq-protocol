@@ -97,12 +97,12 @@ const RECEIVE_ONLY: &[(&str, &[&str])] = &[
     (
         "connection",
         &[
-            "block",
+            "blocked",
             "open-ok",
             "secure",
             "start",
             "tune",
-            "unblock",
+            "unblocked",
             "update-secret-ok",
         ],
     ),
