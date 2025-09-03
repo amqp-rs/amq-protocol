@@ -88,6 +88,8 @@ pub struct AMQPQueryString {
 pub enum SASLMechanism {
     /// This is a legacy mechanism kept for backward compatibility
     AMQPlain,
+    /// Anonymous authentication if supported by the RabbitMQ server
+    Anonymous,
     /// Delegate all authentication to the transport instead of the RabbitMQ server
     External,
     /// Default plain login, this should be supported everywhere
@@ -101,6 +103,7 @@ impl fmt::Display for SASLMechanism {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(match self {
             SASLMechanism::AMQPlain => "AMQPLAIN",
+            SASLMechanism::Anonymous => "ANONYMOUS",
             SASLMechanism::External => "EXTERNAL",
             SASLMechanism::Plain => "PLAIN",
             SASLMechanism::RabbitCrDemo => "RABBIT-CR-DEMO",
@@ -114,6 +117,7 @@ impl FromStr for SASLMechanism {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
             "amqplain" => Ok(SASLMechanism::AMQPlain),
+            "anonymous" => Ok(SASLMechanism::Anonymous),
             "external" => Ok(SASLMechanism::External),
             "plain" => Ok(SASLMechanism::Plain),
             "rabbit-cr-demo" => Ok(SASLMechanism::RabbitCrDemo),
