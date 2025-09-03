@@ -31,7 +31,7 @@ impl Credentials {
     pub fn sasl_auth_string(&self, mechanism: SASLMechanism) -> String {
         match mechanism {
             SASLMechanism::AMQPlain => self.amqplain_auth_string(),
-            SASLMechanism::External => String::default(),
+            SASLMechanism::Anonymous | SASLMechanism::External => String::default(),
             SASLMechanism::Plain => format!("\0{}\0{}", self.username(), self.password()),
             SASLMechanism::RabbitCrDemo => self.username.clone(),
         }
@@ -43,7 +43,7 @@ impl Credentials {
     }
 
     fn amqplain_auth_string(&self) -> String {
-        let needed_len = 4 /* FieldTable length */ + 15 /* LOGIN + PASSWORD + 2 * 1 (length) */ + 5 /* type + length */ + self.username().len() + 5 /* type + length */ + self.password().len();
+        let needed_len = 4 /* FieldTable length */ + 15 /* "LOGIN" (5) + 1 (length) + "PASSWORD" (8) + 1 (length) */ + 5 /* type + length */ + self.username().len() + 5 /* type + length */ + self.password().len();
         let mut buf = vec![0; needed_len];
         let mut table = FieldTable::default();
         table.insert(
