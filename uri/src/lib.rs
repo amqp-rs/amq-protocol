@@ -100,7 +100,8 @@ pub enum SASLMechanism {
 }
 
 impl SASLMechanism {
-    fn name(&self) -> &'static str {
+    /// Get the name of the SASL mechanism as str
+    pub fn name(&self) -> &'static str {
         match self {
             SASLMechanism::AMQPlain => "AMQPLAIN",
             SASLMechanism::Anonymous => "ANONYMOUS",
