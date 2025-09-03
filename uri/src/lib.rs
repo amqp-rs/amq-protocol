@@ -99,15 +99,21 @@ pub enum SASLMechanism {
     RabbitCrDemo,
 }
 
-impl fmt::Display for SASLMechanism {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.write_str(match self {
+impl SASLMechanism {
+    fn name(&self) -> &'static str {
+        match self {
             SASLMechanism::AMQPlain => "AMQPLAIN",
             SASLMechanism::Anonymous => "ANONYMOUS",
             SASLMechanism::External => "EXTERNAL",
             SASLMechanism::Plain => "PLAIN",
             SASLMechanism::RabbitCrDemo => "RABBIT-CR-DEMO",
-        })
+        }
+    }
+}
+
+impl fmt::Display for SASLMechanism {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(self.name())
     }
 }
 
