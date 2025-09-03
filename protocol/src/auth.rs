@@ -37,6 +37,11 @@ impl Credentials {
         }
     }
 
+    /// Get the expected challenge for RabbitCrDemo mechanism
+    pub fn rabbit_cr_demo_challenge(&self) -> &'static str {
+        "Please tell me your password"
+    }
+
     /// Get the answer we need to give to the server for the RabbitCrDemo mehanism
     pub fn rabbit_cr_demo_answer(&self) -> String {
         format!("My password is {}", self.password)
