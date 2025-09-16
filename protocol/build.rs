@@ -1,6 +1,7 @@
 fn main() {
-    println!("cargo:rerun-if-env-changed=AMQ_PROTOCOL_CODEGEN_DIR");
-    println!("cargo:rerun-if-env-changed=AMQ_PROTOCOL_CODEGEN_FILE");
+    println!("cargo::rerun-if-env-changed=AMQ_PROTOCOL_CODEGEN_DIR");
+    println!("cargo::rerun-if-env-changed=AMQ_PROTOCOL_CODEGEN_FILE");
+    println!("cargo::rerun-if-changed=templates/protocol.rs");
 
     #[cfg(feature = "codegen-internal")]
     codegen()

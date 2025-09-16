@@ -1,6 +1,6 @@
 pub use crate::uri::SASLMechanism;
 use crate::{
-    types::{AMQPValue, FieldTable, generation::gen_field_table},
+    types::{AMQPValue, FieldTable, LongString, generation::gen_field_table},
     uri::AMQPUserInfo,
 };
 
@@ -28,12 +28,12 @@ impl Credentials {
     }
 
     /// Get the SASL authentication String for the given SASL mechanism
-    pub fn sasl_auth_string(&self, mechanism: SASLMechanism) -> String {
+    pub fn sasl_auth_string(&self, mechanism: SASLMechanism) -> LongString {
         match mechanism {
             SASLMechanism::AMQPlain => self.amqplain_auth_string(),
-            SASLMechanism::Anonymous | SASLMechanism::External => String::default(),
-            SASLMechanism::Plain => format!("\0{}\0{}", self.username(), self.password()),
-            SASLMechanism::RabbitCrDemo => self.username.clone(),
+            SASLMechanism::Anonymous | SASLMechanism::External => LongString::default(),
+            SASLMechanism::Plain => format!("\0{}\0{}", self.username(), self.password()).into(),
+            SASLMechanism::RabbitCrDemo => self.username.clone().into(),
         }
     }
 
@@ -43,11 +43,11 @@ impl Credentials {
     }
 
     /// Get the answer we need to give to the server for the RabbitCrDemo mehanism
-    pub fn rabbit_cr_demo_answer(&self) -> String {
-        format!("My password is {}", self.password)
+    pub fn rabbit_cr_demo_answer(&self) -> LongString {
+        format!("My password is {}", self.password).into()
     }
 
-    fn amqplain_auth_string(&self) -> String {
+    fn amqplain_auth_string(&self) -> LongString {
         let needed_len = 4 /* FieldTable length */ + 15 /* "LOGIN" (5) + 1 (length) + "PASSWORD" (8) + 1 (length) */ + 5 /* type + length */ + self.username().len() + 5 /* type + length */ + self.password().len();
         let mut buf = vec![0; needed_len];
         let mut table = FieldTable::default();
@@ -62,7 +62,7 @@ impl Credentials {
         gen_field_table(&table)((&mut buf[..]).into())
             .expect("miscalculated AMQPLAIN string length");
         // skip the FieldTable length
-        String::from_utf8_lossy(&buf.as_slice()[4..]).to_string()
+        buf.as_slice()[4..].to_vec().into()
     }
 }
 
@@ -89,8 +89,7 @@ mod test {
     fn test_amqplain() {
         assert_eq!(
             Credentials::default().amqplain_auth_string(),
-            "\u{5}LOGINS\u{0}\u{0}\u{0}\u{5}guest\u{8}PASSWORDS\u{0}\u{0}\u{0}\u{5}guest"
-                .to_string()
+            "\u{5}LOGINS\u{0}\u{0}\u{0}\u{5}guest\u{8}PASSWORDS\u{0}\u{0}\u{0}\u{5}guest".into()
         );
     }
 }
