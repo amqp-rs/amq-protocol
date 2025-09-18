@@ -7,23 +7,23 @@ use crate::{
 /// Structure holding the username and password for authentication
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Credentials {
-    username: String,
-    password: String,
+    username: LongString,
+    password: LongString,
 }
 
 impl Credentials {
     /// Create a new Credentials instance with the given username and password
-    pub fn new(username: String, password: String) -> Self {
+    pub fn new(username: LongString, password: LongString) -> Self {
         Self { username, password }
     }
 
     /// Get the username
-    pub fn username(&self) -> &str {
+    pub fn username(&self) -> &LongString {
         &self.username
     }
 
     /// Get the password
-    pub fn password(&self) -> &str {
+    pub fn password(&self) -> &LongString {
         &self.password
     }
 
@@ -32,8 +32,8 @@ impl Credentials {
         match mechanism {
             SASLMechanism::AMQPlain => self.amqplain_auth_string(),
             SASLMechanism::Anonymous | SASLMechanism::External => LongString::default(),
-            SASLMechanism::Plain => format!("\0{}\0{}", self.username(), self.password()).into(),
-            SASLMechanism::RabbitCrDemo => self.username.clone().into(),
+            SASLMechanism::Plain => format!("\0{}\0{}", self.username, self.password).into(),
+            SASLMechanism::RabbitCrDemo => self.username.clone(),
         }
     }
 
@@ -48,16 +48,13 @@ impl Credentials {
     }
 
     fn amqplain_auth_string(&self) -> LongString {
-        let needed_len = 4 /* FieldTable length */ + 15 /* "LOGIN" (5) + 1 (length) + "PASSWORD" (8) + 1 (length) */ + 5 /* type + length */ + self.username().len() + 5 /* type + length */ + self.password().len();
+        let needed_len = 4 /* FieldTable length */ + 15 /* "LOGIN" (5) + 1 (length) + "PASSWORD" (8) + 1 (length) */ + 5 /* type + length */ + self.username.len() + 5 /* type + length */ + self.password.len();
         let mut buf = vec![0; needed_len];
         let mut table = FieldTable::default();
-        table.insert(
-            "LOGIN".into(),
-            AMQPValue::LongString(self.username().into()),
-        );
+        table.insert("LOGIN".into(), AMQPValue::LongString(self.username.clone()));
         table.insert(
             "PASSWORD".into(),
-            AMQPValue::LongString(self.password().into()),
+            AMQPValue::LongString(self.password.clone()),
         );
         gen_field_table(&table)((&mut buf[..]).into())
             .expect("miscalculated AMQPLAIN string length");
@@ -75,8 +72,8 @@ impl Default for Credentials {
 impl From<AMQPUserInfo> for Credentials {
     fn from(user_info: AMQPUserInfo) -> Self {
         Self {
-            username: user_info.username,
-            password: user_info.password,
+            username: user_info.username.into(),
+            password: user_info.password.into(),
         }
     }
 }

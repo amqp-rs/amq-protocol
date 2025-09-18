@@ -208,10 +208,15 @@ impl From<ShortString> for String {
     }
 }
 
-impl<'a> LongString {
+impl LongString {
     /// Get a reference to a LongString as &[u8]
-    pub fn as_bytes(&'a self) -> &'a [u8] {
+    pub fn as_bytes<'a>(&'a self) -> &'a [u8] {
         &self.0[..]
+    }
+
+    /// Get the length of the inner bytes array
+    pub fn len(&self) -> usize {
+        self.0.len()
     }
 }
 
