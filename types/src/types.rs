@@ -210,13 +210,18 @@ impl From<ShortString> for String {
 
 impl LongString {
     /// Get a reference to a LongString as &[u8]
-    pub fn as_bytes<'a>(&'a self) -> &'a [u8] {
+    pub fn as_bytes(&self) -> &[u8] {
         &self.0[..]
     }
 
     /// Get the length of the inner bytes array
     pub fn len(&self) -> usize {
         self.0.len()
+    }
+
+    /// Check whether the inner bytes array is empty or not
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
     }
 }
 

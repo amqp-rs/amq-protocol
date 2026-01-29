@@ -367,23 +367,23 @@ impl _AMQPMethod {
             .and_then(|m| m.get("metadata"))
             .cloned()
             .unwrap_or_default();
-        if is_reply && metadata.get("state").is_none() {
-            if let Some(state) = class_md
+        if is_reply
+            && metadata.get("state").is_none()
+            && let Some(state) = class_md
                 .and_then(|c| c.get(self.name.replace("-ok", "")))
                 .and_then(|m| m.get("metadata"))
                 .and_then(|m| m.get("state"))
-            {
-                metadata["state"] = state.clone();
-            }
+        {
+            metadata["state"] = state.clone();
         }
-        if is_reply && metadata.get("confirmation").is_none() {
-            if let Some(confirmation) = class_md
+        if is_reply
+            && metadata.get("confirmation").is_none()
+            && let Some(confirmation) = class_md
                 .and_then(|c| c.get(self.name.replace("-ok", "")))
                 .and_then(|m| m.get("metadata"))
                 .and_then(|m| m.get("confirmation"))
-            {
-                metadata["confirmation"] = confirmation.clone();
-            }
+        {
+            metadata["confirmation"] = confirmation.clone();
         }
         let ignore_args = arguments.iter().all(AMQPArgument::force_default);
         let c2s = !receive_only
