@@ -10,4 +10,4 @@ repository = "https://github.com/amqp-rs/amq-protocol"
 categories = ["api-bindings", "network-programming"]
 keywords = ["amqp","rabbitmq","protocol","nom"]
 edition = "2024"
-rust-version = "1.85.0"
+rust-version = "1.88.0"
