@@ -19,7 +19,8 @@
 
 ## Rustls certificates store
 
-- rustls-native-certs (default)
+- rustls-platform-verifier (default)
+- rustls-native-certs
 - rustls-webpki-roots-certs
 
 ## Warning about crypto backends for rustls
