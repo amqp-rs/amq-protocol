@@ -25,7 +25,7 @@ tokio                     = ["async-rs/tokio"]
 
 native-tls                = ["tcp-stream/native-tls-futures"]
 openssl                   = ["tcp-stream/openssl-futures"]
-rustls                    = ["rustls-native-certs", "rustls--aws_lc_rs"]
+rustls                    = ["rustls-platform-verifier", "rustls--aws_lc_rs"]
 rustls-platform-verifier  = ["rustls-common", "tcp-stream/rustls-platform-verifier"]
 rustls-native-certs       = ["rustls-common", "tcp-stream/rustls-native-certs"]
 rustls-webpki-roots-certs = ["rustls-common", "tcp-stream/rustls-webpki-roots-certs"]
@@ -41,7 +41,7 @@ rustls--ring              = ["tcp-stream/rustls--ring"] # more compatible, (e.g.
 cfg-if = "^1.0"
 
 [dependencies.amq-protocol-uri]
-version = "=10.1.0"
+version = "=10.2.0"
 path    = "../uri"
 
 [dependencies.async-rs]
