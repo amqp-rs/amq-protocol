@@ -133,7 +133,7 @@ pub fn parse_content_header<I: ParsableInput>(i: I) -> ParserResult<I, AMQPConte
                 parse_long_long_uint,
                 context("parse_properties", parse_properties),
             ),
-            // FIXME: should we validate that weight is 0?
+            // weight is always 0 per the spec and unused; accept any value for compatibility
             |(class_id, _weight, body_size, properties)| AMQPContentHeader {
                 class_id,
                 body_size,
