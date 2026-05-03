@@ -404,6 +404,9 @@ mod test {
     fn short_string_length_limit() {
         assert!(ShortString::try_new("ok").is_ok());
         assert!(ShortString::try_new("a".repeat(255)).is_ok());
-        assert_eq!(ShortString::try_new("a".repeat(256)), Err(ShortStringError(256)));
+        assert_eq!(
+            ShortString::try_new("a".repeat(256)),
+            Err(ShortStringError(256))
+        );
     }
 }
