@@ -87,8 +87,8 @@ impl AMQPValue {
                 .as_i64()
                 .map(|i| AMQPValue::LongLongInt(i as LongLongInt)),
             AMQPType::LongLongUInt => value
-                .as_i64()
-                .map(|i| AMQPValue::LongLongInt(i as LongLongInt)), /* Not a typo; AMQPValue::LongLongUInt doesn't exist */
+                .as_u64()
+                .map(|u| AMQPValue::LongLongInt(u as LongLongInt)), /* Not a typo; AMQPValue::LongLongUInt doesn't exist; reinterpret bits as i64 */
             AMQPType::Float => value.as_f64().map(|i| AMQPValue::Float(i as Float)),
             AMQPType::Double => value.as_f64().map(|i| AMQPValue::Double(i as Double)),
             AMQPType::DecimalValue => None,
