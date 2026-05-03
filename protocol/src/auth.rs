@@ -42,24 +42,23 @@ impl Credentials {
         "Please tell me your password"
     }
 
-    /// Get the answer we need to give to the server for the RabbitCrDemo mehanism
+    /// Get the answer we need to give to the server for the RabbitCrDemo mechanism
     pub fn rabbit_cr_demo_answer(&self) -> LongString {
         format!("My password is {}", self.password).into()
     }
 
     fn amqplain_auth_string(&self) -> LongString {
-        let needed_len = 4 /* FieldTable length */ + 15 /* "LOGIN" (5) + 1 (length) + "PASSWORD" (8) + 1 (length) */ + 5 /* type + length */ + self.username.len() + 5 /* type + length */ + self.password.len();
-        let mut buf = vec![0; needed_len];
         let mut table = FieldTable::default();
         table.insert("LOGIN".into(), AMQPValue::LongString(self.username.clone()));
         table.insert(
             "PASSWORD".into(),
             AMQPValue::LongString(self.password.clone()),
         );
-        gen_field_table(&table)((&mut buf[..]).into())
-            .expect("miscalculated AMQPLAIN string length");
-        // skip the FieldTable length
-        buf.as_slice()[4..].to_vec().into()
+        let (buf, _) = gen_field_table(&table)(Vec::new().into())
+            .expect("failed to serialize AMQPLAIN auth string")
+            .into_inner();
+        // skip the FieldTable length prefix (4 bytes)
+        buf[4..].to_vec().into()
     }
 }
 
