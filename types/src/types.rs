@@ -146,6 +146,25 @@ pub type Timestamp = LongLongUInt;
 /// No value
 pub type Void = ();
 
+/// Maximum byte length of a [ShortString]
+pub const MAX_SHORT_STRING_LENGTH: usize = ShortShortUInt::MAX as usize;
+
+/// Error returned when constructing a [ShortString] from a string that exceeds [MAX_SHORT_STRING_LENGTH]
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ShortStringError(usize);
+
+impl fmt::Display for ShortStringError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "ShortString exceeds maximum length of {MAX_SHORT_STRING_LENGTH} bytes (got {})",
+            self.0
+        )
+    }
+}
+
+impl std::error::Error for ShortStringError {}
+
 /// A String (deprecated)
 #[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
 pub struct ShortString(String);
@@ -171,22 +190,31 @@ pub struct DecimalValue {
     pub value: LongUInt,
 }
 
-impl<'a> ShortString {
+impl ShortString {
     /// Get a reference to a ShortString as &str
-    pub fn as_str(&'a self) -> &'a str {
+    pub fn as_str(&self) -> &str {
         self.0.as_str()
+    }
+
+    /// Fallibly construct a [ShortString], returning an error if the string exceeds [MAX_SHORT_STRING_LENGTH] bytes
+    pub fn try_new(s: impl Into<String>) -> Result<Self, ShortStringError> {
+        let s = s.into();
+        if s.len() > MAX_SHORT_STRING_LENGTH {
+            return Err(ShortStringError(s.len()));
+        }
+        Ok(Self(s))
     }
 }
 
 impl From<String> for ShortString {
     fn from(s: String) -> Self {
-        Self(s)
+        Self::try_new(s).expect("ShortString exceeds maximum length")
     }
 }
 
 impl From<&str> for ShortString {
     fn from(s: &str) -> Self {
-        s.to_owned().into()
+        Self::try_new(s).expect("ShortString exceeds maximum length")
     }
 }
 
@@ -370,5 +398,12 @@ mod test {
         ] {
             assert_eq!(left, right);
         }
+    }
+
+    #[test]
+    fn short_string_length_limit() {
+        assert!(ShortString::try_new("ok").is_ok());
+        assert!(ShortString::try_new("a".repeat(255)).is_ok());
+        assert_eq!(ShortString::try_new("a".repeat(256)), Err(ShortStringError(256)));
     }
 }
