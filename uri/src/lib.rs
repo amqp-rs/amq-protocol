@@ -45,6 +45,15 @@ impl FromStr for AMQPScheme {
     }
 }
 
+impl fmt::Display for AMQPScheme {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
+            AMQPScheme::AMQP => "amqp",
+            AMQPScheme::AMQPS => "amqps",
+        })
+    }
+}
+
 /// The connection information
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AMQPAuthority {
@@ -140,6 +149,10 @@ fn percent_decode(s: &str) -> Result<String, String> {
         .map_err(|e| e.to_string())
 }
 
+fn percent_encode<'a>(s: &'a str) -> percent_encoding::PercentEncode<'a> {
+    percent_encoding::utf8_percent_encode(s, percent_encoding::NON_ALPHANUMERIC)
+}
+
 impl Default for AMQPUri {
     fn default() -> Self {
         AMQPUri {
@@ -208,6 +221,42 @@ impl FromStr for AMQPUri {
                 auth_mechanism,
             },
         })
+    }
+}
+
+impl fmt::Display for AMQPUri {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}://{}:{}@{}:{}/{}",
+            self.scheme,
+            percent_encode(&self.authority.userinfo.username),
+            percent_encode(&self.authority.userinfo.password),
+            self.authority.host,
+            self.authority.port,
+            percent_encode(&self.vhost),
+        )?;
+        let mut sep = '?';
+        if let Some(v) = self.query.frame_max {
+            write!(f, "{sep}frame_max={v}")?;
+            sep = '&';
+        }
+        if let Some(v) = self.query.channel_max {
+            write!(f, "{sep}channel_max={v}")?;
+            sep = '&';
+        }
+        if let Some(v) = self.query.heartbeat {
+            write!(f, "{sep}heartbeat={v}")?;
+            sep = '&';
+        }
+        if let Some(v) = self.query.connection_timeout {
+            write!(f, "{sep}connection_timeout={v}")?;
+            sep = '&';
+        }
+        if let Some(v) = self.query.auth_mechanism {
+            write!(f, "{sep}auth_mechanism={v}")?;
+        }
+        Ok(())
     }
 }
 
