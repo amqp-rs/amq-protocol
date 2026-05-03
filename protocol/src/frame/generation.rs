@@ -118,9 +118,6 @@ mod test {
 
         let ctx = WriteContext::from(buf);
         let (frame, _size) = val(ctx).unwrap().into_inner();
-        println!("header: {:?}", header);
-        println!("frame: {:?}", frame);
-
         let expected = [
             2, // frame type
             0, 1, // channel ID
