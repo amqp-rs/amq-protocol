@@ -371,7 +371,7 @@ pub mod basic {
     use super::*;
 
     /// Parse basic (Generated)
-    pub fn parse_basic<I: ParsableInput>(i: I) -> ParserResult<I, basic::AMQPMethod> {
+    pub fn parse_basic<I: ParsableInput>(i: I) -> ParserResult<I, AMQPMethod> {
         context(
             "parse_basic",
             map_opt(
@@ -1735,7 +1735,7 @@ pub mod connection {
     use super::*;
 
     /// Parse connection (Generated)
-    pub fn parse_connection<I: ParsableInput>(i: I) -> ParserResult<I, connection::AMQPMethod> {
+    pub fn parse_connection<I: ParsableInput>(i: I) -> ParserResult<I, AMQPMethod> {
         context(
             "parse_connection",
             map_opt(
@@ -2457,7 +2457,7 @@ pub mod channel {
     use super::*;
 
     /// Parse channel (Generated)
-    pub fn parse_channel<I: ParsableInput>(i: I) -> ParserResult<I, channel::AMQPMethod> {
+    pub fn parse_channel<I: ParsableInput>(i: I) -> ParserResult<I, AMQPMethod> {
         context(
             "parse_channel",
             map_opt(
@@ -2766,7 +2766,7 @@ pub mod access {
     use super::*;
 
     /// Parse access (Generated)
-    pub fn parse_access<I: ParsableInput>(i: I) -> ParserResult<I, access::AMQPMethod> {
+    pub fn parse_access<I: ParsableInput>(i: I) -> ParserResult<I, AMQPMethod> {
         context(
             "parse_access",
             map_opt(
@@ -2911,7 +2911,7 @@ pub mod exchange {
     use super::*;
 
     /// Parse exchange (Generated)
-    pub fn parse_exchange<I: ParsableInput>(i: I) -> ParserResult<I, exchange::AMQPMethod> {
+    pub fn parse_exchange<I: ParsableInput>(i: I) -> ParserResult<I, AMQPMethod> {
         context(
             "parse_exchange",
             map_opt(
@@ -3385,7 +3385,7 @@ pub mod queue {
     use super::*;
 
     /// Parse queue (Generated)
-    pub fn parse_queue<I: ParsableInput>(i: I) -> ParserResult<I, queue::AMQPMethod> {
+    pub fn parse_queue<I: ParsableInput>(i: I) -> ParserResult<I, AMQPMethod> {
         context(
             "parse_queue",
             map_opt(
@@ -3976,7 +3976,7 @@ pub mod tx {
     use super::*;
 
     /// Parse tx (Generated)
-    pub fn parse_tx<I: ParsableInput>(i: I) -> ParserResult<I, tx::AMQPMethod> {
+    pub fn parse_tx<I: ParsableInput>(i: I) -> ParserResult<I, AMQPMethod> {
         context(
             "parse_tx",
             map_opt(
@@ -4238,7 +4238,7 @@ pub mod confirm {
     use super::*;
 
     /// Parse confirm (Generated)
-    pub fn parse_confirm<I: ParsableInput>(i: I) -> ParserResult<I, confirm::AMQPMethod> {
+    pub fn parse_confirm<I: ParsableInput>(i: I) -> ParserResult<I, AMQPMethod> {
         context(
             "parse_confirm",
             map_opt(

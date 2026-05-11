@@ -8,6 +8,7 @@ categories.workspace = true
 edition.workspace = true
 keywords.workspace = true
 license.workspace = true
+readme.workspace = true
 repository.workspace = true
 rust-version.workspace = true
 version.workspace = true
@@ -16,12 +17,12 @@ version.workspace = true
 name = "amq_protocol_uri"
 
 [dependencies.amq-protocol-types]
-version = "=10.3.0"
+version = "=10.3.1"
 path    = "../types"
 
 [dependencies]
 percent-encoding = "^2.0"
 url              = "^2.0"
 
-[badges]
-maintenance = { status = "actively-developed" }
+[package.metadata.docs.rs]
+all-features = true

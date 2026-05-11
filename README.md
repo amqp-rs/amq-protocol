@@ -1,8 +1,18 @@
-# amq-protocol
+<div align="center">
 
 [![API Docs](https://docs.rs/amq-protocol/badge.svg)](https://docs.rs/amq-protocol)
 [![Build status](https://github.com/amqp-rs/amq-protocol/workflows/Build%20and%20test/badge.svg)](https://github.com/amqp-rs/amq-protocol/actions)
 [![Downloads](https://img.shields.io/crates/d/amq-protocol.svg)](https://crates.io/crates/amq-protocol)
+[![Dependency Status](https://deps.rs/repo/github/amqp-rs/amq-protocol/status.svg)](https://deps.rs/repo/github/amqp-rs/amq-protocol)
+[![LICENSE](https://img.shields.io/crates/l/amq-protocol)](LICENSE)
+
+ <strong>
+   AMQP 0.9.1 protocol codec and TCP/TLS connection layer.
+ </strong>
+
+</div>
+
+<br />
 
 ## Features
 
@@ -10,6 +20,12 @@
 - hickory-dns: use hickory-dns for domain name resolution to avoid spurious network hangs
 - vendored-openssl: use a vendored openssl version instead of the system one (when using openssl backend)
 - verbose-errors: enable more verbose errors in the AMQP parser
+
+## Runtime
+
+- tokio (default)
+- smol
+- async-global-executor
 
 ## TLS backends
 
@@ -30,4 +46,3 @@ We mimic what rustls does, providing one feature flag per implementation and ena
 Available options are:
 - `rustls--aws_lc_rs` (default)
 - `rustls--ring`
-

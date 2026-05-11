@@ -3,11 +3,12 @@ resolver = "3"
 members = [ "codegen", "protocol", "tcp", "types", "uri" ]
 
 [workspace.package]
-version = "10.3.0"
+version = "10.3.1"
 authors = ["Marc-Antoine Perennou <Marc-Antoine@Perennou.com>"]
 license = "BSD-2-Clause"
 repository = "https://github.com/amqp-rs/amq-protocol"
-categories = ["api-bindings", "network-programming"]
-keywords = ["amqp","rabbitmq","protocol","nom"]
+readme = "README.md"
+categories = ["asynchronous", "network-programming", "parser-implementations"]
+keywords = ["amqp", "rabbitmq", "protocol", "messaging", "codec"]
 edition = "2024"
 rust-version = "1.88.0"

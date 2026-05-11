@@ -8,6 +8,7 @@ categories.workspace = true
 edition.workspace = true
 keywords.workspace = true
 license.workspace = true
+readme.workspace = true
 repository.workspace = true
 rust-version.workspace = true
 version.workspace = true
@@ -41,7 +42,7 @@ rustls--ring              = ["tcp-stream/rustls--ring"] # more compatible, (e.g.
 cfg-if = "^1.0"
 
 [dependencies.amq-protocol-uri]
-version = "=10.3.0"
+version = "=10.3.1"
 path    = "../uri"
 
 [dependencies.async-rs]
@@ -57,5 +58,5 @@ features         = ["futures"]
 version          = "^0.1"
 default-features = false
 
-[badges]
-maintenance = { status = "actively-developed" }
+[package.metadata.docs.rs]
+all-features = true

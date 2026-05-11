@@ -125,7 +125,7 @@ const RECEIVE_ONLY: &[(&str, &[&str])] = &[
 
 /* Modified version of AMQProtocolDefinition to handle deserialization */
 #[derive(Debug, Deserialize)]
-pub struct _AMQProtocolDefinition {
+pub(crate) struct _AMQProtocolDefinition {
     name: String,
     #[serde(rename = "major-version")]
     major_version: ShortShortUInt,
@@ -140,7 +140,7 @@ pub struct _AMQProtocolDefinition {
 }
 
 impl _AMQProtocolDefinition {
-    pub fn into_specs(self, metadata: &Value) -> AMQProtocolDefinition {
+    pub(crate) fn into_specs(self, metadata: &Value) -> AMQProtocolDefinition {
         let domains = self
             .domains
             .iter()

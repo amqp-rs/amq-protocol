@@ -99,6 +99,7 @@ impl<'a> HandlebarsAMQPExtension for CodeGenerator<'a> {
 }
 
 /// Helper for converting text to camel case
+#[derive(Debug)]
 pub struct CamelHelper;
 impl HelperDef for CamelHelper {
     fn call<'reg: 'rc, 'rc>(
@@ -125,6 +126,7 @@ impl HelperDef for CamelHelper {
 }
 
 /// Helper for converting text to snake case
+#[derive(Debug)]
 pub struct SnakeHelper;
 impl HelperDef for SnakeHelper {
     fn call<'reg: 'rc, 'rc>(
@@ -155,6 +157,7 @@ impl HelperDef for SnakeHelper {
 }
 
 /// Helper for getting the type name converted to snake case
+#[derive(Debug)]
 pub struct SnakeTypeHelper;
 impl HelperDef for SnakeTypeHelper {
     fn call<'reg: 'rc, 'rc>(
@@ -181,6 +184,7 @@ impl HelperDef for SnakeTypeHelper {
 }
 
 /// Helper to sanitize name so the it becomes a valid identifier
+#[derive(Debug)]
 pub struct SanitizeNameHelper;
 impl HelperDef for SanitizeNameHelper {
     fn call<'reg: 'rc, 'rc>(
@@ -207,6 +211,7 @@ impl HelperDef for SanitizeNameHelper {
 }
 
 /// Helper to include additional code such as rustdoc
+#[derive(Debug)]
 pub struct IncludeMoreHelper;
 impl HelperDef for IncludeMoreHelper {
     fn call<'reg: 'rc, 'rc>(
@@ -252,6 +257,7 @@ impl HelperDef for IncludeMoreHelper {
 }
 
 /// Helper to check whether a param is passed by ref or not
+#[derive(Debug)]
 pub struct PassByRefHelper;
 impl HelperDef for PassByRefHelper {
     fn call_inner<'reg: 'rc, 'rc>(
@@ -284,6 +290,7 @@ impl HelperDef for PassByRefHelper {
 }
 
 /// Helper to check whether a param is passed using an &str or its real type
+#[derive(Debug)]
 pub struct UseStrRefHelper;
 impl HelperDef for UseStrRefHelper {
     fn call_inner<'reg: 'rc, 'rc>(
@@ -306,6 +313,7 @@ impl HelperDef for UseStrRefHelper {
 }
 
 /// Helper to check whether a param is passed using an &[u8] or its real type
+#[derive(Debug)]
 pub struct UseBytesRefHelper;
 impl HelperDef for UseBytesRefHelper {
     fn call_inner<'reg: 'rc, 'rc>(
@@ -325,6 +333,7 @@ impl HelperDef for UseBytesRefHelper {
 }
 
 /// Helper to walk through a Vec of [AMQPArgument](../specs.AMQPArgument.html).
+#[derive(Debug)]
 pub struct EachArgumentHelper;
 impl HelperDef for EachArgumentHelper {
     fn call<'reg: 'rc, 'rc>(
@@ -389,6 +398,7 @@ impl HelperDef for EachArgumentHelper {
 }
 
 /// Helper for "unwrapping" an amqp_value
+#[derive(Debug)]
 pub struct AMQPValueRefHelper;
 impl HelperDef for AMQPValueRefHelper {
     fn call_inner<'reg: 'rc, 'rc>(
@@ -413,7 +423,7 @@ impl HelperDef for AMQPValueRefHelper {
     }
 }
 
-fn json_value(val: AMQPValue) -> serde_json::Result<serde_json::Value> {
+fn json_value(val: AMQPValue) -> serde_json::Result<Value> {
     match val {
         AMQPValue::Boolean(v) => serde_json::to_value(v),
         AMQPValue::ShortShortInt(v) => serde_json::to_value(v),
@@ -442,7 +452,7 @@ mod test {
 
     use std::collections::BTreeMap;
 
-    pub const TEMPLATE: &str = r#"
+    const TEMPLATE: &str = r#"
 {{protocol.name}} - {{protocol.major_version}}.{{protocol.minor_version}}.{{protocol.revision}}
 {{protocol.copyright}}
 port {{protocol.port}}

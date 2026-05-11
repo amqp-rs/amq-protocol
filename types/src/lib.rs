@@ -1,4 +1,10 @@
-#![deny(missing_docs)]
+#![deny(missing_docs, missing_debug_implementations, unsafe_code)]
+#![warn(unreachable_pub, unused_qualifications, unused_lifetimes)]
+#![warn(
+    clippy::must_use_candidate,
+    clippy::unwrap_in_result,
+    clippy::panic_in_result_fn
+)]
 
 //! # AMQP types manipulation library
 //!
@@ -23,20 +29,20 @@ pub mod parsing;
 /// A Channel identifier
 pub type ChannelId = Identifier;
 /// The size of a chunk of a delivery's payload
-pub type ChunkSize = types::LongUInt;
+pub type ChunkSize = LongUInt;
 /// The number of consumers
-pub type ConsumerCount = types::LongUInt;
+pub type ConsumerCount = LongUInt;
 /// A delivery tag
-pub type DeliveryTag = types::LongLongUInt;
+pub type DeliveryTag = LongLongUInt;
 /// the size of an AMQP frame
-pub type FrameSize = types::LongUInt;
+pub type FrameSize = LongUInt;
 /// The maximum heartbeat interval
-pub type Heartbeat = types::ShortUInt;
+pub type Heartbeat = ShortUInt;
 /// An identifier (class id or method id)
-pub type Identifier = types::ShortUInt;
+pub type Identifier = ShortUInt;
 /// The number of messages
-pub type MessageCount = types::LongUInt;
+pub type MessageCount = LongUInt;
 /// The size of a delivery's payload
-pub type PayloadSize = types::LongLongUInt;
+pub type PayloadSize = LongLongUInt;
 /// A reply code (for closing channels and connections)
-pub type ReplyCode = types::ShortUInt;
+pub type ReplyCode = ShortUInt;
