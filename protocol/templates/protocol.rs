@@ -166,7 +166,7 @@ pub mod {{snake class.name}} {
     use super::*;
 
     /// Parse {{class.name}} (Generated)
-    pub fn parse_{{snake class.name false}}<I: ParsableInput>(i: I) -> ParserResult<I, {{snake class.name}}::AMQPMethod> {
+    pub fn parse_{{snake class.name false}}<I: ParsableInput>(i: I) -> ParserResult<I, AMQPMethod> {
         context("parse_{{snake class.name false}}", map_opt(flat_map(parse_id, |id| move |i| match id {
             {{#each class.methods as |method| ~}}
             {{method.id}} => context("parse_{{snake method.name false}}", map(map(parse_{{snake method.name false}}, AMQPMethod::{{camel method.name}}), Some)).parse(i),
