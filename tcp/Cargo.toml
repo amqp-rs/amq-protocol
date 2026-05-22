@@ -50,7 +50,7 @@ version = "^0.8"
 default-features = false
 
 [dependencies.tcp-stream]
-version          = "^0.34.5"
+version          = "^0.34.10"
 default-features = false
 features         = ["futures"]
 
