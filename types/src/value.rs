@@ -75,14 +75,28 @@ impl AMQPValue {
             AMQPType::Boolean => value.as_bool().map(AMQPValue::Boolean),
             AMQPType::ShortShortInt => value
                 .as_i64()
-                .map(|i| AMQPValue::ShortShortInt(i as ShortShortInt)),
+                .and_then(|i| ShortShortInt::try_from(i).ok())
+                .map(AMQPValue::ShortShortInt),
             AMQPType::ShortShortUInt => value
                 .as_u64()
-                .map(|u| AMQPValue::ShortShortUInt(u as ShortShortUInt)),
-            AMQPType::ShortInt => value.as_i64().map(|i| AMQPValue::ShortInt(i as ShortInt)),
-            AMQPType::ShortUInt => value.as_u64().map(|u| AMQPValue::ShortUInt(u as ShortUInt)),
-            AMQPType::LongInt => value.as_i64().map(|i| AMQPValue::LongInt(i as LongInt)),
-            AMQPType::LongUInt => value.as_u64().map(|u| AMQPValue::LongUInt(u as LongUInt)),
+                .and_then(|u| ShortShortUInt::try_from(u).ok())
+                .map(AMQPValue::ShortShortUInt),
+            AMQPType::ShortInt => value
+                .as_i64()
+                .and_then(|i| ShortInt::try_from(i).ok())
+                .map(AMQPValue::ShortInt),
+            AMQPType::ShortUInt => value
+                .as_u64()
+                .and_then(|u| ShortUInt::try_from(u).ok())
+                .map(AMQPValue::ShortUInt),
+            AMQPType::LongInt => value
+                .as_i64()
+                .and_then(|i| LongInt::try_from(i).ok())
+                .map(AMQPValue::LongInt),
+            AMQPType::LongUInt => value
+                .as_u64()
+                .and_then(|u| LongUInt::try_from(u).ok())
+                .map(AMQPValue::LongUInt),
             AMQPType::LongLongInt => value
                 .as_i64()
                 .map(|i| AMQPValue::LongLongInt(i as LongLongInt)),

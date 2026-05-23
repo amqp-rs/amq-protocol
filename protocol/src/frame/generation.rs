@@ -85,6 +85,10 @@ fn gen_content_body_frame<'a, W: Write + 'a>(
     channel_id: ChannelId,
     content: &'a [u8],
 ) -> impl SerializeFn<W> + 'a {
+    debug_assert!(
+        content.len() <= ChunkSize::MAX as usize,
+        "content body exceeds frame size limit"
+    );
     tuple((
         gen_short_short_uint(constants::FRAME_BODY),
         gen_id(channel_id),

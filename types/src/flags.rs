@@ -37,13 +37,11 @@ impl AMQPFlags {
         let flags = names
             .iter()
             .map(ToString::to_string)
-            .zip(bytes.iter_elements().flat_map(|b| {
-                let mut v = Vec::new();
-                for s in 0..8 {
-                    v.push(((b & (1 << s)) >> s) == 1)
-                }
-                v
-            }))
+            .zip(
+                bytes
+                    .iter_elements()
+                    .flat_map(|b| (0..8u8).map(move |s| ((b >> s) & 1) == 1)),
+            )
             .collect();
 
         AMQPFlags { flags }

@@ -129,6 +129,10 @@ pub fn gen_decimal_value<W: Write>(d: DecimalValue) -> impl SerializeFn<W> {
 
 /// Generate the [ShortString](../type.ShortString.html) in the given buffer (x)
 pub fn gen_short_string<'a, W: Write + 'a>(s: &'a str) -> impl SerializeFn<W> + 'a {
+    debug_assert!(
+        s.len() <= ShortShortUInt::MAX as usize,
+        "short string exceeds 255 bytes"
+    );
     pair(
         gen_short_short_uint(s.len() as ShortShortUInt),
         slice(s.as_bytes()),
@@ -137,6 +141,10 @@ pub fn gen_short_string<'a, W: Write + 'a>(s: &'a str) -> impl SerializeFn<W> + 
 
 /// Generate the [LongString](../type.LongString.html) in the given buffer (x)
 pub fn gen_long_string<'a, W: Write + 'a>(s: &'a [u8]) -> impl SerializeFn<W> + 'a {
+    debug_assert!(
+        s.len() <= LongUInt::MAX as usize,
+        "long string exceeds 4 GiB"
+    );
     pair(gen_long_uint(s.len() as LongUInt), slice(s))
 }
 
@@ -167,6 +175,10 @@ fn gen_field_entry<'a, W: Write + BackToTheBuffer + 'a>(
 
 /// Generate the [ByteArray](../type.ByteArray.html) in the given buffer (x)
 pub fn gen_byte_array<'a, W: Write + 'a>(a: &'a ByteArray) -> impl SerializeFn<W> + 'a {
+    debug_assert!(
+        a.len() <= LongUInt::MAX as usize,
+        "byte array exceeds 4 GiB"
+    );
     pair(gen_long_uint(a.len() as LongUInt), slice(a.as_slice()))
 }
 
