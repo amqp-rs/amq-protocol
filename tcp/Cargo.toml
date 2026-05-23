@@ -42,7 +42,7 @@ rustls--ring              = ["tcp-stream/rustls--ring"] # more compatible, (e.g.
 cfg-if = "^1.0"
 
 [dependencies.amq-protocol-uri]
-version = "=10.4.0"
+version = "=10.5.0"
 path    = "../uri"
 
 [dependencies.async-rs]
