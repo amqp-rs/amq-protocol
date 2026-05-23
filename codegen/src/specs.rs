@@ -31,6 +31,8 @@ pub struct AMQProtocolDefinition {
     pub hard_errors: Vec<AMQPConstant>,
     /// The classes defined by the protocol specification
     pub classes: Vec<AMQPClass>,
+    /// Global metadata useful for codegen
+    pub metadata: Value,
 }
 
 impl AMQProtocolDefinition {

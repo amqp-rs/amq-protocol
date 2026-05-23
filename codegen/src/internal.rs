@@ -198,6 +198,7 @@ impl _AMQProtocolDefinition {
                 })
                 .collect(),
             classes,
+            metadata: metadata.get("metadata").cloned().unwrap_or_default(),
         }
     }
 }
@@ -622,6 +623,7 @@ mod test {
                 }],
                 metadata: Value::default(),
             }],
+            metadata: Value::default(),
         };
         assert_eq!(def.into_specs(&Value::default()), expected);
     }

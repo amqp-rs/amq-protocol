@@ -545,6 +545,7 @@ synchronous: {{method.synchronous}}
                 }],
                 metadata: Value::default(),
             }],
+            metadata: Value::default(),
         }
     }
 
