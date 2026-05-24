@@ -1522,10 +1522,9 @@ pub mod basic {
             &self.cluster_id
         }
         /// Get the bitmask for serialization (Generated)
-        #[allow(clippy::identity_op)]
         pub fn bitmask(&self) -> ShortUInt {
             (if self.content_type.is_some() {
-                1 << (15 - 0)
+                1 << 15
             } else {
                 0
             }) + (if self.content_encoding.is_some() {
@@ -1585,10 +1584,9 @@ pub mod basic {
     }
 
     /// Parse basic properties (Generated)
-    #[allow(clippy::identity_op)]
     pub fn parse_properties<I: ParsableInput>(i: I) -> ParserResult<I, AMQPProperties> {
         let (i, flags) = parse_short_uint(i)?;
-        let (i, content_type) = if flags & (1 << (15 - 0)) != 0 {
+        let (i, content_type) = if flags & (1 << 15) != 0 {
             map(parse_short_string, Some).parse(i)?
         } else {
             (i, None)

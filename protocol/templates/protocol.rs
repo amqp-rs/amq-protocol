@@ -316,20 +316,18 @@ pub mod {{snake class.name}} {
         {{/each ~}}
 
         /// Get the bitmask for serialization (Generated)
-        #[allow(clippy::identity_op)]
         pub fn bitmask(&self) -> ShortUInt {
             {{#each class.properties as |property| ~}}
-            (if self.{{snake property.name}}.is_some() { 1 << (15 - {{@index}}) } else { 0 }) {{#unless @last ~}} + {{/unless ~}}
+            (if self.{{snake property.name}}.is_some() { 1 << {{#if @first ~}}15{{else}}(15 - {{@index}}){{/if ~}} } else { 0 }) {{#unless @last ~}} + {{/unless ~}}
             {{/each ~}}
         }
     }
 
     /// Parse {{class.name}} properties (Generated)
-    #[allow(clippy::identity_op)]
     pub fn parse_properties<I: ParsableInput>(i: I) -> ParserResult<I, AMQPProperties> {
         let (i, flags) = parse_short_uint(i)?;
         {{#each class.properties as |property| ~}}
-        let (i, {{snake property.name}}) = if flags & (1 << (15 - {{@index}})) != 0 { map(parse_{{snake_type property.type}}, Some).parse(i)? } else { (i, None) };
+        let (i, {{snake property.name}}) = if flags & ({{#if @first ~}}1 << 15{{else}}1 << (15 - {{@index}}){{/if ~}}) != 0 { map(parse_{{snake_type property.type}}, Some).parse(i)? } else { (i, None) };
         {{/each ~}}
         Ok((i, AMQPProperties {
             {{#each class.properties as |property| ~}}

@@ -122,149 +122,102 @@ impl AMQPValue {
         }
     }
 
-    /// If the value is bool, returns associated value. Returns None otherwise.
-    pub fn as_bool(&self) -> Option<Boolean> {
-        match self {
-            AMQPValue::Boolean(value) => Some(*value),
-            _ => None,
-        }
-    }
-
-    /// If the value is ShortShortInt, returns associated value. Returns None otherwise.
-    pub fn as_short_short_int(&self) -> Option<ShortShortInt> {
-        match self {
-            AMQPValue::ShortShortInt(value) => Some(*value),
-            _ => None,
-        }
-    }
-
-    /// If the value is ShortShortUInt, returns associated value. Returns None otherwise.
-    pub fn as_short_short_uint(&self) -> Option<ShortShortUInt> {
-        match self {
-            AMQPValue::ShortShortUInt(value) => Some(*value),
-            _ => None,
-        }
-    }
-
-    /// If the value is ShortInt, returns associated value. Returns None otherwise.
-    pub fn as_short_int(&self) -> Option<ShortInt> {
-        match self {
-            AMQPValue::ShortInt(value) => Some(*value),
-            _ => None,
-        }
-    }
-
-    /// If the value is ShortUInt, returns associated value. Returns None otherwise.
-    pub fn as_short_uint(&self) -> Option<ShortUInt> {
-        match self {
-            AMQPValue::ShortUInt(value) => Some(*value),
-            _ => None,
-        }
-    }
-
-    /// If the value is LongInt, returns associated value. Returns None otherwise.
-    pub fn as_long_int(&self) -> Option<LongInt> {
-        match self {
-            AMQPValue::LongInt(value) => Some(*value),
-            _ => None,
-        }
-    }
-
-    /// If the value is LongUInt, returns associated value. Returns None otherwise.
-    pub fn as_long_uint(&self) -> Option<LongUInt> {
-        match self {
-            AMQPValue::LongUInt(value) => Some(*value),
-            _ => None,
-        }
-    }
-
-    /// If the value is LongLongInt, returns associated value. Returns None otherwise.
-    pub fn as_long_long_int(&self) -> Option<LongLongInt> {
-        match self {
-            AMQPValue::LongLongInt(value) => Some(*value),
-            _ => None,
-        }
-    }
-
-    /// If the value is Float, returns associated value. Returns None otherwise.
-    pub fn as_float(&self) -> Option<Float> {
-        match self {
-            AMQPValue::Float(value) => Some(*value),
-            _ => None,
-        }
-    }
-
-    /// If the value is Double, returns associated value. Returns None otherwise.
-    pub fn as_double(&self) -> Option<Double> {
-        match self {
-            AMQPValue::Double(value) => Some(*value),
-            _ => None,
-        }
-    }
-
-    /// If the value is DecimalValue, returns associated value. Returns None otherwise.
-    pub fn as_decimal_value(&self) -> Option<DecimalValue> {
-        match self {
-            AMQPValue::DecimalValue(value) => Some(*value),
-            _ => None,
-        }
-    }
-
-    /// If the value is ShortString, returns associated value as str. Returns None otherwise.
-    pub fn as_short_string(&self) -> Option<&ShortString> {
-        match self {
-            AMQPValue::ShortString(value) => Some(value),
-            _ => None,
-        }
-    }
-
-    /// If the value is LongString, returns associated value as bytes. Returns None otherwise.
-    pub fn as_long_string(&self) -> Option<&LongString> {
-        match self {
-            AMQPValue::LongString(value) => Some(value),
-            _ => None,
-        }
-    }
-
-    /// If the value is FieldArray, returns associated value. Returns None otherwise.
-    pub fn as_array(&self) -> Option<&FieldArray> {
-        match self {
-            AMQPValue::FieldArray(value) => Some(value),
-            _ => None,
-        }
-    }
-
-    /// If the value is Timestamp, returns associated value. Returns None otherwise.
-    pub fn as_timestamp(&self) -> Option<Timestamp> {
-        match self {
-            AMQPValue::Timestamp(value) => Some(*value),
-            _ => None,
-        }
-    }
-
-    /// If the value is FieldTable, returns associated value. Returns None otherwise.
-    pub fn as_field_table(&self) -> Option<&FieldTable> {
-        match self {
-            AMQPValue::FieldTable(value) => Some(value),
-            _ => None,
-        }
-    }
-
-    /// If the value is ByteArray, returns associated value. Returns None otherwise.
-    pub fn as_byte_array(&self) -> Option<&ByteArray> {
-        match self {
-            AMQPValue::ByteArray(value) => Some(value),
-            _ => None,
-        }
-    }
-
-    /// Returns true if value is Void.
+    /// Returns `Some(())` if this is the `Void` variant, `None` otherwise.
     pub fn as_void(&self) -> Option<()> {
-        match self {
-            AMQPValue::Void => Some(()),
-            _ => None,
-        }
+        matches!(self, AMQPValue::Void).then_some(())
     }
+}
+
+macro_rules! amqp_value_getter {
+    ($(#[$meta:meta])* copy $method:ident, $variant:ident, $ty:ty) => {
+        $(#[$meta])*
+        pub fn $method(&self) -> Option<$ty> {
+            match self {
+                AMQPValue::$variant(value) => Some(*value),
+                _ => None,
+            }
+        }
+    };
+    ($(#[$meta:meta])* ref $method:ident, $variant:ident, $ty:ty) => {
+        $(#[$meta])*
+        pub fn $method(&self) -> Option<&$ty> {
+            match self {
+                AMQPValue::$variant(value) => Some(value),
+                _ => None,
+            }
+        }
+    };
+}
+
+impl AMQPValue {
+    amqp_value_getter!(
+        /// If the value is bool, returns associated value. Returns None otherwise.
+        copy as_bool, Boolean, Boolean
+    );
+    amqp_value_getter!(
+        /// If the value is ShortShortInt, returns associated value. Returns None otherwise.
+        copy as_short_short_int, ShortShortInt, ShortShortInt
+    );
+    amqp_value_getter!(
+        /// If the value is ShortShortUInt, returns associated value. Returns None otherwise.
+        copy as_short_short_uint, ShortShortUInt, ShortShortUInt
+    );
+    amqp_value_getter!(
+        /// If the value is ShortInt, returns associated value. Returns None otherwise.
+        copy as_short_int, ShortInt, ShortInt
+    );
+    amqp_value_getter!(
+        /// If the value is ShortUInt, returns associated value. Returns None otherwise.
+        copy as_short_uint, ShortUInt, ShortUInt
+    );
+    amqp_value_getter!(
+        /// If the value is LongInt, returns associated value. Returns None otherwise.
+        copy as_long_int, LongInt, LongInt
+    );
+    amqp_value_getter!(
+        /// If the value is LongUInt, returns associated value. Returns None otherwise.
+        copy as_long_uint, LongUInt, LongUInt
+    );
+    amqp_value_getter!(
+        /// If the value is LongLongInt, returns associated value. Returns None otherwise.
+        copy as_long_long_int, LongLongInt, LongLongInt
+    );
+    amqp_value_getter!(
+        /// If the value is Float, returns associated value. Returns None otherwise.
+        copy as_float, Float, Float
+    );
+    amqp_value_getter!(
+        /// If the value is Double, returns associated value. Returns None otherwise.
+        copy as_double, Double, Double
+    );
+    amqp_value_getter!(
+        /// If the value is DecimalValue, returns associated value. Returns None otherwise.
+        copy as_decimal_value, DecimalValue, DecimalValue
+    );
+    amqp_value_getter!(
+        /// If the value is Timestamp, returns associated value. Returns None otherwise.
+        copy as_timestamp, Timestamp, Timestamp
+    );
+    amqp_value_getter!(
+        /// If the value is ShortString, returns associated value. Returns None otherwise.
+        ref as_short_string, ShortString, ShortString
+    );
+    amqp_value_getter!(
+        /// If the value is LongString, returns associated value. Returns None otherwise.
+        ref as_long_string, LongString, LongString
+    );
+    amqp_value_getter!(
+        /// If the value is FieldArray, returns associated value. Returns None otherwise.
+        ref as_array, FieldArray, FieldArray
+    );
+    amqp_value_getter!(
+        /// If the value is FieldTable, returns associated value. Returns None otherwise.
+        ref as_field_table, FieldTable, FieldTable
+    );
+    amqp_value_getter!(
+        /// If the value is ByteArray, returns associated value. Returns None otherwise.
+        ref as_byte_array, ByteArray, ByteArray
+    );
 }
 
 impl From<Boolean> for AMQPValue {
