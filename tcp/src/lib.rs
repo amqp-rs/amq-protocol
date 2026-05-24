@@ -11,7 +11,7 @@
 //!
 //! Provides [`AMQPUriTcpExt`], a trait that extends [`AMQPUri`] with a
 //! [`connect`](AMQPUriTcpExt::connect) method that opens a
-//! [`TcpStream`](tcp_stream::TcpStream) — with or without TLS — according to
+//! [`TcpStream`] — with or without TLS — according to
 //! the URI scheme and the active runtime/TLS feature flags.
 //!
 //! # Feature flags
