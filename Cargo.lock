@@ -15,7 +15,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol"
-version = "10.6.0"
+version = "10.6.1"
 dependencies = [
  "amq-protocol-codegen",
  "amq-protocol-tcp",
@@ -28,7 +28,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-codegen"
-version = "10.6.0"
+version = "10.6.1"
 dependencies = [
  "amq-protocol-types",
  "handlebars",
@@ -38,7 +38,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-tcp"
-version = "10.6.0"
+version = "10.6.1"
 dependencies = [
  "amq-protocol-uri",
  "async-rs",
@@ -49,7 +49,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-types"
-version = "10.6.0"
+version = "10.6.1"
 dependencies = [
  "cookie-factory",
  "nom 8.0.0",
@@ -59,7 +59,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-uri"
-version = "10.6.0"
+version = "10.6.1"
 dependencies = [
  "amq-protocol-types",
  "percent-encoding",
@@ -259,9 +259,9 @@ dependencies = [
 
 [[package]]
 name = "async-rs"
-version = "0.8.10"
+version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cf4070490e7ef29f618362b32fae88d665928f1fcd413e89bc27e18c750f0a39"
+checksum = "3cd5147201b63ba6883ffabca3a153822f71541748d7108e3e799beaeb283131"
 dependencies = [
  "async-compat",
  "async-global-executor",
@@ -2315,9 +2315,9 @@ checksum = "7b2093cf4c8eb1e67749a6762251bc9cd836b6fc171623bd0a9d324d37af2417"
 
 [[package]]
 name = "tcp-stream"
-version = "0.34.12"
+version = "0.34.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d58bd8709759147bbabefe2faf09c064a9efa7eca3dd6cc94034349484ef413f"
+checksum = "20afa3e0547d91725435be12f25699baaf7f40b5901cab810cca708571de202a"
 dependencies = [
  "async-native-tls",
  "async-openssl",
