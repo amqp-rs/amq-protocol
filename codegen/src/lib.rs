@@ -6,10 +6,12 @@
     clippy::panic_in_result_fn
 )]
 
-//! # AMQP code generation utilities
+//! Code generation utilities for the AMQP 0-9-1 specification.
 //!
-//! amq-protocol-codegen is a library aiming at providing tools to generate
-//! code from official AMQP specs definition.
+//! Parses the RabbitMQ machine-readable protocol spec and exposes a
+//! [Handlebars](https://docs.rs/handlebars)-based templating engine so that
+//! build scripts can generate Rust source code from it. Used internally by
+//! the `amq-protocol` and `lapin` build scripts.
 
 mod internal;
 mod specs;

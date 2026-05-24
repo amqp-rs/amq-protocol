@@ -6,13 +6,11 @@
     clippy::panic_in_result_fn
 )]
 
-//! # AMQP types manipulation library
+//! AMQP 0-9-1 type system for Rust.
 //!
-//! amq-protocol-types is a library aiming at providing an implementation/abstraction
-//! around AMQP types.
-//!
-//! It implements the list of the different kind of types available, a value holder and
-//! serialization.deserialization facilities.
+//! Implements the full set of AMQP scalar types ([`AMQPValue`], [`AMQPType`]),
+//! compound types ([`FieldTable`], [`FieldArray`]), and wire-format
+//! serialisation/deserialisation via the [`generation`] and [`parsing`] modules.
 
 mod types;
 mod value;

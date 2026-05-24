@@ -6,10 +6,10 @@
     clippy::panic_in_result_fn
 )]
 
-//! # AMQP URI manipulation library
+//! AMQP 0-9-1 URI parsing and construction.
 //!
-//! amq-protocol-uri is a library aiming at providing tools to help
-//! managing AMQP URIs
+//! Parses `amqp://` and `amqps://` URIs into an [`AMQPUri`] struct and
+//! provides `Display` / `FromStr` implementations for round-tripping.
 
 use amq_protocol_types::{ChannelId, FrameSize, Heartbeat};
 use url::Url;

@@ -7,10 +7,45 @@
 )]
 #![allow(clippy::result_large_err)]
 
-//! # AMQP URI TCP connection handling
+//! TCP/TLS connection helpers for AMQP URIs.
 //!
-//! amq-protocol-tcp is a library aiming at providing tools to help
-//! connecting to an AMQP URI
+//! Provides [`AMQPUriTcpExt`], a trait that extends [`AMQPUri`] with a
+//! [`connect`](AMQPUriTcpExt::connect) method that opens a
+//! [`TcpStream`](tcp_stream::TcpStream) — with or without TLS — according to
+//! the URI scheme and the active runtime/TLS feature flags.
+//!
+//! # Feature flags
+//!
+//! ## Async runtime (pick exactly one)
+//!
+//! | Flag | Notes |
+//! |------|-------|
+//! | `tokio` *(default)* | Requires a running Tokio runtime |
+//! | `smol` | Uses the smol executor |
+//! | `async-global-executor` | Uses async-global-executor |
+//!
+//! ## TLS backend (pick at most one; `rustls` is the default)
+//!
+//! | Flag | Notes |
+//! |------|-------|
+//! | `rustls` *(default)* | TLS via rustls |
+//! | `native-tls` | TLS via the platform's native library |
+//! | `openssl` | TLS via OpenSSL |
+//!
+//! ## Rustls certificate store (only when `rustls` is active)
+//!
+//! | Flag | Notes |
+//! |------|-------|
+//! | `rustls-platform-verifier` *(default)* | Uses the platform trust store |
+//! | `rustls-native-certs` | Loads native root certificates |
+//! | `rustls-webpki-roots-certs` | Uses the webpki bundled root set |
+//!
+//! ## Rustls crypto provider (at least one must be enabled)
+//!
+//! | Flag | Notes |
+//! |------|-------|
+//! | `rustls--aws_lc_rs` *(default)* | Uses aws-lc-rs |
+//! | `rustls--ring` | Uses ring (more portable) |
 
 use amq_protocol_uri::{AMQPScheme, AMQPUri};
 use async_rs::{Runtime, traits::*};
