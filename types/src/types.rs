@@ -119,31 +119,31 @@ impl fmt::Display for AMQPType {
     }
 }
 
-/// A bool
+/// AMQP boolean (`t`): a single true/false value.
 pub type Boolean = bool;
-/// An i8
+/// AMQP short-short-int (`b`): a signed 8-bit integer.
 pub type ShortShortInt = i8;
-/// A u8
+/// AMQP short-short-uint (`B`): an unsigned 8-bit integer.
 pub type ShortShortUInt = u8;
-/// An i16
+/// AMQP short-int (`U`): a signed 16-bit integer.
 pub type ShortInt = i16;
-/// A u16
+/// AMQP short-uint (`u`): an unsigned 16-bit integer.
 pub type ShortUInt = u16;
-/// An i32
+/// AMQP long-int (`I`): a signed 32-bit integer.
 pub type LongInt = i32;
-/// A u32
+/// AMQP long-uint (`i`): an unsigned 32-bit integer.
 pub type LongUInt = u32;
-/// An i64
+/// AMQP long-long-int (`L`): a signed 64-bit integer.
 pub type LongLongInt = i64;
-/// A u64
+/// AMQP long-long-uint (`l`): an unsigned 64-bit integer.
 pub type LongLongUInt = u64;
-/// A f32
+/// AMQP float (`f`): a 32-bit IEEE 754 floating-point value.
 pub type Float = f32;
-/// A f64
+/// AMQP double (`d`): a 64-bit IEEE 754 floating-point value.
 pub type Double = f64;
-/// A timestamp (u64)
+/// AMQP timestamp (`T`): a 64-bit POSIX timestamp (seconds since the Unix epoch).
 pub type Timestamp = LongLongUInt;
-/// No value
+/// AMQP void: the absence of a value, equivalent to `()`.
 pub type Void = ();
 
 /// Maximum byte length of a [ShortString]
