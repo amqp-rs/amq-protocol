@@ -15,7 +15,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol"
-version = "10.6.1"
+version = "10.6.2"
 dependencies = [
  "amq-protocol-codegen",
  "amq-protocol-tcp",
@@ -28,7 +28,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-codegen"
-version = "10.6.1"
+version = "10.6.2"
 dependencies = [
  "amq-protocol-types",
  "handlebars",
@@ -38,7 +38,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-tcp"
-version = "10.6.1"
+version = "10.6.2"
 dependencies = [
  "amq-protocol-uri",
  "async-rs",
@@ -49,7 +49,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-types"
-version = "10.6.1"
+version = "10.6.2"
 dependencies = [
  "cookie-factory",
  "nom 8.0.0",
@@ -59,7 +59,7 @@ dependencies = [
 
 [[package]]
 name = "amq-protocol-uri"
-version = "10.6.1"
+version = "10.6.2"
 dependencies = [
  "amq-protocol-types",
  "percent-encoding",
@@ -1377,9 +1377,9 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.29"
+version = "0.4.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
+checksum = "616ec5685824bcc94416c6d4a7a446eea774a31efd7062c8480ba6fd06d7a6e5"
 
 [[package]]
 name = "memchr"
@@ -1946,9 +1946,9 @@ dependencies = [
 
 [[package]]
 name = "rustls-connector"
-version = "0.23.5"
+version = "0.23.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b35fa32523bbf1a739061af1dc422e4c2e77ac78a9937331f9ce15246c5ca2d8"
+checksum = "b7664e32b0ffbec386bdf1d7cbca51a89551a90d3278f135186cd6cb3cfa889c"
 dependencies = [
  "futures-io",
  "futures-rustls",
@@ -2315,9 +2315,9 @@ checksum = "7b2093cf4c8eb1e67749a6762251bc9cd836b6fc171623bd0a9d324d37af2417"
 
 [[package]]
 name = "tcp-stream"
-version = "0.34.13"
+version = "0.34.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "20afa3e0547d91725435be12f25699baaf7f40b5901cab810cca708571de202a"
+checksum = "300d0735de48a565461c2ea14cc75b80ee5b6be3b4f5aeabe3553e4c2df8d23d"
 dependencies = [
  "async-native-tls",
  "async-openssl",
