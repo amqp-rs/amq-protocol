@@ -168,7 +168,10 @@ impl fmt::Display for ShortStringError {
 impl std::error::Error for ShortStringError {}
 
 /// A String (deprecated)
-#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
+///
+/// The inner string is guaranteed never to exceed [MAX_SHORT_STRING_LENGTH] bytes, which is what
+/// the wire format can encode. Every constructor, including [Deserialize], enforces that.
+#[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize)]
 pub struct ShortString(String);
 /// A String
 #[derive(Clone, Debug, Default, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
@@ -209,13 +212,52 @@ impl ShortString {
     }
 }
 
+impl<'de> Deserialize<'de> for ShortString {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        struct ShortStringVisitor;
+
+        impl<'de> serde::de::Visitor<'de> for ShortStringVisitor {
+            type Value = ShortString;
+
+            fn expecting(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+                write!(f, "a string of at most {MAX_SHORT_STRING_LENGTH} bytes")
+            }
+
+            fn visit_str<E: serde::de::Error>(self, s: &str) -> Result<Self::Value, E> {
+                ShortString::try_new(s).map_err(E::custom)
+            }
+
+            fn visit_string<E: serde::de::Error>(self, s: String) -> Result<Self::Value, E> {
+                ShortString::try_new(s).map_err(E::custom)
+            }
+
+            fn visit_newtype_struct<D: serde::Deserializer<'de>>(
+                self,
+                deserializer: D,
+            ) -> Result<Self::Value, D::Error> {
+                deserializer.deserialize_string(self)
+            }
+        }
+
+        deserializer.deserialize_newtype_struct("ShortString", ShortStringVisitor)
+    }
+}
+
 impl From<String> for ShortString {
+    /// # Panics
+    ///
+    /// Panics if the string exceeds [MAX_SHORT_STRING_LENGTH] bytes. Use
+    /// [ShortString::try_new] to handle over-long strings.
     fn from(s: String) -> Self {
         Self::try_new(s).expect("ShortString exceeds maximum length")
     }
 }
 
 impl From<&str> for ShortString {
+    /// # Panics
+    ///
+    /// Panics if the string exceeds [MAX_SHORT_STRING_LENGTH] bytes. Use
+    /// [ShortString::try_new] to handle over-long strings.
     fn from(s: &str) -> Self {
         Self::try_new(s).expect("ShortString exceeds maximum length")
     }
@@ -284,6 +326,27 @@ impl FieldArray {
     /// Add an item to the array
     pub fn push(&mut self, v: AMQPValue) {
         self.0.push(v);
+    }
+
+    /// Get the number of values in the array
+    #[must_use]
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    /// Check whether the array is empty
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+}
+
+impl<'a> IntoIterator for &'a FieldArray {
+    type Item = &'a AMQPValue;
+    type IntoIter = std::slice::Iter<'a, AMQPValue>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.iter()
     }
 }
 
@@ -420,5 +483,33 @@ mod test {
             ShortString::try_new("a".repeat(256)),
             Err(ShortStringError(256))
         );
+    }
+
+    #[test]
+    fn short_string_deserialization_enforces_length_limit() {
+        let ok = serde_json::to_string(&"a".repeat(255)).unwrap();
+        assert_eq!(
+            serde_json::from_str::<ShortString>(&ok).unwrap().as_str(),
+            "a".repeat(255)
+        );
+
+        let too_long = serde_json::to_string(&"a".repeat(256)).unwrap();
+        assert!(serde_json::from_str::<ShortString>(&too_long).is_err());
+    }
+
+    #[test]
+    fn short_string_roundtrips_through_serde() {
+        let short = ShortString::from("test");
+        let json = serde_json::to_string(&short).unwrap();
+        assert_eq!(serde_json::from_str::<ShortString>(&json).unwrap(), short);
+    }
+
+    #[test]
+    fn field_array_len() {
+        let array: FieldArray = vec![AMQPValue::Void, AMQPValue::Boolean(true)].into();
+        assert_eq!(array.len(), 2);
+        assert!(!array.is_empty());
+        assert!(FieldArray::default().is_empty());
+        assert_eq!(array.into_iter().count(), 2);
     }
 }

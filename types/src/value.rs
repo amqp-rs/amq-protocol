@@ -107,9 +107,11 @@ impl AMQPValue {
             AMQPType::Float => value.as_f64().map(|i| AMQPValue::Float(i as Float)),
             AMQPType::Double => value.as_f64().map(|i| AMQPValue::Double(i as Double)),
             AMQPType::DecimalValue => None,
+            /* A ShortString is limited to MAX_SHORT_STRING_LENGTH bytes: report a longer one as
+             * None rather than panicking through the From impl. */
             AMQPType::ShortString => value
                 .as_str()
-                .map(ShortString::from)
+                .and_then(|s| ShortString::try_new(s).ok())
                 .map(AMQPValue::ShortString),
             AMQPType::LongString => value
                 .as_str()
@@ -370,6 +372,19 @@ mod test {
         assert_eq!(
             AMQPValue::try_from(&Value::String("test".to_string()), AMQPType::LongString),
             Some(AMQPValue::LongString("test".into()))
+        );
+    }
+
+    #[test]
+    fn test_from_too_long_short_string_value() {
+        /* Must report None instead of panicking */
+        assert_eq!(
+            AMQPValue::try_from(&Value::String("a".repeat(256)), AMQPType::ShortString),
+            None
+        );
+        assert_eq!(
+            AMQPValue::try_from(&Value::String("a".repeat(255)), AMQPType::ShortString),
+            Some(AMQPValue::ShortString("a".repeat(255).into()))
         );
     }
 
