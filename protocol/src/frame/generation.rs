@@ -86,17 +86,17 @@ fn gen_content_body_frame<'a, W: Write + 'a>(
     channel_id: ChannelId,
     content: &'a [u8],
 ) -> impl SerializeFn<W> + 'a {
-    debug_assert!(
-        content.len() <= ChunkSize::MAX as usize,
-        "content body exceeds frame size limit"
-    );
-    tuple((
-        gen_short_short_uint(constants::FRAME_BODY),
-        gen_id(channel_id),
-        gen_long_uint(content.len() as ChunkSize),
-        slice(content),
-        gen_short_short_uint(constants::FRAME_END),
-    ))
+    move |x| {
+        let len = ChunkSize::try_from(content.len())
+            .map_err(|_| length_error("content body", content.len(), ChunkSize::MAX as usize))?;
+        tuple((
+            gen_short_short_uint(constants::FRAME_BODY),
+            gen_id(channel_id),
+            gen_long_uint(len),
+            slice(content),
+            gen_short_short_uint(constants::FRAME_END),
+        ))(x)
+    }
 }
 
 #[cfg(test)]

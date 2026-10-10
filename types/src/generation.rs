@@ -8,7 +8,16 @@ use cookie_factory::{
     multi::many_ref,
     sequence::pair,
 };
-use std::io::Write;
+use std::io::{self, Write};
+
+/// Build a [GenError] for a value that doesn't fit the length prefix of its wire representation
+#[must_use]
+pub fn length_error(what: &str, len: usize, max: usize) -> GenError {
+    GenError::IoError(io::Error::new(
+        io::ErrorKind::InvalidData,
+        format!("{what} is too long to be serialized: {len} bytes (maximum {max})"),
+    ))
+}
 
 /// Apply a generator and serialize its length at the beginning of buffer
 pub fn gen_with_len<W: Write + BackToTheBuffer, F: SerializeFn<W>>(f: F) -> impl SerializeFn<W> {
@@ -20,7 +29,12 @@ pub fn gen_with_len<W: Write + BackToTheBuffer, F: SerializeFn<W>>(f: F) -> impl
             let len = x.position - start;
             Ok((x, len))
         },
-        move |x, len| gen_long_uint(len as LongUInt)(x),
+        move |x, len| {
+            let len = LongUInt::try_from(len).map_err(|_| {
+                length_error("serialized value", len as usize, LongUInt::MAX as usize)
+            })?;
+            gen_long_uint(len)(x)
+        },
     )
 }
 
@@ -146,24 +160,21 @@ pub fn gen_decimal_value<W: Write>(d: DecimalValue) -> impl SerializeFn<W> {
 /// Generate the [ShortString](../type.ShortString.html) in the given buffer (x)
 #[must_use]
 pub fn gen_short_string<'a, W: Write + 'a>(s: &'a str) -> impl SerializeFn<W> + 'a {
-    debug_assert!(
-        s.len() <= ShortShortUInt::MAX as usize,
-        "short string exceeds 255 bytes"
-    );
-    pair(
-        gen_short_short_uint(s.len() as ShortShortUInt),
-        slice(s.as_bytes()),
-    )
+    move |x| {
+        let len = ShortShortUInt::try_from(s.len())
+            .map_err(|_| length_error("short string", s.len(), ShortShortUInt::MAX as usize))?;
+        pair(gen_short_short_uint(len), slice(s.as_bytes()))(x)
+    }
 }
 
 /// Generate the [LongString](../type.LongString.html) in the given buffer (x)
 #[must_use]
 pub fn gen_long_string<'a, W: Write + 'a>(s: &'a [u8]) -> impl SerializeFn<W> + 'a {
-    debug_assert!(
-        s.len() <= LongUInt::MAX as usize,
-        "long string exceeds 4 GiB"
-    );
-    pair(gen_long_uint(s.len() as LongUInt), slice(s))
+    move |x| {
+        let len = LongUInt::try_from(s.len())
+            .map_err(|_| length_error("long string", s.len(), LongUInt::MAX as usize))?;
+        pair(gen_long_uint(len), slice(s))(x)
+    }
 }
 
 /// Generate the [FieldArray](../type.FieldArray.html) in the given buffer (x)
@@ -196,21 +207,17 @@ fn gen_field_entry<'a, W: Write + BackToTheBuffer + 'a>(
 /// Generate the [ByteArray](../type.ByteArray.html) in the given buffer (x)
 #[must_use]
 pub fn gen_byte_array<'a, W: Write + 'a>(a: &'a ByteArray) -> impl SerializeFn<W> + 'a {
-    debug_assert!(
-        a.len() <= LongUInt::MAX as usize,
-        "byte array exceeds 4 GiB"
-    );
-    pair(gen_long_uint(a.len() as LongUInt), slice(a.as_slice()))
+    move |x| {
+        let len = LongUInt::try_from(a.len())
+            .map_err(|_| length_error("byte array", a.len(), LongUInt::MAX as usize))?;
+        pair(gen_long_uint(len), slice(a.as_slice()))(x)
+    }
 }
 
 /// Generate the [AMQPFlags](../type.AMQPFlags.html) in the given buffer (x)
 #[must_use]
 pub fn gen_flags<'a, W: Write + 'a>(f: &'a AMQPFlags) -> impl SerializeFn<W> + 'a {
-    move |x| {
-        f.get_bytes()
-            .iter()
-            .try_fold(x, |acc, b| gen_short_short_uint(*b)(acc))
-    }
+    move |x| f.bytes().try_fold(x, |acc, b| gen_short_short_uint(b)(acc))
 }
 
 #[cfg(test)]
@@ -445,6 +452,18 @@ mod test {
             test_gen!(&mut [0, 0, 0, 0, 0][..], gen_short_string, "test"),
             Ok((vec![4, 116, 101, 115, 116], 5))
         );
+    }
+
+    #[test]
+    fn test_gen_short_string_too_long() {
+        /* A ShortString cannot hold more than 255 bytes, but gen_short_string takes a plain &str:
+         * it must refuse to serialize rather than truncate the length prefix. */
+        let too_long = "a".repeat(256);
+        let mut buf = vec![0u8; 512];
+        assert!(cf_gen(gen_short_string(&too_long), &mut buf[..]).is_err());
+
+        let ok = "a".repeat(255);
+        assert!(cf_gen(gen_short_string(&ok), &mut buf[..]).is_ok());
     }
 
     #[test]
