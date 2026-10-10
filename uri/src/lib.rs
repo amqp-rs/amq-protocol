@@ -12,7 +12,7 @@
 //! provides `Display` / `FromStr` implementations for round-tripping.
 
 use amq_protocol_types::{ChannelId, FrameSize, Heartbeat};
-use url::Url;
+use url::{Host, Url};
 
 use std::{fmt, num::ParseIntError, str::FromStr};
 
@@ -66,6 +66,9 @@ pub struct AMQPAuthority {
     /// The credentials used to connect to the server
     pub userinfo: AMQPUserInfo,
     /// The server's host
+    ///
+    /// An IP literal is stored without its URI brackets, so that it can be handed to a resolver
+    /// or used as a TLS server name as-is. [Display](std::fmt::Display) adds them back.
     pub host: String,
     /// The port the server listens on
     pub port: u16,
@@ -156,7 +159,7 @@ fn percent_decode(s: &str) -> Result<String, String> {
         .map_err(|e| e.to_string())
 }
 
-fn percent_encode<'a>(s: &'a str) -> percent_encoding::PercentEncode<'a> {
+fn percent_encode(s: &str) -> percent_encoding::PercentEncode<'_> {
     percent_encoding::utf8_percent_encode(s, percent_encoding::NON_ALPHANUMERIC)
 }
 
@@ -198,9 +201,14 @@ impl FromStr for AMQPUri {
         let password = url
             .password()
             .map_or(Ok(default.authority.userinfo.password), percent_decode)?;
-        let host = url
-            .domain()
-            .map_or(Ok(default.authority.host), percent_decode)?;
+        /* Not url.domain(): that returns None for IP literals, which would silently fall back to
+         * the default host and connect to the wrong server. */
+        let host = match url.host() {
+            Some(Host::Domain(domain)) => percent_decode(domain)?,
+            Some(Host::Ipv4(addr)) => addr.to_string(),
+            Some(Host::Ipv6(addr)) => addr.to_string(),
+            None => default.authority.host,
+        };
         let port = url.port().unwrap_or_else(|| scheme.default_port());
         let vhost = percent_decode(url.path().get(1..).unwrap_or("/"))?;
         let frame_max = int_queryparam(&url, "frame_max")?;
@@ -235,11 +243,20 @@ impl fmt::Display for AMQPUri {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(
             f,
-            "{}://{}:{}@{}:{}/{}",
+            "{}://{}:{}@",
             self.scheme,
             percent_encode(&self.authority.userinfo.username),
             percent_encode(&self.authority.userinfo.password),
-            self.authority.host,
+        )?;
+        /* An IPv6 literal has to be bracketed to be a valid URI host */
+        if self.authority.host.contains(':') {
+            write!(f, "[{}]", self.authority.host)?;
+        } else {
+            write!(f, "{}", self.authority.host)?;
+        }
+        write!(
+            f,
+            ":{}/{}",
             self.authority.port,
             percent_encode(&self.vhost),
         )?;
@@ -387,6 +404,48 @@ mod test {
                 ..Default::default()
             })
         );
+    }
+
+    #[test]
+    fn test_parse_ipv6_host() {
+        /* This used to silently resolve to the default host ("localhost") */
+        let uri: AMQPUri = "amqp://[::1]:5672/vhost".parse().unwrap();
+        assert_eq!(uri.authority.host, "::1");
+        assert_eq!(uri.authority.port, 5672);
+        assert_eq!(uri.vhost, "vhost");
+    }
+
+    #[test]
+    fn test_parse_ipv6_host_default_port() {
+        let uri: AMQPUri = "amqps://[2001:db8::1]/".parse().unwrap();
+        assert_eq!(uri.authority.host, "2001:db8::1");
+        assert_eq!(uri.authority.port, 5671);
+    }
+
+    #[test]
+    fn test_parse_ipv4_host() {
+        let uri: AMQPUri = "amqp://127.0.0.1:5673/".parse().unwrap();
+        assert_eq!(uri.authority.host, "127.0.0.1");
+        assert_eq!(uri.authority.port, 5673);
+    }
+
+    #[test]
+    fn test_ipv6_roundtrip() {
+        let uri: AMQPUri = "amqp://user:pass@[2001:db8::1]:5672/v".parse().unwrap();
+        assert_eq!(uri.to_string(), "amqp://user:pass@[2001:db8::1]:5672/v");
+        assert_eq!(uri.to_string().parse(), Ok(uri));
+    }
+
+    #[test]
+    fn test_roundtrip() {
+        for uri in [
+            "amqp://localhost:5672/%2F",
+            "amqps://user:pass@example%2Ecom:5671/v?frame_max=1024&heartbeat=42",
+            "amqp://127.0.0.1:5672/",
+        ] {
+            let parsed: AMQPUri = uri.parse().unwrap();
+            assert_eq!(parsed.to_string().parse(), Ok(parsed));
+        }
     }
 
     #[test]
