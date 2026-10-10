@@ -18,7 +18,10 @@ cargo clippy --all-features -- -W clippy::all
 cargo fmt --all -- --check
 cargo fmt --all
 
-# Force-regenerate protocol.rs from the AMQP spec
+# Regenerate protocol/src/generated.rs from the AMQP spec (writes + formats it in place)
+./regen-code.sh
+
+# Build against a freshly generated protocol.rs instead of the checked-in copy
 cargo build -p amq-protocol --features codegen
 ```
 
@@ -48,7 +51,13 @@ Protocol code is generated at build time from the embedded RabbitMQ spec:
 4. **Build script:** `protocol/build.rs` writes the result to `OUT_DIR/protocol.rs`
 5. **Fallback:** `protocol/src/generated.rs` is a pre-generated copy checked into the repo; it is used when the `codegen` feature is disabled
 
-To update the generated code after changing the template or spec, run `cargo build -p amq-protocol --features codegen` and commit `protocol/src/generated.rs`.
+To update the generated code after changing the template or spec, run `./regen-code.sh` and commit
+`protocol/src/generated.rs`. That script is the only thing that writes the checked-in copy:
+`--features codegen` only redirects the build to `OUT_DIR`, so it never updates `generated.rs`.
+
+Never hand-edit `protocol/src/generated.rs` — the next regeneration discards the edit. Change
+`protocol/templates/protocol.rs` and regenerate instead. `cargo clippy --all-features` lints the
+freshly generated code, so it catches drift between the two.
 
 ## Feature Flags
 

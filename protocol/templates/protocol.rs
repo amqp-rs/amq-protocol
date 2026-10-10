@@ -37,6 +37,7 @@ pub enum AMQPSoftError {
 
 impl AMQPSoftError {
     /// Get the id of the soft error
+    #[must_use]
     pub fn get_id(&self) -> Identifier {
         match *self {
             {{#each protocol.soft_errors as |constant| ~}}
@@ -46,6 +47,7 @@ impl AMQPSoftError {
     }
 
     /// Get the soft error corresponding to an id
+    #[must_use]
     pub fn from_id(id: Identifier) -> Option<AMQPSoftError> {
         match id {
             {{#each protocol.soft_errors as |constant| ~}}
@@ -77,6 +79,7 @@ pub enum AMQPHardError {
 
 impl AMQPHardError {
     /// Get the id of the hard error
+    #[must_use]
     pub fn get_id(&self) -> Identifier {
         match *self {
             {{#each protocol.hard_errors as |constant| ~}}
@@ -86,6 +89,7 @@ impl AMQPHardError {
     }
 
     /// Get the hard error corresponding to an id
+    #[must_use]
     pub fn from_id(id: Identifier) -> Option<AMQPHardError> {
         match id {
             {{#each protocol.hard_errors as |constant| ~}}
@@ -121,6 +125,7 @@ pub fn parse_class<I: ParsableInput>(i: I) -> ParserResult<I, AMQPClass> {
 }
 
 /// Serialize an AMQP class
+#[must_use]
 pub fn gen_class<'a, W: Write + BackToTheBuffer + 'a>(class: &'a AMQPClass) -> impl SerializeFn<W> + 'a {
     move |input| match *class {
         {{#each protocol.classes as |class| ~}}
@@ -140,6 +145,7 @@ pub enum AMQPClass {
 
 impl AMQPClass {
     /// Get the AMQP class id (Generated)
+    #[must_use]
     pub fn get_amqp_class_id(&self) -> Identifier {
         match self {
             {{#each protocol.classes as |class| ~}}
@@ -149,6 +155,7 @@ impl AMQPClass {
     }
 
     /// Get the AMQP method id (Generated)
+    #[must_use]
     pub fn get_amqp_method_id(&self) -> Identifier {
         match self {
             {{#each protocol.classes as |class| ~}}
@@ -176,6 +183,7 @@ pub mod {{snake class.name}} {
     }
 
     /// Serialize {{class.name}} (Generated)
+    #[must_use]
     pub fn gen_{{snake class.name false}}<'a, W: Write + BackToTheBuffer + 'a>(method: &'a AMQPMethod) -> impl SerializeFn<W> + 'a {
         cookie_factory::sequence::pair(
             gen_id({{class.id}}),
@@ -223,11 +231,13 @@ pub mod {{snake class.name}} {
 
     impl {{camel method.name}} {
         /// Get the AMQP class id for {{method.name}} (Generated)
+        #[must_use]
         pub fn get_amqp_class_id(&self) -> Identifier {
             {{class.id}}
         }
 
         /// Get the AMQP method id for {{method.name}} (Generated)
+        #[must_use]
         pub fn get_amqp_method_id(&self) -> Identifier {
             {{method.id}}
         }
@@ -239,7 +249,7 @@ pub mod {{snake class.name}} {
         {{#if @argument_is_value ~}}
         let (i, {{#if argument.force_default ~}}_{{else}}{{snake argument.name}}{{/if ~}}) = parse_{{snake_type argument.type}}.parse(i)?;
         {{else}}
-        let (i, {{#if argument.ignore_flags ~}}_{{else}}flags{{/if ~}}) = parse_flags(i, &[
+        let (i, {{#if argument.ignore_flags ~}}_{{else}}flags_{{@index}}{{/if ~}}) = parse_flags(i, &[
             {{#each argument.flags as |flag| ~}}
             "{{snake flag.name}}",
             {{/each ~}}
@@ -256,7 +266,7 @@ pub mod {{snake class.name}} {
             {{#unless argument.ignore_flags ~}}
             {{#each argument.flags as |flag| ~}}
             {{#unless flag.force_default ~}}
-            {{snake flag.name}}: flags.get_flag("{{snake flag.name}}").unwrap_or({{flag.default_value}}),
+            {{snake flag.name}}: flags_{{@../index}}.get_flag("{{snake flag.name}}").unwrap_or({{flag.default_value}}),
             {{/unless ~}}
             {{/each ~}}
             {{/unless ~}}
@@ -266,13 +276,14 @@ pub mod {{snake class.name}} {
     }
 
     /// Serialize {{method.name}} (Generated)
+    #[must_use]
     pub fn gen_{{snake method.name false}}<'a, W: Write + BackToTheBuffer + 'a>({{#if method.arguments ~}}{{#if method.ignore_args ~}}_{{/if ~}}method{{else}}_{{/if ~}}: &'a {{camel method.name}}) -> impl SerializeFn<W> + 'a {
         move |mut input| {
             {{#each_argument method.arguments as |argument| ~}}
             {{#unless @argument_is_value ~}}
-            let mut flags = AMQPFlags::default();
+            let mut flags_{{@index}} = AMQPFlags::default();
             {{#each argument.flags as |flag| ~}}
-            flags.add_flag("{{snake flag.name}}".to_string(), {{#if flag.force_default ~}}{{flag.default_value}}{{else}}method.{{snake flag.name}}{{/if ~}});
+            flags_{{@../index}}.add_flag("{{snake flag.name}}", {{#if flag.force_default ~}}{{flag.default_value}}{{else}}method.{{snake flag.name}}{{/if ~}});
             {{/each ~}}
             {{/unless ~}}
             {{/each_argument ~}}
@@ -283,7 +294,7 @@ pub mod {{snake class.name}} {
             {{/if ~}}
             input = gen_{{snake_type argument.type}}({{#if (and (pass_by_ref argument.type) (not (use_str_ref argument.type))) ~}}&{{/if ~}}{{#if argument.force_default ~}}{{amqp_value_ref argument.default_value}}{{else}}method.{{snake argument.name}}{{#if (use_str_ref argument.type) ~}}{{#if (use_bytes_ref argument.type) ~}}.as_bytes(){{else}}.as_str(){{/if ~}}{{/if ~}}{{/if ~}})(input)?;
             {{else}}
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_{{@index}})(input)?;
             {{/if ~}}
             {{/each_argument ~}}
             Ok(input)
@@ -302,6 +313,7 @@ pub mod {{snake class.name}} {
     impl AMQPProperties {
         {{#each class.properties as |property| ~}}
         /// Set {{property.name}} (Generated)
+        #[must_use]
         pub fn with_{{snake property.name false}}(mut self, value: {{property.type}}) -> Self {
             self.{{snake property.name}} = Some(value);
             self
@@ -310,12 +322,14 @@ pub mod {{snake class.name}} {
 
         {{#each class.properties as |property| ~}}
         /// Get {{property.name}} (Generated)
+        #[must_use]
         pub fn {{snake property.name}}(&self) -> &Option<{{property.type}}> {
             &self.{{snake property.name}}
         }
         {{/each ~}}
 
         /// Get the bitmask for serialization (Generated)
+        #[must_use]
         pub fn bitmask(&self) -> ShortUInt {
             {{#each class.properties as |property| ~}}
             (if self.{{snake property.name}}.is_some() { 1 << {{#if @first ~}}15{{else}}(15 - {{@index}}){{/if ~}} } else { 0 }) {{#unless @last ~}} + {{/unless ~}}
@@ -337,13 +351,14 @@ pub mod {{snake class.name}} {
     }
 
     /// Serialize {{class.name}} properties (Generated)
+    #[must_use]
     pub fn gen_properties<'a, W: Write + BackToTheBuffer + 'a>(props: &'a AMQPProperties) -> impl SerializeFn<W> + 'a {
         cookie_factory::sequence::pair(
             gen_short_uint(props.bitmask()),
             move |mut input| {
                 {{#each class.properties as |property| ~}}
                 if let Some(prop) = props.{{snake property.name}}{{#if (pass_by_ref property.type) ~}}.as_ref(){{/if ~}} {
-                    input = gen_{{snake_type property.type}}(prop{{#if (use_str_ref property.type) ~}}.as_str(){{/if ~}})(input)?;
+                    input = gen_{{snake_type property.type}}(prop{{#if (use_str_ref property.type) ~}}{{#if (use_bytes_ref property.type) ~}}.as_bytes(){{else}}.as_str(){{/if ~}}{{/if ~}})(input)?;
                 }
                 {{/each ~}}
                 Ok(input)

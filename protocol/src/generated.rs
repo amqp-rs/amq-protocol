@@ -566,12 +566,12 @@ pub mod basic {
     pub fn parse_qos<I: ParsableInput>(i: I) -> ParserResult<I, Qos> {
         let (i, _) = parse_long_uint.parse(i)?;
         let (i, prefetch_count) = parse_short_uint.parse(i)?;
-        let (i, flags) = parse_flags(i, &["global"])?;
+        let (i, flags_2) = parse_flags(i, &["global"])?;
         Ok((
             i,
             Qos {
                 prefetch_count,
-                global: flags.get_flag("global").unwrap_or(false),
+                global: flags_2.get_flag("global").unwrap_or(false),
             },
         ))
     }
@@ -582,12 +582,12 @@ pub mod basic {
         method: &'a Qos,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("global".to_string(), method.global);
+            let mut flags_2 = AMQPFlags::default();
+            flags_2.add_flag("global", method.global);
             input = gen_id(10)(input)?;
             input = gen_long_uint(0)(input)?;
             input = gen_short_uint(method.prefetch_count)(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_2)(input)?;
             Ok(input)
         }
     }
@@ -662,17 +662,17 @@ pub mod basic {
         let (i, _) = parse_short_uint.parse(i)?;
         let (i, queue) = parse_short_string.parse(i)?;
         let (i, consumer_tag) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["no_local", "no_ack", "exclusive", "nowait"])?;
+        let (i, flags_3) = parse_flags(i, &["no_local", "no_ack", "exclusive", "nowait"])?;
         let (i, arguments) = parse_field_table.parse(i)?;
         Ok((
             i,
             Consume {
                 queue,
                 consumer_tag,
-                no_local: flags.get_flag("no_local").unwrap_or(false),
-                no_ack: flags.get_flag("no_ack").unwrap_or(false),
-                exclusive: flags.get_flag("exclusive").unwrap_or(false),
-                nowait: flags.get_flag("nowait").unwrap_or(false),
+                no_local: flags_3.get_flag("no_local").unwrap_or(false),
+                no_ack: flags_3.get_flag("no_ack").unwrap_or(false),
+                exclusive: flags_3.get_flag("exclusive").unwrap_or(false),
+                nowait: flags_3.get_flag("nowait").unwrap_or(false),
                 arguments,
             },
         ))
@@ -684,16 +684,16 @@ pub mod basic {
         method: &'a Consume,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("no_local".to_string(), method.no_local);
-            flags.add_flag("no_ack".to_string(), method.no_ack);
-            flags.add_flag("exclusive".to_string(), method.exclusive);
-            flags.add_flag("nowait".to_string(), method.nowait);
+            let mut flags_3 = AMQPFlags::default();
+            flags_3.add_flag("no_local", method.no_local);
+            flags_3.add_flag("no_ack", method.no_ack);
+            flags_3.add_flag("exclusive", method.exclusive);
+            flags_3.add_flag("nowait", method.nowait);
             input = gen_id(20)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.queue.as_str())(input)?;
             input = gen_short_string(method.consumer_tag.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_3)(input)?;
             input = gen_field_table(&method.arguments)(input)?;
             Ok(input)
         }
@@ -762,12 +762,12 @@ pub mod basic {
     /// Parse cancel (Generated)
     pub fn parse_cancel<I: ParsableInput>(i: I) -> ParserResult<I, Cancel> {
         let (i, consumer_tag) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["nowait"])?;
+        let (i, flags_1) = parse_flags(i, &["nowait"])?;
         Ok((
             i,
             Cancel {
                 consumer_tag,
-                nowait: flags.get_flag("nowait").unwrap_or(false),
+                nowait: flags_1.get_flag("nowait").unwrap_or(false),
             },
         ))
     }
@@ -778,11 +778,11 @@ pub mod basic {
         method: &'a Cancel,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("nowait".to_string(), method.nowait);
+            let mut flags_1 = AMQPFlags::default();
+            flags_1.add_flag("nowait", method.nowait);
             input = gen_id(30)(input)?;
             input = gen_short_string(method.consumer_tag.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_1)(input)?;
             Ok(input)
         }
     }
@@ -856,14 +856,14 @@ pub mod basic {
         let (i, _) = parse_short_uint.parse(i)?;
         let (i, exchange) = parse_short_string.parse(i)?;
         let (i, routing_key) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["mandatory", "immediate"])?;
+        let (i, flags_3) = parse_flags(i, &["mandatory", "immediate"])?;
         Ok((
             i,
             Publish {
                 exchange,
                 routing_key,
-                mandatory: flags.get_flag("mandatory").unwrap_or(false),
-                immediate: flags.get_flag("immediate").unwrap_or(false),
+                mandatory: flags_3.get_flag("mandatory").unwrap_or(false),
+                immediate: flags_3.get_flag("immediate").unwrap_or(false),
             },
         ))
     }
@@ -874,14 +874,14 @@ pub mod basic {
         method: &'a Publish,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("mandatory".to_string(), method.mandatory);
-            flags.add_flag("immediate".to_string(), method.immediate);
+            let mut flags_3 = AMQPFlags::default();
+            flags_3.add_flag("mandatory", method.mandatory);
+            flags_3.add_flag("immediate", method.immediate);
             input = gen_id(40)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.exchange.as_str())(input)?;
             input = gen_short_string(method.routing_key.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_3)(input)?;
             Ok(input)
         }
     }
@@ -976,7 +976,7 @@ pub mod basic {
     pub fn parse_deliver<I: ParsableInput>(i: I) -> ParserResult<I, Deliver> {
         let (i, consumer_tag) = parse_short_string.parse(i)?;
         let (i, delivery_tag) = parse_long_long_uint.parse(i)?;
-        let (i, flags) = parse_flags(i, &["redelivered"])?;
+        let (i, flags_2) = parse_flags(i, &["redelivered"])?;
         let (i, exchange) = parse_short_string.parse(i)?;
         let (i, routing_key) = parse_short_string.parse(i)?;
         Ok((
@@ -984,7 +984,7 @@ pub mod basic {
             Deliver {
                 consumer_tag,
                 delivery_tag,
-                redelivered: flags.get_flag("redelivered").unwrap_or(false),
+                redelivered: flags_2.get_flag("redelivered").unwrap_or(false),
                 exchange,
                 routing_key,
             },
@@ -997,12 +997,12 @@ pub mod basic {
         method: &'a Deliver,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("redelivered".to_string(), method.redelivered);
+            let mut flags_2 = AMQPFlags::default();
+            flags_2.add_flag("redelivered", method.redelivered);
             input = gen_id(60)(input)?;
             input = gen_short_string(method.consumer_tag.as_str())(input)?;
             input = gen_long_long_uint(method.delivery_tag)(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_2)(input)?;
             input = gen_short_string(method.exchange.as_str())(input)?;
             input = gen_short_string(method.routing_key.as_str())(input)?;
             Ok(input)
@@ -1035,12 +1035,12 @@ pub mod basic {
     pub fn parse_get<I: ParsableInput>(i: I) -> ParserResult<I, Get> {
         let (i, _) = parse_short_uint.parse(i)?;
         let (i, queue) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["no_ack"])?;
+        let (i, flags_2) = parse_flags(i, &["no_ack"])?;
         Ok((
             i,
             Get {
                 queue,
-                no_ack: flags.get_flag("no_ack").unwrap_or(false),
+                no_ack: flags_2.get_flag("no_ack").unwrap_or(false),
             },
         ))
     }
@@ -1051,12 +1051,12 @@ pub mod basic {
         method: &'a Get,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("no_ack".to_string(), method.no_ack);
+            let mut flags_2 = AMQPFlags::default();
+            flags_2.add_flag("no_ack", method.no_ack);
             input = gen_id(70)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.queue.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_2)(input)?;
             Ok(input)
         }
     }
@@ -1092,7 +1092,7 @@ pub mod basic {
     /// Parse get-ok (Generated)
     pub fn parse_get_ok<I: ParsableInput>(i: I) -> ParserResult<I, GetOk> {
         let (i, delivery_tag) = parse_long_long_uint.parse(i)?;
-        let (i, flags) = parse_flags(i, &["redelivered"])?;
+        let (i, flags_1) = parse_flags(i, &["redelivered"])?;
         let (i, exchange) = parse_short_string.parse(i)?;
         let (i, routing_key) = parse_short_string.parse(i)?;
         let (i, message_count) = parse_long_uint.parse(i)?;
@@ -1100,7 +1100,7 @@ pub mod basic {
             i,
             GetOk {
                 delivery_tag,
-                redelivered: flags.get_flag("redelivered").unwrap_or(false),
+                redelivered: flags_1.get_flag("redelivered").unwrap_or(false),
                 exchange,
                 routing_key,
                 message_count,
@@ -1114,11 +1114,11 @@ pub mod basic {
         method: &'a GetOk,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("redelivered".to_string(), method.redelivered);
+            let mut flags_1 = AMQPFlags::default();
+            flags_1.add_flag("redelivered", method.redelivered);
             input = gen_id(71)(input)?;
             input = gen_long_long_uint(method.delivery_tag)(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_1)(input)?;
             input = gen_short_string(method.exchange.as_str())(input)?;
             input = gen_short_string(method.routing_key.as_str())(input)?;
             input = gen_long_uint(method.message_count)(input)?;
@@ -1186,12 +1186,12 @@ pub mod basic {
     /// Parse ack (Generated)
     pub fn parse_ack<I: ParsableInput>(i: I) -> ParserResult<I, Ack> {
         let (i, delivery_tag) = parse_long_long_uint.parse(i)?;
-        let (i, flags) = parse_flags(i, &["multiple"])?;
+        let (i, flags_1) = parse_flags(i, &["multiple"])?;
         Ok((
             i,
             Ack {
                 delivery_tag,
-                multiple: flags.get_flag("multiple").unwrap_or(false),
+                multiple: flags_1.get_flag("multiple").unwrap_or(false),
             },
         ))
     }
@@ -1202,11 +1202,11 @@ pub mod basic {
         method: &'a Ack,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("multiple".to_string(), method.multiple);
+            let mut flags_1 = AMQPFlags::default();
+            flags_1.add_flag("multiple", method.multiple);
             input = gen_id(80)(input)?;
             input = gen_long_long_uint(method.delivery_tag)(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_1)(input)?;
             Ok(input)
         }
     }
@@ -1236,12 +1236,12 @@ pub mod basic {
     /// Parse reject (Generated)
     pub fn parse_reject<I: ParsableInput>(i: I) -> ParserResult<I, Reject> {
         let (i, delivery_tag) = parse_long_long_uint.parse(i)?;
-        let (i, flags) = parse_flags(i, &["requeue"])?;
+        let (i, flags_1) = parse_flags(i, &["requeue"])?;
         Ok((
             i,
             Reject {
                 delivery_tag,
-                requeue: flags.get_flag("requeue").unwrap_or(false),
+                requeue: flags_1.get_flag("requeue").unwrap_or(false),
             },
         ))
     }
@@ -1252,11 +1252,11 @@ pub mod basic {
         method: &'a Reject,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("requeue".to_string(), method.requeue);
+            let mut flags_1 = AMQPFlags::default();
+            flags_1.add_flag("requeue", method.requeue);
             input = gen_id(90)(input)?;
             input = gen_long_long_uint(method.delivery_tag)(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_1)(input)?;
             Ok(input)
         }
     }
@@ -1283,11 +1283,11 @@ pub mod basic {
 
     /// Parse recover-async (Generated)
     pub fn parse_recover_async<I: ParsableInput>(i: I) -> ParserResult<I, RecoverAsync> {
-        let (i, flags) = parse_flags(i, &["requeue"])?;
+        let (i, flags_0) = parse_flags(i, &["requeue"])?;
         Ok((
             i,
             RecoverAsync {
-                requeue: flags.get_flag("requeue").unwrap_or(false),
+                requeue: flags_0.get_flag("requeue").unwrap_or(false),
             },
         ))
     }
@@ -1298,10 +1298,10 @@ pub mod basic {
         method: &'a RecoverAsync,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("requeue".to_string(), method.requeue);
+            let mut flags_0 = AMQPFlags::default();
+            flags_0.add_flag("requeue", method.requeue);
             input = gen_id(100)(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_0)(input)?;
             Ok(input)
         }
     }
@@ -1328,11 +1328,11 @@ pub mod basic {
 
     /// Parse recover (Generated)
     pub fn parse_recover<I: ParsableInput>(i: I) -> ParserResult<I, Recover> {
-        let (i, flags) = parse_flags(i, &["requeue"])?;
+        let (i, flags_0) = parse_flags(i, &["requeue"])?;
         Ok((
             i,
             Recover {
-                requeue: flags.get_flag("requeue").unwrap_or(false),
+                requeue: flags_0.get_flag("requeue").unwrap_or(false),
             },
         ))
     }
@@ -1343,10 +1343,10 @@ pub mod basic {
         method: &'a Recover,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("requeue".to_string(), method.requeue);
+            let mut flags_0 = AMQPFlags::default();
+            flags_0.add_flag("requeue", method.requeue);
             input = gen_id(110)(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_0)(input)?;
             Ok(input)
         }
     }
@@ -1411,13 +1411,13 @@ pub mod basic {
     /// Parse nack (Generated)
     pub fn parse_nack<I: ParsableInput>(i: I) -> ParserResult<I, Nack> {
         let (i, delivery_tag) = parse_long_long_uint.parse(i)?;
-        let (i, flags) = parse_flags(i, &["multiple", "requeue"])?;
+        let (i, flags_1) = parse_flags(i, &["multiple", "requeue"])?;
         Ok((
             i,
             Nack {
                 delivery_tag,
-                multiple: flags.get_flag("multiple").unwrap_or(false),
-                requeue: flags.get_flag("requeue").unwrap_or(false),
+                multiple: flags_1.get_flag("multiple").unwrap_or(false),
+                requeue: flags_1.get_flag("requeue").unwrap_or(false),
             },
         ))
     }
@@ -1428,12 +1428,12 @@ pub mod basic {
         method: &'a Nack,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("multiple".to_string(), method.multiple);
-            flags.add_flag("requeue".to_string(), method.requeue);
+            let mut flags_1 = AMQPFlags::default();
+            flags_1.add_flag("multiple", method.multiple);
+            flags_1.add_flag("requeue", method.requeue);
             input = gen_id(120)(input)?;
             input = gen_long_long_uint(method.delivery_tag)(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_1)(input)?;
             Ok(input)
         }
     }
@@ -2303,12 +2303,12 @@ pub mod connection {
         method: &'a Open,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("insist".to_string(), false);
+            let mut flags_2 = AMQPFlags::default();
+            flags_2.add_flag("insist", false);
             input = gen_id(40)(input)?;
             input = gen_short_string(method.virtual_host.as_str())(input)?;
             input = gen_short_string("")(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_2)(input)?;
             Ok(input)
         }
     }
@@ -2754,11 +2754,11 @@ pub mod channel {
 
     /// Parse flow (Generated)
     pub fn parse_flow<I: ParsableInput>(i: I) -> ParserResult<I, Flow> {
-        let (i, flags) = parse_flags(i, &["active"])?;
+        let (i, flags_0) = parse_flags(i, &["active"])?;
         Ok((
             i,
             Flow {
-                active: flags.get_flag("active").unwrap_or(false),
+                active: flags_0.get_flag("active").unwrap_or(false),
             },
         ))
     }
@@ -2769,10 +2769,10 @@ pub mod channel {
         method: &'a Flow,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("active".to_string(), method.active);
+            let mut flags_0 = AMQPFlags::default();
+            flags_0.add_flag("active", method.active);
             input = gen_id(20)(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_0)(input)?;
             Ok(input)
         }
     }
@@ -2799,11 +2799,11 @@ pub mod channel {
 
     /// Parse flow-ok (Generated)
     pub fn parse_flow_ok<I: ParsableInput>(i: I) -> ParserResult<I, FlowOk> {
-        let (i, flags) = parse_flags(i, &["active"])?;
+        let (i, flags_0) = parse_flags(i, &["active"])?;
         Ok((
             i,
             FlowOk {
-                active: flags.get_flag("active").unwrap_or(false),
+                active: flags_0.get_flag("active").unwrap_or(false),
             },
         ))
     }
@@ -2814,10 +2814,10 @@ pub mod channel {
         method: &'a FlowOk,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("active".to_string(), method.active);
+            let mut flags_0 = AMQPFlags::default();
+            flags_0.add_flag("active", method.active);
             input = gen_id(21)(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_0)(input)?;
             Ok(input)
         }
     }
@@ -2997,16 +2997,16 @@ pub mod access {
     /// Parse request (Generated)
     pub fn parse_request<I: ParsableInput>(i: I) -> ParserResult<I, Request> {
         let (i, realm) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["exclusive", "passive", "active", "write", "read"])?;
+        let (i, flags_1) = parse_flags(i, &["exclusive", "passive", "active", "write", "read"])?;
         Ok((
             i,
             Request {
                 realm,
-                exclusive: flags.get_flag("exclusive").unwrap_or(false),
-                passive: flags.get_flag("passive").unwrap_or(false),
-                active: flags.get_flag("active").unwrap_or(false),
-                write: flags.get_flag("write").unwrap_or(false),
-                read: flags.get_flag("read").unwrap_or(false),
+                exclusive: flags_1.get_flag("exclusive").unwrap_or(false),
+                passive: flags_1.get_flag("passive").unwrap_or(false),
+                active: flags_1.get_flag("active").unwrap_or(false),
+                write: flags_1.get_flag("write").unwrap_or(false),
+                read: flags_1.get_flag("read").unwrap_or(false),
             },
         ))
     }
@@ -3017,15 +3017,15 @@ pub mod access {
         method: &'a Request,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("exclusive".to_string(), method.exclusive);
-            flags.add_flag("passive".to_string(), method.passive);
-            flags.add_flag("active".to_string(), method.active);
-            flags.add_flag("write".to_string(), method.write);
-            flags.add_flag("read".to_string(), method.read);
+            let mut flags_1 = AMQPFlags::default();
+            flags_1.add_flag("exclusive", method.exclusive);
+            flags_1.add_flag("passive", method.passive);
+            flags_1.add_flag("active", method.active);
+            flags_1.add_flag("write", method.write);
+            flags_1.add_flag("read", method.read);
             input = gen_id(10)(input)?;
             input = gen_short_string(method.realm.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_1)(input)?;
             Ok(input)
         }
     }
@@ -3200,7 +3200,7 @@ pub mod exchange {
         let (i, _) = parse_short_uint.parse(i)?;
         let (i, exchange) = parse_short_string.parse(i)?;
         let (i, kind) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(
+        let (i, flags_3) = parse_flags(
             i,
             &["passive", "durable", "auto_delete", "internal", "nowait"],
         )?;
@@ -3210,11 +3210,11 @@ pub mod exchange {
             Declare {
                 exchange,
                 kind,
-                passive: flags.get_flag("passive").unwrap_or(false),
-                durable: flags.get_flag("durable").unwrap_or(false),
-                auto_delete: flags.get_flag("auto_delete").unwrap_or(false),
-                internal: flags.get_flag("internal").unwrap_or(false),
-                nowait: flags.get_flag("nowait").unwrap_or(false),
+                passive: flags_3.get_flag("passive").unwrap_or(false),
+                durable: flags_3.get_flag("durable").unwrap_or(false),
+                auto_delete: flags_3.get_flag("auto_delete").unwrap_or(false),
+                internal: flags_3.get_flag("internal").unwrap_or(false),
+                nowait: flags_3.get_flag("nowait").unwrap_or(false),
                 arguments,
             },
         ))
@@ -3226,17 +3226,17 @@ pub mod exchange {
         method: &'a Declare,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("passive".to_string(), method.passive);
-            flags.add_flag("durable".to_string(), method.durable);
-            flags.add_flag("auto_delete".to_string(), method.auto_delete);
-            flags.add_flag("internal".to_string(), method.internal);
-            flags.add_flag("nowait".to_string(), method.nowait);
+            let mut flags_3 = AMQPFlags::default();
+            flags_3.add_flag("passive", method.passive);
+            flags_3.add_flag("durable", method.durable);
+            flags_3.add_flag("auto_delete", method.auto_delete);
+            flags_3.add_flag("internal", method.internal);
+            flags_3.add_flag("nowait", method.nowait);
             input = gen_id(10)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.exchange.as_str())(input)?;
             input = gen_short_string(method.kind.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_3)(input)?;
             input = gen_field_table(&method.arguments)(input)?;
             Ok(input)
         }
@@ -3303,13 +3303,13 @@ pub mod exchange {
     pub fn parse_delete<I: ParsableInput>(i: I) -> ParserResult<I, Delete> {
         let (i, _) = parse_short_uint.parse(i)?;
         let (i, exchange) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["if_unused", "nowait"])?;
+        let (i, flags_2) = parse_flags(i, &["if_unused", "nowait"])?;
         Ok((
             i,
             Delete {
                 exchange,
-                if_unused: flags.get_flag("if_unused").unwrap_or(false),
-                nowait: flags.get_flag("nowait").unwrap_or(false),
+                if_unused: flags_2.get_flag("if_unused").unwrap_or(false),
+                nowait: flags_2.get_flag("nowait").unwrap_or(false),
             },
         ))
     }
@@ -3320,13 +3320,13 @@ pub mod exchange {
         method: &'a Delete,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("if_unused".to_string(), method.if_unused);
-            flags.add_flag("nowait".to_string(), method.nowait);
+            let mut flags_2 = AMQPFlags::default();
+            flags_2.add_flag("if_unused", method.if_unused);
+            flags_2.add_flag("nowait", method.nowait);
             input = gen_id(20)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.exchange.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_2)(input)?;
             Ok(input)
         }
     }
@@ -3398,7 +3398,7 @@ pub mod exchange {
         let (i, destination) = parse_short_string.parse(i)?;
         let (i, source) = parse_short_string.parse(i)?;
         let (i, routing_key) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["nowait"])?;
+        let (i, flags_4) = parse_flags(i, &["nowait"])?;
         let (i, arguments) = parse_field_table.parse(i)?;
         Ok((
             i,
@@ -3406,7 +3406,7 @@ pub mod exchange {
                 destination,
                 source,
                 routing_key,
-                nowait: flags.get_flag("nowait").unwrap_or(false),
+                nowait: flags_4.get_flag("nowait").unwrap_or(false),
                 arguments,
             },
         ))
@@ -3418,14 +3418,14 @@ pub mod exchange {
         method: &'a Bind,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("nowait".to_string(), method.nowait);
+            let mut flags_4 = AMQPFlags::default();
+            flags_4.add_flag("nowait", method.nowait);
             input = gen_id(30)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.destination.as_str())(input)?;
             input = gen_short_string(method.source.as_str())(input)?;
             input = gen_short_string(method.routing_key.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_4)(input)?;
             input = gen_field_table(&method.arguments)(input)?;
             Ok(input)
         }
@@ -3498,7 +3498,7 @@ pub mod exchange {
         let (i, destination) = parse_short_string.parse(i)?;
         let (i, source) = parse_short_string.parse(i)?;
         let (i, routing_key) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["nowait"])?;
+        let (i, flags_4) = parse_flags(i, &["nowait"])?;
         let (i, arguments) = parse_field_table.parse(i)?;
         Ok((
             i,
@@ -3506,7 +3506,7 @@ pub mod exchange {
                 destination,
                 source,
                 routing_key,
-                nowait: flags.get_flag("nowait").unwrap_or(false),
+                nowait: flags_4.get_flag("nowait").unwrap_or(false),
                 arguments,
             },
         ))
@@ -3518,14 +3518,14 @@ pub mod exchange {
         method: &'a Unbind,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("nowait".to_string(), method.nowait);
+            let mut flags_4 = AMQPFlags::default();
+            flags_4.add_flag("nowait", method.nowait);
             input = gen_id(40)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.destination.as_str())(input)?;
             input = gen_short_string(method.source.as_str())(input)?;
             input = gen_short_string(method.routing_key.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_4)(input)?;
             input = gen_field_table(&method.arguments)(input)?;
             Ok(input)
         }
@@ -3712,7 +3712,7 @@ pub mod queue {
     pub fn parse_declare<I: ParsableInput>(i: I) -> ParserResult<I, Declare> {
         let (i, _) = parse_short_uint.parse(i)?;
         let (i, queue) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(
+        let (i, flags_2) = parse_flags(
             i,
             &["passive", "durable", "exclusive", "auto_delete", "nowait"],
         )?;
@@ -3721,11 +3721,11 @@ pub mod queue {
             i,
             Declare {
                 queue,
-                passive: flags.get_flag("passive").unwrap_or(false),
-                durable: flags.get_flag("durable").unwrap_or(false),
-                exclusive: flags.get_flag("exclusive").unwrap_or(false),
-                auto_delete: flags.get_flag("auto_delete").unwrap_or(false),
-                nowait: flags.get_flag("nowait").unwrap_or(false),
+                passive: flags_2.get_flag("passive").unwrap_or(false),
+                durable: flags_2.get_flag("durable").unwrap_or(false),
+                exclusive: flags_2.get_flag("exclusive").unwrap_or(false),
+                auto_delete: flags_2.get_flag("auto_delete").unwrap_or(false),
+                nowait: flags_2.get_flag("nowait").unwrap_or(false),
                 arguments,
             },
         ))
@@ -3737,16 +3737,16 @@ pub mod queue {
         method: &'a Declare,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("passive".to_string(), method.passive);
-            flags.add_flag("durable".to_string(), method.durable);
-            flags.add_flag("exclusive".to_string(), method.exclusive);
-            flags.add_flag("auto_delete".to_string(), method.auto_delete);
-            flags.add_flag("nowait".to_string(), method.nowait);
+            let mut flags_2 = AMQPFlags::default();
+            flags_2.add_flag("passive", method.passive);
+            flags_2.add_flag("durable", method.durable);
+            flags_2.add_flag("exclusive", method.exclusive);
+            flags_2.add_flag("auto_delete", method.auto_delete);
+            flags_2.add_flag("nowait", method.nowait);
             input = gen_id(10)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.queue.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_2)(input)?;
             input = gen_field_table(&method.arguments)(input)?;
             Ok(input)
         }
@@ -3839,7 +3839,7 @@ pub mod queue {
         let (i, queue) = parse_short_string.parse(i)?;
         let (i, exchange) = parse_short_string.parse(i)?;
         let (i, routing_key) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["nowait"])?;
+        let (i, flags_4) = parse_flags(i, &["nowait"])?;
         let (i, arguments) = parse_field_table.parse(i)?;
         Ok((
             i,
@@ -3847,7 +3847,7 @@ pub mod queue {
                 queue,
                 exchange,
                 routing_key,
-                nowait: flags.get_flag("nowait").unwrap_or(false),
+                nowait: flags_4.get_flag("nowait").unwrap_or(false),
                 arguments,
             },
         ))
@@ -3859,14 +3859,14 @@ pub mod queue {
         method: &'a Bind,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("nowait".to_string(), method.nowait);
+            let mut flags_4 = AMQPFlags::default();
+            flags_4.add_flag("nowait", method.nowait);
             input = gen_id(20)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.queue.as_str())(input)?;
             input = gen_short_string(method.exchange.as_str())(input)?;
             input = gen_short_string(method.routing_key.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_4)(input)?;
             input = gen_field_table(&method.arguments)(input)?;
             Ok(input)
         }
@@ -3931,12 +3931,12 @@ pub mod queue {
     pub fn parse_purge<I: ParsableInput>(i: I) -> ParserResult<I, Purge> {
         let (i, _) = parse_short_uint.parse(i)?;
         let (i, queue) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["nowait"])?;
+        let (i, flags_2) = parse_flags(i, &["nowait"])?;
         Ok((
             i,
             Purge {
                 queue,
-                nowait: flags.get_flag("nowait").unwrap_or(false),
+                nowait: flags_2.get_flag("nowait").unwrap_or(false),
             },
         ))
     }
@@ -3947,12 +3947,12 @@ pub mod queue {
         method: &'a Purge,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("nowait".to_string(), method.nowait);
+            let mut flags_2 = AMQPFlags::default();
+            flags_2.add_flag("nowait", method.nowait);
             input = gen_id(30)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.queue.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_2)(input)?;
             Ok(input)
         }
     }
@@ -4025,14 +4025,14 @@ pub mod queue {
     pub fn parse_delete<I: ParsableInput>(i: I) -> ParserResult<I, Delete> {
         let (i, _) = parse_short_uint.parse(i)?;
         let (i, queue) = parse_short_string.parse(i)?;
-        let (i, flags) = parse_flags(i, &["if_unused", "if_empty", "nowait"])?;
+        let (i, flags_2) = parse_flags(i, &["if_unused", "if_empty", "nowait"])?;
         Ok((
             i,
             Delete {
                 queue,
-                if_unused: flags.get_flag("if_unused").unwrap_or(false),
-                if_empty: flags.get_flag("if_empty").unwrap_or(false),
-                nowait: flags.get_flag("nowait").unwrap_or(false),
+                if_unused: flags_2.get_flag("if_unused").unwrap_or(false),
+                if_empty: flags_2.get_flag("if_empty").unwrap_or(false),
+                nowait: flags_2.get_flag("nowait").unwrap_or(false),
             },
         ))
     }
@@ -4043,14 +4043,14 @@ pub mod queue {
         method: &'a Delete,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("if_unused".to_string(), method.if_unused);
-            flags.add_flag("if_empty".to_string(), method.if_empty);
-            flags.add_flag("nowait".to_string(), method.nowait);
+            let mut flags_2 = AMQPFlags::default();
+            flags_2.add_flag("if_unused", method.if_unused);
+            flags_2.add_flag("if_empty", method.if_empty);
+            flags_2.add_flag("nowait", method.nowait);
             input = gen_id(40)(input)?;
             input = gen_short_uint(0)(input)?;
             input = gen_short_string(method.queue.as_str())(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_2)(input)?;
             Ok(input)
         }
     }
@@ -4540,11 +4540,11 @@ pub mod confirm {
 
     /// Parse select (Generated)
     pub fn parse_select<I: ParsableInput>(i: I) -> ParserResult<I, Select> {
-        let (i, flags) = parse_flags(i, &["nowait"])?;
+        let (i, flags_0) = parse_flags(i, &["nowait"])?;
         Ok((
             i,
             Select {
-                nowait: flags.get_flag("nowait").unwrap_or(false),
+                nowait: flags_0.get_flag("nowait").unwrap_or(false),
             },
         ))
     }
@@ -4555,10 +4555,10 @@ pub mod confirm {
         method: &'a Select,
     ) -> impl SerializeFn<W> + 'a {
         move |mut input| {
-            let mut flags = AMQPFlags::default();
-            flags.add_flag("nowait".to_string(), method.nowait);
+            let mut flags_0 = AMQPFlags::default();
+            flags_0.add_flag("nowait", method.nowait);
             input = gen_id(10)(input)?;
-            input = gen_flags(&flags)(input)?;
+            input = gen_flags(&flags_0)(input)?;
             Ok(input)
         }
     }
