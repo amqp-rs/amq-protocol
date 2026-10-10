@@ -100,10 +100,30 @@ pub type ParserError = nom::Err<ParserErrors>;
 /// Return type of parsers
 pub type ParserResult<I, T> = Result<(I, T), ParserError>;
 
+/// Maximum nesting depth accepted when parsing compound values
+/// ([FieldTable](../type.FieldTable.html) and [FieldArray](../type.FieldArray.html))
+///
+/// Compound values can contain other compound values, and parsing them is recursive. Without a
+/// bound, a peer could send a small payload nesting them thousands of levels deep and exhaust the
+/// stack, which aborts the process rather than raising a catchable error. Legitimate AMQP payloads
+/// nest a handful of levels at most.
+pub const MAX_NESTING_DEPTH: usize = 64;
+
+fn nesting_error<I>(i: I) -> ParserError {
+    nom::Err::Error(ParserErrors::from_error_kind(i, ErrorKind::TooLarge))
+}
+
 /// Parse the [AMQPValue](../type.AMQPValue.html) of the given [AMQPType](../type.AMQPType.html)
 #[must_use]
 pub fn parse_raw_value<I: ParsableInput>(
     amqp_type: AMQPType,
+) -> impl Parser<I, Output = AMQPValue, Error = ParserErrors> {
+    parse_raw_value_at_depth(amqp_type, 0)
+}
+
+fn parse_raw_value_at_depth<I: ParsableInput>(
+    amqp_type: AMQPType,
+    depth: usize,
 ) -> impl Parser<I, Output = AMQPValue, Error = ParserErrors> {
     context("parse_raw_value", move |i| match amqp_type {
         AMQPType::Boolean => map(parse_boolean, AMQPValue::Boolean).parse(i),
@@ -121,9 +141,17 @@ pub fn parse_raw_value<I: ParsableInput>(
         AMQPType::DecimalValue => map(parse_decimal_value, AMQPValue::DecimalValue).parse(i),
         AMQPType::ShortString => map(parse_short_string, AMQPValue::ShortString).parse(i),
         AMQPType::LongString => map(parse_long_string, AMQPValue::LongString).parse(i),
-        AMQPType::FieldArray => map(parse_field_array, AMQPValue::FieldArray).parse(i),
+        AMQPType::FieldArray => map(
+            |i| parse_field_array_at_depth(i, depth),
+            AMQPValue::FieldArray,
+        )
+        .parse(i),
         AMQPType::Timestamp => map(parse_timestamp, AMQPValue::Timestamp).parse(i),
-        AMQPType::FieldTable => map(parse_field_table, AMQPValue::FieldTable).parse(i),
+        AMQPType::FieldTable => map(
+            |i| parse_field_table_at_depth(i, depth),
+            AMQPValue::FieldTable,
+        )
+        .parse(i),
         AMQPType::ByteArray => map(parse_byte_array, AMQPValue::ByteArray).parse(i),
         AMQPType::Void => Ok((i, AMQPValue::Void)),
     })
@@ -131,7 +159,17 @@ pub fn parse_raw_value<I: ParsableInput>(
 
 /// Parse an [AMQPValue](../type.AMQPValue.html)
 pub fn parse_value<I: ParsableInput>(i: I) -> ParserResult<I, AMQPValue> {
-    context("parse_value", flat_map(parse_type, parse_raw_value)).parse(i)
+    parse_value_at_depth(i, 0)
+}
+
+fn parse_value_at_depth<I: ParsableInput>(i: I, depth: usize) -> ParserResult<I, AMQPValue> {
+    context(
+        "parse_value",
+        flat_map(parse_type, move |amqp_type| {
+            parse_raw_value_at_depth(amqp_type, depth)
+        }),
+    )
+    .parse(i)
 }
 
 /// Parse an [AMQPType](../type.AMQPType.html)
@@ -244,12 +282,22 @@ pub fn parse_long_string<I: ParsableInput>(i: I) -> ParserResult<I, LongString> 
 
 /// Parse a [FieldArray](../type.FieldArray.html)
 pub fn parse_field_array<I: ParsableInput>(i: I) -> ParserResult<I, FieldArray> {
+    parse_field_array_at_depth(i, 0)
+}
+
+fn parse_field_array_at_depth<I: ParsableInput>(i: I, depth: usize) -> ParserResult<I, FieldArray> {
+    if depth >= MAX_NESTING_DEPTH {
+        return Err(nesting_error(i));
+    }
     context(
         "parse_field_array",
         map_parser(
             flat_map(parse_long_uint, take),
             all_consuming(fold_many0(
-                context("parse_field_array_entry", complete(parse_value)),
+                context(
+                    "parse_field_array_entry",
+                    complete(move |i| parse_value_at_depth(i, depth + 1)),
+                ),
                 FieldArray::default,
                 |mut acc, elem| {
                     acc.push(elem);
@@ -268,6 +316,13 @@ pub fn parse_timestamp<I: ParsableInput>(i: I) -> ParserResult<I, Timestamp> {
 
 /// Parse a [FieldTable](../type.FieldTable.html)
 pub fn parse_field_table<I: ParsableInput>(i: I) -> ParserResult<I, FieldTable> {
+    parse_field_table_at_depth(i, 0)
+}
+
+fn parse_field_table_at_depth<I: ParsableInput>(i: I, depth: usize) -> ParserResult<I, FieldTable> {
+    if depth >= MAX_NESTING_DEPTH {
+        return Err(nesting_error(i));
+    }
     context(
         "parse_field_table",
         map_parser(
@@ -275,7 +330,9 @@ pub fn parse_field_table<I: ParsableInput>(i: I) -> ParserResult<I, FieldTable> 
             all_consuming(fold_many0(
                 context(
                     "parse_field_table_entry",
-                    complete(pair(parse_short_string, parse_value)),
+                    complete(pair(parse_short_string, move |i| {
+                        parse_value_at_depth(i, depth + 1)
+                    })),
                 ),
                 FieldTable::default,
                 |mut acc, (key, value)| {
@@ -300,7 +357,7 @@ pub fn parse_byte_array<I: ParsableInput>(i: I) -> ParserResult<I, ByteArray> {
 }
 
 /// Parse the [AMQPFlags](../type.AMQPFlags.html) for which the names are provided
-pub fn parse_flags<I: ParsableInput>(i: I, names: &[&str]) -> ParserResult<I, AMQPFlags> {
+pub fn parse_flags<I: ParsableInput>(i: I, names: &[&'static str]) -> ParserResult<I, AMQPFlags> {
     context(
         "parse_flags",
         map(take(names.len().div_ceil(8)), |b| {
@@ -555,6 +612,54 @@ mod test {
             parse_byte_array(&[0, 0, 0, 4, 42, 1, 2, 3][..]),
             Ok((EMPTY, vec![42, 1, 2, 3].into()))
         );
+    }
+
+    /// Build `depth` levels of nested FieldArray, innermost one empty
+    fn nested_field_arrays(depth: usize) -> Vec<u8> {
+        let mut buf = vec![b'A', 0, 0, 0, 0];
+        for _ in 1..depth {
+            let len = buf.len() as u32;
+            let mut next = Vec::with_capacity(buf.len() + 5);
+            next.push(b'A');
+            next.extend_from_slice(&len.to_be_bytes());
+            next.extend_from_slice(&buf);
+            buf = next;
+        }
+        buf
+    }
+
+    #[test]
+    fn test_nesting_within_limit_is_accepted() {
+        let buf = nested_field_arrays(MAX_NESTING_DEPTH);
+        assert!(parse_value(&buf[..]).is_ok());
+    }
+
+    #[test]
+    fn test_nesting_beyond_limit_is_rejected() {
+        /* This used to recurse until the stack overflowed, aborting the process. */
+        let buf = nested_field_arrays(MAX_NESTING_DEPTH + 1);
+        assert!(parse_value(&buf[..]).is_err());
+
+        let buf = nested_field_arrays(100_000);
+        assert!(parse_value(&buf[..]).is_err());
+    }
+
+    #[test]
+    fn test_nested_field_tables_are_bounded() {
+        /* 'F' <len> ( <shortstr key> <value> )* , nested through the value */
+        let mut buf = vec![b'F', 0, 0, 0, 0];
+        for _ in 0..100_000 {
+            let mut inner = Vec::with_capacity(buf.len() + 7);
+            inner.push(1u8); /* key length */
+            inner.push(b'k');
+            inner.extend_from_slice(&buf);
+            let mut next = Vec::with_capacity(inner.len() + 5);
+            next.push(b'F');
+            next.extend_from_slice(&(inner.len() as u32).to_be_bytes());
+            next.extend_from_slice(&inner);
+            buf = next;
+        }
+        assert!(parse_value(&buf[..]).is_err());
     }
 
     #[test]

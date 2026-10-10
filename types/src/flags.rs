@@ -2,43 +2,54 @@ use crate::types::Boolean;
 
 use serde::{Deserialize, Serialize};
 
+use std::borrow::Cow;
+
 /// A struct representing AMQP boolean flags for RPC
+///
+/// Flag names are borrowed whenever possible: generated code and parsers name their flags with
+/// string literals, so building an `AMQPFlags` for a frame doesn't allocate for the names.
 #[derive(Clone, Debug, Default, PartialEq, Deserialize, Serialize)]
 pub struct AMQPFlags {
-    flags: Vec<(String, Boolean)>,
+    flags: Vec<(Cow<'static, str>, Boolean)>,
 }
 
 impl AMQPFlags {
     /// Add a boolean flag with a name
-    pub fn add_flag(&mut self, name: String, flag: Boolean) {
-        self.flags.push((name, flag));
+    pub fn add_flag<N: Into<Cow<'static, str>>>(&mut self, name: N, flag: Boolean) {
+        self.flags.push((name.into(), flag));
     }
 
     /// Get the value of a boolean flag by name, if present
     #[must_use]
     pub fn get_flag(&self, name: &str) -> Option<Boolean> {
-        self.flags.iter().find(|(n, _)| n == name).map(|(_, v)| *v)
+        self.flags
+            .iter()
+            .find(|(n, _)| n.as_ref() == name)
+            .map(|(_, v)| *v)
+    }
+
+    /// Get the AMQPFlags serialized for AMQP RPC, as an iterator over the bytes
+    pub fn bytes(&self) -> impl Iterator<Item = u8> + '_ {
+        self.flags.chunks(8).map(|v| {
+            v.iter()
+                .enumerate()
+                .map(|(idx, (_, b))| if *b { 1 << idx } else { 0 })
+                .sum::<u8>()
+        })
     }
 
     /// Get the AMQPFlags serialized for AMQP RPC
     #[must_use]
     pub fn get_bytes(&self) -> Vec<u8> {
-        self.flags
-            .chunks(8)
-            .map(|v| {
-                v.iter()
-                    .enumerate()
-                    .map(|(idx, (_, b))| if *b { 1 << idx } else { 0 })
-                    .sum()
-            })
-            .collect()
+        self.bytes().collect()
     }
 
     /// Initialize AMQPFlags from AMQP RPC serialization
-    pub fn from_bytes<I: nom::Input<Item = u8>>(names: &[&str], bytes: I) -> AMQPFlags {
+    pub fn from_bytes<I: nom::Input<Item = u8>>(names: &[&'static str], bytes: I) -> AMQPFlags {
         let flags = names
             .iter()
-            .map(ToString::to_string)
+            .copied()
+            .map(Cow::Borrowed)
             .zip(
                 bytes
                     .iter_elements()
@@ -85,6 +96,16 @@ mod test {
         flags.add_flag("i".to_string(), true);
         flags.add_flag("j".to_string(), true);
         assert_eq!(flags.get_bytes().as_slice(), &[0b00111001, 0b00000011])
+    }
+
+    #[test]
+    fn test_flag_names_can_be_borrowed_or_owned() {
+        let mut flags = AMQPFlags::default();
+        flags.add_flag("borrowed", true);
+        flags.add_flag("owned".to_string(), false);
+        assert_eq!(flags.get_flag("borrowed"), Some(true));
+        assert_eq!(flags.get_flag("owned"), Some(false));
+        assert_eq!(flags.get_bytes(), flags.bytes().collect::<Vec<_>>());
     }
 
     #[test]
