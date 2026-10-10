@@ -123,6 +123,14 @@ const RECEIVE_ONLY: &[(&str, &[&str])] = &[
     ("tx", &["commit-ok", "rollback-ok", "select-ok"]),
 ];
 
+/// Look a name up in one of the override tables above
+fn lookup<T: Copy>(table: &[(&'static str, T)], name: &str) -> Option<T> {
+    table
+        .iter()
+        .find(|(key, _)| *key == name)
+        .map(|(_, value)| *value)
+}
+
 /* Modified version of AMQProtocolDefinition to handle deserialization */
 #[derive(Debug, Deserialize)]
 pub(crate) struct _AMQProtocolDefinition {
@@ -293,30 +301,9 @@ impl _AMQPClass {
             .and_then(|c| c.get("metadata"))
             .cloned()
             .unwrap_or_default();
-        let defaults = (|name| {
-            for (class, defaults) in ENFORCED_DEFAULTS {
-                if class == name {
-                    return Some(*defaults);
-                }
-            }
-            None
-        })(&self.name);
-        let send_only = (|name| {
-            for (class, send_only) in SEND_ONLY {
-                if class == name {
-                    return Some(*send_only);
-                }
-            }
-            None
-        })(&self.name);
-        let receive_only = (|name| {
-            for (class, send_only) in RECEIVE_ONLY {
-                if class == name {
-                    return Some(*send_only);
-                }
-            }
-            None
-        })(&self.name);
+        let defaults = lookup(ENFORCED_DEFAULTS, &self.name);
+        let send_only = lookup(SEND_ONLY, &self.name);
+        let receive_only = lookup(RECEIVE_ONLY, &self.name);
         let properties = match self.properties {
             Some(ref properties) => properties.iter().map(_AMQPProperty::to_specs).collect(),
             None => Vec::default(),
@@ -353,14 +340,7 @@ impl _AMQPMethod {
         send_only: Option<&'static [&'static str]>,
         receive_only: Option<&'static [&'static str]>,
     ) -> AMQPMethod {
-        let defaults = defaults.and_then(|defaults| {
-            for (method, defaults) in defaults {
-                if method == &self.name.as_str() {
-                    return Some(*defaults);
-                }
-            }
-            None
-        });
+        let defaults = defaults.and_then(|defaults| lookup(defaults, &self.name));
         let arguments = self.arguments_to_specs(domains, defaults);
         let is_reply = self.name.ends_with("-ok");
         let mut metadata = class_md
